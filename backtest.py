@@ -403,7 +403,7 @@ def plot(symbol: str, cfg: dict, res: dict, lump: np.ndarray, dca: np.ndarray):
     ax.xaxis.set_major_locator(mdates.YearLocator())
 
     plt.tight_layout(rect=[0, 0, 1, 0.995])
-    out = Path(f"{symbol}_backtest.png")
+    out = Path(f"report/img/{symbol}_backtest.png")
     plt.savefig(out, dpi=150, bbox_inches="tight")
     plt.close()
     print(f"  Chart saved → {out}")

@@ -453,7 +453,7 @@ ax2.grid(True, alpha=0.3)
 ax2.set_title("Drawdown from Peak", fontsize=11)
 
 plt.tight_layout()
-out_png = "/home/ubuntu/projects/investor/congressional_backtest.png"
+out_png = "report/img/congressional_backtest.png"
 plt.savefig(out_png, dpi=150, bbox_inches="tight")
 plt.close()
 print(f"Chart saved → {out_png}")

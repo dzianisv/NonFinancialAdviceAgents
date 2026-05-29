@@ -20,7 +20,7 @@ BACKTEST_START = "2020-01-01"
 END            = "2026-05-27"
 CAPITAL        = 1_000_000
 RISK_FREE      = 0.04
-CHART_PATH     = "/home/ubuntu/projects/investor/social_momentum_backtest.png"
+CHART_PATH     = "report/img/social_momentum_backtest.png"
 
 UNIVERSE = [
     "AAPL","MSFT","GOOGL","AMZN","META","NVDA","TSLA","JPM","V","MA",

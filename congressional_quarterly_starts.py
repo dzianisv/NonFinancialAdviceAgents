@@ -446,7 +446,7 @@ for ax, (name, rows) in zip(axes, results.items()):
     ax.legend(handles=[green_patch, red_patch, voo_line], fontsize=7, loc="upper right")
 
 plt.tight_layout()
-png_path = "/home/ubuntu/projects/investor/congressional_quarterly_starts.png"
+png_path = "report/img/congressional_quarterly_starts.png"
 plt.savefig(png_path, dpi=150, bbox_inches="tight")
 plt.close()
 print(f"Chart saved → {png_path}")

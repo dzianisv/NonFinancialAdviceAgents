@@ -266,7 +266,7 @@ def plot_results(berkshire_df, voo_df, berk_metrics, voo_metrics):
     ax2.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('/home/ubuntu/projects/investor/insider_backtest.png', dpi=150, bbox_inches='tight')
+    plt.savefig('report/img/insider_backtest.png', dpi=150, bbox_inches='tight')
     plt.close()
     print("Chart saved to insider_backtest.png")
 

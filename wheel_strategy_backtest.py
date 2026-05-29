@@ -358,7 +358,7 @@ ax2.legend(loc='lower left')
 ax2.grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig("/home/ubuntu/projects/investor/wheel_strategy_backtest.png", dpi=150, bbox_inches='tight')
+plt.savefig("report/img/wheel_strategy_backtest.png", dpi=150, bbox_inches='tight')
 print("Chart saved.")
 
 # ═══════════════════════════════════════════════════════════════════════════

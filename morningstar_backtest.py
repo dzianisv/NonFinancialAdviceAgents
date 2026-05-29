@@ -350,7 +350,7 @@ for i, (lbl, sx, vx) in enumerate(zip(labels, s_cagrs, v_cagrs)):
     ax2.annotate(lbl, (vx, sx), textcoords="offset points", xytext=(4, 2), fontsize=6)
 
 plt.tight_layout()
-out_png = "/home/ubuntu/projects/investor/morningstar_proxy_backtest.png"
+out_png = "report/img/morningstar_proxy_backtest.png"
 plt.savefig(out_png, dpi=150, bbox_inches="tight")
 print(f"Chart saved: {out_png}")
 

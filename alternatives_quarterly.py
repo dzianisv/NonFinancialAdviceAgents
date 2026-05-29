@@ -252,7 +252,7 @@ ax2.grid(axis="y", alpha=0.3, zorder=0)
 ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v:.0f}%"))
 
 plt.tight_layout(pad=2.5)
-png_path = "/home/ubuntu/projects/investor/alternatives_quarterly.png"
+png_path = "report/img/alternatives_quarterly.png"
 plt.savefig(png_path, dpi=150, bbox_inches="tight")
 print(f"\nChart saved → {png_path}")
 

@@ -393,7 +393,7 @@ ax2.grid(alpha=0.3)
 ax2.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"${v:.1f}M"))
 
 plt.tight_layout()
-png_path = "/home/ubuntu/projects/investor/congress_combined_quarterly.png"
+png_path = "report/img/congress_combined_quarterly.png"
 plt.savefig(png_path, dpi=150, bbox_inches="tight")
 plt.close()
 print(f"\nChart saved: {png_path}")

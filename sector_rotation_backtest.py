@@ -325,7 +325,7 @@ for bar, v in zip(bars3, sharpes):
 fig.suptitle("Sector ETF Momentum Rotation Backtest  |  $1M  |  2020–2026",
              fontsize=15, fontweight="bold", y=1.01)
 
-out_path = "/home/ubuntu/projects/investor/sector_rotation_backtest.png"
+out_path = "report/img/sector_rotation_backtest.png"
 plt.savefig(out_path, dpi=150, bbox_inches="tight")
 print(f"Chart saved → {out_path}")
 print("\nDone.")

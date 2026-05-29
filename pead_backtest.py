@@ -334,7 +334,7 @@ def main():
     print("=" * 65)
     
     # Plot
-    plot_results(pv, voo_val, '/home/ubuntu/projects/investor/pead_backtest.png')
+    plot_results(pv, voo_val, 'report/img/pead_backtest.png')
     
     print("\nFiles written:")
     print("  /home/ubuntu/projects/investor/pead_backtest.py")

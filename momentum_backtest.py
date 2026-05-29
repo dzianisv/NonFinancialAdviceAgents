@@ -410,7 +410,7 @@ ax3.grid(True, alpha=0.3)
 plt.suptitle('Dual Momentum ETF Strategy Backtest (2020–2026)\n$1M Starting Capital, Monthly Rebalancing',
              fontsize=14, fontweight='bold', y=1.01)
 
-output_path = '/home/ubuntu/projects/investor/momentum_backtest.png'
+output_path = 'report/img/momentum_backtest.png'
 plt.savefig(output_path, dpi=150, bbox_inches='tight', facecolor='white')
 print(f"Chart saved to: {output_path}")
 plt.close()

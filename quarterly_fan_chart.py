@@ -251,7 +251,7 @@ ax.grid(True, alpha=0.18, linestyle='--')
 for sp in ['top','right']: ax.spines[sp].set_visible(False)
 
 plt.tight_layout()
-out = '/home/ubuntu/projects/investor/quarterly_fan_chart.png'
+out = 'report/img/quarterly_fan_chart.png'
 plt.savefig(out, dpi=160, bbox_inches='tight', facecolor='#f8f8f8')
 print(f"\nSaved: {out}")
 plt.close()

@@ -337,7 +337,7 @@ ax.legend(handles=legend_elems, loc='upper left', fontsize=8.5,
           framealpha=0.88, title='Category', title_fontsize=9)
 
 plt.tight_layout()
-out = '/home/ubuntu/projects/investor/tldr_chart.png'
+out = 'report/img/tldr_chart.png'
 plt.savefig(out, dpi=160, bbox_inches='tight', facecolor='#f8f8f8')
 print(f"\nSaved: {out}")
 plt.close()

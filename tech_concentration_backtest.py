@@ -295,5 +295,5 @@ ax2.grid(True, alpha=0.3)
 ax2.fill_between(dd.index, 0, 0, alpha=0)  # dummy
 
 plt.tight_layout()
-plt.savefig('/home/ubuntu/projects/investor/tech_concentration_backtest.png', dpi=150, bbox_inches='tight')
+plt.savefig('report/img/tech_concentration_backtest.png', dpi=150, bbox_inches='tight')
 print("\nChart saved to tech_concentration_backtest.png")

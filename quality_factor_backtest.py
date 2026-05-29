@@ -333,7 +333,7 @@ for bar, val in zip(bars2, all_sharpes):
 plt.suptitle("Quality + Momentum + Low Volatility Strategy Backtest (2020–2026)",
              fontsize=15, fontweight="bold", y=1.01)
 
-out_path = "/home/ubuntu/projects/investor/quality_factor_backtest.png"
+out_path = "report/img/quality_factor_backtest.png"
 plt.savefig(out_path, dpi=150, bbox_inches="tight", facecolor="white")
 print(f"\nChart saved to: {out_path}")
 print("Script complete.")

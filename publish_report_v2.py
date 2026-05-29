@@ -21,14 +21,14 @@ TOKEN_FILE  = Path(".telegraph_token")
 PATH_FILE   = Path(".telegraph_path_v2")
 
 CHARTS = {
-    "tech":     Path("tech_concentration_backtest.png"),
-    "social":   Path("social_momentum_backtest.png"),
-    "sector":   Path("sector_rotation_backtest.png"),
-    "quality":  Path("quality_factor_backtest.png"),
-    "wheel":    Path("wheel_strategy_backtest.png"),
-    "momentum": Path("momentum_backtest.png"),
-    "pead":     Path("pead_backtest.png"),
-    "insider":  Path("insider_backtest.png"),
+    "tech":     Path("report/img/tech_concentration_backtest.png"),
+    "social":   Path("report/img/social_momentum_backtest.png"),
+    "sector":   Path("report/img/sector_rotation_backtest.png"),
+    "quality":  Path("report/img/quality_factor_backtest.png"),
+    "wheel":    Path("report/img/wheel_strategy_backtest.png"),
+    "momentum": Path("report/img/momentum_backtest.png"),
+    "pead":     Path("report/img/pead_backtest.png"),
+    "insider":  Path("report/img/insider_backtest.png"),
 }
 
 AUTHOR = "Quant Backtest Lab"
