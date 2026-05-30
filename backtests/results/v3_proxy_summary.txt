@@ -1,0 +1,198 @@
+Downloading proxy tickers...
+Downloading real ETF tickers...
+
+Raw shape: (6793, 16)
+  VFINX: 1999-06-01 -> 2026-05-26  (6793 days)
+  VGTSX: 1999-06-01 -> 2026-05-26  (6793 days)
+  VISVX: 1999-06-01 -> 2026-05-26  (6793 days)
+  GC=F: 2000-08-30 -> 2026-05-26  (6476 days)
+  VUSTX: 1999-06-01 -> 2026-05-26  (6793 days)
+  VIPSX: 2000-06-29 -> 2026-05-26  (6519 days)
+  RSP: 2003-05-01 -> 2026-05-26  (5804 days)
+  VXUS: 2011-01-28 -> 2026-05-26  (3853 days)
+  AVUV: 2019-09-26 -> 2026-05-26  (1674 days)
+  USMV: 2011-10-20 -> 2026-05-26  (3669 days)
+  GLD: 2004-11-18 -> 2026-05-26  (5412 days)
+  DBMF: 2019-05-08 -> 2026-05-26  (1772 days)
+  TLT: 2002-07-30 -> 2026-05-26  (5994 days)
+  SCHP: 2010-08-05 -> 2026-05-26  (3975 days)
+  BTAL: 2011-09-13 -> 2026-05-26  (3696 days)
+  QQQ: 1999-06-01 -> 2026-05-26  (6788 days)
+
+Building proxy sleeve series...
+
+Building v3 strategies...
+
+Running v3 + dip ladder simulation...
+  DIP LADDER TIER 1 FIRED: 2000-11-30 | S&P DD=-13.3% | Deployed $46,194
+  DIP LADDER TIER 2 FIRED: 2000-11-30 | S&P DD=-13.3% | Deployed $55,433
+  DIP LADDER TIER 3 FIRED: 2001-03-30 | S&P DD=-23.2% | Deployed $59,814
+
+====================================================================================================
+FULL PERIOD 2000-2026  (start $1,000,000)
+====================================================================================================
+       Strategy CAGR Sharpe Sortino  MaxDD Calmar    Final $
+      v3 Static 6.8%   0.53    0.70 -26.9%   0.25 $5,680,839
+v3 + Dip Ladder 7.8%   0.55    0.72 -32.1%   0.24 $7,212,220
+    v3 No-Trend 6.8%   0.49    0.64 -30.9%   0.22 $5,661,159
+        S&P 500 8.3%   0.38    0.48 -55.3%   0.15 $8,123,553
+            QQQ 8.7%   0.35    0.46 -83.0%   0.11 $9,136,786
+
+====================================================================================================
+CRISIS WINDOWS — total return & max drawdown during each event
+====================================================================================================
+
+--- Dot-com bust  (2000-03-24 -> 2002-10-09) ---
+       Strategy Total Return  MaxDD
+      v3 Static       -11.5% -13.2%
+v3 + Dip Ladder       -14.3% -16.0%
+    v3 No-Trend       -15.0% -16.3%
+        S&P 500       -47.4% -47.5%
+            QQQ       -82.9% -83.0%
+
+--- Global Financial Crisis  (2007-10-09 -> 2009-03-09) ---
+       Strategy Total Return  MaxDD
+      v3 Static       -26.1% -26.9%
+v3 + Dip Ladder       -31.2% -32.1%
+    v3 No-Trend       -30.3% -30.9%
+        S&P 500       -55.3% -55.3%
+            QQQ       -51.6% -53.4%
+
+--- COVID crash  (2020-02-19 -> 2020-03-23) ---
+       Strategy Total Return  MaxDD
+      v3 Static       -16.6% -16.9%
+v3 + Dip Ladder       -20.0% -20.4%
+    v3 No-Trend       -18.3% -18.3%
+        S&P 500       -33.8% -33.8%
+            QQQ       -27.9% -28.6%
+
+--- 2022 stocks+bonds  (2022-01-03 -> 2022-10-12) ---
+       Strategy Total Return  MaxDD
+      v3 Static        -8.0%  -9.2%
+v3 + Dip Ladder       -10.4% -11.6%
+    v3 No-Trend       -12.9% -13.8%
+        S&P 500       -24.6% -24.6%
+            QQQ       -34.3% -34.3%
+
+--- Recovery to today  (2009-03-09 -> 2026-05-27) ---
+       Strategy Total Return  MaxDD
+      v3 Static      +344.5% -16.9%
+v3 + Dip Ladder      +467.3% -20.4%
+    v3 No-Trend      +373.7% -18.3%
+        S&P 500     +1397.6% -33.8%
+            QQQ     +3186.8% -35.1%
+
+====================================================================================================
+LOST DECADE 2000-01-01 -> 2009-12-31  (S&P went nowhere for 10 years)
+====================================================================================================
+       Strategy  CAGR  Total  MaxDD
+      v3 Static  5.6% +73.0% -26.9%
+v3 + Dip Ladder  6.3% +83.5% -32.1%
+    v3 No-Trend  5.3% +68.0% -30.9%
+        S&P 500 -0.9%  -9.0% -55.3%
+            QQQ -6.8% -50.3% -83.0%
+
+====================================================================================================
+DIP LADDER DEPLOYMENT LOG
+====================================================================================================
+ Tier       Date S&P_DD Deployed_$
+    1 2000-11-30 -13.3%    $46,194
+    2 2000-11-30 -13.3%    $55,433
+    3 2001-03-30 -23.2%    $59,814
+
+====================================================================================================
+REAL-ETF-ERA 2019-09 -> 2026  (no proxies — covers COVID + 2022)
+====================================================================================================
+    Strategy  CAGR Sharpe  MaxDD    Final $
+v3 Real ETFs  8.6%   0.71 -16.9% $1,738,553
+     S&P 500 16.8%   0.75 -33.8% $2,839,312
+         QQQ 23.3%   0.88 -35.1% $4,098,825
+
+Generating chart...
+Chart saved to report/img/v3_proxy_backtest.png
+
+====================================================================================================
+CAVEATS — proxy substitutions and what each under/overstates
+====================================================================================================
+
+PROXY SUBSTITUTIONS:
+
+1. RSP (US large-cap equal-weight) pre-2003: VFINX (cap-weight S&P 500)
+   → UNDERSTATES the de-concentration tilt of RSP; cap-weight will show higher
+     concentration in mega-cap tech especially 1999-2000 and 2023-2026. The real
+     RSP benefit (equal-weight reduces single-stock tail risk) is NOT captured
+     before 2003.  Splice seam: 2003-04-30 (approximate RSP launch).
+
+2. VXUS (international) pre-2011: VGTSX (Vanguard Total International mutual fund)
+   → Reasonable proxy; VGTSX is the same index family. Minor tracking difference.
+     Splice seam: 2011-01-26.
+
+3. AVUV (US small/mid-value) pre-2019: VISVX (Vanguard Small Value index)
+   → UNDERSTATES Avantis' profitability screen advantage. VISVX is passive index;
+     AVUV uses profitability/value tilts that historically improved factor loading.
+     The proxy is a conservative lower-bound for the sleeve.
+     Splice seam: 2019-09-24 (AVUV launch).
+
+4. USMV (min-vol / quality) pre-2011: VFINX (cap-weight S&P 500)
+   → UNDERSTATES the drawdown cushion that min-vol actually provides. Pre-2011,
+     this sleeve behaves like plain S&P — the 2000-2002 and 2007-2009 drawdowns
+     will be WORSE than USMV would have actually been. Conservative for crisis
+     protection claims.  Splice seam: 2011-10-18.
+
+5. GLD (gold) pre-2004: GC=F (gold futures continuous contract)
+   → Price return only (no yield — gold has none). The splice to GLD captures
+     GLD's structure costs vs futures roll, but the direction is the same.
+     Gold's 2001-2011 bull run is a real historical tailwind; repeat not guaranteed.
+     Splice seam: 2004-11-18.
+
+6. DBMF (trend / managed futures) pre-2019: multi-asset TSMOM proxy
+   → Equal-weight 3-asset (S&P/long bond/gold) 12m time-series momentum,
+     long-if-positive else CASH, rebalanced monthly. This SIMPLIFIES real managed
+     futures: (a) only 3 assets vs 50+ in real CTA; (b) no leverage/shorting;
+     (c) no commodity curve roll; (d) real DBMF tracks the SG CTA index.
+     The proxy likely OVERSTATES managed futures' correlation to these three assets
+     during quiet periods but UNDERSTATES it during broad trend regimes.
+     Separately, report v3 No-Trend (DBMF weight redistributed) to isolate how
+     much the trend sleeve drives the result.
+     Splice seam: 2019-05-14 (DBMF launch).
+
+7. SCHP (TIPS) pre-2010: VIPSX (Vanguard Inflation-Protected Securities fund)
+   → Reasonable proxy; same index. VIPSX only starts ~2000-06, so the very early
+     months of the backtest may have a small gap — handled by redistributing weight
+     pro-rata across available sleeves in the static_portfolio function.
+     Splice seam: 2010-08-05.
+
+8. SGOV (dry powder) throughout: CASH accrual (piecewise-constant T-bill estimate)
+   → SGOV is a 0-3 month T-bill ETF (launched 2020); the CASH proxy is a reasonable
+     approximation. The piecewise T-bill rates used are estimates, not actual daily
+     SOFR/T-bill prints. Slight overstatement of yield in low-rate periods possible.
+
+9. BTAL (anti-beta tail protection) pre-2011: CASH
+   → UNDERSTATES crash protection significantly. BTAL is long low-beta / short
+     high-beta, which tends to RISE in market crashes. Substituting CASH means the
+     3% tail sleeve shows near-zero crisis alpha before 2011. This is deliberately
+     conservative — it will NOT inflate crisis numbers. Real BTAL effect is visible
+     only post-2011.  Splice seam: 2011-09-14.
+
+GENERAL CAVEATS:
+10. No transaction costs, bid/ask spreads, or taxes. Annual rebalancing minimises
+    turnover but real costs would modestly reduce all CAGRs.
+11. Splice seams introduce regime discontinuities at the transition dates; return-
+    splicing (not price-level splicing) removes the level jump but not factor
+    composition differences.
+12. TSMOM momentum signals use ONLY trailing 252-day data (no look-ahead).
+    Dip-ladder drawdown uses trailing 252-day rolling max (no look-ahead).
+    NOTE: warmup starts 1999-06-01 (~148 trading days before 2000-01-01), so
+    the rolling-252 max is not fully warmed until ~mid-2001. Early-2000 dip
+    thresholds are based on a shorter window — conservative (not look-ahead).
+13. Annual rebalance rule: the dip-ladder simulation rebalances annually AND
+    fires deployment tiers once each. After firing, the target weight for SGOV
+    decreases and annual rebalance restores WHATEVER weight remains — there is no
+    refill rule (one-way deployment is intentional conservatism).
+14. Gold's bull market (2001-2011) and the 40-year bond bull market (1982-2020)
+    are real historical tailwinds for gold/bond sleeves; both face structural
+    headwinds from today's higher-yield / AI-driven starting point.
+
+====================================================================================================
+v3 PROXY BACKTEST COMPLETE
+====================================================================================================
