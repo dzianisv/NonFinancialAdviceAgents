@@ -41,6 +41,8 @@ roaring bull (the premium for capping the tail). Full context:
 ## The portfolio — pick a risk tier
 
 Each column is a **target allocation** for the fully-deployed portfolio. **Balanced is the default.**
+Every ETF choice — the principle behind the sleeve and the verified fund facts — is sourced in
+[`v3-etf-rationale.md`](v3-etf-rationale.md).
 
 | Sleeve | ETF examples | Defensive | **Balanced** | Growth-tilt |
 |--------|--------------|:-----:|:-----:|:-----:|
