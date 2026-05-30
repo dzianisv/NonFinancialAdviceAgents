@@ -1,59 +1,40 @@
-# Dip-Tranche Strategy — Backtest
+# Bubble-Aware All-Weather — deploy $1M with crash protection
 
-Tiered dip-buying strategy backtested against lump-sum and DCA across **VOO**, **QQQ**, and **VXUS** (2020–2026).
+A research + backtest lab answering one question:
 
-## Research Paper
+> **"I have $1M in cash. The market looks like an AI bubble (à la dot-com). How do I deploy it so I
+> participate in upside but survive a crash — and automate that with an agentic team?"**
 
-📄 [Dip-Tranche Strategy: S&P 500, Nasdaq-100, International — Backtest 2020–2026](https://telegra.ph/Dip-Tranche-Strategy-SP-500-Nasdaq-100-International--Backtest-20202026-05-28)
+> ⚠️ **Educational analysis only — not financial advice.** Past backtest performance does not guarantee
+> future results. Validate with a fee-only fiduciary before deploying real capital.
 
-Full write-up with charts, strategy mechanics, and per-symbol results.
+## Start here
 
-## Strategy Summary
+| If you want… | Read |
+|---|---|
+| **The mission** + bubble evidence + done/not-done checklist | [`GOAL.md`](GOAL.md) |
+| **The recommended strategy** (and how our thinking got there) | [`strategy/`](strategy/README.md) → [`v3`](strategy/v3-bubble-aware-all-weather.md) |
+| **The research** behind it (9 cited notes) | [`research/`](research/README.md) |
+| **The backtest evidence** (runnable scripts + results) | [`backtests/`](backtests/README.md) |
+| **The agent team** that runs it (opencode skills) | [`skills/`](skills/README.md) |
+| **Repo conventions** (for agents/contributors) | [`AGENTS.md`](AGENTS.md) |
 
-A $1,000,000 portfolio is split into three buckets:
+## The answer in three lines
 
-| Bucket | Allocation | Deployment |
-|--------|-----------|------------|
-| Foundation | 50% ($500K) | Lump-sum on day 1 |
-| DCA | 30% ($300K) | Equal weekly instalments over 18 months |
-| Dip Reserve | 20% ($200K) | Tiered tranches triggered by drawdown from 52-week high |
+1. **Don't bet the whole $1M on cap-weight S&P/QQQ at CAPE ~41.** In our 2000-2026 backtest the S&P fell −55% and QQQ −83%; 2000-2009 was a lost decade.
+2. **Selection isn't the edge.** Bottom-up stock-picking (incl. Morningstar's MOAT) doesn't reliably beat a cheap index (our backtests + SPIVA).
+3. **The edge is structural.** De-concentrated diversification + a trend/regime overlay (crisis alpha) + risk management + a dip-reserve, run by an agentic team — caps the left tail without a market call. → [`strategy/v3`](strategy/v3-bubble-aware-all-weather.md).
 
-**Dip Reserve tiers (VOO/VXUS baseline, QQQ ×1.4):**
+## Repository layout
 
-| Tier | Reserve Share | Triggers | Sub-tranches |
-|------|:---:|---|:---:|
-| Tier 1 | 20% | −7%, −8.5%, −10%, time | 4 × $10K |
-| Tier 2 | 30% | −12%, −14%, −16%, time | 4 × $15K |
-| Tier 3 | 50% | −20%, −25%, −30%, time | 4 × $25K |
-
-## Backtest Results (2020-01-01 → 2026-05-27)
-
-| Symbol | Strategy CAGR | Lump Sum CAGR | DCA CAGR | Strategy Max DD |
-|--------|:---:|:---:|:---:|:---:|
-| VOO | 15.1% | 15.8% | 14.6% | −22.5% |
-| QQQ | 19.6% | 21.7% | 17.6% | −31.2% |
-| VXUS | **10.6%** | 10.2% | 10.3% | −26.6% |
-
-> VXUS is the only symbol where the strategy beat both benchmarks — slower international recoveries reward tiered entry.
-
-## Files
-
-| File | Description |
-|------|-------------|
-| `backtest.py` | Full backtest engine — fetches data, runs all three strategies, prints report, saves PNG charts |
-| `publish_report.py` | Builds and publishes the Telegraph report (uploads charts to Imgur, creates Telegraph page) |
-| `VOO_backtest.png` | VOO results chart |
-| `QQQ_backtest.png` | QQQ results chart |
-| `VXUS_backtest.png` | VXUS results chart |
-
-## How to Run
-
-```bash
-pip install yfinance matplotlib pandas numpy requests
-python3 backtest.py          # generates charts + prints report
-python3 publish_report.py    # publishes to telegra.ph
+```
+GOAL.md          # the mission
+strategy/        # v1 (entry timing) → v2 (selection) → v3 (Bubble-Aware All-Weather, current)
+research/        # 9 cited research notes (AI bubble, crash protection, frameworks, $1M playbook)
+backtests/       # all backtest + publisher scripts; results/ holds cached summaries
+report/          # generated charts (img/) + published write-ups (writeups/)
+skills/          # opencode SKILL.md modules for the agentic hedge-fund team
+archive/         # session log + skills.zip backup
 ```
 
-## Disclaimer
-
-This repository is for educational and analytical purposes only. Nothing here constitutes financial advice. Past backtest performance does not guarantee future results. Consult a licensed fiduciary advisor before making any investment decisions.
+Tracking issue: https://github.com/dvashchuk/backtest/issues/1

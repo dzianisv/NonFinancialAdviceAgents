@@ -1,0 +1,311 @@
+//@version=6
+// =============================================================================
+// Dip Tranches Strategy — Tiered S&P 500 ETF deployment on drawdowns
+// =============================================================================
+// Companion to the dip-tranches-strategy skill.
+//
+// What it does:
+//   - Tracks rolling 52-week high
+//   - Plots 3 tiers x 4 sub-tranches as horizontal price levels
+//   - Deploys cash from a "dip reserve" on weekly-close drawdown triggers
+//   - Re-arms after recovery to -5% from a new 52-week high (capped 2x/year)
+//   - Fires alerts on every sub-tranche trigger
+//
+// Intended usage:
+//   - Add to VOO / IVV / SPLG / SPY on the WEEKLY timeframe
+//   - "Properties" panel: set initial capital to your Dip Reserve size
+//   - Use "Strategy Tester" to see how it would have played out historically
+//   - Use "Alerts" panel to push trigger notifications to phone/email/webhook
+//
+// Disclaimer:
+//   This is an analytical / educational tool, NOT financial advice. Past
+//   performance does not predict future results. Use at your own risk.
+// =============================================================================
+
+strategy(
+     title              = "Dip Tranches Deploy",
+     shorttitle         = "DipTranches",
+     overlay            = true,
+     pyramiding         = 12,
+     default_qty_type   = strategy.fixed,
+     default_qty_value  = 1,
+     initial_capital    = 200000,
+     currency           = currency.USD,
+     commission_type    = strategy.commission.cash_per_order,
+     commission_value   = 0.0,
+     calc_on_every_tick = false,
+     process_orders_on_close = true)
+
+// ---------------------------------------------------------------------------
+// Inputs
+// ---------------------------------------------------------------------------
+grp_reserve = "Dip Reserve"
+reserveSize = input.float(200000.0, "Dip Reserve Size (USD)",
+     minval = 1000, step = 5000, group = grp_reserve,
+     tooltip = "Total cash earmarked for dip-buying. Tiers split this 20/30/50.")
+
+grp_tiers = "Tier triggers (% drawdown from 52-week high)"
+t1Trigger = input.float(-7.0,  "Tier 1 trigger",  step = 0.5, group = grp_tiers)
+t1b       = input.float(-8.5,  "Tier 1b",         step = 0.5, group = grp_tiers)
+t1c       = input.float(-10.0, "Tier 1c",         step = 0.5, group = grp_tiers)
+t2Trigger = input.float(-12.0, "Tier 2 trigger",  step = 0.5, group = grp_tiers)
+t2b       = input.float(-14.0, "Tier 2b",         step = 0.5, group = grp_tiers)
+t2c       = input.float(-16.0, "Tier 2c",         step = 0.5, group = grp_tiers)
+t3Trigger = input.float(-20.0, "Tier 3 trigger",  step = 1.0, group = grp_tiers)
+t3b       = input.float(-25.0, "Tier 3b",         step = 1.0, group = grp_tiers)
+t3c       = input.float(-30.0, "Tier 3c",         step = 1.0, group = grp_tiers)
+
+grp_alloc = "Tier allocation (% of reserve)"
+t1Pct = input.float(20.0, "Tier 1 total %", minval = 0, maxval = 100,
+     step = 5, group = grp_alloc)
+t2Pct = input.float(30.0, "Tier 2 total %", minval = 0, maxval = 100,
+     step = 5, group = grp_alloc)
+t3Pct = input.float(50.0, "Tier 3 total %", minval = 0, maxval = 100,
+     step = 5, group = grp_alloc)
+
+grp_rearm = "Re-arm rules"
+rearmPct = input.float(-5.0, "Re-arm threshold (% from new high)",
+     step = 0.5, group = grp_rearm,
+     tooltip = "When price recovers within this % of a NEW 52-week high, " +
+               "reset all triggered tiers so they can fire again.")
+maxRearmsPerYear = input.int(2, "Max re-arms per 52w", minval = 1, maxval = 10,
+     group = grp_rearm)
+
+grp_viz = "Visualization"
+showLines     = input.bool(true,  "Show trigger lines", group = grp_viz)
+showFills     = input.bool(true,  "Shade tier zones",   group = grp_viz)
+showLabels    = input.bool(true,  "Show price labels",  group = grp_viz)
+
+// ---------------------------------------------------------------------------
+// Compute 52-week high (using 252 trading days as proxy; on weekly chart
+// this naturally maps to ~52 bars)
+// ---------------------------------------------------------------------------
+lookback = timeframe.isweekly ? 52 : timeframe.isdaily ? 252 : 252
+high52w  = ta.highest(high, lookback)
+
+// Per-tranche dollar amounts (each tier has 4 sub-tranches, equal-weighted;
+// we implement the 3 price-based sub-tranches here, the 4th is time-based
+// and is surfaced as an alert rather than auto-fired)
+t1Amount = reserveSize * t1Pct / 100.0 / 4.0
+t2Amount = reserveSize * t2Pct / 100.0 / 4.0
+t3Amount = reserveSize * t3Pct / 100.0 / 4.0
+
+// Trigger prices
+p1a = high52w * (1 + t1Trigger / 100)
+p1b = high52w * (1 + t1b       / 100)
+p1c = high52w * (1 + t1c       / 100)
+p2a = high52w * (1 + t2Trigger / 100)
+p2b = high52w * (1 + t2b       / 100)
+p2c = high52w * (1 + t2c       / 100)
+p3a = high52w * (1 + t3Trigger / 100)
+p3b = high52w * (1 + t3b       / 100)
+p3c = high52w * (1 + t3c       / 100)
+
+// Current drawdown
+ddPct = (close - high52w) / high52w * 100
+
+// ---------------------------------------------------------------------------
+// State: track which sub-tranches have fired in the current "dip cycle"
+// A dip cycle resets when price recovers above the re-arm threshold from
+// a NEW 52-week high.
+// ---------------------------------------------------------------------------
+var bool fired1a = false
+var bool fired1b = false
+var bool fired1c = false
+var bool fired2a = false
+var bool fired2b = false
+var bool fired2c = false
+var bool fired3a = false
+var bool fired3b = false
+var bool fired3c = false
+
+// Track new-high events for re-arm logic
+var float lastHigh = na
+var int   rearmsThisYear = 0
+var int   rearmYearAnchor = na
+
+// New 52-week high made this bar?
+newHigh = na(lastHigh) or high52w > lastHigh
+if newHigh
+    lastHigh := high52w
+
+// Reset re-arm counter every 52 bars (~1 year)
+if na(rearmYearAnchor) or (bar_index - rearmYearAnchor) >= lookback
+    rearmsThisYear := 0
+    rearmYearAnchor := bar_index
+
+// Re-arm condition: price within rearmPct of high52w AND we have a fresh high
+anyFired = fired1a or fired1b or fired1c or fired2a or fired2b or fired2c or
+           fired3a or fired3b or fired3c
+shouldRearm = anyFired and newHigh and ddPct >= rearmPct and
+              rearmsThisYear < maxRearmsPerYear
+
+if shouldRearm
+    fired1a := false
+    fired1b := false
+    fired1c := false
+    fired2a := false
+    fired2b := false
+    fired2c := false
+    fired3a := false
+    fired3b := false
+    fired3c := false
+    rearmsThisYear += 1
+
+// ---------------------------------------------------------------------------
+// Order placement: deploy on weekly close at or below each trigger price
+// ---------------------------------------------------------------------------
+// Tier 1
+if not fired1a and close <= p1a
+    qty1a = math.floor(t1Amount / close)
+    if qty1a > 0
+        strategy.entry("T1a", strategy.long, qty = qty1a,
+             comment = "T1a @ -7%")
+        fired1a := true
+        alert("Dip Tranche T1a triggered at " + str.tostring(close, "#.##") +
+              " (drawdown " + str.tostring(ddPct, "#.##") + "%) — deploy $" +
+              str.tostring(t1Amount, "#"), alert.freq_once_per_bar_close)
+
+if not fired1b and close <= p1b
+    qty1b = math.floor(t1Amount / close)
+    if qty1b > 0
+        strategy.entry("T1b", strategy.long, qty = qty1b,
+             comment = "T1b @ -8.5%")
+        fired1b := true
+        alert("Dip Tranche T1b triggered at " + str.tostring(close, "#.##"),
+              alert.freq_once_per_bar_close)
+
+if not fired1c and close <= p1c
+    qty1c = math.floor(t1Amount / close)
+    if qty1c > 0
+        strategy.entry("T1c", strategy.long, qty = qty1c,
+             comment = "T1c @ -10%")
+        fired1c := true
+        alert("Dip Tranche T1c triggered at " + str.tostring(close, "#.##"),
+              alert.freq_once_per_bar_close)
+
+// Tier 2
+if not fired2a and close <= p2a
+    qty2a = math.floor(t2Amount / close)
+    if qty2a > 0
+        strategy.entry("T2a", strategy.long, qty = qty2a,
+             comment = "T2a @ -12%")
+        fired2a := true
+        alert("Dip Tranche T2a triggered at " + str.tostring(close, "#.##") +
+              " — Tier 2 entered, deploy $" + str.tostring(t2Amount, "#"),
+              alert.freq_once_per_bar_close)
+
+if not fired2b and close <= p2b
+    qty2b = math.floor(t2Amount / close)
+    if qty2b > 0
+        strategy.entry("T2b", strategy.long, qty = qty2b,
+             comment = "T2b @ -14%")
+        fired2b := true
+        alert("Dip Tranche T2b triggered at " + str.tostring(close, "#.##"),
+              alert.freq_once_per_bar_close)
+
+if not fired2c and close <= p2c
+    qty2c = math.floor(t2Amount / close)
+    if qty2c > 0
+        strategy.entry("T2c", strategy.long, qty = qty2c,
+             comment = "T2c @ -16%")
+        fired2c := true
+        alert("Dip Tranche T2c triggered at " + str.tostring(close, "#.##"),
+              alert.freq_once_per_bar_close)
+
+// Tier 3 — the big ones
+if not fired3a and close <= p3a
+    qty3a = math.floor(t3Amount / close)
+    if qty3a > 0
+        strategy.entry("T3a", strategy.long, qty = qty3a,
+             comment = "T3a @ -20%")
+        fired3a := true
+        alert("** TIER 3 ENTERED ** Dip Tranche T3a at " +
+              str.tostring(close, "#.##") + " — drawdown " +
+              str.tostring(ddPct, "#.##") + "%. Deploy $" +
+              str.tostring(t3Amount, "#"),
+              alert.freq_once_per_bar_close)
+
+if not fired3b and close <= p3b
+    qty3b = math.floor(t3Amount / close)
+    if qty3b > 0
+        strategy.entry("T3b", strategy.long, qty = qty3b,
+             comment = "T3b @ -25%")
+        fired3b := true
+        alert("Dip Tranche T3b triggered — drawdown " +
+              str.tostring(ddPct, "#.##") + "%",
+              alert.freq_once_per_bar_close)
+
+if not fired3c and close <= p3c
+    qty3c = math.floor(t3Amount / close)
+    if qty3c > 0
+        strategy.entry("T3c", strategy.long, qty = qty3c,
+             comment = "T3c @ -30%")
+        fired3c := true
+        alert("Dip Tranche T3c triggered — deep drawdown " +
+              str.tostring(ddPct, "#.##") + "%",
+              alert.freq_once_per_bar_close)
+
+// ---------------------------------------------------------------------------
+// Visualization
+// ---------------------------------------------------------------------------
+// Color palette
+col_t1 = color.new(color.aqua,   0)
+col_t2 = color.new(color.orange, 0)
+col_t3 = color.new(color.red,    0)
+col_hi = color.new(color.gray,   30)
+
+// Plot 52-week high
+plot(showLines ? high52w : na, "52w High", color = col_hi, linewidth = 1,
+     style = plot.style_line)
+
+// Plot trigger levels
+plot(showLines ? p1a : na, "T1a -7%",   color = col_t1, linewidth = 1)
+plot(showLines ? p1b : na, "T1b -8.5%", color = col_t1, linewidth = 1)
+plot(showLines ? p1c : na, "T1c -10%",  color = col_t1, linewidth = 1)
+plot(showLines ? p2a : na, "T2a -12%",  color = col_t2, linewidth = 2)
+plot(showLines ? p2b : na, "T2b -14%",  color = col_t2, linewidth = 1)
+plot(showLines ? p2c : na, "T2c -16%",  color = col_t2, linewidth = 1)
+plot(showLines ? p3a : na, "T3a -20%",  color = col_t3, linewidth = 2)
+plot(showLines ? p3b : na, "T3b -25%",  color = col_t3, linewidth = 1)
+plot(showLines ? p3c : na, "T3c -30%",  color = col_t3, linewidth = 1)
+
+// Shaded tier zones (between tier entry and next tier entry)
+ph1 = plot(showFills ? p1a : na, display = display.none)
+ph2 = plot(showFills ? p2a : na, display = display.none)
+ph3 = plot(showFills ? p3a : na, display = display.none)
+ph_bottom = plot(showFills ? p3c * 0.85 : na, display = display.none)
+
+fill(ph1, ph2, color = color.new(color.aqua,   90), title = "Tier 1 zone")
+fill(ph2, ph3, color = color.new(color.orange, 90), title = "Tier 2 zone")
+fill(ph3, ph_bottom, color = color.new(color.red, 85), title = "Tier 3 zone")
+
+// Dashboard table — current state at a glance
+if barstate.islast
+    var table dash = table.new(position.top_right, 2, 12,
+         bgcolor = color.new(color.black, 70), border_width = 1)
+    table.cell(dash, 0, 0,  "Metric",            text_color = color.white, bgcolor = color.new(color.gray, 50))
+    table.cell(dash, 1, 0,  "Value",             text_color = color.white, bgcolor = color.new(color.gray, 50))
+    table.cell(dash, 0, 1,  "52w High",          text_color = color.white)
+    table.cell(dash, 1, 1,  str.tostring(high52w, "#.##"), text_color = color.white)
+    table.cell(dash, 0, 2,  "Current",           text_color = color.white)
+    table.cell(dash, 1, 2,  str.tostring(close, "#.##"),   text_color = color.white)
+    table.cell(dash, 0, 3,  "Drawdown",          text_color = color.white)
+    ddColor = ddPct <= t3Trigger ? color.red :
+              ddPct <= t2Trigger ? color.orange :
+              ddPct <= t1Trigger ? color.aqua : color.lime
+    table.cell(dash, 1, 3,  str.tostring(ddPct, "#.##") + "%", text_color = ddColor)
+    table.cell(dash, 0, 4,  "Reserve",           text_color = color.white)
+    table.cell(dash, 1, 4,  "$" + str.tostring(reserveSize, "#"), text_color = color.white)
+    table.cell(dash, 0, 5,  "Re-arms used",      text_color = color.white)
+    table.cell(dash, 1, 5,  str.tostring(rearmsThisYear) + " / " + str.tostring(maxRearmsPerYear),
+         text_color = color.white)
+    // Fired status row
+    firedSummary = (fired1a ? "1a " : "") + (fired1b ? "1b " : "") +
+                   (fired1c ? "1c " : "") + (fired2a ? "2a " : "") +
+                   (fired2b ? "2b " : "") + (fired2c ? "2c " : "") +
+                   (fired3a ? "3a " : "") + (fired3b ? "3b " : "") +
+                   (fired3c ? "3c" : "")
+    table.cell(dash, 0, 6, "Fired this cycle", text_color = color.white)
+    table.cell(dash, 1, 6, firedSummary == "" ? "(none)" : firedSummary,
+         text_color = color.yellow)
