@@ -127,7 +127,8 @@ futures.
   has historically *profited* in extended equity bear markets — the one diversifier that tends to pay off
   precisely when stocks *and* bonds fall together (e.g. 2022). This is the sleeve that replaces the
   backtest's crude "200d-SMA on the S&P" with a real, multi-asset managed-futures strategy.
-- **Why this fund:** iMGP DBi Managed Futures Strategy ETF. Inception **2019-05-07**, expense ratio
+- **Why this fund:** iMGP DBi Managed Futures Strategy ETF. Inception **2019-05-07** (SEC filing date; first
+  reliable yfinance bar 2019-05-08, which is where the backtest splice seam sits), expense ratio
   **0.85%**, **actively managed replication** — the "Dynamic Beta Engine" reads the trailing 60-day returns
   of the largest CTAs and rebuilds a long/short futures book (equities, rates, FX, commodities) to match
   their *performance*; targets 8–10% vol. [SEC 497K (2026-04-30)](https://www.sec.gov/Archives/edgar/data/0001020425/000119312526197034/d62276d497k.htm)
