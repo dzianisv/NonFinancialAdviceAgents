@@ -49,6 +49,7 @@ trend-following ──signals──┐                  ▼
 - `dip-tranches-strategy/dip_tranches_strategy.pine` — TradingView indicator.
 
 ## Provenance
-The backtest evidence behind these skills lives in `../knowledgebase/` (notes 02-05) and the
-scripts in the repo root (`crash_protection_backtest.py`, etc.). Run notification-first; paper-trade
+The backtest evidence behind these skills lives in `../research/` (notes 02-05) and the
+scripts in `../backtests/` (`backtests/crash_protection_backtest.py`, etc.). The strategy these skills
+implement is written up in `../strategy/` (v3 is current). Run notification-first; paper-trade
 before live; keep hard caps in code outside the LLM.

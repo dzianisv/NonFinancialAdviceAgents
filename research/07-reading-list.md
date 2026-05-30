@@ -1,6 +1,6 @@
 # 07 — Reading List (Distilled)
 
-*The books and papers behind the strategies in this knowledgebase, each in a sentence
+*The books and papers behind the strategies in this research, each in a sentence
 or two. Educational.*
 
 ## Books
@@ -43,7 +43,7 @@ or two. Educational.*
   no measurable P&L return — a key bear data point for AI-capex ROI (note 01).
 
 ## How they connect to this repo
-- All-Weather / Permanent / Golden Butterfly → notes 02, 04; backtested in `crash_protection_backtest.py`.
+- All-Weather / Permanent / Golden Butterfly → notes 02, 04; backtested in `backtests/crash_protection_backtest.py`.
 - Trend / Dual Momentum / GTAA → notes 02, 05; backtested as "Trend-Following S&P (200d)" & "Dual Momentum (GEM)".
 - Tail hedging / barbell → note 02 (tail sleeve), note 08 (allocation).
 - Agentic desk → note 05; encoded as `skills/` SKILL.md files.

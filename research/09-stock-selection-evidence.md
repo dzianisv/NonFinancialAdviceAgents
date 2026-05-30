@@ -1,7 +1,7 @@
 # 09 — Does Bottom-Up Stock Selection Beat the Index? (Evidence)
 
 *Should the fund's analyst pick individual undervalued stocks — e.g., using Morningstar
-fair-value & moat ratings? Results from `fundamental_screens_backtest.py`. Educational.*
+fair-value & moat ratings? Results from `backtests/fundamental_screens_backtest.py`. Educational.*
 
 ## The question
 
@@ -126,5 +126,5 @@ never clear the backtest gate. It's a sanity-check, not a strategy.
 - See `fundamental_screens_summary.txt` and `report/img/fundamental_screens_backtest.png`.
 
 ## Sources
-`fundamental_screens_backtest.py` (this repo); VanEck MOAT, Pacer COWZ, Invesco RPV/SPHQ, iShares
+`backtests/fundamental_screens_backtest.py` (this repo); VanEck MOAT, Pacer COWZ, Invesco RPV/SPHQ, iShares
 VLUE/QUAL/MTUM/USMV, Schwab SCHD, ProShares NOBL fact sheets; S&P SPIVA scorecards.

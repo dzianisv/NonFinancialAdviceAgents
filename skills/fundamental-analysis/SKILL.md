@@ -18,7 +18,7 @@ should.** It also encodes an honest, evidence-based verdict on what the analyst 
 ## The verdict that shapes everything (read first)
 
 We backtested the **investable versions** of the major stock-selection methods vs SPY over each
-ETF's full live history (`fundamental_screens_backtest.py`):
+ETF's full live history (`backtests/fundamental_screens_backtest.py`):
 
 | Methodology (ETF) | CAGR vs SPY | Beat SPY? | Higher Sharpe? |
 |---|---|:--:|:--:|

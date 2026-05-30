@@ -50,7 +50,7 @@ Choose by the **drawdown the user can actually live through**, not by the return
 - **Gold + trend** are the diversifiers that worked in 2022 when bonds failed; trend is "crisis alpha."
 - **Treasuries kept modest** (not classic All-Weather's 40%) given the 2022 duration lesson and low-yield start.
 - **Dry powder** earns ~4-5% and is deployed *into* declines by rule (hand off to `dip-tranches-strategy`).
-- Backtest (this repo's `crash_protection_backtest.py`): diversified mixes earned ~7-8%/yr 2000-2026 with
+- Backtest (this repo's `backtests/crash_protection_backtest.py`): diversified mixes earned ~7-8%/yr 2000-2026 with
   −16% to −24% max drawdowns vs the S&P's −55% / QQQ's −83%, and roughly doubled through the 2000-2009 lost decade.
 
 ## Sizing mechanics

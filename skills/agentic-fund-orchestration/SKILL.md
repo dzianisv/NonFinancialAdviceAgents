@@ -89,4 +89,4 @@ turnover, win rate + payoff, effective # of bets, time-in-drawdown, per-sleeve a
 
 ## Starter stack
 yfinance + FRED → vectorbt / `bt` research → Alpaca **paper** → human-approved go-live with hard caps in code.
-See the `knowledgebase/` notes 05 and 06 for the full architecture and data/API details.
+See the `research/` notes 05 and 06 for the full architecture and data/API details.

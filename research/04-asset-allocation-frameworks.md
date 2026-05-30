@@ -68,4 +68,4 @@ over a duration-heavy classic risk-parity stack.
 ## Sources
 portfoliocharts.com (Permanent, Golden Butterfly), optimizedportfolio.com (all portfolios, RPAR, JEPI),
 lazyportfolioetf.com, mebfaber.com (GTAA/Ivy timing model), bridgewater All-Weather public writeups,
-and `crash_protection_backtest.py` in this repo.
+and `backtests/crash_protection_backtest.py` in this repo.

@@ -1,6 +1,6 @@
 # 03 — Backtest Evidence: Why Not Just S&P/QQQ?
 
-*Results from `crash_protection_backtest.py` in this repo. $1,000,000 start,
+*Results from `backtests/crash_protection_backtest.py` in this repo. $1,000,000 start,
 2000-01-01 → 2026-05-27. Total-return data (Vanguard index mutual funds + gold
 futures + a T-bill cash index). Educational; see caveats.*
 
@@ -84,5 +84,5 @@ Permanent −14%, Golden Butterfly −15%, Trend −15%. *The 60/40 / risk-parit
 - The 2000-2009 all-weather edge benefited from the bond + gold bull markets, which start from a
   *lower-yield* base today — don't assume the same bond tailwind repeats. (This is exactly why note 08
   leans on *trend + gold + low-vol* rather than just long bonds.)
-- See also the prior-session backtests (`era_2005_2020_backtest.py`, `tldr_chart.py`) and `AGENTS.md`
+- See also the prior-session backtests (`backtests/era_2005_2020_backtest.py`, `backtests/tldr_chart.py`) and `AGENTS.md`
   for the full strategy index and known biases (survivorship in hindsight-picked universes, etc.).
