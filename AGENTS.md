@@ -1,13 +1,13 @@
 # AGENTS.md — Repo Conventions & Agent Instructions
 
-> **Read [`GOAL.md`](GOAL.md) first.** It states the mission, the bubble evidence, and the
-> done/not-done checklist. Then `strategy/README.md` for the current strategy (v3). Everything in
-> this repo serves that goal.
+> **Read @GOAL.md first.** It states the mission, the bubble evidence, and the done/not-done
+> checklist. Then @strategy/README.md for the current strategy (v3). Everything in this repo serves
+> that goal.
 
 ## Repository Purpose
 
 Backtest investment strategies to answer one mission — deploy $1M with crash protection in a possible
-AI bubble, run by an agentic team. **The mission is defined in [`GOAL.md`](GOAL.md); start there.**
+AI bubble, run by an agentic team. **The mission is defined in @GOAL.md; start there.**
 Some results are also published as Telegraph posts.
 
 ## Directory Structure
@@ -30,17 +30,17 @@ Some results are also published as Telegraph posts.
 
 ## The four pillars
 
-- **`GOAL.md`** — the mission, the bubble evidence, and the done/not-done checklist. Start here.
+- **@GOAL.md** — the mission, the bubble evidence, and the done/not-done checklist. Start here.
 - **`strategy/`** — how our thinking evolved: `v1` (entry timing into the index), `v2` (can selection
   beat the index? — mostly no), `v3` (Bubble-Aware All-Weather — **current recommendation**).
-  Start at `strategy/README.md`.
-- **`research/`** — 9 cited research notes behind the strategy. Start at `research/README.md`; the
+  Start at @strategy/README.md.
+- **`research/`** — 9 cited research notes behind the strategy. Start at @research/README.md; the
   synthesis is `research/08-the-1M-playbook.md`; the centerpiece evidence is
   `backtests/crash_protection_backtest.py`.
 - **`skills/`** — opencode-compatible `SKILL.md` modules for an automated agent team: `regime-detection`,
   `trend-following`, `portfolio-construction`, `risk-management`, `rebalancing`, `dip-tranches-strategy`,
   `tax-loss-harvesting`, `fundamental-analysis`, and the top-level `agentic-fund-orchestration`. See
-  `skills/README.md`. Frontmatter must keep `compatibility: opencode`. The committed
+  @skills/README.md. Frontmatter must keep `compatibility: opencode`. The committed
   `dip-tranches-strategy/SKILL.md` was once mangled to whitespace — the canonical copies are restored;
   `archive/skills.zip` is the backup archive.
 
