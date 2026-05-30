@@ -19,7 +19,6 @@ import argparse
 import json
 import math
 import sys
-import os
 from pathlib import Path
 
 import numpy as np
