@@ -6,6 +6,7 @@ liquidity) capped, directional beta kept small. (Separate from the tradfi book i
 
 | File | What it is |
 |------|------------|
+| [AGENTS.md](AGENTS.md) | **Agent instructions:** the crypto-PM role, mandate, read-only constraint, screening rules, commands, working style |
 | [GOAL.md](GOAL.md) | **The goal (read first):** the optimal-allocation problem stated formally — objective, constraints, success criteria, required investor inputs, roadmap |
 | [STRATEGY.md](STRATEGY.md) | **The strategy:** policy defaults, target allocation + venue menu, the 5-job control loop, cash-deployment waterfall, transition plan, crash validation |
 | [portfolio.py](portfolio.py) | Live tracker — pulls APY + collateral from DefiLlama + Morpho, reports value/yield/idle/concentration + rebalance model |
