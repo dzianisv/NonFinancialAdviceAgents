@@ -438,6 +438,105 @@ def print_json(data: dict) -> None:
 # CLI entrypoint
 # ---------------------------------------------------------------------------
 
+def build_order_ticket(data: dict) -> dict:
+    """
+    Stage the allocation into an actionable order ticket.
+
+    Final state = v3 Balanced weights on `capital` (incl. 22% SGOV reserve).
+    Path to get there, with no idle cash:
+      - TODAY: deploy Foundation ($ = FOUNDATION_PCT*capital) across the 9 risk
+        sleeves (every sleeve except SGOV), each at weight/risk_book_pct.
+      - TODAY: park (DCA + dip-reserve) $ in SGOV — the DCA portion earns T-bill
+        yield while it waits; the dip-reserve portion is permanent dry powder.
+      - MONTHLY (x DCA_MONTHS): move dca_per_month from SGOV into the 9 risk
+        sleeves, same weight/risk_book_pct split.
+    Reconciliation: Foundation risk buys + today's SGOV buy == capital.
+    """
+    alloc = {a["ticker"]: a for a in data["allocation"]}
+    t = data["tranches"]
+    cap = data["capital"]
+
+    risk = [a for a in data["allocation"] if a["ticker"] != "SGOV"]
+    risk_book_pct = sum(a["weight_pct"] for a in risk) / 100.0  # ~0.78
+
+    def split(dollars):
+        rows = []
+        for a in risk:
+            w = (a["weight_pct"] / 100.0) / risk_book_pct  # weight within risk book
+            d = w * dollars
+            px = a["price"]
+            sh = math.floor(d / px) if (px and px > 0) else None
+            rows.append({
+                "ticker": a["ticker"], "role": a["role"],
+                "dollar": round(d, 2), "price": px,
+                "shares": sh,
+                "actual_dollar": round(sh * px, 2) if (sh is not None and px) else None,
+            })
+        return rows
+
+    foundation = split(t["foundation_dollar"])
+
+    # SGOV today holds the permanent dip reserve + the DCA-in-waiting cash.
+    sgov_today_dollar = round(t["dip_reserve_dollar"] + t["dca_dollar"], 2)
+    sgov_px = alloc["SGOV"]["price"]
+    sgov_shares = math.floor(sgov_today_dollar / sgov_px) if (sgov_px and sgov_px > 0) else None
+
+    today_risk_actual = sum(r["actual_dollar"] or 0 for r in foundation)
+    sgov_actual = round(sgov_shares * sgov_px, 2) if (sgov_shares is not None and sgov_px) else 0.0
+
+    monthly = split(t["dca_per_month"])
+
+    return {
+        "as_of": data["as_of"], "capital": cap,
+        "risk_book_pct": round(risk_book_pct * 100, 1),
+        "foundation": foundation,
+        "foundation_target": t["foundation_dollar"],
+        "sgov_today": {"ticker": "SGOV", "dollar": sgov_today_dollar,
+                       "price": sgov_px, "shares": sgov_shares,
+                       "actual_dollar": sgov_actual,
+                       "permanent_reserve": t["dip_reserve_dollar"],
+                       "dca_in_waiting": t["dca_dollar"]},
+        "today_total_intended": round(t["foundation_dollar"] + sgov_today_dollar, 2),
+        "today_total_actual": round(today_risk_actual + sgov_actual, 2),
+        "dca_monthly": {"per_month": t["dca_per_month"], "months": t["dca_months"],
+                        "rows": monthly},
+    }
+
+
+def print_ticket(data: dict) -> None:
+    tk = build_order_ticket(data)
+    cap = tk["capital"]
+    print("=" * 72)
+    print("  v3 BALANCED — ORDER TICKET  (place at next market open)")
+    print(f"  Reference prices as of: {tk['as_of']}    Capital: ${cap:,.0f}")
+    print("=" * 72)
+    print("\n  >>> TODAY — FOUNDATION (deploy now across the risk book):")
+    print(f"  {'ETF':<6}{'role':<40}{'$':>13}{'px':>10}{'shares':>9}")
+    print("  " + "-" * 76)
+    for r in tk["foundation"]:
+        px = f"${r['price']:,.2f}" if r["price"] else "n/a"
+        sh = f"{r['shares']:,}" if r["shares"] is not None else "n/a"
+        print(f"  {r['ticker']:<6}{r['role']:<40}${r['dollar']:>11,.0f}{px:>10}{sh:>9}")
+    sg = tk["sgov_today"]
+    sg_role = f"dry powder (reserve ${sg['permanent_reserve']:,.0f} + DCA-wait ${sg['dca_in_waiting']:,.0f})"
+    sg_px = f"${sg['price']:,.2f}" if sg["price"] else "n/a"
+    sg_sh = f"{sg['shares']:,}" if sg["shares"] is not None else "n/a"
+    print(f"  {'SGOV':<6}{sg_role:<40}${sg['dollar']:>11,.0f}{sg_px:>10}{sg_sh:>9}")
+    print("  " + "-" * 76)
+    print(f"  TODAY intended: ${tk['today_total_intended']:,.2f}   filled (whole shares): ${tk['today_total_actual']:,.2f}")
+    print(f"  (risk book = {tk['risk_book_pct']}% of capital; Foundation deploys 50% of capital into it today, DCA adds 28% over {tk['dca_monthly']['months']} mo)")
+    print(f"\n  >>> MONTHLY — DCA for {tk['dca_monthly']['months']} months (${tk['dca_monthly']['per_month']:,.0f}/mo, sell SGOV → buy risk sleeves):")
+    for r in tk["dca_monthly"]["rows"]:
+        sh = f"~{r['shares']:,} sh" if r["shares"] is not None else "n/a"
+        print(f"    {r['ticker']:<6} ${r['dollar']:>8,.0f}/mo  ({sh})")
+    print("\n  >>> ON DIPS — deploy the $%s SGOV reserve per the dip tiers" % f"{tk['sgov_today']['permanent_reserve']:,.0f}")
+    print("      (run `v3_allocate_today.py` for live tier trigger prices).")
+    print("\n  Use LIMIT orders near the reference prices. Prices move at the open;")
+    print("  re-run this ticket Monday morning for fresh levels.")
+    print("\n  Educational analysis only — not financial advice. You place the orders.")
+    print("=" * 72)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="v3 Balanced — today's dollar allocation + regime + dip signal."
@@ -453,12 +552,21 @@ def main():
         action="store_true",
         help="Emit machine-readable JSON instead of the human report",
     )
+    ap.add_argument(
+        "--ticket",
+        action="store_true",
+        help="Emit a staged order ticket (Foundation today + SGOV + DCA schedule)",
+    )
     args = ap.parse_args()
 
     data = compute_allocation(args.capital)
 
     if args.json:
+        if args.ticket:
+            data = {**data, "order_ticket": build_order_ticket(data)}
         print_json(data)
+    elif args.ticket:
+        print_ticket(data)
     else:
         print_report(data)
 
