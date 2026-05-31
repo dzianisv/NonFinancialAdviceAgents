@@ -10,15 +10,15 @@ one-time trade list.
 
 ## 0. Policy assumptions (acting as the investor — override any of these)
 
-The optimization is undefined without a risk policy. I've set conservative, bubble-defensive defaults that
-match the current book (already 69% stables) and the parent AI-bubble thesis. **Tell me to change any line.**
+The optimization is undefined without a risk policy. I've set conservative defaults that match the current
+book (already 69% stables) and crypto's actual risk profile. **Tell me to change any line.**
 
 | Policy | Default | Rationale |
 |---|---|---|
-| Max whole-book drawdown in a crypto/AI crash | **~ −20%** | Conservative; the book is already cash-heavy and the mandate is defensive |
+| Max whole-book drawdown in a −60% crypto move | **~ −20%** | Conservative; crypto draws down 60–80% routinely (2018, 2022), so the book must absorb that without breaking |
 | Time horizon | **3–5+ yr**, no near-term liquidity event | Lets us use notice-window products (Maple) for part of the sleeve |
-| Instant-liquidity reserve | **≥ $25k (~15%)** withdrawable same-day | Covers shocks without unwinding the whole book |
-| Stable vs directional posture | **Keep stables high; do NOT add crypto beta** | In a suspected bubble, the win is yield on cash, not more BTC/ETH exposure |
+| Instant-liquidity reserve | **≥ $25k (~15%)** withdrawable same-day | Survives a DeFi run / utilization spike without unwinding the whole book |
+| Stable vs directional posture | **Keep stables high; do NOT add crypto beta** | Directional vol (60–80% drawdowns) dwarfs any yield; the durable win is real yield on principal |
 | KYC for tokenized T-bills | **No (default permissionless)** | Keep it click-to-deposit; revisit if you want the ~4.65% USDY tier |
 | Self-custody | **Yes** — blue-chip spot off perp venues to a hardware wallet | Removes exchange/venue custody risk on the directional sleeve |
 | Stablecoin mix | **Diversify USDC-heavy → add USDT + USDS** | A single-stable depeg is the sleeve's main correlated risk |
@@ -34,7 +34,7 @@ cut TON concentration, drop speculative alts, diversify the stable base).
 | Sleeve | Target | $ | vs now | Why |
 |---|---|---|---|---|
 | **Clean stable yield** | **68%** | ~$120k | 69% → 68% (but reactivated) | The engine. Most of the book, now actually earning ~4.6% instead of ~1.7% |
-| **Gold (PAXG)** | **6%** | ~$11k | 2.5% → 6% | Defensive ballast; funded by exiting speculative alts, not by selling stables |
+| **Gold (PAXG)** | **6%** | ~$11k | 2.5% → 6% | Non-correlated, non-custodial-counterparty ballast; funded by exiting speculative alts, not by selling stables |
 | **SOL (jitoSOL)** | **4%** | ~$7k | consolidate | Staking is near-mandatory (~5.6% MEV-real); consolidate fragSOL + idle SOL |
 | **ETH (wstETH)** | **3%** | ~$5k | hold | Keep existing exposure, convert to the safest LST; don't add beta |
 | **Satellite** | **≤5%** | ~$9k | 12% → 5% | Cap the "you-are-the-house" / high-risk sleeve; survivable if it zeros |
@@ -70,7 +70,7 @@ far above the $25k floor; Maple is the only locked sleeve at $24k (<15%). Divers
 | **Monitor** | Weekly `portfolio.py` run | Check blended yield, idle $, concentration, each position's live APY + collateral grade |
 | **Rotate** | A held venue's **net APY drops below 3%** for >1 week, **or** its collateral fails the C1 screen, **or** TVL/utilization signals stress | Exit to the next-best eligible venue; log the reason |
 | **Rebalance** | A sleeve drifts **±5%** off target, or any position breaches the **15%** cap | Trim the overweight, top up the underweight |
-| **Defend** | Risk-off regime flips (parent [`../GOAL.md`](../GOAL.md) bubble signal: trend break / vol spike) | Raise stable+gold toward the top of band, cut satellite to ~0, move directional to the safest LSTs |
+| **Defend** | Crypto risk-off: BTC/ETH trend break, funding/vol spike, a major depeg or protocol exploit | Raise stable+gold toward the top of band, cut satellite to ~0, move directional to the safest LSTs |
 
 ## 3. Cash-deployment waterfall (for *any* incoming cash)
 
@@ -149,4 +149,4 @@ definition of better-yield-risk-aware.
 
 ## References
 
-Goal & constraints: [`GOAL.md`](GOAL.md) · Tracker: [`portfolio.py`](portfolio.py) · Screening: [`../research/10-crypto-lp-yield-state.md`](../research/10-crypto-lp-yield-state.md) · Parent mandate: [`../GOAL.md`](../GOAL.md)
+Goal & constraints: [`GOAL.md`](GOAL.md) · Tracker: [`portfolio.py`](portfolio.py) · Screening: [`../research/10-crypto-lp-yield-state.md`](../research/10-crypto-lp-yield-state.md) · Separate tradfi book: [`../GOAL.md`](../GOAL.md)

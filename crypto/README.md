@@ -1,7 +1,8 @@
 # crypto/
 
-Managing a live ~$177k multi-chain crypto book — conservative, blue-chip-backed, bubble-defensive.
-Inherits the AI-bubble mandate from [`../GOAL.md`](../GOAL.md).
+Managing a live ~$177k multi-chain crypto book — a conservative, capital-preservation-first crypto
+treasury: real yield on principal, idiosyncratic crypto risks (smart-contract, depeg, bridge, custody,
+liquidity) capped, directional beta kept small. (Separate from the tradfi book in [`../GOAL.md`](../GOAL.md).)
 
 | File | What it is |
 |------|------------|

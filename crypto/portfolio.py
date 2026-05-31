@@ -93,7 +93,7 @@ POSITIONS: list[Pos] = [
     Pos("fragSOL","Solana","SOL","sol", 3935.32, apy=5.5, note="sheet 0.55% = tracking error; LST ~5.5%"),
     Pos("SOL @ Hyperliquid","Hyperliquid","SOL","sol", 1489.69, apy=0.0, note="prefer self-custody"),
     Pos("PAXG (gold)","Ethereum","gold","gold", 4359.00, apy=0.0, note="defensive; fully reserved"),
-    # --- bubble-correlated directional (trim/exit) ---
+    # --- speculative / high-vol directional (trim/exit) ---
     Pos("HYPE @ Hyperliquid","Hyperliquid","HYPE","directional", 5174.77, apy=0.0, note="TRIM: ATH, ~100x rev, unlocks"),
     Pos("ASTER @ Asterdex","Asterdex","ASTER","directional", 3546.73, apy=0.0, note="EXIT: speculative, 8-mo-old venue"),
     Pos("LINEA","Ethereum","LINEA","directional", 997.28, apy=0.0),

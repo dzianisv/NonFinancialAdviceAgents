@@ -9,7 +9,8 @@
 Build and run a **risk-aware yield strategy** — a standing policy, not a one-time trade — that manages the
 live **~$177k multi-chain crypto book *and all available cash*** (idle balances, new deposits, harvested
 yield, proceeds from exits) to earn the **best sustainable net yield the mandate allows, without ever
-compromising capital preservation.** Conservative, bubble-defensive.
+compromising capital preservation.** Conservative, capital-preservation-first — managed against crypto's
+own failure modes (smart-contract, depeg, bridge, custody, liquidity, yield-traps), not any macro cycle.
 
 The strategy's **output at any moment is an optimal target allocation**: a specific, defended weight for every
 dollar, derived from the full eligible opportunity set under explicit constraints, such that you **cannot raise
@@ -28,7 +29,7 @@ A written, automatable policy — a control loop, not a spreadsheet — with fiv
 | **Monitor** | Continuous (via `portfolio.py`) | Track live blended yield, idle $, concentration, collateral grade per position |
 | **Rotate** | A held venue's net yield falls below the clean frontier, or its collateral degrades / fails C1 | Exit to a better eligible venue; record why |
 | **Rebalance** | A sleeve or position drifts outside its band (C2–C8) | Trim/add back to target |
-| **Defend** | Regime flips risk-off (bubble-defense signal from parent [`../GOAL.md`](../GOAL.md)) | Raise stable/gold weight, cut satellite, per the policy bands |
+| **Defend** | Crypto risk-off (BTC/ETH trend break, funding/vol spike, a major depeg or exploit) | Raise stable/gold weight, cut satellite, per the policy bands |
 
 "Better yield, risk-aware" = **maximize sustainable net yield subject to the hard constraints below** — never
 the other way around. The optimization problem below is how each cycle of this loop is *solved*; the loop is
@@ -41,7 +42,7 @@ the strategy.
 **Two layers** (solve top-down):
 
 1. **Strategic sleeves** — the split across `{clean-stable-yield, ETH, SOL, BTC, gold, satellite}`. Driven by
-   the **bubble-defense mandate and the investor's risk tolerance/horizon/liquidity needs**, not by yield.
+   the **investor's risk tolerance / horizon / liquidity needs and crypto's volatility**, not by yield.
    This layer is a *policy choice*, not a free optimization — it needs the investor inputs below.
 2. **Within the stable sleeve** — a true constrained yield-maximization (a linear program):
    **maximize** `Σ wᵢ · r_netᵢ` **subject to** the constraints below, where `r_netᵢ` = live APY net of expected
@@ -73,7 +74,7 @@ frontier (~4.5–4.7%) or has a documented reason it can't, and no constraint is
 
 These are policy choices only the investor can make — they set C6, C8, and the satellite appetite:
 
-- [ ] **Risk tolerance** — max tolerable drawdown on the *whole* book in a crypto/AI crash (e.g. −15%? −30%?).
+- [ ] **Risk tolerance** — max tolerable drawdown on the *whole* book in a −60% crypto move (e.g. −15%? −30%?).
 - [ ] **Time horizon** — when, if ever, is this capital needed?
 - [ ] **Liquidity need** — how much must be withdrawable within 1 / 7 / 30 days?
 - [ ] **Stable vs directional split** — target % in yield-bearing stables vs blue-chip crypto upside.
@@ -145,4 +146,4 @@ steakUSDC/gtUSDCp). No new risk — *less* risk (exits the perp-LP).
 - Tooling: [`portfolio.py`](portfolio.py) · report in [`report/`](report/) · run guide in [`README.md`](README.md)
 - Screening & yield landscape: [`../research/10-crypto-lp-yield-state.md`](../research/10-crypto-lp-yield-state.md)
 - Conservative-deposit thesis: [`../blog/2026-05-where-to-park-usdt-usdc.md`](../blog/2026-05-where-to-park-usdt-usdc.md)
-- Parent (equity) mandate: [`../GOAL.md`](../GOAL.md)
+- Separate tradfi book (not a driver of this strategy): [`../GOAL.md`](../GOAL.md)
