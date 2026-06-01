@@ -35,8 +35,14 @@ months, Dip reserve 22% in SGOV deployed on drawdowns. The 78% risk book = all s
 
 Backtested reality (2000-2026, `backtests/v3_proxy_backtest.py`): max DD −27% vs S&P −55%; +73% through
 the 2000-09 lost decade vs S&P −9%; **but lags in bulls** (6.8% vs 8.3% lifetime; real-era 2019-26 8.6%
-vs S&P 16.8%). The lag is the premium for capping the left tail. **Every weekly note must include this
-acknowledgment — even in bull markets and calm quarters. Never omit it.**
+vs S&P 16.8%). The lag is the premium for capping the left tail.
+
+**Every weekly note must acknowledge this bull-market lag — even in calm or bull weeks. Never omit it.**
+However, the acknowledgment must be **contextualized to the week's actual situation**: tie the numbers to
+what is happening now (the current regime, whether a dip tier is firing or idle, what action is being
+taken). Use the exact figures (6.8% vs 8.3% lifetime; 8.6% vs 16.8% in 2019-26) but rephrase freshly
+each week — do not paste a fixed boilerplate sentence. A note with identical wording to a prior week
+fails this check.
 
 ## The weekly loop
 
@@ -52,9 +58,20 @@ Run these from the repo root with `/Users/engineer/.venv/bin/python3`.
 2. **ASSESS — three checks, in order:**
    - **Regime** (`regime-detection`): note the score and label. A flip only acts after it **holds 3-5
      sessions** — do not chase a one-day move. Regime is the tactical dial (lean defensive/growth); it
-     does **not** override the strategic weights. **Fallback:** if the regime-detection helper was not run
-     and no numeric score is available, report the binary instead — "price above/below 200d MA" — and
-     explicitly note that the full regime score was not computed.
+     does **not** override the strategic weights.
+
+     **Session-persistence is required in every regime line.** State one of:
+     - "held N sessions — confirmed" (when session history is available and the threshold is met),
+     - "N session(s) — not yet confirmed" (when history shows fewer than 3),
+     - "session history unavailable — cannot confirm persistence" (when you cannot determine how long the
+       reading has held).
+     This applies even when the drawdown magnitude makes the call seem obvious — confirmation status must
+     still be stated.
+
+     **Fallback:** if the regime-detection helper was not run and no numeric score is available, report the
+     binary instead — "price above/below 200d MA" — and explicitly note that the full regime score was not
+     computed.
+
    - **Dip tier** (`dip-tranches-strategy`): if S&P drawdown crosses −7% / −12% / −20% from the 52w high
      (weekly closes, don't skip tiers), a tranche of the SGOV reserve deploys. Tiers deploy
      **20% / 30% / 50%** of the reserve respectively (cumulative as tiers stack); the "last sub-tranche"
@@ -110,11 +127,11 @@ Deliver a SHORT note structured as:
 
 ```
 <weekly-note>
-<regime> label + score (or "price above/below 200d MA — full score not computed"); held N sessions? </regime>
+<regime> label + score (or "price above/below 200d MA — full score not computed"); session-persistence status — one of: "held N sessions — confirmed", "N session(s) — not yet confirmed", or "session history unavailable — cannot confirm persistence" </regime>
 <dip> S&P drawdown from 52w high; tier firing (yes/no/which); if yes — per-sleeve dollar deploy amounts (computed as tier% × $220K split pro-rata to target weights / 0.78); note that share counts are finalized at the open via --ticket </dip>
 <rebalance> quarter-end due? sleeve breach confirmed or all-clear; if breach — exact sell/buy orders </rebalance>
 <action> The concrete result of the checks above — either the specific orders to place, or "No action — all checks clear." Never a conditional or a pointer to run a command. </action>
-<bull-lag> One sentence acknowledging the strategy's bull-market lag (6.8% vs 8.3% lifetime; 8.6% vs 16.8% in the 2019-26 bull). Required in every note. </bull-lag>
+<bull-lag> One or two sentences acknowledging the strategy's bull-market lag, using the exact figures (6.8% vs 8.3% lifetime; 8.6% vs 16.8% in the 2019-26 bull), contextualized to this week's regime, dip status, and action — not a fixed boilerplate phrase. Required every week; must be freshly worded relative to the current situation. </bull-lag>
 <watch> any thesis-change signal </watch>
 </weekly-note>
 ```
@@ -141,7 +158,7 @@ you place the orders.*
 Share counts and limit prices finalized at the open via --ticket. </dip>
 <rebalance> Quarter-end check due (March). Current holdings not provided — Quarter-end rebalance check due: compute sleeve drift on current holdings; act only on a sleeve >±20% relative or >±5% absolute, else hold. </rebalance>
 <action> Place the Tier-2 SGOV-reserve deploy as dollar amounts above (share counts at open). Run the drift check on current holdings; rebalance only if a breach is confirmed. </action>
-<bull-lag> Strategy trades bull-market upside for crash protection: lifetime 6.8% vs S&P 8.3%; in the 2019-26 bull specifically 8.6% vs 16.8%. A drawdown week like this one is exactly the scenario the reserve exists for — deployment is on plan. </bull-lag>
+<bull-lag> With a Tier-2 dip now confirmed and reserve capital deploying into the drawdown, the strategy's cost is visible in calmer markets — lifetime 6.8% vs S&P 8.3%, and 8.6% vs 16.8% in the 2019-26 bull — but this week is the scenario that cost was paid for: buying −13% dislocations while the reserve was held ready. </bull-lag>
 <watch> AI capex ROI narrative building; no durable breadth broadening yet — stay Defensive, keep remaining reserve. </watch>
 </weekly-note>
 
@@ -151,6 +168,11 @@ Share counts and limit prices finalized at the open via --ticket. </dip>
 **Done when** the note contains all six elements above and every action is concrete and self-contained.
 A note is **not done** if:
 - the bull-lag acknowledgment is absent (required even in calm or bull weeks),
+- the bull-lag uses verbatim boilerplate from a prior week rather than being contextualized to the current
+  regime, dip status, and action — it must use the exact figures but in fresh phrasing tied to this week,
+- the regime line omits session-persistence status — it must state "held N sessions — confirmed",
+  "N session(s) — not yet confirmed", or "session history unavailable — cannot confirm persistence",
+  even when the drawdown magnitude makes the regime call seem obvious,
 - a dip tier fired but the note says "run --ticket for orders" instead of listing the per-sleeve dollar
   amounts — the dollar plan is the order; share counts at open are a logistics detail, not a reason to punt,
 - a quarter-end rebalance section says "pending verification" or "TBD" instead of either (a) reporting the

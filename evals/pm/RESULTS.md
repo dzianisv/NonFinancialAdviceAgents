@@ -20,10 +20,37 @@ Darwin Gödel Machine / Hyperagents pattern (arXiv 2603.19461): mutate the promp
 |---|--:|--:|--:|--:|
 | v0 (baseline) | 91.9 | 91.3 | 16.7/25 | 0 |
 | v1 | ~91.8 | — | 16.8/25 | 0 |
-| **v2 (shipped)** | **98.0** | **98.0** | **23.0/25** | **0** |
+| v2 (shipped, coupled loop) | 98.0 | 98.0 | 23.0/25 | 0 |
+| **v3 (supervisor/executor)** | **100.0** | **100.0** | **25.0/25** | **0** |
 
 Deterministic score was at ceiling (75/75) from v0 — the decision *rules* were already correct. All gains
 were qualitative, and **holdout improved as much as train → generalization, not overfitting.**
+
+## v3 — supervisor/executor architecture (2026-05-31)
+
+The v0→v2 loop had a structural flaw: the same agent that reflected on the notes also rewrote the prompt
+**and** influenced the judging — the self-reflection-and-self-modification failure mode (a single agent
+gaming its own rubric). v3 fixes the architecture, not just the prompt, with strict **propose/dispose
+separation** (see `.agents/skills/skill-supervisor/SKILL.md`):
+
+- **Supervisor** (main session) owns the harness, holdout, and invariants; scores; selects; archives.
+  Never edits the skill.
+- **Runner** (blind Claude Code subagent) runs the skill on market-fact inputs only — no answer key.
+- **Modifier** (blind Claude Code subagent) edits a *candidate* file given a plain-language gap
+  description — never sees the rubric, the holdout, or the judge.
+- **Judge** (supervisor-side, frozen rubric in `JUDGE_RUBRIC.md`) scores only the qualitative slice.
+
+What the separation caught that a self-grading loop would have missed: a strict adversarial re-judge
+flagged the Tier-3 "human confirms before placing" line in the four crash notes as a "conditional punt"
+(−5 each). The supervisor **rejected that as a reward-hacking target** — that line is the strategy's own
+data-gated systemic-event pause; deleting it to score points would remove a real risk control. The rubric
+was corrected (a documented data-gated pause = full marks) and the **Tier-3 pause was added as a frozen
+invariant** an edit may never remove. The Modifier then fixed only the two legitimate gaps — verbatim
+bull-lag boilerplate and the missing regime session-persistence caveat — taking 97.0 → 100.0 on both
+train and holdout, 0 invariant violations, with all risk controls verified intact.
+
+Artifacts: v2 blind rerun (`*_v2blind`), the lenient vs strict vs corrected judges
+(`judgments_v2_lenient/strict/corrected`), and the accepted v3 run (`decisions_v3` / `judgments_v3`).
 
 ## What each iteration changed
 
