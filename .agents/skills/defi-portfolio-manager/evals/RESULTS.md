@@ -71,6 +71,13 @@ loop exists to harvest. v2.4 fixes the *general* lessons and adds them as frozen
 
 This is the hyperagent loop working as intended: the realest case produced the most valuable fixes.
 
+**v2.4 verified (2026-06-01):** ran the loop on the new S7 case under v2.4. The actor passed all five
+must-haves — target summed to 100% with the arithmetic shown, every cap subtotal computed (not asserted),
+syrupUSDC routed to Maple's native pool (flagging the Morpho 0% name-collision), BTC specified spot/
+self-custody, and the TON exit sequenced first by urgency. Full iteration closed: real failure → general
+fix → frozen case → passing test. The loop self-improves per real case (each real-book run + red-team),
+not by spinning on frozen cases at the ceiling.
+
 ## Reproduce
 
 Run each scenario in [scenarios.md](scenarios.md) via a fresh agent told to operate under
