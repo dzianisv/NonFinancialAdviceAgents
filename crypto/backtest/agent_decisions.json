@@ -1,0 +1,10 @@
+{
+"2024-07-01": {"compound_usdc_eth":0.25,"aave_usdc_eth":0.05,"steakusdc_eth":0.25,"steth":0.3},
+"2024-10-01": {"compound_usdc_eth":0.18,"aave_usdc_eth":0.27,"steakusdc_eth":0.15,"steth":0.3},
+"2025-01-01": {"aave_usdc_eth":0.25,"compound_usdc_eth":0.25,"steakusdc_eth":0.05,"steth":0.3},
+"2025-04-01": {"compound_usdc_eth":0.10,"steakusdc_base":0.20,"susds_eth":0.10,"aave_usdc_eth":0.10,"steth":0.30},
+"2025-07-01": {"compound_usdc_eth":0.15,"steakusdc_base":0.20,"susds_eth":0.20,"steth":0.30,"aave_usdc_eth":0.10},
+"2025-10-01": {"compound_usdc_eth":0.15,"steakusdc_base":0.25,"susds_eth":0.15,"steth":0.3,"aave_usdt_eth":0.1},
+"2026-01-01": {"compound_usdc_eth":0.20,"steakusdc_base":0.25,"susds_eth":0.10,"steth":0.30},
+"2026-04-01": {"compound_usdc_eth":0.20,"steakusdc_base":0.25,"susds_eth":0.20,"steth":0.30}
+}
