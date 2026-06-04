@@ -30,15 +30,36 @@ cost-mirage strategy from reaching real capital. Logged here so we do not blindl
 **HYPE/USD:** only listed on Coinbase ~2026-02-05 (~4 months, 2.8k bars) — too little out-of-sample to
 gate. Tracked, not traded.
 
-## What the gate points to next (hypotheses, each must re-pass)
-1. **Lower frequency** — daily/6h trend trades far less; costs may stop dominating (likely converges to
-   the long-horizon book, which is the honest answer: for majors, *hold* tends to beat *day-trade*).
-2. **Maker-passive only** — limit-only execution at ~0.1%; needs a fill model (not every limit fills).
-3. **Regime-gated** — only trade trend in confirmed high-trend regimes, stand down in chop (most cost
-   bleed is chop whipsaw).
-4. **Cross-sectional / relative-value** rather than time-series trend (long strongest vs short weakest —
-   but shorting adds funding/borrow).
+## Candidate 2 — lower-frequency / regime-gated (`crypto_lowfreq_backtest.py`)
 
-Bottom line for the day-trade mandate: **so far the backtested evidence says hold-the-majors beats
-intraday trend after costs.** We keep searching for an honest intraday edge; until one PASSes, the
-crypto desk trades nothing intraday.
+The gate steered us to lower frequency + regime gating. Daily bars, BTC/ETH/SOL, vol-targeted, no-trade
+band. Three families, each gated; OOS 2024+ (params chosen IS ≤2023):
+
+| Candidate | OOS taker 0.5% | OOS maker 0.1% | OOS 2× stress | Max DD | vs hold-BTC | Verdict |
+|-----------|----------------|----------------|---------------|--------|-------------|---------|
+| TSMOM N=30 | Sharpe 0.14 | 0.50 | −0.30 | −36% | < 0.45 | FAIL |
+| SMA N=50 | 0.13 | 0.39 | −0.20 | −28% | < 0.45 | FAIL |
+| **REGIME-SMA (BTC>200d) N=50** | **0.41** | **0.61** | **0.15** | **−24%** | 0.41 < 0.45 | FAIL (retail) |
+| Hold BTC (benchmark) | 0.45 | — | — | **−50%** | — | — |
+
+**The honest read on REGIME-SMA:** it FAILs the strict gate at retail taker (Sharpe 0.41 vs hold 0.45 —
+the gate's bar is "beat hold risk-adjusted at realistic cost", and we did NOT loosen it). BUT it is a
+real **drawdown-control** result, not noise: it **halves the drawdown (−24% vs −50%)** at comparable
+risk-adjusted return, survives 2× cost stress (0.15 > 0), and **beats hold at maker fees (0.61 > 0.45)**.
+That is the bubble-defense ethos applied to crypto — same ballpark return, half the pain.
+
+**Status:** not promoted to trade (fails the alpha bar at retail taker). Promotable to **paper** as a
+*drawdown-managed crypto sleeve* (NOT a daily-income day-trade) **iff** a maker-fill model confirms the
+0.1% execution is achievable. That fill model is the next gate.
+
+## Bottom line for the crypto day-trade mandate (honest)
+Across intraday **and** daily horizons, **buy-and-hold the majors beats systematic trend after retail
+costs.** No candidate has cleared the gate to trade. The one genuinely useful finding is REGIME-SMA's
+**drawdown halving** — a risk-control sleeve, not a daily-income engine. Until something PASSes at
+realistic cost, the crypto desk **trades nothing**. "No edge found" + "found a drawdown control, not
+alpha" are both honest, valuable results — and exactly what the gate exists to tell us.
+
+## Still-open hypotheses (each must re-pass the gate)
+- **Maker-fill model** — does limit-only execution at ~0.1% actually fill enough to realize REGIME-SMA's edge?
+- **Cross-sectional momentum** — long strongest / short weakest of the majors (shorting adds funding/borrow).
+- **Vol/funding carry** — harvest funding on perps in range regimes (different risk: liquidation, exchange).
