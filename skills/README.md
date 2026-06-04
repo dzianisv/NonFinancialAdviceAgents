@@ -36,6 +36,8 @@ trend-following ──signals──┐                  ▼
 | [strategy-discovery-backtest](strategy-discovery-backtest/SKILL.md) | **the gate** | hypothesis→backtest(no look-ahead, real costs)→walk-forward→deflate→stress→PASS/FAIL. Runs FIRST on any "trade X" (backtest-before-trade invariant) |
 | [crypto-daytrading](crypto-daytrading/SKILL.md) | day-trade desk | crypto intraday income (BTC/ETH/SOL/HYPE+), 24/7, fees/funding, Coinbase CDP — gated by the above |
 | [stock-daytrading](stock-daytrading/SKILL.md) | day-trade desk | equity intraday income, RTH/PDT rule, Robinhood — gated by the above |
+| [robinhood-connector](robinhood-connector/SKILL.md) | execution (D) | route equity orders to Robinhood agentic MCP — notification-first, live hard-gated |
+| [coinbase-cdp-connector](coinbase-cdp-connector/SKILL.md) | execution (E) | route crypto orders to Coinbase CDP CLI/MCP — notification + testnet, live hard-gated |
 | [agentic-fund-orchestration](agentic-fund-orchestration/SKILL.md) | orchestrator | the daily decision loop, shared state, guardrails |
 | [regime-detection](regime-detection/SKILL.md) | regime analyst | risk-on/off → gross-exposure dial (+ runnable `regime_monitor.py`) |
 | [fundamental-analysis](fundamental-analysis/SKILL.md) | research analyst | what data/sources the analyst reads, screens, and the mandatory backtest gate (honest verdict: stock-picking ≠ alpha) |

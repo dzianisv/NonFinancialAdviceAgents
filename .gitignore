@@ -6,3 +6,6 @@ __pycache__/
 
 # cached intraday OHLCV (re-fetch via crypto_data.py)
 backtests/daytrade/data/
+
+# connector audit trail (append-only, runtime)
+connectors/audit_log.jsonl
