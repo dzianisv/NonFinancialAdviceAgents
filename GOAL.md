@@ -92,17 +92,26 @@ Non-negotiable. An edit or action that breaks one is rejected.
 <success-criteria>
 Done = all true, each observable:
 
-- [ ] **A:** a backtested mid-risk stock allocation + rebalancing, runnable by `hedge-fund-manager`, with an
-      eval harness and crisis-window results committed.
-- [ ] **B:** a `stock-daytrading` skill (discover→backtest→paper→live) + ≥1 backtested intraday strategy
-      with net-of-cost edge documented (or honest no-edge), eval harness committed.
-- [ ] **C:** a backtested crypto day-trading strategy for BTC/ETH/SOL/HYPE+ , net of fees/slippage, with the
-      daily order logic + eval harness committed.
-- [ ] **D:** Robinhood connector working in paper/notification mode; a documented path to live behind sign-off.
-- [ ] **E:** Coinbase CDP CLI connector working in paper/notification mode; documented live path.
-- [ ] **F:** every new skill/strategy has a `skill-supervisor`-style eval; CI/loop re-runs it on edits.
-- [ ] **End-to-end demo:** user grants access + says "trade BTC, ETH, SOL, HYPE daily for income" → team
+- [x] **A:** a backtested mid-risk stock allocation + rebalancing, runnable by `hedge-fund-manager`, with an
+      eval harness and crisis-window results committed. — **PASS: `RSP70/GLD15/IEF15`** (Sharpe 0.49≈SPY,
+      DD −42% vs −55%, de-concentrated). `strategy/midrisk-bubble-trimmed.md`, `backtests/midrisk_allocation_backtest.py` (#17).
+- [x] **B:** a `stock-daytrading` skill (discover→backtest→paper→live) + ≥1 backtested intraday strategy
+      with net-of-cost edge documented (or honest no-edge), eval harness committed. — **honest no-edge**:
+      ORB/MOM/VWAP-reversion all FAIL vs hold-SPY OOS. `backtests/daytrade/stock_intraday_backtest.py` (#18).
+- [x] **C:** a backtested crypto day-trading strategy for BTC/ETH/SOL/HYPE+ , net of fees/slippage, with the
+      daily order logic + eval harness committed. — **honest no-edge intraday**; daily REGIME-SMA = a
+      drawdown control (−24% vs −50%), not alpha. `backtests/daytrade/crypto_*_backtest.py` (#15/#16).
+- [x] **D:** Robinhood connector working in paper/notification mode; a documented path to live behind sign-off.
+      — `connectors/` + `skills/robinhood-connector` (MCP), notification-first, 13 tests pass (#19).
+- [x] **E:** Coinbase CDP CLI connector working in paper/notification mode; documented live path.
+      — `connectors/` + `skills/coinbase-cdp-connector` (CDP CLI/MCP, base-sepolia testnet) (#19).
+- [x] **F:** every new skill/strategy has a `skill-supervisor`-style eval; CI/loop re-runs it on edits.
+      — every strategy ships its backtest as a durable eval; `evals/pm`, `evals/hf` + the backtest scripts.
+- [~] **End-to-end demo:** user grants access + says "trade BTC, ETH, SOL, HYPE daily for income" → team
       runs discover→backtest→propose→(approve)→execute→report, and produces a daily P&L report.
+      — **paper end-to-end PROVEN** (`connectors/e2e_paper_demo.py`: regime→gate→desk→caps→notify→report,
+      no creds, nothing placed). **LIVE demo awaits the user's Robinhood/Coinbase creds + go-live sign-off**
+      — the only remaining step is swapping `mode="notify"` → `mode="live"`.
 </success-criteria>
 
 <operating-instructions>
