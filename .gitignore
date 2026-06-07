@@ -3,3 +3,7 @@ __pycache__/
 .telegraph_token
 .telegraph_path
 .tasks/
+.DS_Store
+
+# Raw ebooks — keep local, commit only the markdown KB under books/
+books/*.epub
