@@ -44,7 +44,18 @@ optimal-allocation problem, constraints, and roadmap. Do not conflate it with th
   `backtests/crash_protection_backtest.py`.
 - **`skills/`** — opencode-compatible `SKILL.md` modules for an automated agent team: `regime-detection`,
   `trend-following`, `portfolio-construction`, `risk-management`, `rebalancing`, `dip-tranches-strategy`,
-  `tax-loss-harvesting`, `fundamental-analysis`, and the top-level `agentic-fund-orchestration`. See
+  `tax-loss-harvesting`, `fundamental-analysis`, `hedge-fund-13f-analysis`, `analytics-lyn-alden`, and
+  the top-level `agentic-fund-orchestration`. Use **`analytics-lyn-alden`** to analyze any macro/asset
+  question through Lyn Alden's framework (fiscal dominance, broad-money inflation, eurodollar system,
+  energy/EROI, BTC-as-hurdle, scarce-asset allocation) — it's a synthesis SKILL.md + per-theme KB in
+  `references/` distilled from ~100 lynalden.com articles + her newsletters; treat it as a lens (with
+  her hedges), and re-check tactical/"current" claims against her newest newsletter. Use
+  **`hedge-fund-13f-analysis`** whenever a position needs an
+  institutional-conviction cross-check — what notable funds (Buffett, Burry, Ackman, Tepper, Druckenmiller,
+  Klarman, Li Lu, Tiger, etc.) own and why, computed from SEC 13F filings, and overlapped against a book;
+  it pins the filing quarter, computes Q/Q deltas, infers the *why*, and persists the read to
+  `stocks/13f-overlap.md` + a memory pointer. It is a lagging cross-check, not a trade trigger — it
+  complements `fundamental-analysis` (the valuation gate), never replaces it. See
   @skills/README.md. Frontmatter must keep `compatibility: opencode`. The committed
   `dip-tranches-strategy/SKILL.md` was once mangled to whitespace — the canonical copies are restored;
   `archive/skills.zip` is the backup archive.
