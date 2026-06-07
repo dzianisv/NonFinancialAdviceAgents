@@ -54,7 +54,7 @@ which hold the actual frameworks and primary sources.
 | The dollar, reserve status, de-dollarization | Pettis + Alden + Dalio |
 | China, tariffs, trade war, global imbalances | **Pettis** (lead) + Dalio (world order) |
 | Is this an equity bubble / what to do with cash | **Buffett** (lead) + Dalio (cycle) + Druckenmiller (liquidity) |
-| Portfolio construction / how to position the $1M | Dalio (all-weather) + Buffett (cash) + Alden (scarce assets) + Hunt (duration dissent) |
+| Portfolio construction / how to position a large book | Dalio (all-weather) + Buffett (cash) + Alden (scarce assets) + Hunt (duration dissent) |
 | Generational market bottom / when to deploy | Napier (anatomy of the bear) + Druckenmiller (turn) + Buffett (greedy-when-fearful) |
 
 ## Example

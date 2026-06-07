@@ -45,7 +45,20 @@ optimal-allocation problem, constraints, and roadmap. Do not conflate it with th
 - **`skills/`** — opencode-compatible `SKILL.md` modules for an automated agent team: `regime-detection`,
   `trend-following`, `portfolio-construction`, `risk-management`, `rebalancing`, `dip-tranches-strategy`,
   `tax-loss-harvesting`, `fundamental-analysis`, `hedge-fund-13f-analysis`, the **macro-economist panel**
-  (`macro-panel` + the seven `analytics-*` thinker-lenses), and the top-level `agentic-fund-orchestration`.
+  (`macro-panel` + the seven `analytics-*` thinker-lenses), the two **trading-discipline lenses**
+  (`analyst-systematic-trading` + `analyst-technical-analysis`), and the top-level
+  `agentic-fund-orchestration`.
+
+  **The trading-discipline lenses** are book-grounded experts (sources in `books/`):
+  `analyst-systematic-trading` distils Robert Carver's *Systematic Trading* (2015) — the
+  how-to-*design/size/validate/automate* a rules-based strategy lens (modular framework, EWMAC+carry,
+  volatility targeting / Half-Kelly, handcrafting, the over-fitting/over-trading/over-betting pitfalls,
+  the cost "speed limit"); it operationalizes the GOAL.md mandate that any strategy be backtested with
+  realistic costs **before** trading. `analyst-technical-analysis` distils Jacob Bernstein's *The
+  Ultimate Day Trader* (2009) — the chart/indicator/Set-Up→Trigger→Follow-Through lens with exact
+  parameters — carried explicitly as **hypothesis-generation, not validated edge** (TA has a weak
+  empirical base; the house finding is hold/mid-risk beats day-trading after costs). The two pair: TA
+  proposes, `analyst-systematic-trading` validates.
 
   **The macro-economist panel** is a team of thinker-lenses, each a synthesis `SKILL.md` + per-theme KB
   in `references/` distilled from that person's primary sources (full provenance in each skill's
@@ -55,8 +68,11 @@ optimal-allocation problem, constraints, and roadmap. Do not conflate it with th
   `analytics-stanley-druckenmiller` (liquidity / timing / position-sizing),
   `analytics-lacy-hunt` (the **deflation dissent** seat — debt→low-velocity→disinflation, long bonds),
   `analytics-michael-pettis` (trade / capital-flows / China, S−I=CA),
-  `analytics-russell-napier` (financial repression / structural-inflation regime), and
-  `analytics-warren-buffett` (bubble-discipline / quality-value / cash-as-option). Use a single
+  `analytics-russell-napier` (financial repression / structural-inflation regime),
+  `analytics-warren-buffett` (bubble-discipline / quality-value / cash-as-option), and
+  `analytics-benjamin-graham` (the **rules-based value origin** — investment-vs-speculation, margin of
+  safety, Mr. Market, defensive vs enterprising, net-nets / the Graham number; the statistical-value
+  counterpart that Buffett evolved from). Use a single
   `analytics-*` skill to apply one thinker's lens; use **`macro-panel`** to convene several at once and
   surface their **agreement vs disagreement** (the disagreement is the signal — never average it away).
   Each is a LENS, not gospel (carry the per-skill Caveats; every thinker has been wrong/early), and all
