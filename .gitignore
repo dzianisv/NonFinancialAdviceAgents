@@ -9,3 +9,8 @@ backtests/daytrade/data/
 
 # connector audit trail (append-only, runtime)
 connectors/audit_log.jsonl
+
+# portfolio-monitor: never commit real holdings / reports (public repo)
+stocks/portfolio-review.csv
+stocks/monitor-report-*.md
+.agents/skills/portfolio-monitor/scripts/__pycache__/
