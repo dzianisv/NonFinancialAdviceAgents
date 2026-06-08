@@ -106,6 +106,23 @@ goal in @crypto/GOAL.md**. Do not conflate with the $1M tradfi @GOAL.md.
 Use `skill-supervisor` (propose/dispose). Re-run the eval harness (`evals/pm`, `evals/hf`) before
 shipping any SKILL.md edit; reject if score drops or an invariant gate trips. Never self-grade.
 
+### Capture recurring routines as skills (proactive — no instruction needed)
+When a **repeatable method** emerges in a session — the same multi-step analysis, screen, research
+fan-out, or eval done a second time, or any procedure worth re-running — **propose and author a skill
+for it on your own initiative.** Do not wait to be told.
+- **Skill vs doc:** a skill captures the *repeatable method* (the function); a `crypto/`, `research/`,
+  or `backtests/results/` file captures the *findings* (the dated output). Findings go stale; the skill
+  regenerates them. Write both — the skill cites the doc as its reference rationale.
+- **How:** follow the `write-skill` + `skill-creator` skills. Put deterministic data-pulls in a
+  bundled `scripts/` (so they can't drift); keep the body non-obvious-only and under ~500 lines; one
+  worked `<example>`; a "Done when" check. Frontmatter `description` carries the real trigger phrases.
+- **Where:** `skills/` for desk/analysis methods, `.agents/skills/` for operating skills. Build in a
+  worktree off `origin/main` (the local crypto branch lacks main's skills).
+- **Gate before trust:** every new skill gets a `skill-supervisor`-style eval; propose the skill (PR),
+  don't silently auto-merge it into the live set.
+- Trigger bar: you've done it twice, or you can already name the inputs→outputs cleanly. When in doubt,
+  draft the skill and say you did.
+
 ### Publishing
 - Charts → Imgur (Client-ID `546c25a59c58ad7`) → embedded in Telegraph.
 - Telegraph token in `.telegraph_token`. Page paths in `.telegraph_path` (v1) / `.telegraph_path_v2` (v2).
