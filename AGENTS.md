@@ -58,7 +58,12 @@ optimal-allocation problem, constraints, and roadmap. Do not conflate it with th
   Ultimate Day Trader* (2009) — the chart/indicator/Set-Up→Trigger→Follow-Through lens with exact
   parameters — carried explicitly as **hypothesis-generation, not validated edge** (TA has a weak
   empirical base; the house finding is hold/mid-risk beats day-trading after costs). The two pair: TA
-  proposes, `analyst-systematic-trading` validates.
+  proposes, `analyst-systematic-trading` validates. A third book-grounded lens,
+  `analyst-crypto` (Michael Howell *Capital Wars* + on-chain/sentiment/DCA), is the crypto-market analysis
+  brain for the `crypto/` book (liquidity governor → on-chain level → sentiment → tilted-DCA execution +
+  BTC-as-hurdle). And `analytics-morgan-housel` (Morgan Housel *The Psychology of Money*) is the
+  behavioral-finance / investor-psychology lens — the discipline guardrail over the trader who is "the
+  weakest link" — pairing with `analytics-warren-buffett` / `analytics-benjamin-graham` on temperament.
 
   **The macro-economist panel** is a team of thinker-lenses, each a synthesis `SKILL.md` + per-theme KB
   in `references/` distilled from that person's primary sources (full provenance in each skill's
