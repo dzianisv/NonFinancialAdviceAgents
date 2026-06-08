@@ -1,28 +1,34 @@
 ---
 name: trend-scout
-description: Weekly equity theme-momentum screener (buy-strength, NOT laggard rotation). Ranks 9 themes by relative-strength heat, surfaces the STRONGEST above-200dMA names within confirmed-hot themes as FINALISTS for multi-lens-quorum conviction gate. Stage 0 validated on Ken French 49 industries OOS: plain momentum survives weakly; buy-laggard is empirically backwards (−0.45%/mo net); EARLY>LATE staging was overfit and dropped. Use when asked "what trend/theme is hot right now", "find emerging themes", "scan themes", "run the trend scout", "weekly stock research", "what's waking up in the market", "rotate into what", or names a theme (AI, optics, space, nuclear, memory, defense, quantum, robotics, datacenter power) and asks how to play it. Weak-edge screener feeding human/quorum judgment — hypothesis funnel, never alpha claim, never auto-trades. Educational, not advice.
+description: Equity trend RADAR so you don't MISS the next NVDA/SanDisk-type breakout anywhere in the market. Two layers — (1) emerging_scan.py sweeps a broad ~180-name cross-sector universe for what's WAKING UP, split into EARLY MOVERS (strong+accelerating+not-yet-extended, catch earlier) and ALREADY-EXTENDED (surfaced but tagged late/decelerating); (2) theme radar ranks 9 themes by relative-strength heat with the strongest names per hot theme. Both emit FINALISTS for the multi-lens-quorum conviction gate. RADAR/awareness only — NOT a buy signal, NOT alpha: Stage 0 (Ken French 49 OOS) showed momentum is weak and buy-laggard is backwards; coverage is the value, the buy/late-chase call is the quorum's. Use for "what trend is hot", "find/scan emerging trends or themes", "what's waking up in the market", "am I missing a trend", "what should be on my radar", "weekly stock research", or naming a theme (AI, semis, space, nuclear, memory, quantum, robotics, cyber). Never auto-trades. Educational, not advice.
 license: MIT
 compatibility: opencode
 metadata:
   audience: thematic-momentum-investors
   domain: equity-theme-momentum-screening
-  role: Stage-0-validated-momentum-screener-buy-strength
+  role: dont-miss-trend-radar-feeding-quorum (coverage, not alpha)
   source: "Built 2026-06-08; Ken French 49-industry OOS validation; free yfinance data; buy-laggard thesis refuted and dropped"
 ---
 
-# Trend Scout — weekly theme-momentum screener
+# Trend Scout — don't-miss trend RADAR (feeds the quorum)
 
-Surface which investment themes have real relative-strength right now, then name the **strongest confirmed-uptrend names** within them as candidates for deeper review.
+A RADAR so you don't **miss** the next NVDA/SanDisk-type breakout — *anywhere*, not just in pre-chosen themes. Two layers:
+- **Coverage (`emerging_scan.py`)** — sweeps a broad ~180-name cross-sector universe (`universe.txt`) and splits what's outperforming into **EARLY MOVERS** (strong + accelerating + not-yet-extended → catch earlier) and **ALREADY-EXTENDED** (surfaced so you don't miss them, but tagged late/decelerating). This is the layer that catches the *next* one before it's parabolic.
+- **Theme detail (`theme_radar.py` + `weekly_scout.py`)** — ranks 9 themes by relative-strength heat and names the strongest stocks per hot theme.
 
-**What was tested and dropped:** an earlier design surfaced the cheapest/least-run name within a hot theme ("buy the laggard"). Stage 0 validation (Ken French 49 industries, OOS ≥2010, 1185 months, 15bps costs) found that rule is *empirically backwards* — leaders beat laggards −0.45%/mo net, consistent in both train and test. That design is gone. Only plain momentum (buy-strength) survived OOS, and only weakly (t=1.70). The skill is honest about this: weak edge, screener only.
+**It is a RADAR, not a buy signal and not alpha.** A name surfacing here means "this is moving, look at it" — the **buy vs late-chase call belongs to `multi-lens-quorum`**, never to the screen. Stage 0 (Ken French 49, OOS) proved there's no mechanical edge: coverage/awareness is the value; judgment is separate.
 
-This is the **research/screen layer**. It generates finalists; it does not decide. Route finalists to `multi-lens-quorum` (conviction gate — an agent step, not a Python call).
+**What was tested and dropped:** an earlier design surfaced the cheapest/least-run name within a hot theme ("buy the laggard"). Stage 0 (Ken French 49 industries, OOS ≥2010, 1185 months, 15bps costs) found it *empirically backwards* — leaders beat laggards −0.45%/mo net, consistent in train and test. Gone. Only plain momentum survived OOS, weakly (t=1.70). The skill stays honest: weak edge, radar only.
+
+Route anything interesting to `multi-lens-quorum` (conviction gate — an agent step, not a Python call).
 
 ## Pipeline
 
 ```
-theme_radar.py  →  stock_picker.py  →  weekly_scout.py  →  FINALISTS  →  multi-lens-quorum
-   (rank themes)     (rank names)       (one command)      (hand off)      (agent step)
+emerging_scan.py ─┐                                            don't-miss coverage (whole universe)
+                  ├─→ FINALISTS ─→ multi-lens-quorum ─→ you decide   (radar, not a buy signal)
+weekly_scout.py ──┘   (hand off)    (agent: buy or late-chase?)
+ (theme_radar + stock_picker: 9-theme detail)
 ```
 
 ## Run it
@@ -30,7 +36,10 @@ theme_radar.py  →  stock_picker.py  →  weekly_scout.py  →  FINALISTS  → 
 Use the repo venv: `/Users/engineer/.venv/bin/python3`. Requires `yfinance pandas numpy`.
 
 ```bash
-# Recommended: run everything in one shot
+# DON'T-MISS coverage sweep (broad universe → EARLY MOVERS + ALREADY-EXTENDED)
+/Users/engineer/.venv/bin/python3 scripts/emerging_scan.py
+
+# Theme detail in one shot
 /Users/engineer/.venv/bin/python3 scripts/weekly_scout.py
 
 # Individual stages (for debugging)
