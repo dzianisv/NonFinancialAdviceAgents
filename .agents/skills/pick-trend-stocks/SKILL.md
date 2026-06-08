@@ -102,6 +102,38 @@ advantage of an agent team reading financial journalism.
 Each research subagent needs web access (web_fetch, web_search, or browser tools) to actually
 read the sources. If web tools are unavailable, the orchestrator should note which sources could
 not be accessed and flag the gap to the user.
+
+### How to read paywalled sources (FT, WSJ, SA, Bloomberg, etc.)
+
+Paywalled sites block direct fetches. Use these techniques in order of preference:
+
+1. **Google AMP/cache** — fetch the Google AMP or cached version:
+   - `https://webcache.googleusercontent.com/search?q=cache:<article-url>`
+   - Or search Google for the exact headline and access via the cached link
+
+2. **Referer trick** — many paywalls allow access when the request comes from Google/Twitter:
+   - Set `Referer: https://www.google.com/` header when fetching
+   - Or fetch via: `https://www.google.com/amp/s/<article-url-without-https>`
+
+3. **archive.today / web.archive.org** — check if the article is archived:
+   - `https://archive.ph/<article-url>`
+   - `https://web.archive.org/web/<article-url>`
+
+4. **Browser tool with bypass-paywalls** — if a browser MCP tool is available (playwright,
+   vibebrowser), use it. The user has the bypass-paywalls-chrome extension installed which
+   unlocks: FT, WSJ, NYT, Bloomberg, Seeking Alpha, The Economist, Barron's, and 100+ more.
+   Prefer browser tools over web_fetch for paywalled content.
+
+5. **Fallback: free sources that cite the paywalled article** — search for the headline in
+   quotes. Financial blogs, Reddit, and aggregators often quote the key paragraphs.
+
+6. **RSS feeds** — many sites expose full-text or substantial excerpts via RSS:
+   - FT: `https://www.ft.com/rss/home`
+   - WSJ: `https://feeds.a.dj.com/rss/RSSMarketsMain.xml`
+   - SA: individual author RSS feeds
+
+If ALL access methods fail for a source, explicitly state: "Could not access [source] — paywall
+blocked all methods. Gap: [what information is missing]." Never hallucinate content you couldn't read.
 </orchestration>
 
 <instructions>
@@ -201,9 +233,12 @@ has one. Record it as "obvious plays only" and move on.
 <step_4_actions>
 For EVERY candidate, answer ALL THREE questions. Drop or downgrade any that fail:
 
-1. ALREADY PRICED? Up >100% in 6-12 months? At 52-week highs with heavy coverage? Far above
-   200-day MA? → Tag as LATE, watchlist only, do not recommend entry.
-   (Cheap/ignored + real catalyst = often the better entry.)
+1. ALREADY PRICED? Apply these hard thresholds:
+   - Up >150% in 12 months → KILLED. No exceptions. It's late.
+   - Up >100% in 6 months → KILLED unless catalyst is completely unrealized (hasn't happened yet).
+   - At 52-week highs with heavy analyst/retail coverage → LATE at minimum, watchlist only.
+   - Far above 200-day MA (>50% above) → KILLED.
+   (Cheap/ignored + real catalyst = often the better entry. Favor beaten-down names with unrealized catalysts.)
 
 2. CONCRETE CATALYST + TIMELINE? Name a specific event in the next 1-4 quarters: price hike
    effective date, capacity coming online, contract award, spinoff, product launch, regulatory
@@ -211,6 +246,11 @@ For EVERY candidate, answer ALL THREE questions. Drop or downgrade any that fail
 
 3. WHAT KILLS IT? State the single biggest risk that would invalidate the thesis.
    If you cannot name a specific risk, you do not understand the position yet — research more or drop.
+
+ALSO: If the ticker is ALREADY PUBLICLY ASSOCIATED with the hot theme (e.g., everyone already
+calls it "an AI stock" or "a power play"), it fails the non-obvious test. The best finds hide in
+a different sector — food company with a chip substrate monopoly, steel company with a transformer
+material monopoly, auto supplier with robotics contracts. If it's already in the narrative, it's priced.
 
 Record your skeptic assessment for each candidate. Be honest — the majority should be dropped.
 </step_4_actions>
