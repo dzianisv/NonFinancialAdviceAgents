@@ -106,6 +106,37 @@ goal in @crypto/GOAL.md**. Do not conflate with the $1M tradfi @GOAL.md.
 Use `skill-supervisor` (propose/dispose). Re-run the eval harness (`evals/pm`, `evals/hf`) before
 shipping any SKILL.md edit; reject if score drops or an invariant gate trips. Never self-grade.
 
+### Mandatory execute→evaluate→improve loop (for every new skill or strategy)
+
+When you create or substantially rewrite a skill or strategy, you MUST run this loop before
+considering it shipped:
+
+1. **Execute** — run the skill/strategy end-to-end on a real or realistic input. For a research
+   skill, actually perform the research. For a backtest strategy, run the backtest. For a trading
+   skill, paper-trade it. Produce concrete output.
+2. **Evaluate** — critically assess the output against the skill's own `<success_criteria>` or
+   "Done when" checklist. Score each criterion PASS/PARTIAL/FAIL. Identify specific gaps:
+   - Did it actually read sources, or hallucinate/speculate?
+   - Is the output actionable and concrete, or vague fluff?
+   - Would a human trust this output enough to act on it?
+3. **Feedback** — write a specific, actionable list of what failed or was weak. Not "could be
+   better" — name the exact gap and how to fix it.
+4. **Improve** — edit the skill/strategy to address each feedback item. Change the prompt, add
+   constraints, tighten examples, fix the procedure.
+5. **Re-execute** — run again. Compare output quality to the previous iteration.
+6. **Repeat** until the output meets the success criteria and produces results a human would
+   actually use. Minimum 2 iterations; no maximum.
+
+This loop is NOT optional. A skill that has never been executed against real input is untested
+code — do not ship it. The first version is always wrong; the loop is how you find out how.
+
+```
+create/edit skill → execute on real input → evaluate output → feedback (specific gaps)
+       ↑                                                              │
+       └──────────── improve skill ←──────────────────────────────────┘
+                     (repeat until output is good)
+```
+
 ### Capture recurring routines as skills (proactive — no instruction needed)
 When a **repeatable method** emerges in a session — the same multi-step analysis, screen, research
 fan-out, or eval done a second time, or any procedure worth re-running — **propose and author a skill
