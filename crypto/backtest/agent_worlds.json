@@ -1,0 +1,323 @@
+{
+ "2024-07-01": {
+  "aave_usdc_eth": {
+   "apy": 6.84607,
+   "apy_30d": 7.548759677419357,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 5.43356,
+   "apy_30d": 6.210464838709677,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 7.15803,
+   "apy_30d": 7.850276774193549,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 4.41537,
+   "apy_30d": 4.222177142857142,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 7.54129,
+   "apy_30d": 8.626381612903227,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.997,
+   "apy_30d": 3.126774193548387,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 9.23113,
+   "apy_30d": 17.526975483870967,
+   "kind": "synthetic"
+  }
+ },
+ "2024-10-01": {
+  "aave_usdc_eth": {
+   "apy": 4.31319,
+   "apy_30d": 3.9439254838709688,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 3.86078,
+   "apy_30d": 3.3313112903225806,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 5.92654,
+   "apy_30d": 4.073709677419354,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 2.36225,
+   "apy_30d": 2.574368275862068,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 4.15338,
+   "apy_30d": 5.7309,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 3.025,
+   "apy_30d": 3.042870967741936,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 11.75876,
+   "apy_30d": 6.679309032258065,
+   "kind": "synthetic"
+  }
+ },
+ "2025-01-01": {
+  "aave_usdc_eth": {
+   "apy": 10.00571,
+   "apy_30d": 12.55457806451613,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 6.08619,
+   "apy_30d": 9.835141612903225,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 8.42467,
+   "apy_30d": 11.371409354838711,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 6.64352,
+   "apy_30d": 12.754368387096777,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 6.43184,
+   "apy_30d": 9.025141290322583,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.849,
+   "apy_30d": 2.9235483870967736,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 12.11525,
+   "apy_30d": 20.04802096774193,
+   "kind": "synthetic"
+  }
+ },
+ "2025-04-01": {
+  "aave_usdc_eth": {
+   "apy": 2.9139,
+   "apy_30d": 2.960650322580645,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 2.99238,
+   "apy_30d": 2.924481935483871,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 3.7209,
+   "apy_30d": 4.253607096774194,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 11.28131,
+   "apy_30d": 6.843587741935484,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 4.26195,
+   "apy_30d": 5.191010322580644,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.787,
+   "apy_30d": 2.9474838709677416,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 10.70709,
+   "apy_30d": 6.720056774193548,
+   "kind": "synthetic"
+  },
+  "susds_eth": {
+   "apy": 4.5,
+   "apy_30d": 5.919354838709677,
+   "kind": "stable"
+  }
+ },
+ "2025-07-01": {
+  "aave_usdc_eth": {
+   "apy": 3.92897,
+   "apy_30d": 4.003521290322581,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 3.06261,
+   "apy_30d": 3.603822258064516,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 6.01691,
+   "apy_30d": 4.2125583870967755,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 5.87864,
+   "apy_30d": 5.537258387096775,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 4.24906,
+   "apy_30d": 4.970936129032258,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.685,
+   "apy_30d": 2.750275862068966,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 3.52824,
+   "apy_30d": 4.843209677419356,
+   "kind": "synthetic"
+  },
+  "susds_eth": {
+   "apy": 4.5,
+   "apy_30d": 4.5,
+   "kind": "stable"
+  }
+ },
+ "2025-10-01": {
+  "aave_usdc_eth": {
+   "apy": 3.96577,
+   "apy_30d": 4.46386129032258,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 4.70164,
+   "apy_30d": 4.803028387096773,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 5.09786,
+   "apy_30d": 4.601464193548386,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 6.76366,
+   "apy_30d": 6.656495483870968,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 4.59253,
+   "apy_30d": 5.441419032258065,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.559,
+   "apy_30d": 2.6354193548387106,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 5.93125,
+   "apy_30d": 7.045711935483871,
+   "kind": "synthetic"
+  },
+  "susds_eth": {
+   "apy": 4.75,
+   "apy_30d": 4.75,
+   "kind": "stable"
+  }
+ },
+ "2026-01-01": {
+  "aave_usdc_eth": {
+   "apy": 3.57391,
+   "apy_30d": 3.2898400000000003,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 2.77148,
+   "apy_30d": 3.105750967741935,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 3.83493,
+   "apy_30d": 3.5738983870967735,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 5.39925,
+   "apy_30d": 5.400502903225805,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 4.79286,
+   "apy_30d": 3.927064516129032,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.545,
+   "apy_30d": 2.5503870967741937,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 4.22968,
+   "apy_30d": 4.392467419354838,
+   "kind": "synthetic"
+  },
+  "susds_eth": {
+   "apy": 4,
+   "apy_30d": 4.112903225806452,
+   "kind": "stable"
+  }
+ },
+ "2026-04-01": {
+  "aave_usdc_eth": {
+   "apy": 2.61018,
+   "apy_30d": 2.0144793548387097,
+   "kind": "stable"
+  },
+  "aave_usdt_eth": {
+   "apy": 1.99704,
+   "apy_30d": 1.8913506451612905,
+   "kind": "stable"
+  },
+  "compound_usdc_eth": {
+   "apy": 2.61286,
+   "apy_30d": 2.521056774193548,
+   "kind": "stable"
+  },
+  "steakusdc_base": {
+   "apy": 4.25673,
+   "apy_30d": 3.7508370967741933,
+   "kind": "stable"
+  },
+  "steakusdc_eth": {
+   "apy": 2.72921,
+   "apy_30d": 3.21233870967742,
+   "kind": "stable"
+  },
+  "steth": {
+   "apy": 2.434,
+   "apy_30d": 2.506677419354839,
+   "kind": "eth"
+  },
+  "susde": {
+   "apy": 3.54776,
+   "apy_30d": 3.491163870967742,
+   "kind": "synthetic"
+  },
+  "susds_eth": {
+   "apy": 3.75,
+   "apy_30d": 3.806451612903226,
+   "kind": "stable"
+  }
+ }
+}

@@ -1,0 +1,4 @@
+"Ticker","Company","Account","Shares","Sheet_Value_USD","Action","Conviction","AI_Bubble_Fragility","Price_Flag","Thesis","Key_Risk","Reasoning","Next_Step"
+"AAA","Example Compounder","taxable","100","45000","HOLD","HIGH","LOW","OK","Wide-moat cash machine.","Multiple compression.","Core defensive anchor.","Add below $400."
+"BBB","Example AI Name","taxable","50","8000","HOLD","MEDIUM","HIGH","OK","AI-infra beneficiary.","Rich multiple, risk-off fragile.","Real but extended.","Trim if > $200; add below $120."
+"CCC","Example Value Trap","taxable","200","3000","SELL (tax-loss)","LOW","LOW","OK","Cheap legacy name.","Secular decline.","Broken thesis stub.","Sell all 200. Harvest loss."

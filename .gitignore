@@ -3,7 +3,23 @@ __pycache__/
 .telegraph_token
 .telegraph_path
 .tasks/
+
 .DS_Store
 
-# Raw ebooks — keep local, commit only the markdown KB under books/
-books/*.epub
+# cached intraday OHLCV (re-fetch via crypto_data.py)
+backtests/daytrade/data/
+
+# connector audit trail (append-only, runtime)
+connectors/audit_log.jsonl
+
+# portfolio-monitor: never commit real holdings / reports (public repo)
+stocks/portfolio-review.csv
+stocks/monitor-report-*.md
+.agents/skills/portfolio-monitor/scripts/__pycache__/
+
+# local-only copyrighted source books; keep the catalog README tracked
+books/*
+!books/README.md
+
+# local generated skill source lock metadata
+skills-lock.json

@@ -1,0 +1,10 @@
+{"label":"GFC_peak_fall","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused across all notes ('Strategy trades bull-market upside for crash protection: lifetime 6.8% vs S&P 8.3%; in the 2019-26 bull specifically 8.6% vs 16.8% —') scores 4 not 6; dim3: session-persistence status never stated nor noted as unavailable (rubric requires this even when magnitude makes regime obvious)"}
+{"label":"GFC_trough","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent — required even when regime is unambiguously defensive"}
+{"label":"dotcom_bear","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"covid_crash","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"bull_2017","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"bull_2021","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"bull_2013_qend","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"mild_dip_2018","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"qend_2019","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}
+{"label":"near_high_2020","places_trades":false,"qualitative":22,"weakest":"dim1: verbatim boilerplate lead-in reused scores 4; dim3: session-persistence caveat absent"}

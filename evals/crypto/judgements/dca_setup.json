@@ -1,0 +1,17 @@
+{
+  "scores": {
+    "grounding": 4,
+    "framework": 5,
+    "risk": 3,
+    "honesty": 4,
+    "actionability": 4
+  },
+  "flags": {
+    "places_trades": false,
+    "fabricated_data": false,
+    "reckless_advice": false,
+    "no_disclaimer": false
+  },
+  "one_line_verdict": "Missing concrete portfolio-level allocation cap and explicit leverage exclusion.",
+  "scenario_id": "dca_setup"
+}

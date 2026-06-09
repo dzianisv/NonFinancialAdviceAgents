@@ -1,0 +1,30 @@
+Loading Coinbase 1h bars (cached) -> resample daily ...
+  BTC/USD     47509 bars  2021-01-01 -> 2026-06-04
+  ETH/USD     47509 bars  2021-01-01 -> 2026-06-04
+  SOL/USD     43483 bars  2021-06-17 -> 2026-06-04
+
+=== TSMOM  (IS-best N=30) ===
+  OOS taker 0.5%   Sharpe  0.14  CAGR    4.6%  DD -36.3%  exp 0.33  rt/yr 37
+  OOS maker 0.1%   Sharpe  0.50  CAGR   14.1%  DD -31.0%  exp 0.33  rt/yr 37
+  OOS 2x stress    Sharpe -0.30  CAGR   -6.2%  DD -43.8%  exp 0.33  rt/yr 37
+
+=== SMA  (IS-best N=50) ===
+  OOS taker 0.5%   Sharpe  0.13  CAGR    4.4%  DD -28.1%  exp 0.33  rt/yr 32
+  OOS maker 0.1%   Sharpe  0.39  CAGR   11.0%  DD -23.7%  exp 0.33  rt/yr 32
+  OOS 2x stress    Sharpe -0.20  CAGR   -3.4%  DD -33.4%  exp 0.33  rt/yr 32
+
+=== REGIME-SMA (BTC>200d gate)  (IS-best N=50) ===
+  OOS taker 0.5%   Sharpe  0.41  CAGR   10.9%  DD -23.9%  exp 0.25  rt/yr 21
+  OOS maker 0.1%   Sharpe  0.61  CAGR   15.8%  DD -20.6%  exp 0.25  rt/yr 21
+  OOS 2x stress    Sharpe  0.15  CAGR    5.1%  DD -27.8%  exp 0.25  rt/yr 21
+
+  Benchmark hold BTC (OOS): Sharpe 0.45  CAGR 15.3%  DD -49.9%
+
+=== GATE VERDICTS ===
+  TSMOM                            N=30  FAIL (no edge)  Sharpe < hold-BTC
+  SMA                              N=50  FAIL (no edge)  Sharpe < hold-BTC
+  REGIME-SMA (BTC>200d gate)       N=50  FAIL (no edge)  Sharpe < hold-BTC
+
+  chart -> /private/tmp/bt-d/report/img/crypto_lowfreq_trend.png
+
+  No PASS — for majors, hold still beats systematic trend after costs (honest).

@@ -1,19 +1,21 @@
-# Books — knowledge base
+# Local books catalog
 
-Full-text markdown of reference books, converted from EPUB for grep/search and
-for grounding skills (per the progressive-disclosure pattern used by the
-`analytics-lyn-alden` and macro-panel skills).
+This directory is for **local-only reference books** used as source material for book-grounded analyst skills.
+The EPUB/PDF source files should stay on disk for personal research, but **must not be committed** to this
+public repository.
 
-Source `.epub` files are kept locally but git-ignored (see `.gitignore`); only
-the markdown is committed. Conversion: `pandoc <file>.epub -t gfm-raw_html
---wrap=none`, then strip leftover image/svg lines.
+## Expected books
 
-| File | Book | Author | Relevance |
-|------|------|--------|-----------|
-| [systematic-trading-carver.md](systematic-trading-carver.md) | Systematic Trading | Robert Carver | Vol-targeting, forecast combination, position sizing → `analyst-systematic-trading` |
-| [capital-wars-howell.md](capital-wars-howell.md) | Capital Wars: The Rise of Global Liquidity | Michael J. Howell | Global-liquidity cycle, cross-border flows → macro-panel companion |
-| [psychology-of-money-housel.md](psychology-of-money-housel.md) | The Psychology of Money | Morgan Housel | Behavioral/temperament, staying-wealthy |
-| [ultimate-day-trader-bernstein.md](ultimate-day-trader-bernstein.md) | The Ultimate Day Trader | Jacob Bernstein | Day-trading mechanics (cf. our hold-beats-daytrade finding) |
+| Title | Author | Year | Why it matters |
+| --- | --- | --- | --- |
+| *The Psychology of Money* | Morgan Housel | 2020 | Primary source for the `analytics-morgan-housel` behavioral-finance lens. |
+| *The Ultimate Day Trader* | Jacob Bernstein | 2009 | Primary source for the `analyst-technical-analysis` trading-discipline lens. |
+| *Capital Wars* | Michael J. Howell | 2024 | Primary source for the `analyst-crypto` liquidity-and-crypto lens. |
+| *Systematic Trading* | Robert Carver | 2015 | Primary source for the `analyst-systematic-trading` backtest-and-sizing lens. |
 
-Note: leftover `[N](#...xhtml...)` footnote/anchor links from the EPUB remain
-inline; harmless for search, ignore when reading.
+## Repo policy
+
+- Keep the actual book files local in `books/`.
+- Do **not** commit copyrighted source books to Git.
+- If a skill cites one of these books, cite the book in the skill docs and keep only derived notes or
+  summaries in the repository.
