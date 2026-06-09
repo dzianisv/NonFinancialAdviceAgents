@@ -1,6 +1,6 @@
 ---
-name: pick-trend-stocks
-description: Research-first method to pick trendy stocks by reading quality financial journalism (Seeking Alpha, WSJ, Financial Times) — the only approach that has worked to find the next NVDA/SanDisk BEFORE the move. Static scanners can only pre-screen; the real insights come from reading analysts who understand the demand inflection, supply-chain bottleneck, and catalyst. Use when asked "find trendy stocks", "what companies are trending", "analyze the market for opportunities", "what should I buy", "find the next NVDA/SanDisk", "what's the next big trend", "scan for emerging stocks", "research a sector for winners", or to build a weekly trend-stock watchlist. Hypothesis generation, not a buy signal; never auto-trades. Educational, not advice.
+name: trend-stock-research
+description: Research-first method to pick trendy stocks by reading quality financial journalism (Seeking Alpha, WSJ, Financial Times) — the only approach that has worked to find the next NVDA/SanDisk BEFORE the move. Static scanners can only pre-screen; the real insights come from reading analysts who understand the demand inflection, supply-chain bottleneck, and catalyst. Integrates a quantitative pre-screen (emerging_scan.py, 180-name universe) with deep journalism reading. Use when asked "find trendy stocks", "what companies are trending", "analyze the market for opportunities", "what should I buy", "find the next NVDA/SanDisk", "what's the next big trend", "scan for emerging stocks", "research a sector for winners", "what's waking up", "am I missing a trend", or to build a weekly trend-stock watchlist. Hypothesis generation, not a buy signal; never auto-trades. Educational, not advice.
 license: MIT
 compatibility: opencode
 metadata:
@@ -97,65 +97,77 @@ With 9 parallel subagents, you get all 9 readings in ~60 seconds. The orchestrat
 2-3 minutes on synthesis (Steps 3-5). Total: ~4 minutes vs 50+ minutes. This is the scalable
 advantage of an agent team reading financial journalism.
 
-### Subagent tool requirements
+### How to read articles (including paywalled sources)
 
-Each research subagent needs web access (web_fetch, web_search, or browser tools) to actually
-read the sources. If web tools are unavailable, the orchestrator should note which sources could
-not be accessed and flag the gap to the user.
+**USE THE BROWSER.** The user has bypass-paywalls-chrome installed. Open the article URL in the
+browser and read `document.body.innerText` — the extension handles access transparently. No tricks
+needed for FT, WSJ, Bloomberg, SA, NYT, The Economist, Barron's, and 100+ more.
 
-### How to read paywalled sources (FT, WSJ, SA, Bloomberg, etc.)
+Use WHICHEVER browser tool is available in your environment (check in this priority order):
 
-Paywalled sites block direct fetches. Use these techniques in order of preference:
+1. **`chrome-use` CLI** (preferred) — drives the user's real Chrome with their extensions:
+   ```bash
+   chrome-use open "https://www.ft.com/content/<article-id>"
+   chrome-use eval "document.querySelector('article')?.innerText || document.body.innerText"
+   ```
+   The bypass-paywalls extension is already active. Just open and read.
 
-1. **Google AMP/cache** — fetch the Google AMP or cached version:
-   - `https://webcache.googleusercontent.com/search?q=cache:<article-url>`
-   - Or search Google for the exact headline and access via the cached link
+2. **Built-in browser tools** (openclaw/opencode) — if your runtime has `browser_navigate`,
+   `browser_snapshot`, `browser_evaluate` or similar built-in browser commands, use those.
+   Navigate to the URL → evaluate `document.body.innerText` or use snapshot to read.
 
-2. **Referer trick** — many paywalls allow access when the request comes from Google/Twitter:
-   - Set `Referer: https://www.google.com/` header when fetching
-   - Or fetch via: `https://www.google.com/amp/s/<article-url-without-https>`
+3. **`chrome-devtools-remote` MCP** — if available as an MCP tool, use it to navigate and
+   evaluate JavaScript on the page.
 
-3. **archive.today / web.archive.org** — check if the article is archived:
-   - `https://archive.ph/<article-url>`
-   - `https://web.archive.org/web/<article-url>`
+4. **`playwright` MCP** — headless browser. NOTE: paywalls may NOT be bypassed since the
+   extension isn't loaded. Use as fallback for free sources only.
 
-4. **Browser tool with bypass-paywalls** — if a browser MCP tool is available (playwright,
-   vibebrowser), use it. The user has the bypass-paywalls-chrome extension installed which
-   unlocks: FT, WSJ, NYT, Bloomberg, Seeking Alpha, The Economist, Barron's, and 100+ more.
-   Prefer browser tools over web_fetch for paywalled content.
+5. **`web_fetch`** — last resort for URLs that don't require paywall bypass (SEC EDGAR,
+   press releases, free blogs, RSS feeds).
 
-5. **Fallback: free sources that cite the paywalled article** — search for the headline in
-   quotes. Financial blogs, Reddit, and aggregators often quote the key paragraphs.
+**IMPORTANT**: Do NOT use `web_fetch` for FT/WSJ/SA/Bloomberg — it will hit the paywall.
+Always use a browser tool for paywalled publications.
 
-6. **RSS feeds** — many sites expose full-text or substantial excerpts via RSS:
-   - FT: `https://www.ft.com/rss/home`
-   - WSJ: `https://feeds.a.dj.com/rss/RSSMarketsMain.xml`
-   - SA: individual author RSS feeds
+If NO browser tool is available at all, state clearly: "No browser tool available — cannot read
+paywalled sources. Gap: [what's missing]." Never hallucinate content you couldn't read.
 
-If ALL access methods fail for a source, explicitly state: "Could not access [source] — paywall
-blocked all methods. Gap: [what information is missing]." Never hallucinate content you couldn't read.
+### Fallback sources (no browser needed)
+
+These are always accessible via `web_fetch`:
+- SEC EDGAR full-text search: `https://efts.sec.gov/LATEST/search-index?q=...`
+- Press releases / IR pages (usually not paywalled)
+- RSS feeds: FT (`ft.com/rss/home`), WSJ (`feeds.a.dj.com/rss/RSSMarketsMain.xml`)
+- archive.today / web.archive.org (check if article is cached)
+- Free sources citing paywalled articles (search headline in quotes)
 </orchestration>
 
 <instructions>
 Execute these 5 steps in order. Each step has explicit actions. Do not skip steps. Do not speculate
 about information you have not read — investigate first, then reason.
 
-## Step 1 — Pre-screen: identify hot sectors (fast, optional)
+## Step 1 — Pre-screen: identify hot sectors (MANDATORY — do not skip)
 
 <step_1_actions>
-Run the static scanner for awareness of what's already moving:
+Run the static scanner FIRST. Show its output before proceeding to Step 2. This directs WHERE
+you read — without it you're guessing which sectors to research.
+
 ```bash
-/Users/engineer/.venv/bin/python3 .agents/skills/trend-scout/scripts/emerging_scan.py --top 25
+/Users/engineer/.venv/bin/python3 .agents/skills/trend-stock-research/scripts/emerging_scan.py --top 25
 ```
 
 Also check sector ETFs vs SPY (XLK, SMH, XLE, XLV, ITA, XLF, XLU, ARKK, ICLN, TAN, HACK, ROBO)
 for which are breaking to new highs — this points to the hot neighborhood.
 
+**You MUST show the scanner output** (or a summary: which themes are EARLY MOVER vs EXTENDED)
+before moving to Step 2. If the scanner fails to run, state why and use sector ETF comparison
+as the directional input instead.
+
 This step produces: a list of 3-5 hot sectors/themes to research in Step 2.
 
 IMPORTANT: This step does NOT produce stock picks. Most real winners (NVDA 2021, Ajinomoto, CLF)
 would NOT have appeared in this scan until it was too late. The scan only tells you where to
-point your reading.
+point your reading — it answers "which neighborhoods are hot RIGHT NOW" so your reading effort
+is focused, not scattered.
 </step_1_actions>
 
 ## Step 2 — Read financial journalism (this is where the edge is)
@@ -206,6 +218,11 @@ FOR EACH PROMISING IDEA, EXTRACT AND RECORD:
 - The supply-chain bottleneck: what scarce input gates the trend?
 - The catalyst: what specific event (next 1-4 quarters) unlocks value?
 - Source quality: is this from a filing/earnings call, or a blog post?
+- **Extractable evidence**: for EVERY source cited, include at least ONE specific fact you
+  extracted from it (a quote, a number, a date, a named person). "WSJ reported on X" is NOT
+  enough — "WSJ (2026-06-03, 'Transformer Shortage Threatens Data Center Boom'): lead times
+  now 3-5 years, up from 18 months" IS enough. If you cannot name a specific extractable
+  fact from a source, you did not actually read it — drop the citation.
 - Your confidence level: HIGH (multiple filing-backed sources) / MEDIUM (one good source) / LOW (narrative only)
 </step_2_actions>
 
