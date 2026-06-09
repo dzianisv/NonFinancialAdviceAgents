@@ -1,5 +1,8 @@
 # Stateful Daily Research Agent — Architecture Design
 
+> **Scheduling**: NOT built into the skill. Run externally via `claude /loop schedule` or
+> openclaw cron task. The skill reads/writes the DB — the scheduler calls it.
+
 ## Problem
 
 A single-shot skill (no matter how good) cannot replicate the "read daily for weeks, accumulate

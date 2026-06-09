@@ -464,3 +464,119 @@ with gaps", FAIL means "did not do this at all or fabricated content".
 The skill is considered WORKING when: total_pass >= 6 AND total_fail == 0 for 2 consecutive iterations.
 Until then, keep iterating (fix gaps → re-run → re-score).
 </eval_tracking>
+
+<stateful_mode>
+## Stateful Operation (daily ingest + weekly synthesis)
+
+This skill has TWO operational modes when run on a schedule:
+
+### Mode: INGEST (daily — "read and store")
+
+Triggered by: "daily ingest", "read today's news", "ingest articles"
+
+1. Run emerging_scan.py → identify today's hot themes
+2. Read FT/WSJ/SA headlines via browser (top 5-10 relevant articles)
+3. For each article read, store it in the research DB:
+
+```python
+import sys
+sys.path.insert(0, '.agents/skills/trend-stock-research/scripts/db')
+from research_db import ingest_article
+
+ingest_article(
+    url="<article_url>",
+    title="<headline>",
+    source="ft",          # ft, wsj, sa, edgar, reuters, etc.
+    body_text="<extracted text>",
+    summary="<your 2-3 sentence summary>",
+    themes="ai-power,transformers",    # comma-separated theme tags
+    companies="CLF,GEV",               # comma-separated tickers mentioned
+    signals="bottleneck,demand_inflection",  # signal types found
+    confidence="high",                 # high/medium/low based on source quality
+    date_published="2026-06-09"
+)
+```
+
+4. Check for Form 4 insider buying clusters on tracked companies
+5. Log the run: how many articles ingested, which themes
+
+**Theme tagging convention** (use consistently so convergence detection works):
+- Use lowercase, hyphenated: `ai-power`, `hbm-memory`, `humanoid-robotics`, `goes-steel`
+- Reuse existing tags when the theme matches (don't invent synonyms)
+- Check existing themes first: `python3 scripts/db/research_db.py themes`
+
+### Mode: SYNTHESIZE (weekly — "what's converging?")
+
+Triggered by: "weekly synthesis", "what's building?", "run picks"
+
+1. Query the DB for convergence:
+```python
+from research_db import search_theme_convergence, get_articles_for_theme, get_active_theses
+
+# Find themes with 3+ independent sources over 2+ weeks
+converging = search_theme_convergence(min_sources=3, min_weeks=2)
+```
+
+2. For each converging theme:
+   - Pull all articles: `get_articles_for_theme("ai-power")`
+   - Count independent sources (SA ≠ WSJ ≠ FT ≠ EDGAR = different)
+   - Check if evidence is ACCELERATING (more mentions this week vs last)
+   - Check if still non-obvious (not saturated on Reddit/fintwit/CNBC)
+
+3. Promote theses based on accumulated evidence:
+   - 1 source, 1 week: `monitoring` (just filed)
+   - 3+ sources, 2+ weeks: `building` (something is forming)
+   - 5+ sources, 3+ weeks, catalyst identified: `actionable` (route to quorum)
+
+4. Apply the skeptic filter (Step 4) to any `actionable` thesis
+5. Route survivors to multi-lens-quorum with the full evidence trail
+
+### Mode: SEARCH (on-demand — "look up what we know")
+
+Triggered by: "what do we know about <topic>?", "search the DB for <query>"
+
+```python
+from research_db import search
+
+# BM25 ranked search — finds articles by keyword relevance
+results = search("transformer AND shortage AND bottleneck")
+results = search("CLF OR cleveland-cliffs")
+results = search("humanoid AND actuator")
+```
+
+FTS5 query syntax:
+- `AND` / `OR` — boolean operators
+- `"exact phrase"` — phrase match
+- `NOT term` — exclusion
+- `term*` — prefix match
+- `NEAR(term1 term2, 10)` — proximity (within 10 tokens)
+
+### DB location and CLI
+
+```bash
+# Check stats
+python3 .agents/skills/trend-stock-research/scripts/db/research_db.py stats
+
+# Search
+python3 .agents/skills/trend-stock-research/scripts/db/research_db.py search "transformer shortage"
+
+# List converging themes
+python3 .agents/skills/trend-stock-research/scripts/db/research_db.py themes
+
+# List active theses
+python3 .agents/skills/trend-stock-research/scripts/db/research_db.py theses
+```
+
+DB file: `~/.local/share/trend-research/articles.db` (persists across sessions, zero cost)
+
+### Why SQLite + BM25, not vector DB
+
+- **Zero cost**: no embedding API calls, no GPU, no external service
+- **Zero dependencies**: sqlite3 is built into Python
+- **Domain vocabulary is consistent**: financial journalism uses "bottleneck", "capacity constrained",
+  "supply shortage", "backlog" — BM25 keyword search finds these perfectly
+- **Exact match matters**: when you search for "CLF" or "GOES", you want exact hits, not semantic
+  approximations that might return "US Steel" because it's "similar"
+- **Portable**: one .db file, copy anywhere
+- **Fast**: FTS5 BM25 search over 10,000 articles is <1ms
+</stateful_mode>
