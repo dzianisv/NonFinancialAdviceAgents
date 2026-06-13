@@ -39,10 +39,15 @@ which hold the actual frameworks and primary sources.
 3. **Build the consensus/divergence map.** Explicitly state: where do they AGREE (convergence = higher
    confidence), and where do they SPLIT — and *why* (which assumption differs). Name the load-bearing
    disagreement.
-4. **Give the synthesis,** but preserve the dissent — do not average them into mush. State what you'd
+4. **Anchor any dated/observable claim to the crowd's priced odds.** When the question touches a
+   gradable outcome (Fed cut, CPI bucket, recession-by-date), pull **`prediction-market-odds`**
+   (Polymarket/Kalshi/FedWatch) before opining — seven economists debating with no market check is the
+   naive-analyst failure. Report where the panel deviates from the market and why.
+5. **Give the synthesis,** but preserve the dissent — do not average them into mush. State what you'd
    conclude, what would change your mind, and which seat you'd watch for the early warning.
-5. **Time-stamp tactical claims.** Each thinker's "current" view decays — flag and re-check against
-   their `05-current-views.md` / latest newsletter.
+6. **Time-stamp tactical claims.** Each thinker's "current" view decays — flag and re-check against
+   their `05-current-views.md` / latest newsletter. For a dated *prediction*, hand off to
+   **`superforecasting`** (calibrated probability + `forecast-ledger` logging).
 
 ## Routing — which seats for which question
 
