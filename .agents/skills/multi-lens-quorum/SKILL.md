@@ -59,6 +59,7 @@ method/conductor skills. The repo's available lens menu (`.agents/skills/`):
 | `analyst-systematic-trading` | Carver — rules, vol-target, Half-Kelly, cost speed limit, overfit gate | The discipline/sizing seat; kills the narrative trade |
 | `analyst-technical-analysis` | Bernstein — setup→trigger→follow-through, "no trigger, no trade" | The timing/trigger seat (weak evidence — carry as hypothesis) |
 | `analyst-crypto` | Howell — global liquidity → on-chain → sentiment → tilted-DCA | The liquidity-tide seat (often the WAIT/dissent) |
+| `analyst-derivatives-positioning` | Funding/OI/basis + options skew/IV/max-pain/gamma; options-implied distribution (crypto + equities) | The positioning / market-implied seat — what leverage & options price |
 | `analytics-benjamin-graham` | Margin of safety, intrinsic value, Mr. Market | The value/"is this even an investment" dissent seat |
 | `analytics-morgan-housel` | Behavior > intelligence, tails, enough, room for error | The behavioral guardrail / "don't blow up" seat |
 | `analytics-warren-buffett` | Moats, circle of competence, cash-as-option, bubble-discipline | The quality/discipline / hold-cash seat |

@@ -23,3 +23,6 @@ books/*
 
 # local generated skill source lock metadata
 skills-lock.json
+forecasts/
+13f/
+.reflection/

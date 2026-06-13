@@ -102,7 +102,9 @@ optimal-allocation problem, constraints, and roadmap. Do not conflate it with th
   `tax-loss-harvesting`, `fundamental-analysis`, `hedge-fund-13f-analysis`, the **macro-economist panel**
   (`macro-panel` + the seven `analytics-*` thinker-lenses), the two **trading-discipline lenses**
   (`analyst-systematic-trading` + `analyst-technical-analysis`), the **decision method**
-  `multi-lens-quorum`, and the top-level `agentic-fund-orchestration`.
+  `multi-lens-quorum`, the **forecasting stack** (`superforecasting` + `prediction-market-odds` +
+  `analyst-derivatives-positioning` + `forecast-ledger`), the **trend-stock finder**
+  `trend-stock-research`, and the top-level `agentic-fund-orchestration`.
 
   **`multi-lens-quorum`** is the general orchestration method for hard JUDGMENT calls: convene 4-7
   independent lenses (each subagent reads ONE skill, judges the SAME question on IDENTICAL facts,
@@ -112,6 +114,28 @@ optimal-allocation problem, constraints, and roadmap. Do not conflate it with th
   questions directly) and mandates a dissent seat. It is the GENERAL method over any lenses; `macro-panel`
   is the special case that convenes the macro-thinker seats. Proven on the live BTC-tranche cadence call
   (consensus $1k/wk × 6 calendar; Howell + Carver dissent preserved).
+
+  **The forecasting stack** turns a *dated* market question into a **scored probability** — distinct from
+  quorum's verdict. `superforecasting` is the method: frame a scored question (observable outcome + a
+  resolution date), convene lenses **via `multi-lens-quorum`**, anchor the probabilities to market-implied
+  odds, emit a base-case probability + alternates + falsifiable flip/de-risk triggers, and **log it to be
+  graded**. It is asset-agnostic (crypto, equities, indices, rates) and deliberately **excludes pure-value
+  seats** (Graham/Buffett) for short-horizon price forecasts — they answer *should I own this*, not *where
+  does price go by Friday*. It draws on two data skills: **`prediction-market-odds`** (the crowd's priced
+  probability of discrete dated events — Polymarket / Kalshi / CME FedWatch, liquidity-weighted, with the
+  slug-discovery / frozen-market / thin-liquidity traps handled) and **`analyst-derivatives-positioning`**
+  (the continuous options-implied distribution + positioning — futures funding/OI/basis/COT and options
+  skew/IV/max-pain/gamma, cross-asset crypto + equities; note its odds are *risk-neutral*, not real-world).
+  Forecasts are recorded by **`forecast-ledger`** (`ledger.py`: add → resolve → Brier + calibration by
+  lens/source), closing the Tetlock feedback loop — unscored forecasting is cosplay. `macro-panel` now
+  anchors any dated macro claim to `prediction-market-odds` and hands dated *predictions* to
+  `superforecasting`.
+
+  **Three non-overlapping jobs — keep them distinct.** `trend-stock-research` *finds WHICH* names
+  (open-universe discovery via quality journalism + a 180-name pre-screen → a watchlist of hypotheses);
+  `multi-lens-quorum` *judges WHETHER / how much* (a defended buy/hold/size verdict); `superforecasting`
+  *predicts WHAT happens by a date* (a graded probability). They **chain**: scout picks → quorum judges →
+  superforecaster times.
 
   **The trading-discipline lenses** are book-grounded experts (sources in `books/`):
   `analyst-systematic-trading` distils Robert Carver's *Systematic Trading* (2015) — the

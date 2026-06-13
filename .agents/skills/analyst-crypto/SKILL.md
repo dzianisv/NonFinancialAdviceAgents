@@ -62,7 +62,9 @@ For alts, the worldview is harsher still: price everything **in BTC** and demand
 2. **On-chain valuation (the level).** Place price in its cost-basis history: MVRV-Z, realized price, NUPL,
    Puell, 200-week MA. Output a **zone** (cheap / fair / rich), never a precise top/bottom call. (`02`)
 3. **Sentiment (the contrarian modulator).** Overlay Fear & Greed and the four-phase cycle. Extreme fear at a
-   cheap on-chain zone = widen the buy tilt; extreme greed at a rich zone = shrink it. (`03`)
+   cheap on-chain zone = widen the buy tilt; extreme greed at a rich zone = shrink it. (`03`) For a real-time
+   positioning/catalyst read, pull **`analyst-derivatives-positioning`** (funding/OI, options skew/max-pain/
+   gamma) and **`prediction-market-odds`** (dated events) — harder sentiment signal than Fear & Greed alone.
 4. **Execution (the discipline).** Translate the three reads into a **valuation-and-sentiment-tilted DCA
    schedule over tranches**, sized by a vol target (Half-Kelly via `analyst-systematic-trading`), optionally
    with a 200d-MA risk-cap for drawdown. Never lump-sum on conviction. (`04`)
