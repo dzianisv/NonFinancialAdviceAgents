@@ -83,7 +83,7 @@ def list_(a):
         sel = rows
     elif a.due:
         sel = [r for r in rows if r["status"] == "open" and r["horizon"] <= today]
-    else:
+    else:  # bare `list` and explicit `--open` are the same view by design: open forecasts
         sel = [r for r in rows if r["status"] == "open"]
     if not sel:
         print("(none)")

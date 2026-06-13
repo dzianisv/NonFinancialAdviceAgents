@@ -30,7 +30,7 @@ The OpenClaw skill installer is the `skills` CLI. The exact invocation OpenClaw'
 ```sh
 # Per-agent install (into the investor agent's workspace) — run on the deployment, HOME = openclaw home:
 cd ~/.openclaw/workspace/investor
-HOME=~ npx --yes skills add dzianisv/backtest \
+HOME="${OPENCLAW_HOME_DIR:-$HOME}" npx --yes skills add dzianisv/backtest \
   --skill superforecasting \
   --agent openclaw --yes --copy --dangerously-accept-openclaw-risks
 ```
@@ -40,7 +40,7 @@ omitting `--skill` (installs every SKILL.md the CLI discovers in the repo):
 
 ```sh
 cd ~/.openclaw/workspace/investor
-HOME=~ npx --yes skills add dzianisv/backtest \
+HOME="${OPENCLAW_HOME_DIR:-$HOME}" npx --yes skills add dzianisv/backtest \
   --agent openclaw --yes --copy --dangerously-accept-openclaw-risks
 ```
 
