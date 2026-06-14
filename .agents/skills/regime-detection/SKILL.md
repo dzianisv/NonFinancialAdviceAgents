@@ -75,36 +75,48 @@ Return structured JSON the Portfolio Manager and Risk Manager can consume:
 }
 ```
 
-## Running the regime check
+## Agent fetch procedure (WebFetch — sequential, one call at a time)
 
-**Always use the Python script — do NOT attempt raw WebFetch for price/VIX data.**
+**CRITICAL: fetch ONE URL at a time. Parallel requests trigger 429 rate-limits.**
 
-Yahoo Finance requires session cookies (crumb system) that raw HTTP fetches cannot obtain. The `yfinance` library handles this automatically. `FRED BAMLH0A0HYM2` (HY OAS) is fetched via plain HTTP in the script.
+### 1. SPY price + 200-day MA
+```
+WebFetch: https://query2.finance.yahoo.com/v8/finance/chart/SPY?range=1y&interval=1d
+Parse JSON: result[0].indicators.quote[0].close  → array of ~252 daily closes
+200-day MA = average of last 200 values
+Current price = last value
+Signal: +1 if price > 200dMA × 1.01 | -1 if price < 200dMA × 0.99 | 0 otherwise
+```
+If 429: wait and retry once. If still 429: mark `sma200 = [UNAVAILABLE]`, drop its weight.
 
-```bash
-python3 <skills>/regime-detection/regime_monitor.py --json
+### 2. VIX spot (after SPY completes)
+```
+WebFetch: https://query2.finance.yahoo.com/v8/finance/chart/%5EVIX?range=5d&interval=1d
+Parse: result[0].indicators.quote[0].close → last value = VIX spot
 ```
 
-Output is JSON:
-```json
-{
-  "regime": "RISK_ON",
-  "exposure_multiplier": 1.0,
-  "score": 0.571,
-  "signals": {"sma200": 1, "vix_ts": 1, "credit": -1},
-  "weights": {"sma200": 3, "vix_ts": 2, "credit": 2},
-  "price": 594.32,
-  "sma200": 563.45,
-  "vix": 14.2,
-  "vix3m": 16.1,
-  "vix_vix3m_ratio": 0.882,
-  "hy_oas_pct": 2.78
-}
+### 3. VIX3M (after VIX completes)
+```
+WebFetch: https://query2.finance.yahoo.com/v8/finance/chart/%5EVIX3M?range=5d&interval=1d
+Parse: last close = VIX3M
+Signal: +1 if VIX/VIX3M < 0.95 (contango) | -1 if > 1.0 (backwardation) | 0 otherwise
 ```
 
-Parse `regime` and `exposure_multiplier` directly from this JSON.
+### 4. HY Credit spreads — FRED BAMLH0A0HYM2 (after VIX3M completes)
+```
+WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2
+Parse CSV: last row = date,OAS_pct
+Signal: +1 if OAS < 3.5% | -1 if OAS > 5.0% | 0 otherwise
+```
+If timeout: mark `credit = [UNAVAILABLE]`, drop its weight, continue.
 
-**Requires:** `yfinance` installed (`pip install yfinance`). On openclaw pods this is pre-installed.
+### 5. Score → exposure multiplier
+Weighted sum using available signals only (drop weight of any UNAVAILABLE signal):
+```
+sma200(×3) + vix_ts(×2) + credit(×2)
+Normalize: score = weighted_sum / sum_of_active_weights  → range [-1, +1]
+```
+Map to regime per table in signal ensemble above.
 
 ## Implementation notes (Python / local runner)
 - Data: yfinance for prices/VIX (`^VIX`, `^VIX3M`), HYG/LQD; **FRED** for HY OAS (`BAMLH0A0HYM2`),
