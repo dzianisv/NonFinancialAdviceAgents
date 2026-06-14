@@ -26,3 +26,10 @@ skills-lock.json
 forecasts/
 13f/
 .reflection/
+
+# local copies created by npx skills add --copy
+skills/
+
+# claude code session artifacts
+session.txt
+.claude/
