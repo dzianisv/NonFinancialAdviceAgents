@@ -24,8 +24,18 @@ from collections import defaultdict
 
 LEDGER = os.environ.get("CONGRESS_LEDGER", os.path.join("congress", "recommended.jsonl"))
 
-HOUSE_API = "https://housestockwatcher.com/api/transactions"
-SENATE_API = "https://senatestockwatcher.com/api/transactions"
+# Primary + fallback sources (tried in order)
+HOUSE_APIS = [
+    "https://housestockwatcher.com/api/transactions",
+    "https://house-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json",
+]
+SENATE_APIS = [
+    "https://senatestockwatcher.com/api/transactions",
+    "https://senate-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json",
+]
+# Keep legacy names for backwards compat
+HOUSE_API = HOUSE_APIS[0]
+SENATE_API = SENATE_APIS[0]
 
 PURCHASE_KEYWORDS = {"purchase", "buy", "bought", "exchange (partial)"}
 SKIP_KEYWORDS = {"sale", "sale (partial)", "sale (full)", "sale_full", "sale_partial"}
@@ -49,6 +59,15 @@ def _fetch_json(url: str) -> list:
     except URLError as e:
         print(f"[WARN] fetch failed {url}: {e}", file=sys.stderr)
         return []
+
+
+def _fetch_json_with_fallback(urls: list) -> list:
+    for url in urls:
+        result = _fetch_json(url)
+        if result:
+            return result
+        print(f"[INFO] trying next fallback...", file=sys.stderr)
+    return []
 
 
 def _load() -> list:
@@ -85,7 +104,7 @@ def fetch_recent(days: int) -> list:
     rows = []
 
     # House
-    for tx in _fetch_json(HOUSE_API):
+    for tx in _fetch_json_with_fallback(HOUSE_APIS):
         tx_date_str = tx.get("transaction_date") or tx.get("disclosure_date") or ""
         try:
             tx_date = datetime.strptime(tx_date_str[:10], "%Y-%m-%d").date()
@@ -110,7 +129,7 @@ def fetch_recent(days: int) -> list:
         })
 
     # Senate
-    for tx in _fetch_json(SENATE_API):
+    for tx in _fetch_json_with_fallback(SENATE_APIS):
         tx_date_str = tx.get("transaction_date") or tx.get("disclosure_date") or ""
         try:
             tx_date = datetime.strptime(tx_date_str[:10], "%Y-%m-%d").date()

@@ -34,14 +34,25 @@ fact/definition. No market = no anchor; don't fabricate one.
 
 ## Polymarket Gamma API — the working recipe
 
-**Discovery = `public-search`. Do NOT guess slugs** (slug-guessing 404s — the #1 failure):
+**Discovery = `public-search`. Do NOT guess slugs, do NOT browse `/markets` list** (the list returns thousands of unfiltered markets including novelty/entertainment — always search):
 
+For **macro markets** relevant to equities, run these searches (one WebFetch per query):
+```
+WebFetch: https://gamma-api.polymarket.com/public-search?q=fed+rate+decision&limit_per_type=5
+WebFetch: https://gamma-api.polymarket.com/public-search?q=federal+reserve+2026&limit_per_type=5
+WebFetch: https://gamma-api.polymarket.com/public-search?q=recession+2026&limit_per_type=5
+WebFetch: https://gamma-api.polymarket.com/public-search?q=S%26P+500&limit_per_type=5
+WebFetch: https://gamma-api.polymarket.com/public-search?q=CPI+inflation&limit_per_type=5
+```
+
+Filter results: KEEP only markets where the `question` or `title` contains at least one of:
+  `Fed`, `FOMC`, `rate`, `recession`, `CPI`, `inflation`, `GDP`, `S&P`, `cut`, `hike`, `basis point`
+DISCARD any market about sports, entertainment, gaming (GTA, elections unrelated to economy), celebrities.
+
+Then for each relevant market slug:
 ```bash
-# 1. DISCOVER the event by keyword (returns slug, ticker, title, description)
-curl -s "https://gamma-api.polymarket.com/public-search?q=fed%20decision%20june&limit_per_type=5"
-
-# 2. FETCH the event's markets + odds by slug
-curl -s "https://gamma-api.polymarket.com/events?slug=fed-decision-in-june-825"
+# FETCH the event's markets + odds by slug
+curl -s "https://gamma-api.polymarket.com/events?slug=<slug-from-search>"
 #    each market has: outcomes, outcomePrices (stringified arrays), volume, liquidity, endDate
 ```
 

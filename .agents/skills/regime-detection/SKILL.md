@@ -75,9 +75,64 @@ Return structured JSON the Portfolio Manager and Risk Manager can consume:
 }
 ```
 
-## Implementation notes
+## WebFetch / LLM-agent procedure (no Python required)
+
+Run these fetches in order. Parse the JSON inline — do NOT spawn a Python subprocess.
+
+### 1. SPY price vs 200-day MA
+```
+WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=1y&interval=1d
+Parse: result[0].indicators.quote[0].close  → array of ~252 daily closes
+200-day MA = average of last 200 values
+Current price = last value in array
+Signal: +1 if current > 200dMA * 1.01, -1 if current < 200dMA * 0.99, else 0
+```
+Fallback if Yahoo blocked:
+```
+WebFetch: https://stooq.com/q/l/?s=spy.us&f=sd2t2ohlcv&h&e=csv   (CSV, last row = today)
+```
+
+### 2. VIX (spot) and VIX term structure
+```
+WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=5d&interval=1d
+Parse: last close = VIX spot
+
+WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX3M?range=5d&interval=1d
+Parse: last close = VIX3M
+Signal: +1 if VIX/VIX3M < 1 (contango), -1 if > 1 (backwardation)
+```
+Fallback: CBOE VIX page (scrape the number):
+```
+WebFetch: https://www.cboe.com/tradable_products/vix/
+```
+
+### 3. Credit spreads (HY OAS) — FRED public API, no key needed
+```
+WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2&vintage_date=2026-06-14
+Parse: last row = today's HY OAS in bps
+Signal: +1 if OAS < 350bps (tight), -1 if OAS > 500bps (wide), else 0
+```
+Fallback HYG/LQD ratio:
+```
+WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/HYG?range=30d&interval=1d
+WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/LQD?range=30d&interval=1d
+Signal: +1 if HYG/LQD ratio is above its 30-day average, -1 if below
+```
+
+### 4. Yield curve — FRED public API
+```
+WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y2Y&vintage_date=2026-06-14
+Parse: last row = 10y-2y spread (positive = normal, negative = inverted)
+Signal: +1 if spread > 0, -1 if spread < -0.25
+```
+
+### 5. Score → exposure multiplier
+Weighted sum: SMA(×3) + VIX_TS(×2) + Credit(×2) + Curve(×1), max=8, min=-8.
+Normalize to [-1, +1] by dividing by 8. Map per the table above.
+
+## Implementation notes (Python / local runner)
 - Data: yfinance for prices/VIX (`^VIX`, `^VIX3M`), HYG/LQD; **FRED** for HY OAS (`BAMLH0A0HYM2`),
-  curve (`T10Y2Y`, `T10Y3M`). See the `data-sources` references.
+  curve (`T10Y2Y`, `T10Y3M`). See `regime_monitor.py`.
 - Compute SMA/momentum on **trailing** data only (no look-ahead). Decide on prior close, act next open.
 - Backtest the ensemble across **2000-02, 2008, 2020, 2022** — each window stresses different signals
   (2020 punishes slow trend; 2022 punishes anything that assumed bonds hedge).

@@ -46,9 +46,18 @@ Summary (2-3 sentences): what the Fed said, what changed, and what it means for 
 
 1. **Fetch calendar** — get the next scheduled FOMC meeting date(s). Flag if we are within 10 days of a meeting (heightened sensitivity).
 
-2. **Fetch latest statement** — from the press releases page, find the most recent FOMC statement (not minutes — the statement released the day of the decision). Use WebFetch to read it.
+2. **Fetch latest statement** — exact steps:
+   ```
+   a. WebFetch: https://www.federalreserve.gov/newsevents/pressreleases.htm
+   b. Scan the HTML for href links matching the pattern: /newsevents/pressreleases/monetary20*.htm
+      (e.g. /newsevents/pressreleases/monetary20260507a.htm)
+   c. The FIRST such link is the most recent FOMC statement.
+   d. WebFetch: https://www.federalreserve.gov<that href>
+   e. Extract: rate decision, key language paragraphs, vote tally.
+   ```
+   Do NOT stop at step (a) — the index page is NOT the statement. You MUST follow the link in step (d).
 
-3. **Fetch prior statement** — the one from the previous meeting. Same source.
+3. **Fetch prior statement** — the SECOND monetary*.htm link from the same index page. Same fetch procedure.
 
 4. **Parse tone delta** — compare key policy language:
    - Count hawkish phrases: "remains committed to returning inflation", "still elevated", "further increases may be appropriate", "restrictive", "ongoing increases"

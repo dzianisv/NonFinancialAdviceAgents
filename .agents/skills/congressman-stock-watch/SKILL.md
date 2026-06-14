@@ -25,17 +25,33 @@ This **proposes / notifies** — it **never trades** and never sizes a real orde
 - **Do not rely on sells:** Sells can be for many reasons (tax, divorce, rebalancing). Focus on **PURCHASES** with a notable dollar-range.
 - **Cluster signal:** A ticker appearing in ≥3 purchases across different members in the same filing period is a stronger signal than a single buy.
 
-## Data sources
+## Data sources (tried in priority order)
 
+**Primary (community aggregators, fastest):**
 ```
 https://housestockwatcher.com/api/transactions         — House disclosures JSON
 https://senatestockwatcher.com/api/transactions        — Senate disclosures JSON
 ```
 
-Both APIs are maintained by open-source community projects (not official .gov). Always verify notable transactions against the official EFTS eForms search:
+**Fallback 1 — S3 mirrors (same data, different host):**
 ```
-https://efts.sec.gov/LATEST/search-index?q=%22Form+8%22&dateRange=custom...
+https://house-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json
+https://senate-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json
 ```
+
+**Fallback 2 — WebFetch scraping (when APIs are DNS-blocked):**
+If the JSON APIs above fail with DNS errors, use WebFetch on these web pages and extract disclosure tables:
+```
+WebFetch: https://www.quiverquant.com/sources/housetrading    (scrape the table)
+WebFetch: https://www.quiverquant.com/sources/senatetrading   (scrape the table)
+```
+
+**Official source (for verification of specific transactions):**
+```
+https://disclosures-clerk.house.gov/FinancialDisclosure   — House official (requires JS — use as verification only)
+```
+
+**⚠ If ALL sources fail:** Emit `[SIGNAL UNAVAILABLE — congressional APIs blocked in this environment]` and continue with the rest of the pipeline. Do NOT fabricate transactions.
 
 ## The loop
 
