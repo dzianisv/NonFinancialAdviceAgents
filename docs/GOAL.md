@@ -99,8 +99,12 @@ data feeds, intraday day-trading (that is root GOAL.md workstreams B/C, behind t
       08:15, weekly 13F/congress/brief Mon). Added the 3 missing: 'Daily stock dip scan' (45 7 * * 1-5),
       'Daily crypto dip scan' (50 7 * * *), 'Daily signal convergence' (30 8 * * 1-5), all SILENT-unless-alert.
       Removed the duplicating workspace HEARTBEAT.md — CRON owns the schedule; heartbeat stays light.
-- [ ] Log every DM'd call to `forecast-ledger` for 30/60/90d scoring (feedback loop — not yet wired into the
-      cron prompts).
-- [ ] Align docs (TDD §3 / SETUP-openclaw) to reality: openclaw primary = AGENT CRON, not heartbeat+HEARTBEAT.md.
-- [ ] Deploy/validate on claude-code + hermes backends (openclaw proven; other two documented only).
+- [x] Feedback loop wired by REUSE: installed `forecast-ledger` in the agent + updated the 'Weekly main
+      investment brief' cron prompt to `forecast-ledger add` each DM'd call and `score`/`report` due ones
+      (30/60/90d hit-rate by source in the brief). No new journal skill.
+- [x] Docs aligned to reality (TDD §3, SETUP-openclaw, PRD): openclaw primary = AGENT CRON; heartbeat = light backup.
+- [x] claude-code backend validated: 3 skills installed to `~/.claude/skills`, load as `/commands`, run clean
+      on live data; scheduling via `/loop`+`CronCreate` / Routines (documented in SETUP-claudecode.md).
+- [~] hermes backend: DEFERRED — no hermes instance available this session. Setup documented
+      (SETUP-hermes.md); deploy/validate when an instance exists. Same portable skills apply.
 </done_when>
