@@ -79,52 +79,63 @@ Return structured JSON the Portfolio Manager and Risk Manager can consume:
 
 Run these fetches in order. Parse the JSON inline — do NOT spawn a Python subprocess.
 
-### 1. SPY price vs 200-day MA
+**IMPORTANT: Fetch ONE source at a time (sequential, not parallel). Yahoo Finance v8 API 429s under parallel load — use stooq.com as primary.**
+
+### 1. SPY price + 200-day MA
+
+**Primary — stooq.com (reliable, no rate limit):**
 ```
-WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=1y&interval=1d
-Parse: result[0].indicators.quote[0].close  → array of ~252 daily closes
-200-day MA = average of last 200 values
-Current price = last value in array
+WebFetch: https://stooq.com/q/d/l/?s=spy.us&d1=20251201&d2=20260614&i=d
+Response: CSV with Date,Open,High,Low,Close,Volume columns (newest row = today)
+200-day MA = average of last 200 Close values
+Current price = most recent Close
 Signal: +1 if current > 200dMA * 1.01, -1 if current < 200dMA * 0.99, else 0
 ```
-Fallback if Yahoo blocked:
+
+**Fallback — Yahoo Finance key-statistics page (scrape the "200-Day Moving Average" field):**
 ```
-WebFetch: https://stooq.com/q/l/?s=spy.us&f=sd2t2ohlcv&h&e=csv   (CSV, last row = today)
+WebFetch: https://finance.yahoo.com/quote/SPY/key-statistics/
+Look for "200-Day Moving Average" in the Stock Price History table.
 ```
 
-### 2. VIX (spot) and VIX term structure
-```
-WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=5d&interval=1d
-Parse: last close = VIX spot
+### 2. VIX spot
 
-WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX3M?range=5d&interval=1d
-Parse: last close = VIX3M
-Signal: +1 if VIX/VIX3M < 1 (contango), -1 if > 1 (backwardation)
+**Primary — stooq.com:**
 ```
-Fallback: CBOE VIX page (scrape the number):
+WebFetch: https://stooq.com/q/d/l/?s=%5Evix&d1=20260601&d2=20260614&i=d
+Parse: last row Close = VIX spot level
+Signal: VIX > 25 → stress; VIX > 35 → acute stress
+```
+
+**Fallback — CBOE page:**
 ```
 WebFetch: https://www.cboe.com/tradable_products/vix/
+Scrape the current VIX level from the page.
 ```
 
-### 3. Credit spreads (HY OAS) — FRED public API, no key needed
+**VIX term structure (VIX vs VIX3M):**
 ```
-WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2&vintage_date=2026-06-14
-Parse: last row = today's HY OAS in bps
-Signal: +1 if OAS < 350bps (tight), -1 if OAS > 500bps (wide), else 0
-```
-Fallback HYG/LQD ratio:
-```
-WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/HYG?range=30d&interval=1d
-WebFetch: https://query1.finance.yahoo.com/v8/finance/chart/LQD?range=30d&interval=1d
-Signal: +1 if HYG/LQD ratio is above its 30-day average, -1 if below
+WebFetch: https://stooq.com/q/d/l/?s=%5Evix3m&d1=20260601&d2=20260614&i=d
+Signal: +1 if VIX/VIX3M < 1 (contango/calm), -1 if > 1 (backwardation/stress)
 ```
 
-### 4. Yield curve — FRED public API
+### 3. Credit spreads — FRED HY OAS
+
+**Try FRED (may timeout — retry once, then skip):**
 ```
-WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y2Y&vintage_date=2026-06-14
-Parse: last row = 10y-2y spread (positive = normal, negative = inverted)
+WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2
+Parse: last row = date,OAS_bps
+Signal: +1 if OAS < 350bps, -1 if OAS > 500bps, else 0
+```
+If FRED times out → mark credit as `[SIGNAL UNAVAILABLE]` and drop its weight to 0 from the ensemble. Continue with the other signals.
+
+### 4. Yield curve — FRED T10Y2Y
+```
+WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y2Y
+Parse: last row = 10y-2y spread
 Signal: +1 if spread > 0, -1 if spread < -0.25
 ```
+Same retry-once / skip rule as credit.
 
 ### 5. Score → exposure multiplier
 Weighted sum: SMA(×3) + VIX_TS(×2) + Credit(×2) + Curve(×1), max=8, min=-8.
