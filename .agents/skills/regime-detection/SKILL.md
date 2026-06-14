@@ -75,71 +75,36 @@ Return structured JSON the Portfolio Manager and Risk Manager can consume:
 }
 ```
 
-## WebFetch / LLM-agent procedure (no Python required)
+## Running the regime check
 
-Run these fetches in order. Parse the JSON inline — do NOT spawn a Python subprocess.
+**Always use the Python script — do NOT attempt raw WebFetch for price/VIX data.**
 
-**IMPORTANT: Fetch ONE source at a time (sequential, not parallel) to avoid 429 rate limits.**
+Yahoo Finance requires session cookies (crumb system) that raw HTTP fetches cannot obtain. The `yfinance` library handles this automatically. `FRED BAMLH0A0HYM2` (HY OAS) is fetched via plain HTTP in the script.
 
-### 1. SPY price + 200-day MA
-
-**Primary — Yahoo Finance query2 (confirmed working):**
-```
-WebFetch: https://query2.finance.yahoo.com/v8/finance/chart/SPY?range=1y&interval=1d
-Parse JSON: result[0].indicators.quote[0].close  → array of ~252 daily closes
-200-day MA = average of last 200 values
-Current price = last value in array
-Signal: +1 if current > 200dMA * 1.01, -1 if current < 200dMA * 0.99, else 0
+```bash
+python3 <skills>/regime-detection/regime_monitor.py --json
 ```
 
-**Fallback — Yahoo Finance key-statistics page (scrape the field):**
-```
-WebFetch: https://finance.yahoo.com/quote/SPY/key-statistics/
-Look for "200-Day Moving Average" in the Stock Price History section.
-```
-
-### 2. VIX spot
-
-**Primary:**
-```
-WebFetch: https://query2.finance.yahoo.com/v8/finance/chart/%5EVIX?range=5d&interval=1d
-Parse JSON: result[0].indicators.quote[0].close → last value = VIX spot
-Signal: VIX > 25 → stress; VIX > 35 → acute stress
-```
-
-**Fallback — CBOE page:**
-```
-WebFetch: https://www.cboe.com/tradable_products/vix/
-Scrape the current VIX level from the page.
+Output is JSON:
+```json
+{
+  "regime": "RISK_ON",
+  "exposure_multiplier": 1.0,
+  "score": 0.571,
+  "signals": {"sma200": 1, "vix_ts": 1, "credit": -1},
+  "weights": {"sma200": 3, "vix_ts": 2, "credit": 2},
+  "price": 594.32,
+  "sma200": 563.45,
+  "vix": 14.2,
+  "vix3m": 16.1,
+  "vix_vix3m_ratio": 0.882,
+  "hy_oas_pct": 2.78
+}
 ```
 
-**VIX term structure (VIX vs VIX3M):**
-```
-WebFetch: https://query2.finance.yahoo.com/v8/finance/chart/%5EVIX3M?range=5d&interval=1d
-Signal: +1 if VIX/VIX3M < 1 (contango/calm), -1 if > 1 (backwardation/stress)
-```
+Parse `regime` and `exposure_multiplier` directly from this JSON.
 
-### 3. Credit spreads — FRED HY OAS
-
-**Try FRED (may timeout — retry once, then skip):**
-```
-WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2
-Parse: last row = date,OAS_bps
-Signal: +1 if OAS < 350bps, -1 if OAS > 500bps, else 0
-```
-If FRED times out → mark credit as `[SIGNAL UNAVAILABLE]` and drop its weight to 0 from the ensemble. Continue with the other signals.
-
-### 4. Yield curve — FRED T10Y2Y
-```
-WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=T10Y2Y
-Parse: last row = 10y-2y spread
-Signal: +1 if spread > 0, -1 if spread < -0.25
-```
-Same retry-once / skip rule as credit.
-
-### 5. Score → exposure multiplier
-Weighted sum: SMA(×3) + VIX_TS(×2) + Credit(×2) + Curve(×1), max=8, min=-8.
-Normalize to [-1, +1] by dividing by 8. Map per the table above.
+**Requires:** `yfinance` installed (`pip install yfinance`). On openclaw pods this is pre-installed.
 
 ## Implementation notes (Python / local runner)
 - Data: yfinance for prices/VIX (`^VIX`, `^VIX3M`), HYG/LQD; **FRED** for HY OAS (`BAMLH0A0HYM2`),

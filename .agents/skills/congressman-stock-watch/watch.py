@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """congressman-stock-watch — STOCK Act dedup ledger + live disclosure fetcher.
 
-Fetches from housestockwatcher.com + senatestockwatcher.com, filters for PURCHASES,
-deduplicates against a JSONL ledger so the same ticker is never proposed twice.
+Fetches from QuiverQuant API (requires QUIVERQUANT_API_KEY env var), filters for
+PURCHASES, deduplicates against a JSONL ledger so the same ticker is never proposed twice.
 
 Usage:
   watch.py recent [--days 90]             # fetch + print recent PURCHASE transactions
@@ -24,20 +24,11 @@ from collections import defaultdict
 
 LEDGER = os.environ.get("CONGRESS_LEDGER", os.path.join("congress", "recommended.jsonl"))
 
-# Primary + fallback sources (tried in order)
-HOUSE_APIS = [
-    "https://housestockwatcher.com/api/transactions",
-    "https://house-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json",
-]
-SENATE_APIS = [
-    "https://senatestockwatcher.com/api/transactions",
-    "https://senate-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json",
-]
-# Keep legacy names for backwards compat
-HOUSE_API = HOUSE_APIS[0]
-SENATE_API = SENATE_APIS[0]
+QUIVERQUANT_API_KEY = os.environ.get("QUIVERQUANT_API_KEY", "")
+QUIVERQUANT_HOUSE_URL = "https://api.quiverquant.com/beta/live/housetrading"
+QUIVERQUANT_SENATE_URL = "https://api.quiverquant.com/beta/live/senatetrading"
 
-PURCHASE_KEYWORDS = {"purchase", "buy", "bought", "exchange (partial)"}
+PURCHASE_KEYWORDS = {"purchase", "buy", "bought"}
 SKIP_KEYWORDS = {"sale", "sale (partial)", "sale (full)", "sale_full", "sale_partial"}
 
 AMOUNT_ORDER = [
@@ -51,23 +42,30 @@ AMOUNT_ORDER = [
 ]
 
 
-def _fetch_json(url: str) -> list:
+def _require_api_key():
+    if not QUIVERQUANT_API_KEY:
+        print(
+            "error: QUIVERQUANT_API_KEY env var not set.\n"
+            "Get a free key at https://www.quiverquant.com/account/signup\n"
+            "Then: export QUIVERQUANT_API_KEY=<your-key>",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
+def _fetch_quiverquant(url: str) -> list:
+    _require_api_key()
+    req = Request(url, headers={
+        "User-Agent": "congressman-stock-watch/1.0 (educational)",
+        "Authorization": f"Token {QUIVERQUANT_API_KEY}",
+        "Accept": "application/json",
+    })
     try:
-        req = Request(url, headers={"User-Agent": "congressman-stock-watch/1.0 (educational)"})
-        with urlopen(req, timeout=15) as r:
+        with urlopen(req, timeout=20) as r:
             return json.loads(r.read().decode())
     except URLError as e:
-        print(f"[WARN] fetch failed {url}: {e}", file=sys.stderr)
+        print(f"[ERROR] QuiverQuant fetch failed {url}: {e}", file=sys.stderr)
         return []
-
-
-def _fetch_json_with_fallback(urls: list) -> list:
-    for url in urls:
-        result = _fetch_json(url)
-        if result:
-            return result
-        print(f"[INFO] trying next fallback...", file=sys.stderr)
-    return []
 
 
 def _load() -> list:
@@ -99,58 +97,75 @@ def _amount_rank(amount_str: str) -> int:
         return len(AMOUNT_ORDER)
 
 
+def _normalize_amount(raw: str) -> str:
+    """Map QuiverQuant amount strings to standard ranges."""
+    raw = (raw or "").strip()
+    # QuiverQuant may return numeric values like "1000000" or range strings
+    try:
+        v = int(raw.replace(",", "").replace("$", "").replace("+", ""))
+        if v >= 1_000_001: return "$1,000,001+"
+        if v >= 500_001: return "$500,001 - $1,000,000"
+        if v >= 250_001: return "$250,001 - $500,000"
+        if v >= 100_001: return "$100,001 - $250,000"
+        if v >= 50_001: return "$50,001 - $100,000"
+        if v >= 15_001: return "$15,001 - $50,000"
+        return "$1,001 - $15,000"
+    except (ValueError, AttributeError):
+        return raw  # return as-is if not parseable
+
+
 def fetch_recent(days: int) -> list:
     cutoff = (datetime.now() - timedelta(days=days)).date()
     rows = []
 
-    # House
-    for tx in _fetch_json_with_fallback(HOUSE_APIS):
-        tx_date_str = tx.get("transaction_date") or tx.get("disclosure_date") or ""
+    # House (QuiverQuant)
+    for tx in _fetch_quiverquant(QUIVERQUANT_HOUSE_URL):
+        tx_date_str = tx.get("Date") or tx.get("transaction_date") or ""
         try:
             tx_date = datetime.strptime(tx_date_str[:10], "%Y-%m-%d").date()
         except ValueError:
             continue
         if tx_date < cutoff:
             continue
-        tx_type = tx.get("type") or tx.get("transaction_type") or ""
+        tx_type = tx.get("Transaction") or tx.get("type") or ""
         if not _is_purchase(tx_type):
             continue
-        ticker = (tx.get("ticker") or "").upper().strip()
+        ticker = (tx.get("Ticker") or tx.get("ticker") or "").upper().strip()
         if not ticker or ticker in ("N/A", "--", ""):
             continue
         rows.append({
             "ticker": ticker,
-            "member": tx.get("representative") or tx.get("name") or "Unknown",
+            "member": tx.get("Representative") or tx.get("representative") or "Unknown",
             "chamber": "house",
             "transaction_date": tx_date_str[:10],
-            "disclosure_date": tx.get("disclosure_date", "")[:10],
-            "amount": tx.get("amount") or "",
-            "asset_description": tx.get("asset_description") or tx.get("asset") or "",
+            "disclosure_date": (tx.get("ReportDate") or tx.get("disclosure_date") or "")[:10],
+            "amount": _normalize_amount(tx.get("Amount") or tx.get("amount") or ""),
+            "asset_description": tx.get("asset_description") or tx.get("Asset") or "",
         })
 
-    # Senate
-    for tx in _fetch_json_with_fallback(SENATE_APIS):
-        tx_date_str = tx.get("transaction_date") or tx.get("disclosure_date") or ""
+    # Senate (QuiverQuant)
+    for tx in _fetch_quiverquant(QUIVERQUANT_SENATE_URL):
+        tx_date_str = tx.get("Date") or tx.get("transaction_date") or ""
         try:
             tx_date = datetime.strptime(tx_date_str[:10], "%Y-%m-%d").date()
         except ValueError:
             continue
         if tx_date < cutoff:
             continue
-        tx_type = tx.get("type") or tx.get("transaction_type") or ""
+        tx_type = tx.get("Transaction") or tx.get("type") or ""
         if not _is_purchase(tx_type):
             continue
-        ticker = (tx.get("ticker") or "").upper().strip()
+        ticker = (tx.get("Ticker") or tx.get("ticker") or "").upper().strip()
         if not ticker or ticker in ("N/A", "--", ""):
             continue
         rows.append({
             "ticker": ticker,
-            "member": tx.get("senator") or tx.get("name") or "Unknown",
+            "member": tx.get("Senator") or tx.get("senator") or tx.get("Representative") or "Unknown",
             "chamber": "senate",
             "transaction_date": tx_date_str[:10],
-            "disclosure_date": tx.get("disclosure_date", "")[:10],
-            "amount": tx.get("amount") or "",
-            "asset_description": tx.get("asset_description") or tx.get("asset") or "",
+            "disclosure_date": (tx.get("ReportDate") or tx.get("disclosure_date") or "")[:10],
+            "amount": _normalize_amount(tx.get("Amount") or tx.get("amount") or ""),
+            "asset_description": tx.get("asset_description") or tx.get("Asset") or "",
         })
 
     return rows
@@ -159,8 +174,7 @@ def fetch_recent(days: int) -> list:
 def cmd_recent(a):
     rows = fetch_recent(a.days)
     if not rows:
-        print(f"(no purchase disclosures found in last {a.days} days — "
-              "both APIs returned empty or are unreachable; verify housestockwatcher.com + senatestockwatcher.com)")
+        print(f"(no purchase disclosures found in last {a.days} days)")
         return
 
     # Cluster by ticker
@@ -186,8 +200,9 @@ def cmd_recent(a):
 
 
 def cmd_roster(a):
-    print("Tracked chambers: House (housestockwatcher.com) + Senate (senatestockwatcher.com)")
-    print("All members who file STOCK Act disclosures are tracked automatically.")
+    print("Data source: QuiverQuant API (https://api.quiverquant.com)")
+    print("Tracked chambers: House + Senate (all STOCK Act filers)")
+    print(f"API key set: {'yes' if QUIVERQUANT_API_KEY else 'NO — set QUIVERQUANT_API_KEY'}")
     print(f"Ledger: {LEDGER}")
 
 

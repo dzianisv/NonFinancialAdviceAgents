@@ -1,13 +1,13 @@
 ---
 name: congressman-stock-watch
-description: Watch recent congressional stock disclosures (STOCK Act — House + Senate) and propose NEW buy-candidates from what members of Congress just purchased. Use when asked "what stocks are congressmen buying", "track congressional trades", "what did Pelosi/McCaul buy", "run the congressional watcher", "congressman stock picks", "STOCK Act tracker", or on a schedule. Fetches from housestockwatcher.com + senatestockwatcher.com APIs, filters for PURCHASES only, deduplicates against a ledger so the same ticker is never proposed twice. Recommend-only — never trades. Educational, not advice. Note: disclosures lag 30-45 days; congress-members are long-only (personal accounts), not macro smart-money.
+description: Watch recent congressional stock disclosures (STOCK Act — House + Senate) and propose NEW buy-candidates from what members of Congress just purchased. Use when asked "what stocks are congressmen buying", "track congressional trades", "what did Pelosi/McCaul buy", "run the congressional watcher", "congressman stock picks", "STOCK Act tracker", or on a schedule. Fetches from QuiverQuant API (requires QUIVERQUANT_API_KEY), filters for PURCHASES only, deduplicates against a ledger so the same ticker is never proposed twice. Recommend-only — never trades. Educational, not advice. Note: disclosures lag 30-45 days; congress-members are long-only (personal accounts), not macro smart-money.
 license: MIT
 compatibility: opencode
 metadata:
   audience: event-driven-and-political-alpha-investors
   domain: congressional-disclosure-watchlist
   role: stock-act-buy-watcher-and-deduper
-  source: "housestockwatcher.com + senatestockwatcher.com (community STOCK Act aggregators)"
+  source: "QuiverQuant API (https://api.quiverquant.com)"
 ---
 
 # Congressional Stock Watch (propose new buys from STOCK Act filings)
@@ -25,33 +25,20 @@ This **proposes / notifies** — it **never trades** and never sizes a real orde
 - **Do not rely on sells:** Sells can be for many reasons (tax, divorce, rebalancing). Focus on **PURCHASES** with a notable dollar-range.
 - **Cluster signal:** A ticker appearing in ≥3 purchases across different members in the same filing period is a stronger signal than a single buy.
 
-## Data sources (tried in priority order)
+## Data source
 
-**Primary (community aggregators, fastest):**
+**QuiverQuant API (requires `QUIVERQUANT_API_KEY` env var):**
 ```
-https://housestockwatcher.com/api/transactions         — House disclosures JSON
-https://senatestockwatcher.com/api/transactions        — Senate disclosures JSON
-```
-
-**Fallback 1 — S3 mirrors (same data, different host):**
-```
-https://house-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json
-https://senate-stock-watcher-data.s3-us-east-2.amazonaws.com/data/all_transactions.json
+House:  https://api.quiverquant.com/beta/live/housetrading
+Senate: https://api.quiverquant.com/beta/live/senatetrading
+Authorization: Token <QUIVERQUANT_API_KEY>
 ```
 
-**Fallback 2 — WebFetch scraping (when APIs are DNS-blocked):**
-If the JSON APIs above fail with DNS errors, use WebFetch on these web pages and extract disclosure tables:
-```
-WebFetch: https://www.quiverquant.com/sources/housetrading    (scrape the table)
-WebFetch: https://www.quiverquant.com/sources/senatetrading   (scrape the table)
-```
+Free tier available at https://www.quiverquant.com/account/signup
 
-**Official source (for verification of specific transactions):**
-```
-https://disclosures-clerk.house.gov/FinancialDisclosure   — House official (requires JS — use as verification only)
-```
+**If `QUIVERQUANT_API_KEY` is not set:** The script exits with an error. Set the key and retry. Do NOT fabricate transactions.
 
-**⚠ If ALL sources fail:** Emit `[SIGNAL UNAVAILABLE — congressional APIs blocked in this environment]` and continue with the rest of the pipeline. Do NOT fabricate transactions.
+**Background:** housestockwatcher.com and senatestockwatcher.com are permanently decommissioned (DNS has no A record). Their S3 mirrors are private (403). QuiverQuant is the only working free aggregator.
 
 ## The loop
 

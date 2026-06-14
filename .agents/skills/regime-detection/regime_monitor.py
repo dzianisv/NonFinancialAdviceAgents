@@ -2,125 +2,147 @@
 """
 regime_monitor.py — Daily market-regime monitor.
 
-Computes a weighted-ensemble regime score from robust signals and maps it to a
-target gross-exposure multiplier. Notification-first: prints (or emits JSON) a
-recommendation; it does NOT place trades.
+Computes a weighted-ensemble regime score from robust signals:
+  - S&P 500 vs 200-day MA (weight 3)
+  - VIX term structure VIX/VIX3M (weight 2)
+  - HY credit spreads via FRED BAMLH0A0HYM2 (weight 2)
 
-Signals (each scored -1 / 0 / +1, weighted):
-    - S&P 500 vs 200-day MA (with a 1% band)        weight 3   [trend, robust]
-    - VIX term structure  VIX / VIX3M               weight 2   [stress]
-    - Credit spreads      HYG / LQD ratio trend     weight 2   [credit leads equities]
-    - Breadth proxy       % of a sample > 200dma     weight 1   [confirmatory]
-    - Yield curve         10y-2y (^TNX vs 2y proxy)  weight 1   [slow, strategic]
+Requires: pip install yfinance
+  yfinance handles Yahoo Finance session cookies automatically.
 
 Usage:
-    python regime_monitor.py
-    python regime_monitor.py --json
-    python regime_monitor.py --ticker SPY
+    python3 regime_monitor.py
+    python3 regime_monitor.py --json
+    python3 regime_monitor.py --ticker SPY
 
-Requires: pip install yfinance pandas numpy
-Data caveats & upgrades: see ../dip-tranches-strategy/references/data-sources.md
 Educational only — not investment advice.
 """
 from __future__ import annotations
 import argparse, json, sys
-import numpy as np
-import pandas as pd
+from urllib.request import Request, urlopen
 
 try:
     import yfinance as yf
 except ImportError:
-    sys.exit("pip install yfinance pandas numpy")
+    sys.exit("pip install yfinance")
 
 
-def _last(series):
-    s = series.dropna()
-    return float(s.iloc[-1]) if len(s) else float("nan")
+def _fetch_fred_last(series_id: str) -> float | None:
+    """Fetch the most recent value from a FRED series CSV."""
+    url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
+    req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urlopen(req, timeout=15) as r:
+            lines = r.read().decode().strip().split("\n")
+        last = lines[-1].split(",")
+        val = last[1].strip() if len(last) > 1 else "."
+        return float(val) if val not in (".", "", "NA") else None
+    except Exception:
+        return None
 
 
-def compute_regime(equity_ticker="^GSPC"):
-    tickers = [equity_ticker, "^VIX", "^VIX3M", "HYG", "LQD"]
-    px = yf.download(tickers, period="2y", auto_adjust=True, progress=False)["Close"].ffill()
+def compute_regime(equity_ticker: str = "SPY") -> dict:
+    signals: dict[str, int] = {}
+    weights: dict[str, int] = {}
+    data: dict = {}
 
-    signals, weights = {}, {}
+    # Download price data via yfinance (handles cookies/crumb automatically)
+    tickers = [equity_ticker, "^VIX", "^VIX3M"]
+    px = yf.download(tickers, period="1y", auto_adjust=True, progress=False)["Close"].ffill()
 
-    # 1) Price vs 200d MA (+/-1% band)  weight 3
-    p = px[equity_ticker]
-    sma200 = p.rolling(200).mean()
-    price, ma = _last(p), _last(sma200)
-    if price > ma * 1.01:
+    def _last(col):
+        s = px[col].dropna()
+        return float(s.iloc[-1]) if len(s) else float("nan")
+
+    # 1) Price vs 200-day MA (weight 3)
+    p = px[equity_ticker].dropna()
+    price = float(p.iloc[-1])
+    sma200 = float(p.rolling(200).mean().iloc[-1])
+    data["equity_ticker"] = equity_ticker
+    data["price"] = round(price, 2)
+    data["sma200"] = round(sma200, 2)
+    if price > sma200 * 1.01:
         signals["sma200"] = 1
-    elif price < ma * 0.99:
+    elif price < sma200 * 0.99:
         signals["sma200"] = -1
     else:
         signals["sma200"] = 0
     weights["sma200"] = 3
 
-    # 2) VIX term structure VIX/VIX3M  weight 2  (>1 backwardation = stress)
-    if "^VIX" in px and "^VIX3M" in px:
-        ratio = _last(px["^VIX"]) / _last(px["^VIX3M"])
+    # 2) VIX term structure VIX/VIX3M (weight 2)
+    vix = _last("^VIX")
+    vix3m = _last("^VIX3M")
+    data["vix"] = round(vix, 2) if vix == vix else None
+    data["vix3m"] = round(vix3m, 2) if vix3m == vix3m else None
+    if vix == vix and vix3m == vix3m and vix3m != 0:
+        ratio = vix / vix3m
+        data["vix_vix3m_ratio"] = round(ratio, 3)
         signals["vix_ts"] = 1 if ratio < 0.95 else (-1 if ratio > 1.0 else 0)
     else:
-        signals["vix_ts"], ratio = 0, float("nan")
+        data["vix_vix3m_ratio"] = None
+        signals["vix_ts"] = 0
     weights["vix_ts"] = 2
 
-    # 3) Credit spreads via HYG/LQD ratio trend (20d slope)  weight 2
-    if "HYG" in px and "LQD" in px:
-        cr = (px["HYG"] / px["LQD"]).dropna()
-        slope = _last(cr) - cr.iloc[-21] if len(cr) > 21 else 0.0
-        signals["credit"] = 1 if slope > 0 else (-1 if slope < 0 else 0)
+    # 3) HY credit spreads via FRED BAMLH0A0HYM2 OAS in % (weight 2)
+    hy_oas = _fetch_fred_last("BAMLH0A0HYM2")
+    data["hy_oas_pct"] = round(hy_oas, 2) if hy_oas is not None else None
+    if hy_oas is not None:
+        # OAS in %; < 3.5% = tight (risk-on); > 5.0% = wide (risk-off)
+        signals["credit"] = 1 if hy_oas < 3.5 else (-1 if hy_oas > 5.0 else 0)
     else:
         signals["credit"] = 0
     weights["credit"] = 2
 
-    # 4) Breadth proxy: is the equity index itself > 50d & 200d (cheap stand-in)  weight 1
-    sma50 = _last(p.rolling(50).mean())
-    signals["breadth"] = 1 if (price > sma50 and price > ma) else (-1 if price < ma else 0)
-    weights["breadth"] = 1
-
-    # weighted score normalized to [-1, 1]
     wsum = sum(weights.values())
     score = sum(signals[k] * weights[k] for k in signals) / wsum
 
     if score >= 0.5:
-        mult, regime = 1.0, "risk-on"
+        mult, regime = 1.0, "RISK_ON"
     elif score >= 0.0:
-        mult, regime = 0.7, "neutral"
+        mult, regime = 0.7, "NEUTRAL"
     elif score >= -0.5:
-        mult, regime = 0.5, "risk-off (mild)"
+        mult, regime = 0.5, "RISK_OFF (mild)"
     else:
-        mult, regime = 0.3, "risk-off"
+        mult, regime = 0.3, "RISK_OFF"
 
     return {
-        "date": str(px.index[-1].date()),
-        "equity_ticker": equity_ticker,
-        "price": round(price, 2),
-        "sma200": round(ma, 2),
-        "vix_vix3m_ratio": round(ratio, 3) if ratio == ratio else None,
         "regime": regime,
         "exposure_multiplier": mult,
         "score": round(score, 3),
         "signals": signals,
         "weights": weights,
-        "note": "Persistence rule: require this regime to hold 3-5 sessions before acting. "
-                "Educational, not advice.",
+        **data,
+        "note": (
+            "Persistence rule: require regime to hold 3-5 sessions before acting. "
+            "Educational, not advice."
+        ),
     }
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--ticker", default="^GSPC", help="equity index ticker (default ^GSPC)")
-    ap.add_argument("--json", action="store_true")
+def main() -> None:
+    ap = argparse.ArgumentParser(description="Regime monitor")
+    ap.add_argument("--ticker", default="SPY", help="equity ticker (default SPY)")
+    ap.add_argument("--json", action="store_true", help="emit JSON")
     a = ap.parse_args()
-    r = compute_regime(a.ticker)
+
+    try:
+        r = compute_regime(a.ticker)
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(1)
+
     if a.json:
         print(json.dumps(r, indent=2))
         return
-    print(f"\n=== Market Regime  ({r['date']}) ===")
+
+    print(f"\n=== Market Regime ===")
     print(f"  {r['equity_ticker']}: {r['price']}   200d MA: {r['sma200']}")
-    print(f"  VIX/VIX3M: {r['vix_vix3m_ratio']}")
+    print(f"  VIX: {r.get('vix', 'n/a')}  "
+          f"VIX3M: {r.get('vix3m', 'n/a')}  "
+          f"ratio: {r.get('vix_vix3m_ratio', 'n/a')}")
+    print(f"  HY OAS: {r.get('hy_oas_pct', 'n/a')}%")
     print(f"  signals: {r['signals']}  (weights {r['weights']})")
-    print(f"\n  REGIME: {r['regime'].upper()}   score {r['score']:+.2f}")
+    print(f"\n  REGIME: {r['regime']}   score {r['score']:+.3f}")
     print(f"  -> target gross-exposure multiplier: {r['exposure_multiplier']}x")
     print(f"\n  {r['note']}\n")
 

@@ -29,20 +29,27 @@ AAPL,25,165.00,"Quality compounder","$150 = add; $220 = trim","Watch earnings","
 
 The `portfolio-monitor` script reads this file and fires alerts when your written triggers hit.
 
-## 2b. Known environment limitations (openclaw pod)
+## 2b. Environment requirements (openclaw pod)
 
-When running on openclaw, the following data sources are blocked at the network level:
+| Skill | Requirement | Status |
+|-------|-------------|--------|
+| regime-detection | `yfinance` Python package | Pre-installed in pod (Dockerfile ships it) |
+| congressman-stock-watch | `QUIVERQUANT_API_KEY` env var | **Must set manually** — get free key at quiverquant.com/account/signup |
+| fomc-monitor | `web_fetch` (federalreserve.gov) | Works reliably |
+| prediction-market-odds | `web_fetch` (gamma-api.polymarket.com) | Works reliably |
+| trend-stock-research | `web_fetch` (FT/WSJ RSS) | Works reliably |
+| 13f-watch | `web_fetch` (sec.gov EDGAR) | Works reliably |
 
-| Source | Status | Workaround |
-|--------|--------|------------|
-| Yahoo Finance v8 API (`query1`/`query2`) | **429 rate-limit** when called in parallel | Sequential calls work; or skip regime |
-| stooq.com CSV | **JS challenge** (bot can't execute JS) | Use Yahoo sequentially |
-| FRED CSV (`fredgraph.csv`) | **Timeout** intermittently | Retry once; mark [UNAVAILABLE] if fails |
-| housestockwatcher.com / senatestockwatcher.com | **DNS ENOTFOUND** (pod-level block) | Use S3 mirror or QuiverQuant fallback per SKILL.md |
+**Set the QuiverQuant key in openclaw:**
+```bash
+# Add to ~/.openclaw/workspace/investor/.env or pod environment
+QUIVERQUANT_API_KEY=<your-key>
+```
 
-**What works reliably in openclaw:** federalreserve.gov (FOMC), gamma-api.polymarket.com (Polymarket), SEC EDGAR, FT RSS, WSJ RSS.
-
-**Regime signal workaround:** If price APIs are unavailable, the agent will emit `REGIME: [UNAVAILABLE]` and continue producing a brief from FOMC + Polymarket + journalism + 13F. The brief is still actionable; the exposure multiplier just can't be computed that run.
+**Notes:**
+- Yahoo Finance requires session cookies — raw `web_fetch` gets 429. Use `regime_monitor.py` (yfinance) only.
+- housestockwatcher.com and senatestockwatcher.com are permanently decommissioned (no DNS A record).
+- FRED T10Y2Y endpoint returns 0 bytes — not used. HY OAS (`BAMLH0A0HYM2`) works fine.
 
 ## 3. Paste this prompt to your agent
 
