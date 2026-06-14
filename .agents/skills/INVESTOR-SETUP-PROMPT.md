@@ -47,21 +47,23 @@ STEP 1 — VERIFY SKILLS
 Confirm these skills are loaded and tell me which are missing:
 
 SIGNAL SKILLS:
-  prediction-market-odds   (Polymarket + Kalshi + CME FedWatch)
-  fomc-monitor             (Fed statements + hawkish/dovish delta)
-  trend-stock-research     (FT / WSJ / Seeking Alpha journalism)
-  13f-watch                (institutional 13F buys, deduped)
-  congressman-stock-watch  (STOCK Act purchases, deduped)
-  regime-detection         (risk-on/off from 200dMA, VIX, credit spreads)
+  prediction-market-odds       (Polymarket + Kalshi + CME FedWatch — required by superforecasting)
+  analyst-derivatives-positioning  (futures funding/OI, options skew/IV — required by superforecasting)
+  fomc-monitor                 (Fed statements + hawkish/dovish delta — required by macro-panel)
+  trend-stock-research         (FT / WSJ / Seeking Alpha journalism — paywall bypass built-in)
+  13f-watch                    (institutional 13F buys, deduped — requires hedge-fund-13f-analysis)
+  hedge-fund-13f-analysis      (EDGAR filing reader — required sub-skill of 13f-watch)
+  congressman-stock-watch      (STOCK Act purchases, deduped)
+  regime-detection             (risk-on/off from 200dMA, VIX, credit spreads)
 
 ANALYSIS SKILLS:
   macro-panel              (7 macro-thinker lenses: Dalio / Druckenmiller / Lyn Alden / Hunt / Pettis / Napier / Buffett)
-  multi-lens-quorum        (buy/sell/hold verdict engine)
-  superforecasting         (dated probability + invalidation triggers)
-  fundamental-analysis     (valuation, FCF, quality screen)
+  multi-lens-quorum        (buy/sell/hold verdict engine — also add Graham/Housel for deep-value/behavioral seat)
+  superforecasting         (dated probability + invalidation triggers — requires prediction-market-odds + analyst-derivatives-positioning)
+  fundamental-analysis     (valuation, FCF, quality screen — cross-checks with hedge-fund-13f-analysis)
 
 PORTFOLIO SKILLS:
-  portfolio-monitor        (discipline check: fires price triggers on your holdings)
+  portfolio-monitor        (discipline check: fires price triggers on your holdings — has runnable portfolio_monitor.py)
   risk-management          (concentration cap, drawdown circuit-breaker, veto authority)
   hedge-fund-manager       (PM orchestrator — delegates to all sub-skills above)
 

@@ -30,8 +30,17 @@ and the risk veto into one calibrated, actionable answer — and is graded by `e
 5. **No fabrication.** Never invent prices, on-chain metrics, or a specific news catalyst. If you don't
    have live data, say so and name what you'd verify.
 
+## Required sub-skills (load before answering)
+
+| When | Load |
+|------|------|
+| Any timing / deploy / "is now good?" question | **`analyst-crypto`** — four-pillar liquidity→on-chain→sentiment→DCA lens. The global liquidity pillar (Howell) is the governor over all timing decisions. Load it first; do not answer timing without the liquidity phase read. |
+| Any FOMC / Fed / rates mention | **`fomc-monitor`** → tone + language delta. Then **`prediction-market-odds`** → CME FedWatch rate path. Hawkish Fed = liquidity headwind for BTC. |
+| Any "is the derivatives positioning bullish/bearish?" | **`analyst-derivatives-positioning`** — funding rates, OI, options skew, max-pain. Harder sentiment than Fear & Greed. |
+| Any alt selection | **`crypto-token-screener`** — 6-point BTC-hurdle filter before any tilt on an alt. |
+
 ## How to answer (route by question type)
-- **Timing ("buy the dip / buy today?")** → REGIME first (above/below 200d, death cross, risk-off?), then
+- **Timing ("buy the dip / buy today?")** → Load `analyst-crypto` liquidity pillar FIRST (is the global liquidity tide rising or falling?). Then REGIME (above/below 200d, death cross, risk-off?), then
   split the answer for the **trader** (trend says wait below 200d) vs the **long-term accumulator** (a deep
   drawdown is where you *start* nibbling). Give the concrete staged size + reserve ladder + "no leverage".
   Name the falling-knife tail (BTC has done −70/−80%).

@@ -76,7 +76,11 @@ Drawdown budget: a −60% crypto move should leave the whole book within **~−3
 
 ## No shitty assets (the hard line — moderate does NOT relax this)
 
-**Keep only:** T-bills, BTC, ETH, SOL (+ liquid staking), other genuine majors, overcollateralized loans
+**REQUIRED SUB-SKILL for any non-BTC/ETH/SOL token:** `crypto-token-screener` — run the 6-point
+BTC-hurdle filter before including any alt token in the portfolio. If it can't clear the BTC-denominated
+value-accrual bar, default to BTC. Do not accept a token's own marketing as the value-accrual argument.
+
+**Keep only:** T-bills, BTC, ETH, SOL (+ liquid staking), other genuine majors that passed `crypto-token-screener`, overcollateralized loans
 against those, and audited real-yield protocols (>6 months live, >$20M TVL, yield you can name).
 
 **Reject always (these ARE the shitty assets):** reflexive/synthetic dollars (sUSDe, stcUSD, reUSD, USDe…),
