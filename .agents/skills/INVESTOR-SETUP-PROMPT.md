@@ -34,17 +34,11 @@ The `portfolio-monitor` script reads this file and fires alerts when your writte
 | Skill | Requirement | Status |
 |-------|-------------|--------|
 | regime-detection | `yfinance` Python package | Pre-installed in pod (Dockerfile ships it) |
-| congressman-stock-watch | `QUIVERQUANT_API_KEY` env var | **Must set manually** — get free key at quiverquant.com/account/signup |
+| congressman-stock-watch | none — scrapes Capitol Trades | Works out of the box; no signup |
 | fomc-monitor | `web_fetch` (federalreserve.gov) | Works reliably |
 | prediction-market-odds | `web_fetch` (gamma-api.polymarket.com) | Works reliably |
 | trend-stock-research | `web_fetch` (FT/WSJ RSS) | Works reliably |
 | 13f-watch | `web_fetch` (sec.gov EDGAR) | Works reliably |
-
-**Set the QuiverQuant key in openclaw:**
-```bash
-# Add to ~/.openclaw/workspace/investor/.env or pod environment
-QUIVERQUANT_API_KEY=<your-key>
-```
 
 **Notes:**
 - Yahoo Finance requires session cookies — raw `web_fetch` gets 429. Use `regime_monitor.py` (yfinance) only.
