@@ -94,8 +94,13 @@ data feeds, intraday day-trading (that is root GOAL.md workstreams B/C, behind t
       not more skills.
 - [x] The 3 kept scripts hardened after adversarial review: true 52w intraday high (was mislabeled "ATH"
       close-max), SMA200 nulled <200d, convergence freshness fails CLOSED, dropped-batch logging.
-- [ ] Re-deploy the FIXED dip/crypto scanners to the live agent (it still has the pre-review versions).
+- [x] Re-deployed the FIXED dip/crypto/convergence scripts to the live agent (high_52w/pct_from_high live).
+- [x] Wired the proactive loop on AGENT-NATIVE CRON (the agent already had 13 jobs — regime 08:00, journalism
+      08:15, weekly 13F/congress/brief Mon). Added the 3 missing: 'Daily stock dip scan' (45 7 * * 1-5),
+      'Daily crypto dip scan' (50 7 * * *), 'Daily signal convergence' (30 8 * * 1-5), all SILENT-unless-alert.
+      Removed the duplicating workspace HEARTBEAT.md — CRON owns the schedule; heartbeat stays light.
+- [ ] Log every DM'd call to `forecast-ledger` for 30/60/90d scoring (feedback loop — not yet wired into the
+      cron prompts).
+- [ ] Align docs (TDD §3 / SETUP-openclaw) to reality: openclaw primary = AGENT CRON, not heartbeat+HEARTBEAT.md.
 - [ ] Deploy/validate on claude-code + hermes backends (openclaw proven; other two documented only).
-- [ ] Wire the loop on AGENT-NATIVE CRON (fixed-UTC daily/weekly), not heartbeat alone; weekly brief as a
-      dynamic workflow; log every DM'd call to `forecast-ledger` for 30/60/90d scoring.
 </done_when>
