@@ -27,8 +27,8 @@ forecasts/
 13f/
 .reflection/
 
-# local copies created by npx skills add --copy
-skills/
+# local copies created by npx skills add --copy (repo-root only — must NOT match .agents/skills/)
+/skills/
 
 # claude code session artifacts
 session.txt
