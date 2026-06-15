@@ -1,7 +1,7 @@
 export const meta = {
   name: 'hedge-fund-committee',
-  description: 'Hedge-fund org of agent-employees: analyst fan-out -> aggregate -> investor panel (independent vote + dissent) -> risk veto -> CIO decision memo. Reuses existing skills as employees. RECOMMEND-ONLY.',
-  whenToUse: 'Weekly investment committee, or a deep decision on one ticker. The SLOW/deliberative tier (the daily cron dip/convergence alerts are the separate FAST tier).',
+  description: 'Find the next stocks to BUY. A hedge-fund org of agent-employees DISCOVERS candidates (13F/congress/news/dips/regime), aggregates by conviction, an investor panel votes (independent + dissent), risk vetoes/sizes, and the CIO issues a ranked BUY list. Open-universe research — no ticker needed. RECOMMEND-ONLY.',
+  whenToUse: 'PRIMARY: "what should I buy this week / next picks" — open-universe discovery, NO ticker. The SLOW/deliberative tier (daily cron dip/convergence alerts are the separate FAST tier). SECONDARY (optional): pass args:{ticker} only to deep-dive a name you ALREADY have.',
   phases: [
     { title: 'Analysts' },
     { title: 'Aggregate' },
@@ -11,8 +11,15 @@ export const meta = {
   ],
 }
 
-// args (optional): { ticker: "GOOGL" } to deep-dive ONE name, else the full weekly sweep.
+// args (optional): { ticker: "GOOGL" } to deep-dive ONE name, else the full discovery sweep.
+//                  { portfolio: "<holdings text/CSV>" } to ground sizing/concentration in the REAL book.
 const FOCUS = (args && args.ticker) ? String(args.ticker).toUpperCase() : null
+const PORTFOLIO = (args && args.portfolio) ? String(args.portfolio) : null
+const BOOK_NOTE = PORTFOLIO
+  ? `CURRENT BOOK (ground all sizing/concentration in this — do NOT invent weights):\n${PORTFOLIO}`
+  : `NO current portfolio was supplied. Do NOT invent any "existing X% of book" weight. Treat sizes as ` +
+    `CEILINGS for a NEW position assuming ZERO current exposure (single-name cap 10%); explicitly caveat ` +
+    `that the owner must verify against the actual book before sizing.`
 
 // ── Schemas ────────────────────────────────────────────────────────────────
 const REPORT = {
@@ -76,6 +83,8 @@ const desks = FOCUS
 const reports = (await parallel(desks.map(d => () =>
   agent(d.prompt + ' Educational only, recommend-only. Mark anything you could not fetch [unverified] — NEVER fabricate a number, price, or headline.',
     { label: `analyst:${d.desk}`, phase: 'Analysts', schema: REPORT })
+    // Tag with OUR controlled key — never rely on the agent's free-text `desk` field for lookups.
+    .then(r => r && ({ ...r, _key: d.desk }))
 ))).filter(Boolean)
 
 // ── PHASE 2 — CHIEF OF STAFF: aggregate into ONE briefing packet ─────────────
@@ -86,13 +95,13 @@ for (const r of reports) for (const c of (r.candidates || [])) {
   const t = (c.ticker || '').toUpperCase().trim()
   if (!t) continue
   const e = (byTicker[t] ||= { ticker: t, desks: new Set(), notes: [] })
-  e.desks.add(r.desk)
-  e.notes.push(`${r.desk}: ${c.thesis} [${c.evidence}]`)
+  e.desks.add(r._key)                                   // controlled key, not agent free-text
+  e.notes.push(`${r._key}: ${c.thesis} [${c.evidence}]`)
 }
 const clustered = Object.values(byTicker)
   .map(e => ({ ticker: e.ticker, n_desks: e.desks.size, desks: [...e.desks], notes: e.notes }))
   .sort((a, b) => b.n_desks - a.n_desks)
-const macro = reports.find(r => r.desk === 'macro-regime' || r.desk === 'focus-research')
+const macro = reports.find(r => r._key === 'macro-regime' || r._key === 'focus-research')
 const TOP = clustered.slice(0, FOCUS ? 1 : 5)
 log(`Aggregated ${clustered.length} names; convergence top: ${TOP.map(t => `${t.ticker}(${t.n_desks} desks)`).join(', ') || 'none'}`)
 if (!TOP.length) return { regime: macro?.summary, note: 'No candidates surfaced this cycle. No action.', reports }
@@ -123,8 +132,9 @@ const risked = await parallel(judged.filter(Boolean).map(j => () =>
   agent(
     `You are the CRO. Apply /risk-management to a proposed position in ${j.ticker}. ` +
     `Regime: ${macro?.summary || '[unknown]'}. Committee votes: ${JSON.stringify(j.votes.map(v => ({ l: v.lens, vd: v.verdict, c: v.conviction })))}. ` +
-    `VETO if: RISK_OFF regime, or this would take any name >10% of book, or sector already concentrated. ` +
-    `Else PASS with a max size (% of book). Deterministic risk discipline, not opinion.`,
+    `${BOOK_NOTE} ` +
+    `VETO if: RISK_OFF regime, or this would take any name >10% of book, or (only if a book is supplied) the sector is already concentrated. ` +
+    `Else PASS with a max size. Deterministic risk discipline, not opinion. Never fabricate a portfolio weight.`,
     { label: `risk:${j.ticker}`, phase: 'Risk', schema: RISK })
     .then(risk => ({ ...j, risk }))
 )).then(a => a.filter(Boolean))
@@ -137,13 +147,15 @@ const memo = await agent(
   `CANDIDATES (votes + risk gate): ${JSON.stringify(risked)}\n\n` +
   `Rules:\n` +
   `- RECOMMEND-ONLY. Educational, not advice. Any actionable trade still requires the backtest gate + human approval.\n` +
-  `- Per name: the committee decision (BUY/ADD/HOLD/TRIM/SELL/PASS), conviction, sizing (only if risk=PASS), invalidation trigger.\n` +
+  `- ${BOOK_NOTE}\n` +
+  `- Per name: the committee decision (BUY/ADD/HOLD/TRIM/SELL/PASS), conviction, sizing (only if risk=PASS) — sizes are CEILINGS, never assert an existing holding weight that wasn't supplied, invalidation trigger.\n` +
   `- MANDATORY DISSENT LOG: for every name, surface the strongest MINORITY view verbatim — never average dissent away. ` +
   `If Lacy Hunt (deflation) or any lens dissented, quote it. A unanimous panel is a flag, not a comfort.\n` +
   `- Note convergence (how many independent desks surfaced each name).\n` +
   `- A "WHAT WE COULD NOT VERIFY" section listing every [unverified] item and any desk that was rate-limited.\n` +
   `- 13F lag 45d, STOCK Act lag 30-45d — state it.\n` +
-  `Format tight and skimmable.`,
+  `Output ONLY the memo itself, starting with the line "# INVESTMENT COMMITTEE MEMO". No preamble, ` +
+  `no "I'll write…" meta, no tool talk. Format tight and skimmable.`,
   { label: 'cio-memo', phase: 'Decision' }
 )
 
