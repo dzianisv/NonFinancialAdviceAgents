@@ -53,6 +53,7 @@ def add(a):
         "id": rid, "created": created, "asset": a.asset,
         "question": a.q, "prob": a.p, "horizon": a.by,
         "source": a.source or "", "lenses": a.lens.split(",") if a.lens else [],
+        "flip": a.flip or "",  # invalidation: the condition that would prove this call wrong
         "status": "open", "outcome": None, "resolved_on": None, "note": "",
     })
     _save(rows)
@@ -92,6 +93,8 @@ def list_(a):
         due = "  ** DUE **" if r["status"] == "open" and r["horizon"] <= today else ""
         oc = "" if r["outcome"] is None else f"  -> {'HIT' if r['outcome'] else 'MISS'}"
         print(f'{r["id"]}\n    p={r["prob"]}  by {r["horizon"]}  [{r["status"]}]{due}{oc}  {r["question"]}')
+        if r.get("flip"):
+            print(f'    flip: {r["flip"]}')
 
 
 def score(a):
@@ -137,6 +140,7 @@ def main():
     s = sub.add_parser("add"); s.add_argument("--asset", required=True); s.add_argument("--q", required=True)
     s.add_argument("--p", type=float, required=True); s.add_argument("--by", required=True)
     s.add_argument("--source"); s.add_argument("--lens"); s.add_argument("--id")
+    s.add_argument("--flip", help="invalidation: the condition that would prove this call wrong")
     s.add_argument("--created", help="forecast date YYYY-MM-DD (default today) — backdate a past call"); s.set_defaults(fn=add)
     s = sub.add_parser("resolve"); s.add_argument("id"); s.add_argument("outcome")
     s.add_argument("--on"); s.add_argument("--note"); s.set_defaults(fn=resolve)

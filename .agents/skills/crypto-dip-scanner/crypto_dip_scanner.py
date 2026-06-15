@@ -12,14 +12,23 @@ Usage:
 Data sources (all free, no API key):
   - Prices:      yfinance  (BTC-USD, ETH-USD, etc.) — High/Close, auto_adjust=False
   - Fear & Greed: api.alternative.me/fng/
-  - Funding rate: fapi.binance.com (Binance perp futures; geo-blocked in US/some pods → null)
+  - Funding rate: OKX (primary) -> dYdX (fallback). Binance (fapi.binance.com) is
+                  geo-blocked (HTTP 451) and Bybit returns 403 from many sandboxes,
+                  so they are intentionally NOT used. Funding is a BONUS confirmation
+                  signal only — never a hard requirement.
+  - Regime x-ref: lightweight SPY vs 200d-MA check (yfinance) to surface whether
+                  TradFi is RISK_OFF alongside the crypto dip. Self-contained; does
+                  not depend on the regime-detection skill running.
 
 Honesty notes:
   - "52w high" = max trailing-1y INTRADAY HIGH, not a closing max, not all-time.
   - sma200 is null when <200 days of history exist.
+  - Funding conventions differ by venue: OKX returns the current 8h funding rate;
+    dYdX's nextFundingRate is a 1h rate, normalized to 8h (x8) for comparability.
 """
 from __future__ import annotations
 import argparse, json, sys
+from datetime import datetime, timezone
 from urllib.request import Request, urlopen
 
 try:
@@ -57,17 +66,84 @@ def fear_greed() -> dict | None:
     return None
 
 
-def btc_funding_rate() -> float | None:
-    d = _get("https://fapi.binance.com/fapi/v1/fundingRate?symbol=BTCUSDT&limit=1")
+def _ms_to_iso(ms) -> str | None:
     try:
-        if isinstance(d, list) and d:
-            return round(float(d[0]["fundingRate"]) * 100, 5)
-    except (KeyError, ValueError, TypeError):
+        return datetime.fromtimestamp(int(ms) / 1000, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    except (ValueError, TypeError, OSError):
         return None
+
+
+def btc_funding_rate() -> dict | None:
+    """Live BTC perp funding rate from a non-geo-blocked venue.
+
+    Returns {"rate_pct", "venue", "timestamp", "interval_h"} or None if all blocked.
+    Rate is reported as the venue's native funding rate in percent. OKX = 8h rate;
+    dYdX is a 1h rate normalized to an 8h-equivalent (x8) so the sign/scale is
+    comparable to the Binance convention this skill historically used.
+    Binance (451) and Bybit (403) are deliberately skipped.
+    """
+    # 1) OKX — current 8h funding rate for BTC-USD perpetual swap.
+    d = _get("https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USD-SWAP")
+    try:
+        if isinstance(d, dict) and d.get("code") == "0" and d.get("data"):
+            row = d["data"][0]
+            return {
+                "rate_pct": round(float(row["fundingRate"]) * 100, 5),
+                "venue": "OKX",
+                "timestamp": _ms_to_iso(row.get("fundingTime")),
+                "interval_h": 8,
+            }
+    except (KeyError, ValueError, TypeError, IndexError):
+        pass
+
+    # 2) dYdX v4 — nextFundingRate is a 1h rate; normalize to 8h-equivalent.
+    d = _get("https://indexer.dydx.trade/v4/perpetualMarkets?ticker=BTC-USD")
+    try:
+        if isinstance(d, dict) and d.get("markets", {}).get("BTC-USD"):
+            m = d["markets"]["BTC-USD"]
+            rate_1h = float(m["nextFundingRate"])
+            return {
+                "rate_pct": round(rate_1h * 8 * 100, 5),
+                "venue": "dYdX (1h x8)",
+                "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "interval_h": 8,
+            }
+    except (KeyError, ValueError, TypeError):
+        pass
+
     return None
 
 
-def scan(threshold_pct: float = 20.0) -> tuple[list[dict], dict | None, float | None]:
+def spy_regime() -> dict | None:
+    """Lightweight TradFi regime cross-reference: SPY vs its 200d moving average.
+
+    Self-contained (no dependency on the regime-detection skill). Returns
+    {"ticker", "price", "sma200", "pct_vs_200d", "regime"} or None if data is
+    unavailable. regime is "RISK_OFF" when price < 200d-MA, else "RISK_ON".
+    """
+    try:
+        raw = yf.download("SPY", period="1y", auto_adjust=False, progress=False, group_by="column")
+        cs = raw["Close"]
+        if hasattr(cs, "columns"):  # multiindex/group_by guard
+            cs = cs["SPY"]
+        cs = cs.dropna()
+        if len(cs) < 200:
+            return None
+        price = float(cs.iloc[-1])
+        sma200 = float(cs.rolling(200).mean().iloc[-1])
+        pct = (price - sma200) / sma200 * 100
+        return {
+            "ticker": "SPY",
+            "price": round(price, 2),
+            "sma200": round(sma200, 2),
+            "pct_vs_200d": round(pct, 1),
+            "regime": "RISK_OFF" if price < sma200 else "RISK_ON",
+        }
+    except Exception:
+        return None
+
+
+def scan(threshold_pct: float = 20.0) -> tuple[list[dict], dict | None, dict | None]:
     tickers = list(CRYPTO.values())
     try:
         raw = yf.download(tickers, period="1y", auto_adjust=False, progress=False, group_by="column")
@@ -125,9 +201,17 @@ def main():
     a = ap.parse_args()
 
     hits, fg, fr = scan(a.threshold)
+    regime = spy_regime()
 
     if a.json:
-        print(json.dumps({"dips": hits, "fear_greed": fg, "btc_funding_rate_pct": fr}, indent=2))
+        print(json.dumps({
+            "dips": hits,
+            "fear_greed": fg,
+            "btc_funding": fr,
+            # backward-compatible scalar: the funding rate in percent (or null)
+            "btc_funding_rate_pct": fr["rate_pct"] if fr else None,
+            "tradfi_regime": regime,
+        }, indent=2))
         return
 
     print("\n=== CRYPTO DIP SCANNER ===\n")
@@ -137,10 +221,17 @@ def main():
     else:
         print("  Fear & Greed: [UNAVAILABLE]")
     if fr is not None:
-        fr_note = "shorts dominant" if fr < -0.01 else "overleveraged longs" if fr > 0.05 else "neutral"
-        print(f"  BTC Funding:  {fr:+.4f}%  [{fr_note}]")
+        rate = fr["rate_pct"]
+        fr_note = "shorts dominant" if rate < -0.01 else "overleveraged longs" if rate > 0.05 else "neutral"
+        print(f"  BTC Funding:  {rate:+.4f}%  [{fr_note}]  "
+              f"({fr['venue']}, {fr['interval_h']}h, {fr['timestamp']})")
     else:
-        print("  BTC Funding:  [UNAVAILABLE — Binance geo-blocked]")
+        print("  BTC Funding:  [UNAVAILABLE — OKX + dYdX both unreachable]")
+    if regime is not None:
+        tag = "RISK_OFF — confirms crypto stress" if regime["regime"] == "RISK_OFF" else "RISK_ON"
+        print(f"  TradFi (SPY): {regime['pct_vs_200d']:+.1f}% vs 200d-MA  [{tag}]")
+    else:
+        print("  TradFi (SPY): [UNAVAILABLE]")
     print()
 
     if not hits:

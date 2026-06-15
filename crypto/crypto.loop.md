@@ -1,0 +1,1 @@
+/loop read ./crypto.goal.md, run workflow, evaluate, find gaps, fix. this is long process. I don't expect it will produce good results from first iteration.

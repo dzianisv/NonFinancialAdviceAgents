@@ -43,7 +43,11 @@ WATCHLIST (the "next Google" universe — large quality names worth catching on 
 429 → retry once, then mark `[UNAVAILABLE]`, continue. Never fabricate. (Pod path trades coverage for
 feasibility; the full 100-name scan runs on local backends.)
 
-Output fields: `ticker`, `pct_from_high`, `high_52w`, `current`, `sma200`, `pct_vs_200d`, `conviction`. (`high_52w` = trailing-1y intraday high, not all-time; `sma200` null if <200d history.)
+Output fields: `ticker`, `pct_from_high`, `high_52w`, `current`, `sma200`, `pct_vs_200d`, `as_of`, `conviction`. (`high_52w` = trailing-1y intraday high, not all-time; `sma200` null if <200d history; `as_of` = the ISO date of THIS ticker's own last data row, so each quote's date label is always correct.)
+
+`--json` output is `{"hits": [...], "fetch_misses": [...]}`. A constituent that returns no data is retried once via a single-ticker fetch; if still empty it is reported in `fetch_misses` (and as a `[FETCH-MISS]` line in text mode) — **never silently dropped and never falsely labelled "delisted"** (these are transient Yahoo feed misses, e.g. MMC). The durable `--emit-pool` jsonl contract is unchanged (only HIGH/MEDIUM hits, same row schema).
+
+**2nd-source cross-check (accepted limitation):** quotes are single-source yfinance. A stooq cross-check was evaluated but stooq is behind a JavaScript/anti-bot wall from the agent sandbox (returns an HTML challenge, not CSV) for all tickers, so it is not a reliable second source here. Treat single-source as a known limitation rather than forcing an unreliable cross-check.
 
 Conviction tiers:
 - `HIGH`: >= -30% from 52w high (immediate alert if RISK_ON)

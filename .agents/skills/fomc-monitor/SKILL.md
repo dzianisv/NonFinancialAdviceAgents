@@ -20,8 +20,28 @@ Calendar:    https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm
 Statements:  https://www.federalreserve.gov/newsevents/pressreleases.htm   (filter: monetary policy)
 Minutes:     https://www.federalreserve.gov/monetarypolicy/fomcminutes.htm
 Chair press: https://www.federalreserve.gov/newsevents/speech.htm           (Powell speeches)
-CME FedWatch (market-implied): via prediction-market-odds skill
+Rate-path odds (market-implied): compute from ZQ Fed Funds futures — `python3.12 fedwatch_zq.py`
+                                 (durable; do NOT quote the JS FedWatch page or a WebSearch summary)
 ```
+
+## Rate-path probability — fetch it FIRST-HAND, never second-hand
+
+The CME FedWatch *page* (cmegroup.com) is JS-rendered and routinely unreachable from a sandbox.
+Quoting its % from a WebSearch *summary* is a real, repeated failure (news digests paraphrase and have
+**inverted** the number). The durable fix: FedWatch is just arithmetic on CME 30-Day Fed Funds futures
+(ZQ), and ZQ quotes ARE fetchable. Compute the implied path yourself:
+
+```bash
+python3.12 fedwatch_zq.py                       # nearest two meetings (June + July 2026 defaults)
+python3.12 fedwatch_zq.py "Sep 2026,2026,9,17"  # override meeting dates as label,YYYY,MM,effective-day
+```
+
+This pulls the current target range + EFFR from the **NY Fed markets API** and ZQ futures from the
+**Yahoo chart API** (both no-key, both fetched live), then solves the post-meeting EFFR implied by each
+contract's month-average price and maps the implied move to P(hold)/P(cut)/P(hike). If a source is
+unreachable it prints `[UNAVAILABLE]` for that leg — never a fabricated number. Always print the
+as-of date the script reports. Cross-check against `prediction-market-odds` (Polymarket/Kalshi); if the
+ZQ-implied and crowd numbers disagree by >5pts, report the spread rather than picking one.
 
 ## Output contract
 
@@ -68,7 +88,7 @@ Summary (2-3 sentences): what the Fed said, what changed, and what it means for 
    - Count dovish phrases: "data-dependent", "appropriate to slow", "pause", "balanced", "well-anchored expectations", "easing", "rate cuts"
    - Note any changes in the description of the labor market, inflation trajectory, and balance-sheet policy.
 
-5. **Pull market-implied path** — invoke `prediction-market-odds` skill for CME FedWatch probabilities for the next 2 meetings.
+5. **Pull market-implied path** — run `python3.12 fedwatch_zq.py` for the ZQ-futures-implied hold/cut/hike probability for BOTH the nearest AND the following meeting (not just the nearest). Corroborate with `prediction-market-odds` (Polymarket + Kalshi). Report each meeting's P(hold) with its source and as-of date; if venues diverge >5pts, report the spread.
 
 6. **Emit the structured signal** above. Route to `macro-panel` as the "Fed" input.
 

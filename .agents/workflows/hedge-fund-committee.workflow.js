@@ -126,21 +126,24 @@ const clustered = Object.values(byTicker).map(e => {
   (b.n_sources - a.n_sources) || (a.flow_only === b.flow_only ? 0 : a.flow_only ? 1 : -1)
 )
 const macro = reports.find(r => r._key === 'macro-regime' || r._key === 'focus-research')
-// INCLUSION ≠ crowdedness. n_sources rewards 13F∩dip echoes of the SAME mega-cap and buries a genuine
-// single-desk pre-move thesis (the SanDisk pattern). So the panel sees the UNION of:
-//   (a) top-5 by source count, PLUS  (b) ANY single-desk thesis with desk-conviction >= 4.
-// n_sources stays as a context flag, NOT the sole gatekeeper. Capped at 7 to bound committee fan-out.
-let TOP
+// GATE before the expensive committee. The old top-5 fill admitted mechanical single-source dips with
+// no convergence and no conviction — spending a 4-lens panel just to PASS on them and bloating the memo.
+// A name EARNS the committee only if it shows convergence (n_sources>=2) OR a desk's high conviction
+// (>=4). If nothing clears (a genuinely thin week), fall back to the 2 best single-source names as
+// WATCH-ONLY rather than forcing a full slate — and tell the CIO it was thin so the memo says so.
+let TOP, thinWeek = false
 if (FOCUS) {
   TOP = clustered.slice(0, 1)
 } else {
-  const topBySrc = clustered.slice(0, 5)
-  const highConv = clustered.filter(c => c.max_conviction >= 4)
-  const seen = new Set(), union = []
-  for (const c of [...topBySrc, ...highConv]) if (!seen.has(c.ticker)) { seen.add(c.ticker); union.push(c) }
-  TOP = union.slice(0, 7)
+  const gated = clustered.filter(c => c.n_sources >= 2 || c.max_conviction >= 4)
+  if (gated.length) {
+    TOP = gated.slice(0, 7)
+  } else {
+    thinWeek = true
+    TOP = clustered.slice().sort((a, b) => b.max_conviction - a.max_conviction).slice(0, 2)
+  }
 }
-log(`Aggregated ${clustered.length} names; panel sees ${TOP.length}: ${TOP.map(t => `${t.ticker}(${t.n_sources}src,c${t.max_conviction}${t.flow_only ? ',flow-only' : ''})`).join(', ') || 'none'}`)
+log(`Aggregated ${clustered.length} names; panel sees ${TOP.length}${thinWeek ? ' (THIN WEEK — watch-only fallback)' : ''}: ${TOP.map(t => `${t.ticker}(${t.n_sources}src,c${t.max_conviction}${t.flow_only ? ',flow-only' : ''})`).join(', ') || 'none'}`)
 if (!TOP.length) return { regime: macro?.summary, coverage, dead_desks: deadDesks, note: 'No candidates surfaced this cycle. No action.', reports }
 
 // ── PHASE 3 — INVESTMENT COMMITTEE (panel) ───────────────────────────────────
@@ -200,38 +203,59 @@ const risked = await parallel(withDissent.map(j => () =>
     .then(risk => ({ ...j, risk }))
 )).then(a => a.filter(Boolean))
 
-// ── PHASE 5 — CIO writes ONE decision memo (mandatory dissent log) ────────────
+// ── PHASE 5 — CIO writes TWO artifacts: a 1-min BRIEF + the full audit MEMO ────
+// The owner is a busy PM. The BRIEF is the 30-second read (what / how much / why). The full MEMO is the
+// audit trail behind it. Length discipline: verbatim dissent ONLY on actionable verdicts; PASS/HOLD get
+// one line. The CEILING caveat is stated ONCE. §"could not verify" must NOT repeat the coverage-table notes.
 phase('Decision')
 const memo = await agent(
-  `You are the PM/CIO. Write the INVESTMENT COMMITTEE MEMO from this packet.\n` +
+  `You are the PM/CIO. Write TWO markdown files from this packet — a short BRIEF and a full MEMO.\n` +
   `REGIME/FED: ${macro?.summary || '[unknown]'}\n` +
   `DESK COVERAGE (ran/empty/FAILED + n candidates): ${JSON.stringify(coverage)}\n` +
+  `THIN WEEK (no name cleared the n_sources>=2 OR conviction>=4 gate; the names below are WATCH-ONLY ` +
+  `fallbacks, not earned candidates): ${thinWeek}\n` +
   `CANDIDATES (votes + risk gate): ${JSON.stringify(risked)}\n\n` +
-  `Rules:\n` +
-  `- DESK COVERAGE TABLE (mandatory, near the top): one row per desk with status ran/empty/FAILED and n. ` +
-  `A FAILED or empty crypto/political-flows/news desk is a GAP, not "nothing to buy there" — call it out ` +
-  `explicitly as a coverage hole that weakens the sweep. Dead desks this run: ${JSON.stringify(deadDesks)}.\n` +
-  `- RECOMMEND-ONLY. Educational, not advice. Any actionable trade still requires the backtest gate + human approval.\n` +
-  `- ${BOOK_NOTE}\n` +
-  `- Per name: the committee decision (BUY/ADD/HOLD/TRIM/SELL/PASS), conviction, sizing (only if risk=PASS) — sizes are CEILINGS, never assert an existing holding weight that wasn't supplied, invalidation trigger.\n` +
-  `- MANDATORY DISSENT LOG (code-enforced): each candidate carries a \`minority\` field — the opposing ` +
-  `voice computed in code, NOT your choice. You MUST quote that exact lens + its reason verbatim for ` +
-  `every name where minority is non-null. Never average dissent away; never substitute your own. If ` +
-  `minority is null the panel was one-sided — say so explicitly (a unanimous panel is a FLAG, not comfort).\n` +
-  `- Convergence: report n_sources per name and FLAG any \`flow_only:true\` name as "13F/congress only — ` +
-  `30-45d lagged, NOT a time-sensitive signal". n_sources is crowdedness, not proven independence.\n` +
-  `- A "WHAT WE COULD NOT VERIFY" section listing every [unverified] item and any desk that was rate-limited.\n` +
-  `- 13F lag 45d, STOCK Act lag 30-45d — state it.\n` +
-  `\nDELIVERABLE — write a MARKDOWN REPORT FILE:\n` +
-  `1. Get today's date: run bash \`date -u +%F\`.\n` +
-  `2. \`mkdir -p reports\` then WRITE the full memo to \`reports/hedge-fund-committee-<date>.md\` ` +
-  `(start the file with "# INVESTMENT COMMITTEE MEMO — <date>"). Use the Write tool.\n` +
-  `3. Confirm by reading back the first 3 lines of the file.\n` +
-  `Then return EXACTLY: the line "REPORT SAVED: reports/hedge-fund-committee-<date>.md" followed by the ` +
-  `full memo markdown. No preamble, no "I'll write…" meta beyond that.`,
+
+  `=== FILE 1 — THE BRIEF (\`reports/hedge-fund-brief-<date>.md\`) — the busy-PM 1-minute read, MAX ~20 lines ===\n` +
+  `Start with "# BUY BRIEF — <date>". Then:\n` +
+  `- ONE bottom-line action line (e.g. "No initiations — defer to <event>" or "BUY X, watch Y,Z").\n` +
+  `- ONE regime line: regime + exposure dial + the single biggest event risk.\n` +
+  `- A DECISIONS TABLE, one row per name: | Ticker | Verdict | Size ceiling (%) | One-line why | Dissent |. ` +
+  `Verdict ∈ BUY/ADD/HOLD/TRIM/SELL/PASS. Size only if risk=PASS, else "—". "Dissent" = the minority lens ` +
+  `name + ≤6-word gist, or "unanimous (FLAG)" if minority is null.\n` +
+  `- A "Watch next" line: the 1-2 names to re-test + the dated catalyst that flips them.\n` +
+  `- A "Coverage" line: which desks were empty/FAILED (one phrase) if any.\n` +
+  `NO verbatim quotes, NO per-name prose in the brief. It must fit one screen.\n\n` +
+
+  `=== FILE 2 — THE FULL MEMO (\`reports/hedge-fund-committee-<date>.md\`) — the audit trail ===\n` +
+  `Start with "# INVESTMENT COMMITTEE MEMO — <date>". Rules:\n` +
+  `- State the CEILING caveat ONCE in the header (sizes are ceilings for a NEW position assuming ZERO ` +
+  `current exposure, 10% single-name cap; owner verifies vs the real book). Do NOT repeat it per name.\n` +
+  `- ${BOOK_NOTE.split('\n')[0]}\n` +
+  `- §Regime & Fed. §Desk-coverage table (one row/desk: status ran/empty/FAILED + n + gap); call empty ` +
+  `crypto/political/news desks a coverage hole, not "nothing to buy". Dead desks: ${JSON.stringify(deadDesks)}.\n` +
+  `- Per name: decision, conviction, size (if risk=PASS), invalidation trigger.\n` +
+  `- DISSENT (code-enforced \`minority\` field — NOT your choice): quote the lens + reason VERBATIM ONLY for ` +
+  `names with an ACTIONABLE verdict (BUY/ADD/TRIM/SELL). For PASS/HOLD names, compress the minority to ONE ` +
+  `line (lens + one-clause reason). Never drop it, never average it, never substitute your own. If minority ` +
+  `is null, say "unanimous — FLAG, not comfort" in one line.\n` +
+  `- Convergence: n_sources per name; FLAG any flow_only name "13F/congress only — 30-45d lagged". If THIN ` +
+  `WEEK is true, say so up top: nothing cleared the gate, these are watch-only.\n` +
+  `- §"WHAT WE COULD NOT VERIFY": list ONLY items NOT already in the desk-coverage table's gap column ` +
+  `(do not duplicate it). If everything is already covered there, write "See coverage table." and stop.\n` +
+  `- 13F lag 45d, STOCK Act 30-45d — state once.\n\n` +
+
+  `DELIVERABLE STEPS:\n` +
+  `1. bash \`date -u +%F\` for <date>. 2. \`mkdir -p reports\`. 3. Write BOTH files with the Write tool. ` +
+  `4. Read back the first 3 lines of each to confirm.\n` +
+  `Then return EXACTLY these two lines first:\n` +
+  `"BRIEF SAVED: reports/hedge-fund-brief-<date>.md"\n` +
+  `"REPORT SAVED: reports/hedge-fund-committee-<date>.md"\n` +
+  `followed by the BRIEF markdown only (not the full memo). No preamble.`,
   { label: 'cio-memo', phase: 'Decision' }
 )
 
-// memo text contains "REPORT SAVED: <path>" as its first line (the durable artifact the owner opens).
+// memo text leads with "BRIEF SAVED:" + "REPORT SAVED:" — the two durable artifacts the owner opens.
+const briefPath = (memo.match(/BRIEF SAVED:\s*(\S+)/) || [])[1] || null
 const reportPath = (memo.match(/REPORT SAVED:\s*(\S+)/) || [])[1] || null
-return { regime: macro?.summary, coverage, dead_desks: deadDesks, convergence: TOP, report_path: reportPath, memo }
+return { regime: macro?.summary, coverage, dead_desks: deadDesks, thin_week: thinWeek, convergence: TOP, brief_path: briefPath, report_path: reportPath, memo }

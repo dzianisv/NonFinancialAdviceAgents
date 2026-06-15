@@ -70,8 +70,11 @@ Return structured JSON the Portfolio Manager and Risk Manager can consume:
   "regime": "risk-on | neutral | risk-off",
   "exposure_multiplier": 0.7,
   "score": 0.32,
-  "signals": {"sma200": 1, "vix_ts": 0, "credit": 1, "breadth": 0, "curve": -1, "hindenburg": 0},
-  "rationale": "S&P above 200d MA, credit tightening, but curve inverted and breadth middling."
+  "signals": {"sma200": 1, "vix_ts": 0, "credit": 1, "curve": -1},
+  "credit_source": "[OAS] | [proxy: HYG/LQD]",
+  "breadth_pct_above_200dma": "[UNAVAILABLE]",
+  "hindenburg": "[UNAVAILABLE]",
+  "rationale": "S&P above 200d MA, credit tightening, but curve inverted."
 }
 ```
 
@@ -102,18 +105,46 @@ Parse: last close = VIX3M
 Signal: +1 if VIX/VIX3M < 0.95 (contango) | -1 if > 1.0 (backwardation) | 0 otherwise
 ```
 
+**Parse the as-of date correctly.** For each chart, the JSON has a parallel
+`result[0].timestamp` array (Unix epoch SECONDS). The as-of date of the last
+close is `timestamp[last_index]` → `datetime.utcfromtimestamp(ts).date()`. Do NOT
+reuse one ticker's date for another, and do NOT assume "today" — print the real
+per-quote date so a stale/holiday feed is visible. (The local runner takes this
+date straight from each series' own index; see `regime_monitor.py::_last`.)
+
 ### 4. HY Credit spreads — FRED BAMLH0A0HYM2 (after VIX3M completes)
 ```
 WebFetch: https://fred.stlouisfed.org/graph/fredgraph.csv?id=BAMLH0A0HYM2
-Parse CSV: last row = date,OAS_pct
-Signal: +1 if OAS < 3.5% | -1 if OAS > 5.0% | 0 otherwise
+(send a real browser User-Agent; retry once on drop/403/timeout)
+Parse CSV: last numeric row = date,OAS_pct
+Signal: +1 if OAS < 3.5% | -1 if OAS > 5.0% | 0 otherwise   → label "[OAS]"
 ```
-If timeout: mark `credit = [UNAVAILABLE]`, drop its weight, continue.
+**Known issue (validated 2026-06):** `fredgraph.csv` frequently drops the
+connection / times out from sandboxes, and the FRED JSON API requires a free
+`api_key`. If it stays blocked, FALL BACK to the HYG/LQD price ratio and LABEL
+the credit score `[proxy: HYG/LQD]` (vs `[OAS]`) so the memo knows which fired:
+```
+ratio = HYG_close / LQD_close ; compare to its 50-day average
+Signal: +1 if ratio > 50dMA×1.005 | -1 if < ×0.995 | 0 otherwise
+```
+Only mark `credit = [UNAVAILABLE]` (drop weight) if even HYG/LQD is unavailable.
 
-### 5. Score → exposure multiplier
+### 5. Yield-curve slope (10y-3m) — Yahoo ^TNX / ^IRX
+```
+^TNX = 10y yield, ^IRX = 13-week (3m) yield (Yahoo has no 2y series, so 10y-3m
+stands in for 10y-2y — an equally valid recession curve).
+slope = TNX - IRX ;  Signal: +1 if slope > 0 | -1 if inverted   (weight 1)
+```
+
+### 6. Breadth (% S&P > 200dma) & Hindenburg Omen — [UNAVAILABLE]
+No reliable free structured source here (need full constituents / advance-decline
++ 52w highs-lows). Report a single honest `[UNAVAILABLE]` line each; do not omit
+silently and do not fabricate. Their weight simply drops from the denominator.
+
+### 7. Score → exposure multiplier
 Weighted sum using available signals only (drop weight of any UNAVAILABLE signal):
 ```
-sma200(×3) + vix_ts(×2) + credit(×2)
+sma200(×3) + vix_ts(×2) + credit(×2) + curve(×1)
 Normalize: score = weighted_sum / sum_of_active_weights  → range [-1, +1]
 ```
 Map to regime per table in signal ensemble above.

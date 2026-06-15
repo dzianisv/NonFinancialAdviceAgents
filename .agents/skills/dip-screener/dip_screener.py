@@ -42,62 +42,106 @@ SP100 = [
 ]
 
 
-def scan(threshold_pct: float = 20.0) -> list[dict]:
+def _fetch_single(ticker: str):
+    """Fetch one ticker's unadjusted 1y OHLC. Returns (close_series, high_series) or (None, None).
+
+    Used as a retry path for any constituent the batch download returned empty for
+    (transient Yahoo feed misses, e.g. MMC), so a real large-cap is never silently
+    dropped on one flaky batch response."""
+    raw = yf.download(ticker, period="1y", auto_adjust=False, progress=False)
+    if raw is None or raw.empty:
+        return None, None
+    # A single-ticker download may return flat or MultiIndex columns depending on yf version.
+    close = raw["Close"]
+    high = raw["High"]
+    if hasattr(close, "columns"):  # MultiIndex / DataFrame -> take the ticker's column
+        close = close[ticker] if ticker in close.columns else close.iloc[:, 0]
+        high = high[ticker] if ticker in high.columns else high.iloc[:, 0]
+    return close.dropna(), high.dropna()
+
+
+def _evaluate(ticker: str, cs, hs, threshold_pct: float):
+    """Compute dip metrics for one ticker from its own close/high series.
+
+    The as-of date is read from THIS ticker's own last data row (cs.index[-1]),
+    so each row's date label is always the true date of that quote (mirrors the
+    regime skill's per-column as-of handling; no mismatched-year bug)."""
+    if cs is None or hs is None or len(cs) < 20 or len(hs) < 20:
+        return None
+    current = float(cs.iloc[-1])
+    high_52w = float(hs.max())  # true trailing-1y intraday high
+    pct_from_high = (current - high_52w) / high_52w * 100
+    as_of = cs.index[-1].date().isoformat()
+    if len(cs) >= 200:
+        sma200 = float(cs.rolling(200).mean().iloc[-1])
+        pct_vs_200d = round((current - sma200) / sma200 * 100, 1)
+    else:
+        sma200 = None
+        pct_vs_200d = None
+    if pct_from_high > -threshold_pct:
+        return None
+    return {
+        "ticker": ticker,
+        "current": round(current, 2),
+        "high_52w": round(high_52w, 2),
+        "pct_from_high": round(pct_from_high, 1),
+        "sma200": round(sma200, 2) if sma200 is not None else None,
+        "pct_vs_200d": pct_vs_200d,
+        "as_of": as_of,
+        "conviction": (
+            "HIGH" if pct_from_high <= -30
+            else "MEDIUM" if pct_from_high <= -25
+            else "WATCH"
+        ),
+    }
+
+
+def scan(threshold_pct: float = 20.0) -> tuple[list[dict], list[str]]:
+    """Return (hits, fetch_misses).
+
+    fetch_misses = tickers that returned NO data even after a single-ticker retry.
+    These are reported explicitly (not silently dropped, not falsely "delisted")."""
     results = []
+    fetch_misses = []
     batch_size = 10
     for i in range(0, len(SP100), batch_size):
         batch = SP100[i:i + batch_size]
+        close = high = None
         try:
             # auto_adjust=False so we get the true unadjusted intraday High/Close.
             raw = yf.download(batch, period="1y", auto_adjust=False, progress=False, group_by="column")
-        except Exception as e:
-            print(f"[dip-screener] batch fetch failed {batch}: {e}", file=sys.stderr)
-            time.sleep(2)
-            continue
-        try:
             close = raw["Close"]
             high = raw["High"]
-        except Exception:
-            print(f"[dip-screener] batch missing OHLC columns {batch}", file=sys.stderr)
-            continue
+        except Exception as e:
+            print(f"[dip-screener] batch fetch failed {batch}: {e}", file=sys.stderr)
+            # Don't drop the whole batch — fall through to per-ticker retry below.
         for ticker in batch:
+            cs = hs = None
             try:
-                if ticker not in close.columns:
-                    print(f"[dip-screener] no data for {ticker} (skipped)", file=sys.stderr)
+                if close is not None and ticker in getattr(close, "columns", []):
+                    cs = close[ticker].dropna()
+                    hs = high[ticker].dropna()
+                # Retry once per-ticker if the batch returned this name empty/missing.
+                if cs is None or hs is None or cs.empty or hs.empty:
+                    print(f"[dip-screener] {ticker}: empty in batch, retrying single fetch...",
+                          file=sys.stderr)
+                    time.sleep(1)
+                    cs, hs = _fetch_single(ticker)
+                if cs is None or hs is None or cs.empty or hs.empty:
+                    print(f"[dip-screener] FETCH-MISS {ticker}: no data after retry "
+                          f"(transient feed miss — NOT confirmed delisted)", file=sys.stderr)
+                    fetch_misses.append(ticker)
                     continue
-                cs = close[ticker].dropna()
-                hs = high[ticker].dropna()
-                if len(cs) < 20 or len(hs) < 20:
-                    continue
-                current = float(cs.iloc[-1])
-                high_52w = float(hs.max())  # true trailing-1y intraday high
-                pct_from_high = (current - high_52w) / high_52w * 100
-                if len(cs) >= 200:
-                    sma200 = float(cs.rolling(200).mean().iloc[-1])
-                    pct_vs_200d = round((current - sma200) / sma200 * 100, 1)
-                else:
-                    sma200 = None
-                    pct_vs_200d = None
-                if pct_from_high <= -threshold_pct:
-                    results.append({
-                        "ticker": ticker,
-                        "current": round(current, 2),
-                        "high_52w": round(high_52w, 2),
-                        "pct_from_high": round(pct_from_high, 1),
-                        "sma200": round(sma200, 2) if sma200 is not None else None,
-                        "pct_vs_200d": pct_vs_200d,
-                        "conviction": (
-                            "HIGH" if pct_from_high <= -30
-                            else "MEDIUM" if pct_from_high <= -25
-                            else "WATCH"
-                        ),
-                    })
+                hit = _evaluate(ticker, cs, hs, threshold_pct)
+                if hit is not None:
+                    results.append(hit)
             except Exception as e:
                 print(f"[dip-screener] {ticker} parse error: {e}", file=sys.stderr)
+                fetch_misses.append(ticker)
                 continue
         time.sleep(1)
     results.sort(key=lambda x: x["pct_from_high"])
-    return results
+    return results, fetch_misses
 
 
 def emit_pool(hits: list[dict], path: str) -> int:
@@ -125,15 +169,19 @@ def main():
                     help="append HIGH+MEDIUM dips to the durable convergence pool (default: %(default)s)")
     a = ap.parse_args()
 
-    hits = scan(a.threshold)
+    hits, fetch_misses = scan(a.threshold)
 
     if a.emit_pool:
         n = emit_pool(hits, a.emit_pool)
         print(f"[dip-screener] wrote {n} candidate(s) to pool {a.emit_pool}", file=sys.stderr)
 
     if a.json:
-        print(json.dumps(hits, indent=2))
+        print(json.dumps({"hits": hits, "fetch_misses": fetch_misses}, indent=2))
         return
+
+    if fetch_misses:
+        print(f"\n[FETCH-MISS] {len(fetch_misses)} ticker(s) returned no data after retry "
+              f"(transient feed miss, NOT confirmed delisted): {', '.join(fetch_misses)}")
 
     if not hits:
         print(f"No S&P 100 stocks >= {a.threshold:.0f}% below 52-week high today.")
@@ -149,7 +197,7 @@ def main():
             ma = "200dMA n/a (<200d history)"
         print(
             f"  {label} {r['ticker']:6s}  {r['pct_from_high']:+.1f}% from 52w high (${r['high_52w']:.2f})  "
-            f"now ${r['current']:.2f}  {ma}"
+            f"now ${r['current']:.2f}  {ma}  as-of {r['as_of']}"
         )
     print(f"\n  {len(hits)} candidate(s). Educational only — not advice.\n")
 

@@ -41,7 +41,11 @@ python3 .agents/skills/crypto-dip-scanner/crypto_dip_scanner.py --threshold 20
 6. AVAX:  …/chart/AVAX-USD?range=1y&interval=1d
 7. LINK:  …/chart/LINK-USD?range=1y&interval=1d
 ```
-Funding (`fapi.binance.com`) is geo-blocked from the pod — skip it, it's bonus only.
+Funding rate (bonus): `web_fetch https://www.okx.com/api/v5/public/funding-rate?instId=BTC-USD-SWAP`
+→ `data[0].fundingRate` (8h rate, x100 for %). If OKX fails, fall back to
+`https://indexer.dydx.trade/v4/perpetualMarkets?ticker=BTC-USD` → `markets["BTC-USD"].nextFundingRate`
+(1h rate; x8 to normalize to 8h). Do NOT use `fapi.binance.com` (HTTP 451 geo-block) or
+Bybit (403). Funding is bonus-only — skip it if both venues fail.
 If a chart fetch 429s: retry once, then mark that coin `[UNAVAILABLE]` and continue. Never fabricate.
 
 Output fields per coin: `pct_from_high`, `current_usd`, `high_52w_usd`, `sma200_usd`, `pct_vs_200d`, `conviction`. (`high_52w` = trailing-1y intraday high, not all-time; `sma200_usd` null if <200d history.)
@@ -61,14 +65,14 @@ Conviction tiers:
 1. Any coin is >= -30% from 52w high, AND
 2. Fear & Greed < 25 (extreme fear)
 
-These two are the reliable, always-available signals. **Funding rate is a BONUS confirmation, not a requirement** — `fapi.binance.com` is geo-blocked from many networks (incl. the openclaw pod), so the script prints no funding line when it can't fetch. NEVER suppress a valid dip+fear alert just because funding is missing. If funding IS available and < 0% (shorts dominant), add it to the alert as extra weight.
+These two are the reliable, always-available signals. **Funding rate is a BONUS confirmation, not a requirement** — sourced from OKX (primary) with a dYdX fallback, since `fapi.binance.com` is geo-blocked (451) and Bybit returns 403. NEVER suppress a valid dip+fear alert just because funding is missing. If funding IS available and < 0% (shorts dominant), add it to the alert as extra weight.
 
 Fire:
 ```
 🚨 CRYPTO DIP ALERT — [COIN] [pct]% below 52w high
   52w high: $[high_52w]  Now: $[price]  200dMA: $[sma]
   Fear & Greed: [n]/100 ([label])  ← EXTREME FEAR
-  BTC Funding: [rate]% [or "unavailable — Binance geo-blocked"]
+  BTC Funding: [rate]% (OKX/dYdX) [or "unavailable"]
   Historical context: BTC/ETH extreme-fear zones (F&G<25) have historically been net-positive
     entry points over 6-12m horizons. NOT a guarantee — regime can stay fearful for weeks.
   → Run /multi-lens-quorum on [COIN]? Reply YES.
@@ -78,7 +82,9 @@ Fire:
 
 ## Macro cross-check
 
-After firing alert: check TradFi regime (`regime_monitor.py`). If TradFi is also RISK_OFF (equity sell-off), crypto dip may be correlated → note this. If TradFi recovers first, crypto often follows → heightens urgency.
+The scanner now prints a **lightweight TradFi regime line** (SPY vs its 200d-MA, self-contained) so RISK_OFF is surfaced inline with the dip — no separate skill run required. If SPY < 200d-MA (`RISK_OFF`), the crypto dip is likely correlated with an equity sell-off → note this in the alert.
+
+For a fuller regime read (VIX, credit spreads, breadth, yield curve), hand off to the **regime-detection** skill (`regime_monitor.py --json`); the inline SPY check is a fast cross-reference, not a replacement.
 
 ## Success criteria
 

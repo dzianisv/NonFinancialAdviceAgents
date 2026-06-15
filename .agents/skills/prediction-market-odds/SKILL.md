@@ -7,7 +7,7 @@ metadata:
   audience: forecasters-and-analysts-anchoring-to-crowd-odds
   domain: prediction-market-data-access
   role: data-source-reference
-  source: "verified live against Polymarket Gamma API 2026-06-11; Kalshi + CME FedWatch as corroborating venues"
+  source: "verified live 2026-06-15: Polymarket Gamma API + ZQ-futures-implied (NY Fed + Yahoo) as the two anchor venues; Kalshi KXFEDDECISION corroborates when traded (Fed legs often null)"
 ---
 
 # Prediction-Market Odds (the crowd's priced probability)
@@ -45,9 +45,37 @@ fact/definition. No market = no anchor; don't fabricate one.
 
 | Venue | Best for | Access |
 |---|---|---|
-| **Polymarket** | Crypto prices, macro, politics, general — deepest crypto | Gamma API (below), no key |
-| **Kalshi** | Regulated US econ — CPI, Fed, jobs, GDP (often deeper than PM on prints) | `api.elections.kalshi.com/trade-api/v2` (public read) |
-| **CME FedWatch** | Fed-funds path from futures (not a bet market, but the rate-path benchmark) | cmegroup.com (JS-rendered — use search/snippet) |
+| **Polymarket** | Crypto prices, macro, politics, general — deepest crypto + deepest Fed-decision pool | Gamma API (below), no key |
+| **Kalshi** | Regulated US econ — CPI, jobs, GDP. (Fed-decision legs are often **untraded**, see below) | `api.elections.kalshi.com/trade-api/v2` (public read) |
+| **CME FedWatch (ZQ-implied)** | Fed-funds path — the rate-path benchmark, computed first-hand from futures | `python3.12 fedwatch_zq.py` — do NOT scrape the JS FedWatch page |
+
+### Fed rate-path: compute it from ZQ futures, don't scrape FedWatch
+
+The cmegroup.com FedWatch page is JS-rendered and unreachable from a sandbox; its % is only obtainable
+via a WebSearch *summary* — which is the exact second-hand trap that bit us. FedWatch is just arithmetic
+on CME 30-Day Fed Funds futures (ZQ), and ZQ quotes ARE fetchable. So compute it:
+
+```bash
+python3.12 fedwatch_zq.py            # nearest two FOMC meetings: implied P(hold)/P(cut)/P(hike) + sources
+```
+
+Pulls current target+EFFR (NY Fed markets API) and ZQ prices (Yahoo chart API), both no-key/live; solves
+the post-meeting implied rate per the standard FedWatch method. Use this as the **second venue** to
+corroborate Polymarket's Fed-decision odds. Prints `[UNAVAILABLE]` per leg if a source is down — never a
+guessed number.
+
+### Kalshi Fed markets — verified series + the untraded-leg gotcha
+
+The Fed-decision series is **`KXFEDDECISION`** (per-meeting; legs `-H0` hold, `-C25` cut 25bp, `-C26`
+cut >25, `-H25`/`-H26` hike). Pull live quotes:
+```bash
+curl -s "https://api.elections.kalshi.com/trade-api/v2/events?series_ticker=KXFEDDECISION&limit=200"     # find the <YY><MON> event ticker, e.g. KXFEDDECISION-26JUL
+curl -s "https://api.elections.kalshi.com/trade-api/v2/markets?event_ticker=KXFEDDECISION-26JUL&limit=50" # yes_bid/yes_ask/last_price in cents, volume
+```
+**Gotcha (verified 2026-06-15):** Kalshi's Fed-decision legs frequently have `yes_bid/yes_ask/last_price/
+volume = null` (no liquidity — the pool sits on Polymarket). A null-quote leg is NOT a probability; treat
+it as `[no Kalshi quote]` and fall back to the **ZQ-implied** number as your second venue. Do NOT report a
+null as 0% or 50%. (`KXFED` is a separate *range* series — also thin; prefer `KXFEDDECISION`.)
 
 ## Polymarket Gamma API — the working recipe
 
@@ -105,7 +133,15 @@ State the volume next to every number you quote. A $5k-volume leg is one trader,
 
 Per outcome: **implied P + venue + volume + pull-timestamp**, e.g.
 `P(FOMC hold, Jun) = 99.1% (Polymarket, $76M vol, pulled 2026-06-10 09:13 UTC)`.
-Cross-venue: if Polymarket and Kalshi/FedWatch disagree, report the spread — don't average silently.
+
+**Cross-venue is mandatory for Fed/FOMC odds — never single-venue.** Report ≥2 venues and state
+agreement vs divergence; if they disagree by >5pts, show the spread, don't average silently. The second
+venue is the **ZQ-implied** number (`fedwatch_zq.py`) when Kalshi's leg is null/untraded. Example
+(live 2026-06-15):
+```
+P(June hold): Polymarket 99.45% ($114M vol) | ZQ-implied ~100% (move +1.2bp) | Kalshi [no quote]  -> AGREE
+P(July hold): Polymarket 93.5%  ($10M vol)  | ZQ-implied 90.5% (10% cut priced) | Kalshi [no quote] -> AGREE (3pt)
+```
 
 ## Common mistakes
 
