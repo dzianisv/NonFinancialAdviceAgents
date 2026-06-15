@@ -73,7 +73,7 @@ dedup ledgers, deduped, weekly), `portfolio-monitor` (holdings triggers → PRIO
 same pipeline serially in-agent). Parallelism is the design: independent lenses never block.
 
 ```
- 09:30 Mon  ──►  weekly-brief.workflow.js   (3 phases, fan-out/fan-in)
+ 09:30 Mon  ──►  hedge-fund-committee.workflow.js   (3 phases, fan-out/fan-in)
  ───────────────────────────────────────────────────────────────────────────────────────
  PHASE 1  COLLECT          parallel() × 6 agents — one skill each
    regime-detection ┐ fomc-monitor ┐ 13f-watch ┐ congressman-stock-watch ┐ trend(narrative) ┐ dips ┐
@@ -130,7 +130,7 @@ Same skills, same 6 slots. Each backend uses its NATIVE primitive — no shared 
 openclaw HEARTBEAT.md checks **UTC**; claude-code `/loop`/`CronCreate`/Routines fire in **local TZ**;
 hermes per its scheduler. Pick the slot times per backend so they land at the same wall-clock moment.
 
-### openclaw — AGENT CRON (primary) + heartbeat (light backup) (`SETUP-openclaw.md`)
+### openclaw — AGENT CRON (primary) + heartbeat (light backup) (`setup-openclaw.md`)
 - **Reality (verified live 2026-06-14): the investor agent HAS native cron and it is the primary scheduler.**
   It already runs ~13 jobs (e.g. `0 8 * * 1-5 UTC` regime+Fed, `15 8 * * 1-5` journalism, `0/5/30 9 * * 1`
   weekly 13F/congress/brief). We added the 3 missing dip jobs:
@@ -143,16 +143,16 @@ hermes per its scheduler. Pick the slot times per backend so they land at the sa
 - Skills + scripts live in the agent sandbox at `/home/node/.openclaw/workspace/investor/skills/<skill>/`
   (python3.12 + yfinance + Yahoo reachable there — distinct from the `kubectl exec` container).
 
-### claude-code — `/loop` + `/goal` + workflows (`SETUP-claudecode.md`)
+### claude-code — `/loop` + `/goal` + workflows (`setup-claudecode.md`)
 - NOT OS crontab → `claude -p`: that's stateless and writes to stdout, no native notify path back to the owner.
 - **In-session recurring:** `/loop` + `CronCreate`/`CronList`/`CronDelete` (5-field cron, session-scoped). Agent stays ALIVE between turns → notifies via its own tools. Daily playbook in `.claude/loop.md` (same time-gated logic as openclaw `HEARTBEAT.md`). Self-paced `/loop` (no interval) lets Claude pick the gap each iteration. **Limits: 7-day expiry, fires only while session running+idle, cleared on new convo (restored on `--resume`).**
-- **Completion driver:** `/goal "<brief produced via /weekly-brief AND pushed> or stop after 25 turns"` — a fast-model Stop-hook evaluator re-runs turns until the condition holds. Pair with auto mode.
+- **Completion driver:** `/goal "<brief produced via /hedge-fund-committee AND pushed> or stop after 25 turns"` — a fast-model Stop-hook evaluator re-runs turns until the condition holds. Pair with auto mode.
 - **Durable unattended:** **Routines** (Anthropic cloud, min 1h, runs machine-off, fresh clone) or **Desktop scheduled tasks** (local, min 1m, local files+venv) — one task per cadence slot. This is the production path; `/loop` is for an open session.
-- **Weekly brief = dynamic workflow:** `ultracode` keyword (or saved `/weekly-brief`) authors+runs `weekly-brief.workflow.js`, fanning quorum lenses in PARALLEL; returns the brief, loop/routine pushes it.
+- **Weekly brief = dynamic workflow:** `ultracode` keyword (or saved `/hedge-fund-committee`) authors+runs `hedge-fund-committee.workflow.js`, fanning quorum lenses in PARALLEL; returns the brief, loop/routine pushes it.
 - **Notify:** in-session/routine agent is alive → mobile **push** (ping) + messaging connector (Telegram MCP, full brief text). No external sender.
 - Auth: `ANTHROPIC_API_KEY` (or routine/connector creds). Subscription headless draws Agent SDK credit (effective 2026-06-15).
 
-### hermes-ai — hermes scheduler / crontab (`SETUP-hermes.md`)
+### hermes-ai — hermes scheduler / crontab (`setup-hermes.md`)
 - `hermes -s <skills> -p "$1"` one-shot. Register slots in native scheduler, else crontab (`CRON_TZ=UTC`).
 - Mandate: paste `AGENTS.template.md` into hermes investor system prompt (persists across sessions).
 - URL skill install pulls SKILL.md only → vendor `.py` via `npx skills add … --copy`.
@@ -199,13 +199,14 @@ Pool files = JSONL, one obj/line, each needs `ticker` (or `symbol`); optional `n
 {"dip-screener":"2026-06-14","crypto-dip-scanner":"2026-06-14","regime-fed":"2026-06-14","journalism":"2026-06-14","convergence":"2026-06-14","weekly-brief":"2026-06-08"}
 ```
 
-## 5. Weekly Brief Workflow (`weekly-brief.workflow.js`)
+## 5. Weekly committee = the SLOW-tier decision engine
 
-3 phases. Parallelism is the point — lenses don't block each other.
-
-1. **Collect** — `parallel()` 6 agents, one skill each (regime, fed, 13f, congress, journalism, dips), each returns `CAND_SCHEMA {candidates[],summary}`. Cross-ref: build `bySources[ticker]→Set(source)`; rank by `n` (source count); take top 5. **Ticker in ≥2 sources elevated.**
-2. **Quorum** — nested `parallel`: per top-5 candidate × 4 lenses, each emits `VERDICT_SCHEMA {verdict∈BUY/ADD/HOLD/TRIM/SELL, conviction 1-5, reason, invalidation, dissent}`. Lenses: `analytics-warren-buffett`, `analytics-stanley-druckenmiller`, `analytics-lyn-alden`, `fundamental-analysis`.
-3. **Synthesize** — per candidate `/risk-management` VETO (name >10% book OR RISK_OFF → VETO). Final agent writes INVESTMENT BRIEF: header (REGIME/FED), PRIORITY ACTIONS, NEW BUY IDEAS (risk=PASS only, w/ conviction+dissent+invalidation), HOLDS, COULD NOT VERIFY; states 13F 45d / STOCK Act 30-45d lag; preserves dissent (no averaging).
+**The authoritative spec is §8** (`.agents/workflows/hedge-fund-committee.workflow.js`, the 5-phase org).
+The old 3-phase sketch that used to live here is superseded — do not implement it. In short, the weekly
+run is: analyst fan-out (parallel, open-universe discovery) → aggregate by conviction (n_sources, flow_only
+down-weight) → 4-lens panel voting INDEPENDENTLY with **code-enforced dissent** (`minorityVote()`) → CRO
+`/risk-management` veto + sizing ceilings → CIO **ranked BUY memo**. See §8 for phases, schemas, and the
+anti-groupthink protocol.
 
 ## 6. Known Limitations / Failure Modes
 
@@ -247,7 +248,7 @@ manager), FinRobot (Director-over-specialists), Anthropic orchestrator-workers, 
 - **SLOW / committee** = `.agents/workflows/hedge-fund-committee.workflow.js` (Claude Code dynamic workflow):
   `Analysts (parallel fan-out) → Aggregate (cluster, convergence-weight) → Committee (lenses vote
   INDEPENDENTLY, parallel = no anchoring) → Risk (CRO veto+size) → CIO memo`. Run weekly, or on one
-  ticker via `args:{ticker}`. Supersedes the thin `weekly-brief.workflow.js`.
+  ticker via `args:{ticker}`. Supersedes the thin `hedge-fund-committee.workflow.js`.
 
 ### Anti-failure protocol (from the research — these are not optional)
 - **Cost ~15× (Anthropic).** Panel runs ONCE per aggregated cycle, not per signal; only top-5 / ≥3-desk

@@ -44,7 +44,7 @@ CRON_TZ=UTC
 ## 3. Standing mandate
 
 Hermes loads agent identity from its system prompt / agent config. Paste the contents of
-`.agents/setup/AGENTS.template.md` into the hermes investor agent's system prompt so the standing
+`.agents/templates/AGENTS.template.md` into the hermes investor agent's system prompt so the standing
 RECOMMEND-ONLY mandate + weekly pipeline persists across sessions.
 
 ## 4. Notify

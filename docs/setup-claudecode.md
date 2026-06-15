@@ -36,7 +36,7 @@ alert + route to /multi-lens-quorum. Else stay silent.
 /crypto-dip-scanner — alert only if a coin >=-30% from ATH AND Fear&Greed<25. Push me, else silent.
 
 # Mon 09:30 — the weekly brief (runs the workflow)
-Run /weekly-brief and send me the INVESTMENT BRIEF.
+Run /hedge-fund-committee and send me the INVESTMENT BRIEF.
 ```
 Routines run autonomously (no permission prompts). Wire a messaging connector so the push carries the
 brief text; otherwise the mobile push pings you to open the result.
@@ -58,7 +58,7 @@ the bare `/loop` then runs it each iteration.
 
 Drive the weekly brief to a verified end-state with `/goal`:
 ```text
-/goal the weekly INVESTMENT BRIEF has been produced via /weekly-brief (regime+fed+13F+congress+
+/goal the weekly INVESTMENT BRIEF has been produced via /hedge-fund-committee (regime+fed+13F+congress+
 narrative cross-referenced, quorum on top 5, risk veto applied) AND pushed to me — or stop after 25 turns
 ```
 `/goal` re-runs turns until a fast model confirms the brief is built + sent. Pair with auto mode so each
@@ -70,7 +70,7 @@ The heavy synthesis is `.agents/workflows/hedge-fund-committee.workflow.js` (5 p
 aggregate → investor panel votes independently → risk veto → CIO memo). Run via the Workflow tool
 (`{scriptPath}`) or save as `/hedge-fund-committee` (`/workflows` → `s`). Deep-dive one ticker with
 `args:{ticker:"GOOGL"}`. Returns the decision memo (with mandatory dissent log); the `/loop` or routine
-pushes it to you. (Supersedes the old 3-phase `weekly-brief.workflow.js`.)
+pushes it to you. (Supersedes the old 3-phase `hedge-fund-committee.workflow.js`.)
 
 ## 5. Notification
 
@@ -80,7 +80,7 @@ In-session/routine agent is ALIVE, so it notifies with its own tools — no exte
 Configure the connector once; reference it in the loop/routine prompt ("push me", "send me").
 
 ## Done when
-- [ ] `~/.claude/skills/` has all skills; `/weekly-brief` workflow saved.
+- [ ] `~/.claude/skills/` has all skills; `/hedge-fund-committee` workflow saved.
 - [ ] Durable cadence set (Routine or Desktop task per slot) OR an always-on `/loop` with `.claude/loop.md`.
 - [ ] A test alert reaches your phone (push + connector), not just stdout.
 - [ ] `/goal` drives the weekly brief to "produced + sent" without per-turn prompting.

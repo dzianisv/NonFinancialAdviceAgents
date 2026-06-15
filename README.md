@@ -30,10 +30,12 @@ Two missions, one north-star ([`GOAL.md`](GOAL.md)):
    |---|---|
    | [`docs/GOAL.md`](docs/GOAL.md) | the advisor north-star (the missed-opportunity mandate) |
    | [`docs/prd.md`](docs/prd.md) | **what** — gaps → features, cadence, personas |
-   | [`docs/tdd.md`](docs/tdd.md) | **how** — architecture + full wiring diagrams + data contracts |
-   | [`.agents/setup/`](.agents/setup/) | per-backend proactive deployment (openclaw / claude-code / hermes) |
+   | [`docs/tdd.md`](docs/tdd.md) | **how** — architecture + full wiring diagrams + data contracts (§8 = the committee) |
+   | [`docs/setup-*.md`](docs/) | per-backend deployment (openclaw / claude-code / hermes) |
+   | [`.agents/workflows/hedge-fund-committee.workflow.js`](.agents/workflows/) | the weekly hedge-fund committee → ranked next-buy memo |
 
-   Status: skills built, tested, and documented; not yet validated live on a backend.
+   Status: fast-tier daily scanners deployed live on openclaw (cron + liveness); the slow-tier weekly
+   committee workflow is built + validated (3 iterations) but not yet on a weekly schedule (see tdd §8).
 
 ## Start here
 

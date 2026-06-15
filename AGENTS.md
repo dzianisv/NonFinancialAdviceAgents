@@ -30,19 +30,26 @@ Two skill roots:
 | `tradfi-portfolio-manager` | the weekly portfolio note (REVIEW→ASSESS→RESEARCH→DECIDE→ORDER), v3. |
 | `skill-supervisor` | the propose/dispose improvement loop — blind modifier proposes, supervisor scores on held-out evals, accept only if train↑ AND holdout↑ AND 0 invariant trips. **Use to improve any skill.** Never let one agent both edit and grade. |
 
-#### Advisor proactive skills (the **AI Agent Investment Advisor** sub-project — see @docs/GOAL.md)
-The notification-first slice: watch daily, DM the owner same-day on a time-sensitive setup. Recommend-only.
-| Skill | Role |
-|-------|------|
-| `dip-screener` | daily S&P100 dip scan, flags names `≥20/25/30%` below 52w ATH; HIGH (`≤−30%`) DMs only when regime=RISK_ON (regime-gated), MED→`/tmp/dip_candidates.jsonl` pool. Ships `dip_screener.py`. Catches the Google −30%. |
-| `crypto-dip-scanner` | daily BTC/ETH/SOL/BNB/AVAX/LINK % from ATH + Fear&Greed + funding; PRIMARY trigger = dip `≤−30%` AND F&G`<25` (funding = bonus, never required — `fapi.binance.com` is geo-blocked 451 from US/pod). Ships `crypto_dip_scanner.py`. Catches the BTC $61k. |
-| `signal-convergence-alert` | cross-references the daily signal pools/ledgers (dip + journalism + 13F + congress); DMs when `≥2` independent sources hit the same ticker (`≥3` → routes `multi-lens-quorum`). Ships `convergence.py`. Catches the SanDisk multi-signal pattern. |
+#### Advisor: the **AI Agent Investment Advisor** sub-project (TWO TIERS — see @docs/GOAL.md)
+A notification-first advisor whose job is to **find the next stocks to buy**. Recommend-only. Two tiers:
+- **FAST** (daily cron, SILENT-unless-alert) — catch a time-sensitive setup the SAME DAY.
+- **SLOW** (weekly dynamic workflow) — a **hedge-fund committee** that researches open-universe and
+  produces a ranked next-buy memo. This is the primary decision engine.
+
+| Skill / artifact | Tier | Role |
+|------------------|------|------|
+| `dip-screener` | fast | daily S&P100 scan, `≥20/25/30%` below 52w high; HIGH (`≤−30%`) DMs only in RISK_ON; `--emit-pool` deterministically writes the **durable** convergence pool. Ships `dip_screener.py`. Catches Google −30%. |
+| `crypto-dip-scanner` | fast | daily BTC/ETH/SOL/BNB/AVAX/LINK % from 52w high + Fear&Greed; PRIMARY = dip `≤−30%` AND F&G`<25` (funding = bonus; `fapi.binance.com` geo-blocked 451). Ships `crypto_dip_scanner.py`. Catches BTC $61k. |
+| `signal-convergence-alert` | fast | crosses the daily pools/ledgers; DMs when `≥2` sources (MAY be correlated, not independent) hit one ticker (`≥3` → `multi-lens-quorum`). Ships `convergence.py`. SanDisk multi-signal. |
+| `trend-stock-research` (`mention_velocity.py`) | fast | rolling news mention-velocity vs the ticker's OWN baseline → feeds the convergence pool (cold-start-guarded). |
+| `liveness-monitor` | ops | dead-man's-switch: each scan logs a heartbeat; a health cron DMs only when a job goes stale (so silence ≠ broken). Ships `liveness.py`. |
+| **`hedge-fund-committee.workflow.js`** | **slow** | the WEEKLY decision engine: analyst fan-out → aggregate by conviction → 4-lens panel (independent vote, **code-enforced dissent**) → CRO risk veto → CIO **ranked BUY memo**. Open-universe (no ticker). In `.agents/workflows/`. |
 
 > **Advisor docs:** north-star @docs/GOAL.md, the **what** @docs/prd.md, the **how** + full wiring
-> diagrams @docs/tdd.md. Per-backend proactive deployment (openclaw heartbeat / claude-code `/loop` +
-> Routines / hermes scheduler) lives in **`.agents/setup/`** — `SETUP-openclaw.md`, `SETUP-claudecode.md`,
-> `SETUP-hermes.md` + the `HEARTBEAT.template.md` / `AGENTS.template.md` / `weekly-brief.workflow.js`.
-> Same skills on all three backends; only the scheduling/notification wiring differs.
+> @docs/tdd.md (§8 = the committee org). Per-backend deployment lives in **`docs/`** —
+> `setup-openclaw.md`, `setup-claudecode.md`, `setup-hermes.md`; the agent-deployed mandate template is
+> `.agents/templates/AGENTS.template.md`. Same skills on all three backends; only the
+> scheduling/notification wiring differs.
 >
 > **POD ENV NOTE — validate in the AGENT SANDBOX, not `kubectl exec`.** Proven live 2026-06-14:
 > the investor agent runs bash at `HOME=/home/node` with **python3.12 + yfinance + Yahoo reachable**,

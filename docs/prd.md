@@ -19,7 +19,16 @@ Root cause: agent REACTIVE (Monday weekly brief), opportunities TIME-SENSITIVE (
 
 ## Goal
 
-Proactive advisor. Monitors stocks+crypto daily. Reads news, builds context, DMs owner immediately when conditions align. Educational, not advice. Human-in-the-loop.
+Proactive advisor that **finds the next stocks to buy**. Monitors stocks+crypto daily, reads news, builds context — and once a week convenes a hedge-fund committee to research open-universe and hand the owner a ranked, vetted buy list. Educational, not advice. Human-in-the-loop.
+
+## Two tiers (the product is BOTH)
+
+| Tier | What | Cadence | Output |
+|---|---|---|---|
+| **FAST** — proactive alerts | dip/crypto/convergence scanners; DM the owner same-day on a time-sensitive setup | daily cron, SILENT-unless-alert | a DM the day a dip/convergence fires |
+| **SLOW** — hedge-fund committee | the `hedge-fund-committee` dynamic workflow: analyst fan-out → aggregate → 4-lens panel (independent vote + code-enforced dissent) → CRO veto → CIO memo | weekly | a **ranked next-buy memo** with sizing, dissent, invalidation |
+
+The SLOW tier is the primary decision engine ("what do I buy this week"); the FAST tier is the interrupt for things that can't wait for it. See tdd §8 for the org.
 
 ## Users / Personas
 
