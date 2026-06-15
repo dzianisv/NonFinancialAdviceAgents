@@ -14,7 +14,7 @@ Merge the raw data seats into ONE dense, factual brief on the asset/portfolio in
 
 ## Sections (in order)
 1. **QUESTION & PORTFOLIO** — restate the user's question + current holdings/exposure verbatim so every downstream seat sees it.
-2. **PRICE & TREND** · 3. **ON-CHAIN VALUATION** · 4. **DERIVATIVES / POSITIONING** · 5. **MACRO (CPI/FOMC/rates)** · 6. **LIQUIDITY FLOWS** · 7. **SENTIMENT / REGIME** · 8. **NEWS / NARRATIVE** (events + source-count + priced-in tag; `[UNAVAILABLE]` if no news seat ran) · 9. **PREDICTION-MARKET ODDS** · 10. **CROSS-SOURCE CONFLICTS** · 11. **DATA GAPS**.
+2. **PRICE & TREND** · 3. **ON-CHAIN VALUATION** · 4. **DERIVATIVES / POSITIONING** · 5. **MACRO (CPI/FOMC/rates)** · 6. **LIQUIDITY FLOWS** (MUST include a **Spot-BTC-ETF net-flow** line — write `[UNAVAILABLE]` + §11 entry if the onchain seat couldn't fetch it; never omit) · 7. **SENTIMENT / REGIME** · 8. **NEWS / NARRATIVE** (events + source-count + priced-in tag; `[UNAVAILABLE]` if no news seat ran) · 9. **PREDICTION-MARKET ODDS** · 10. **CROSS-SOURCE CONFLICTS** · 11. **DATA GAPS**.
 
 ## Rules
 - Every number keeps its `as-of` + `source`. Quote, don't paraphrase, priced probabilities.

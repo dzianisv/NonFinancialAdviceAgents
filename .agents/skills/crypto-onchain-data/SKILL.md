@@ -24,6 +24,10 @@ DATA ONLY. No buy/sell call, no thesis. Return numbers with `as-of` + `source`; 
 - **Puell multiple** (miner stress / capitulation)
 - **Hashrate trend** (rising/falling 30d)
 
+**Spot-BTC-ETF net flows — REQUIRED, never silently omit** (the dominant marginal-demand read for "buy BTC today")
+- Aggregate net daily flow (IBIT/FBTC/etc., creations − redemptions) + 5-day direction (inflow/outflow).
+- Try via WebFetch (not urllib — these block bots): `farside.co.uk/btc/`, `sosovalue.com` ETF dashboard, `coinglass.com/bitcoin-etf`. If ALL are blocked, emit the metric anyway with `value: "[UNAVAILABLE]"` + which sources you tried. **Do NOT drop the line** — its absence must be loud, not silent.
+
 ## Sources (try in order; one fetch at a time to avoid 429)
 - Price/MA: `yfinance` (`BTC-USD`, `range=5y` for the 200-week) or Yahoo chart API.
 - On-chain: WebFetch/WebSearch over `newhedge.io/bitcoin/*`, `checkonchain.com`, `lookintobitcoin.com`, `bitcoinmagazinepro.com/charts/*`. These charts are often JS-gated — if a clean number isn't fetchable, mark that metric `[UNAVAILABLE]`, do not infer it.
