@@ -80,49 +80,81 @@ const DESKS = [
 const desks = FOCUS
   ? [{ desk: 'focus-research', prompt: `Deep-research ${FOCUS}: run /fundamental-analysis + /trend-stock-research + check /13f-watch and /congressman-stock-watch for ${FOCUS}. Return ${FOCUS} as a candidate with the strongest REAL evidence (valuation, FCF, who owns it, live catalyst).` }]
   : DESKS
-const reports = (await parallel(desks.map(d => () =>
+// DESK-HEALTH ACCOUNTING: every desk is ALWAYS represented in `reports`, even on death/error.
+// A desk that returns [] (ran, found nothing) MUST be distinguishable from one that errored — otherwise
+// a silently-dropped crypto/congress desk reads as "nothing to buy there" when it actually never ran.
+const reports = await parallel(desks.map(d => () =>
   agent(d.prompt + ' Educational only, recommend-only. Mark anything you could not fetch [unverified] — NEVER fabricate a number, price, or headline.',
     { label: `analyst:${d.desk}`, phase: 'Analysts', schema: REPORT })
     // Tag with OUR controlled key — never rely on the agent's free-text `desk` field for lookups.
-    .then(r => r && ({ ...r, _key: d.desk }))
-))).filter(Boolean)
+    .then(r => r
+      ? { ...r, _key: d.desk, _status: 'ran' }
+      : { _key: d.desk, _status: 'errored', summary: '[desk returned no result — agent died/timed out]', candidates: [] })
+    .catch(err => ({ _key: d.desk, _status: 'errored', summary: `[desk threw: ${String(err).slice(0, 120)}]`, candidates: [] }))
+))
 
 // ── PHASE 2 — CHIEF OF STAFF: aggregate into ONE briefing packet ─────────────
 // Plain code first (cheap, deterministic): cluster by ticker, count SOURCES (not "independent desks" —
 // 13F + a value lens can echo the SAME fact, so n_sources is crowdedness, NOT proven triangulation).
 phase('Aggregate')
 const FLOW_DESKS = new Set(['institutional-flows', 'political-flows'])  // 30-45d LAGGED — context, not time-sensitive
+// Desk-coverage roster: ran (found names) / empty (ran, nothing) / FAILED (errored/died). The CIO MUST
+// surface this so an absent crypto/congress desk is a LOUD gap, never silent "nothing to buy".
+const coverage = reports.map(r => ({
+  desk: r._key,
+  status: r._status === 'errored' ? 'FAILED' : ((r.candidates || []).length ? 'ran' : 'empty'),
+  n: (r.candidates || []).length,
+  note: r._status === 'errored' ? r.summary : (r.unverified || null),
+}))
+const deadDesks = coverage.filter(c => c.status === 'FAILED').map(c => c.desk)
+log(`Desk coverage: ${coverage.map(c => `${c.desk}=${c.status}(${c.n})`).join(', ')}`)
 const byTicker = {}
 for (const r of reports) for (const c of (r.candidates || [])) {
   const t = (c.ticker || '').toUpperCase().trim()
   if (!t) continue
-  const e = (byTicker[t] ||= { ticker: t, sources: new Set(), notes: [] })
+  const e = (byTicker[t] ||= { ticker: t, sources: new Set(), notes: [], maxConv: 0 })
   e.sources.add(r._key)
+  e.maxConv = Math.max(e.maxConv, Number(c.conviction) || 0)
   e.notes.push(`${r._key}: ${c.thesis} [${c.evidence}]`)
 }
 const clustered = Object.values(byTicker).map(e => {
   const srcs = [...e.sources]
   const flow_only = srcs.every(s => FLOW_DESKS.has(s))   // ONLY 13F/congress surfaced it → lagged, low time-sensitivity
-  return { ticker: e.ticker, n_sources: e.sources.size, sources: srcs, flow_only, notes: e.notes }
+  return { ticker: e.ticker, n_sources: e.sources.size, sources: srcs, flow_only, max_conviction: e.maxConv, notes: e.notes }
 }).sort((a, b) =>
   // rank by source count, but a fresh (non-flow) signal outranks a flow-only one at equal count
   (b.n_sources - a.n_sources) || (a.flow_only === b.flow_only ? 0 : a.flow_only ? 1 : -1)
 )
 const macro = reports.find(r => r._key === 'macro-regime' || r._key === 'focus-research')
-const TOP = clustered.slice(0, FOCUS ? 1 : 5)
-log(`Aggregated ${clustered.length} names; top: ${TOP.map(t => `${t.ticker}(${t.n_sources}src${t.flow_only ? ',flow-only' : ''})`).join(', ') || 'none'}`)
-if (!TOP.length) return { regime: macro?.summary, note: 'No candidates surfaced this cycle. No action.', reports }
+// INCLUSION ≠ crowdedness. n_sources rewards 13F∩dip echoes of the SAME mega-cap and buries a genuine
+// single-desk pre-move thesis (the SanDisk pattern). So the panel sees the UNION of:
+//   (a) top-5 by source count, PLUS  (b) ANY single-desk thesis with desk-conviction >= 4.
+// n_sources stays as a context flag, NOT the sole gatekeeper. Capped at 7 to bound committee fan-out.
+let TOP
+if (FOCUS) {
+  TOP = clustered.slice(0, 1)
+} else {
+  const topBySrc = clustered.slice(0, 5)
+  const highConv = clustered.filter(c => c.max_conviction >= 4)
+  const seen = new Set(), union = []
+  for (const c of [...topBySrc, ...highConv]) if (!seen.has(c.ticker)) { seen.add(c.ticker); union.push(c) }
+  TOP = union.slice(0, 7)
+}
+log(`Aggregated ${clustered.length} names; panel sees ${TOP.length}: ${TOP.map(t => `${t.ticker}(${t.n_sources}src,c${t.max_conviction}${t.flow_only ? ',flow-only' : ''})`).join(', ') || 'none'}`)
+if (!TOP.length) return { regime: macro?.summary, coverage, dead_desks: deadDesks, note: 'No candidates surfaced this cycle. No action.', reports }
 
 // ── PHASE 3 — INVESTMENT COMMITTEE (panel) ───────────────────────────────────
 // Each lens votes INDEPENDENTLY (parallel = no anchoring on peers). Dissent is preserved, never averaged.
 phase('Committee')
-// 4 lenses, not 6 — a macro-thinker quorum on a chart dip is waste. Kept: quality-value, timing,
-// the PROTECTED deflation/dissent seat, valuation. (Graham overlaps Buffett; Lyn-Alden overlaps Hunt.)
+// 4 lenses on 4 ORTHOGONAL axes — no double-counting. (Was: Buffett + fundamental-analysis, which both
+// key off "wide-moat name at a low multiple" → one value vote wearing two hats, which manufactured an ADD
+// lean on every split. Replaced fundamental-analysis with superforecasting for a genuinely independent
+// outside-view/base-rate axis.) Graham overlaps Buffett; Lyn-Alden overlaps Hunt — both still excluded.
 const LENSES = [
-  'analytics-warren-buffett',         // quality / business-value
-  'analytics-stanley-druckenmiller',  // timing / liquidity
-  'analytics-lacy-hunt',              // PROTECTED deflation / dissent seat
-  'fundamental-analysis',             // valuation
+  'analytics-warren-buffett',         // quality / business-value (moat + intrinsic value)
+  'analytics-stanley-druckenmiller',  // timing / liquidity / tape
+  'analytics-lacy-hunt',              // PROTECTED deflation / macro-dissent seat
+  'superforecasting',                 // outside view / base rates / calibrated probability — NOT a value echo
 ]
 const judged = await parallel(TOP.map(cand => () =>
   parallel(LENSES.map(lens => () =>
@@ -139,13 +171,19 @@ const judged = await parallel(TOP.map(cand => () =>
 
 // CODE-ENFORCED DISSENT: compute the strongest opposing voice to the modal action in JS — do NOT let
 // the CIO turn decide whether dissent survives. This literal MUST be echoed in the memo.
-const BULL = new Set(['BUY', 'ADD']), BEAR = new Set(['SELL', 'TRIM', 'PASS'])
+const BULL = new Set(['BUY', 'ADD']), BEAR = new Set(['SELL', 'TRIM', 'PASS']), HOLD = new Set(['HOLD'])
 function minorityVote(votes) {
   if (!votes || !votes.length) return null
-  const bull = votes.filter(v => BULL.has(v.verdict)), bear = votes.filter(v => BEAR.has(v.verdict))
-  const pool = (bull.length >= bear.length) ? bear : bull   // the side OPPOSING the modal lean
-  if (!pool.length) return null
-  return pool.slice().sort((a, b) => b.conviction - a.conviction)[0]  // its most-convicted voice
+  const bull = votes.filter(v => BULL.has(v.verdict))
+  const bear = votes.filter(v => BEAR.has(v.verdict))
+  const hold = votes.filter(v => HOLD.has(v.verdict))
+  // HOLD is dissent against ANY action-majority (don't-add vs a bullish modal, don't-cut vs a bearish modal).
+  // Old bug: HOLD was in neither set, so a 2-ADD/2-HOLD split returned null — losing the dissent on the
+  // exact case the mechanism exists for. Now: opposing pool = everyone NOT on the modal action side.
+  const bullish = bull.length >= bear.length
+  const pool = bullish ? [...bear, ...hold] : [...bull, ...hold]
+  if (!pool.length) return null   // genuinely unanimous on one action side → no dissent
+  return pool.slice().sort((a, b) => b.conviction - a.conviction)[0]  // its most-convicted opposing voice
 }
 const withDissent = judged.filter(Boolean).map(j => ({ ...j, minority: minorityVote(j.votes) }))
 
@@ -167,8 +205,12 @@ phase('Decision')
 const memo = await agent(
   `You are the PM/CIO. Write the INVESTMENT COMMITTEE MEMO from this packet.\n` +
   `REGIME/FED: ${macro?.summary || '[unknown]'}\n` +
+  `DESK COVERAGE (ran/empty/FAILED + n candidates): ${JSON.stringify(coverage)}\n` +
   `CANDIDATES (votes + risk gate): ${JSON.stringify(risked)}\n\n` +
   `Rules:\n` +
+  `- DESK COVERAGE TABLE (mandatory, near the top): one row per desk with status ran/empty/FAILED and n. ` +
+  `A FAILED or empty crypto/political-flows/news desk is a GAP, not "nothing to buy there" — call it out ` +
+  `explicitly as a coverage hole that weakens the sweep. Dead desks this run: ${JSON.stringify(deadDesks)}.\n` +
   `- RECOMMEND-ONLY. Educational, not advice. Any actionable trade still requires the backtest gate + human approval.\n` +
   `- ${BOOK_NOTE}\n` +
   `- Per name: the committee decision (BUY/ADD/HOLD/TRIM/SELL/PASS), conviction, sizing (only if risk=PASS) — sizes are CEILINGS, never assert an existing holding weight that wasn't supplied, invalidation trigger.\n` +
@@ -192,4 +234,4 @@ const memo = await agent(
 
 // memo text contains "REPORT SAVED: <path>" as its first line (the durable artifact the owner opens).
 const reportPath = (memo.match(/REPORT SAVED:\s*(\S+)/) || [])[1] || null
-return { regime: macro?.summary, convergence: TOP, report_path: reportPath, memo }
+return { regime: macro?.summary, coverage, dead_desks: deadDesks, convergence: TOP, report_path: reportPath, memo }
