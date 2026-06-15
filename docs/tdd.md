@@ -7,30 +7,35 @@ Aligns to `docs/prd.md`. RECOMMEND-ONLY. Never trades. Honest-or-`[UNAVAILABLE]`
 Four layers. Data flows up, decision down, alert out.
 
 ```
- (d) NOTIFY        DM owner (Telegram CLI / osascript / hermes deliver)
-                        ▲  only when alert condition fires; else SILENT
- (c) SCHEDULER     per-agent native primitive wakes the agent on a time slot
-                        ▲  openclaw heartbeat 15m | claude-code crontab | hermes sched
- (b) SKILL.md      agent READS skill, runs script, applies gate, DECIDES alert vs pool
+ (d) NOTIFY        agent-native delivery on the cron job's own target (NO osascript)
+                        ▲  openclaw `cron --target telegram` | claude-code push+connector | hermes `--target telegram`; SILENT/[SILENT] else
+ (c) SCHEDULER     each backend's NATIVE cron (heartbeat is only a stuck-task nudge)
+                        ▲  openclaw `cron create --cron` | claude-code /loop+CronCreate+Routines | hermes `cron create`
+ (b) SKILL         agent READS skill, EXECUTES it (a script .py OR pure web_fetch/agent tools — NOT all skills are python), applies gate
                         ▲  regime gate, F&G gate, ≥2-source gate, risk VETO
- (a) DATA .py      deterministic, no fabrication, emit [UNAVAILABLE] on fetch fail
-                        live web: yfinance / FRED / alternative.me / binance
+ (a) DATA          a skill's script (.py) OR the agent's web_fetch/browser tools — deterministic where scripted, no fabrication, [UNAVAILABLE] on fail
+                        live web: yfinance / FRED / alternative.me / SEC EDGAR / FT-WSJ / Polymarket
 ```
 
-- (a) `.py` scripts: pure fetch+compute, `--json` contract, exceptions → skip/empty, never invent a number.
-- (b) `SKILL.md`: the judgment layer. Reads script JSON, checks gates, writes pools or DMs.
-- (c) Scheduler: NOT in-script. The backend's own primitive fires the agent (§3).
-- (d) Notify: any non-`SILENT` output → owner channel. DM = something real fired.
+- (a) Data: scripted skills (`.py`, `--json` contract, exceptions → skip/empty, never invent) AND prompt-only skills that fetch via the agent's `web_fetch`/browser (e.g. fomc-monitor, trend-stock-research, 13f-watch). Mixed by design.
+- (b) Skill: the judgment layer. Runs its script or web tools, checks gates, writes pools or emits a result.
+- (c) Scheduler: the backend's NATIVE cron fires the agent (§3). Heartbeat is NOT the scheduler — it only nudges a stuck/overdue task.
+- (d) Notify: agent-native delivery on the job's configured target; non-`SILENT` output → owner channel. DM = something real fired.
 
 ### 1a. Complete wiring — DAILY (every skill, where it plugs in)
 
-Scheduler primitive fires the agent on each UTC slot. Agent reads the SKILL.md, runs the `.py`,
-applies the gate, then either DMs the owner or writes a pool file. Pools feed convergence + the
-weekly brief. State file stops double-fire.
+The backend's NATIVE CRON fires the agent on each slot. The agent runs the skill (a `.py` script for
+the scanners, OR pure `web_fetch`/agent tools for fomc-monitor / trend-stock-research / 13f-watch — not
+all skills are python), applies the gate, then either DMs the owner or writes a pool row. Cron state
+persists in the backend's own store (openclaw SQLite / hermes `jobs.json`) — no separate state file.
+
+> NOTE (v1, being superseded): the daily scanners below are LOOSELY coupled — each fires its own DM and
+> drops rows into `/tmp` pools that convergence + the weekly brief read. §8 specifies the v2 redesign:
+> a hedge-fund ORG of role-owned agent-employees, fan-out → aggregate → investor panel → one decision.
 
 ```
  SCHEDULER PRIMITIVE  ── openclaw AGENT CRON (heartbeat = light backup) │ claude-code /loop+CronCreate (durable: Routine) │ hermes sched
-        │  reads .heartbeat-state.json (task→last_run_date); runs only the DUE slot
+        │  each cron job fires at its own fixed UTC time (state in backend store, not a file)
         ▼
  ┌──07:45────────┐ ┌──07:50──────────┐ ┌──08:00──────────┐ ┌──08:15──────────┐ ┌──08:30──────────────┐
  │ dip-screener  │ │ crypto-dip-     │ │ regime-detection│ │ trend-stock-    │ │ signal-convergence- │
