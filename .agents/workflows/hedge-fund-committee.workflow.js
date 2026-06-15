@@ -88,37 +88,48 @@ const reports = (await parallel(desks.map(d => () =>
 ))).filter(Boolean)
 
 // ── PHASE 2 — CHIEF OF STAFF: aggregate into ONE briefing packet ─────────────
-// Plain code first (cheap, deterministic): cluster by ticker, count independent desks (convergence).
+// Plain code first (cheap, deterministic): cluster by ticker, count SOURCES (not "independent desks" —
+// 13F + a value lens can echo the SAME fact, so n_sources is crowdedness, NOT proven triangulation).
 phase('Aggregate')
+const FLOW_DESKS = new Set(['institutional-flows', 'political-flows'])  // 30-45d LAGGED — context, not time-sensitive
 const byTicker = {}
 for (const r of reports) for (const c of (r.candidates || [])) {
   const t = (c.ticker || '').toUpperCase().trim()
   if (!t) continue
-  const e = (byTicker[t] ||= { ticker: t, desks: new Set(), notes: [] })
-  e.desks.add(r._key)                                   // controlled key, not agent free-text
+  const e = (byTicker[t] ||= { ticker: t, sources: new Set(), notes: [] })
+  e.sources.add(r._key)
   e.notes.push(`${r._key}: ${c.thesis} [${c.evidence}]`)
 }
-const clustered = Object.values(byTicker)
-  .map(e => ({ ticker: e.ticker, n_desks: e.desks.size, desks: [...e.desks], notes: e.notes }))
-  .sort((a, b) => b.n_desks - a.n_desks)
+const clustered = Object.values(byTicker).map(e => {
+  const srcs = [...e.sources]
+  const flow_only = srcs.every(s => FLOW_DESKS.has(s))   // ONLY 13F/congress surfaced it → lagged, low time-sensitivity
+  return { ticker: e.ticker, n_sources: e.sources.size, sources: srcs, flow_only, notes: e.notes }
+}).sort((a, b) =>
+  // rank by source count, but a fresh (non-flow) signal outranks a flow-only one at equal count
+  (b.n_sources - a.n_sources) || (a.flow_only === b.flow_only ? 0 : a.flow_only ? 1 : -1)
+)
 const macro = reports.find(r => r._key === 'macro-regime' || r._key === 'focus-research')
 const TOP = clustered.slice(0, FOCUS ? 1 : 5)
-log(`Aggregated ${clustered.length} names; convergence top: ${TOP.map(t => `${t.ticker}(${t.n_desks} desks)`).join(', ') || 'none'}`)
+log(`Aggregated ${clustered.length} names; top: ${TOP.map(t => `${t.ticker}(${t.n_sources}src${t.flow_only ? ',flow-only' : ''})`).join(', ') || 'none'}`)
 if (!TOP.length) return { regime: macro?.summary, note: 'No candidates surfaced this cycle. No action.', reports }
 
 // ── PHASE 3 — INVESTMENT COMMITTEE (panel) ───────────────────────────────────
 // Each lens votes INDEPENDENTLY (parallel = no anchoring on peers). Dissent is preserved, never averaged.
 phase('Committee')
+// 4 lenses, not 6 — a macro-thinker quorum on a chart dip is waste. Kept: quality-value, timing,
+// the PROTECTED deflation/dissent seat, valuation. (Graham overlaps Buffett; Lyn-Alden overlaps Hunt.)
 const LENSES = [
-  'analytics-warren-buffett', 'analytics-benjamin-graham', 'analytics-stanley-druckenmiller',
-  'analytics-lyn-alden', 'analytics-lacy-hunt', 'fundamental-analysis',
+  'analytics-warren-buffett',         // quality / business-value
+  'analytics-stanley-druckenmiller',  // timing / liquidity
+  'analytics-lacy-hunt',              // PROTECTED deflation / dissent seat
+  'fundamental-analysis',             // valuation
 ]
 const judged = await parallel(TOP.map(cand => () =>
   parallel(LENSES.map(lens => () =>
     agent(
       `Apply ONLY the /${lens} lens to: BUY/ADD/HOLD/TRIM/SELL ${cand.ticker}? ` +
       `Macro backdrop: ${macro?.summary || '[unknown]'}. ` +
-      `Why it surfaced (${cand.n_desks} independent desks): ${cand.notes.join(' | ')}. ` +
+      `Surfaced by ${cand.n_sources} source(s)${cand.flow_only ? ' — ALL are 30-45d LAGGED 13F/congress flows (context only, NOT a time-sensitive signal)' : ''} (note: sources may be correlated, not independent): ${cand.notes.join(' | ')}. ` +
       `Commit your OWN verdict before considering any other lens. Give verdict, conviction 1-5, one reason ` +
       `grounded in a real fact, the invalidation trigger, and your lens's structural blind spot. Recommend-only.`,
       { label: `vote:${cand.ticker}:${lens.replace('analytics-', '')}`, phase: 'Committee', schema: VOTE })
@@ -126,9 +137,21 @@ const judged = await parallel(TOP.map(cand => () =>
   )).then(votes => ({ ...cand, votes: votes.filter(Boolean) }))
 ))
 
+// CODE-ENFORCED DISSENT: compute the strongest opposing voice to the modal action in JS — do NOT let
+// the CIO turn decide whether dissent survives. This literal MUST be echoed in the memo.
+const BULL = new Set(['BUY', 'ADD']), BEAR = new Set(['SELL', 'TRIM', 'PASS'])
+function minorityVote(votes) {
+  if (!votes || !votes.length) return null
+  const bull = votes.filter(v => BULL.has(v.verdict)), bear = votes.filter(v => BEAR.has(v.verdict))
+  const pool = (bull.length >= bear.length) ? bear : bull   // the side OPPOSING the modal lean
+  if (!pool.length) return null
+  return pool.slice().sort((a, b) => b.conviction - a.conviction)[0]  // its most-convicted voice
+}
+const withDissent = judged.filter(Boolean).map(j => ({ ...j, minority: minorityVote(j.votes) }))
+
 // ── PHASE 4 — RISK (CRO holds the binding veto + sizing) ─────────────────────
 phase('Risk')
-const risked = await parallel(judged.filter(Boolean).map(j => () =>
+const risked = await parallel(withDissent.map(j => () =>
   agent(
     `You are the CRO. Apply /risk-management to a proposed position in ${j.ticker}. ` +
     `Regime: ${macro?.summary || '[unknown]'}. Committee votes: ${JSON.stringify(j.votes.map(v => ({ l: v.lens, vd: v.verdict, c: v.conviction })))}. ` +
@@ -149,9 +172,12 @@ const memo = await agent(
   `- RECOMMEND-ONLY. Educational, not advice. Any actionable trade still requires the backtest gate + human approval.\n` +
   `- ${BOOK_NOTE}\n` +
   `- Per name: the committee decision (BUY/ADD/HOLD/TRIM/SELL/PASS), conviction, sizing (only if risk=PASS) — sizes are CEILINGS, never assert an existing holding weight that wasn't supplied, invalidation trigger.\n` +
-  `- MANDATORY DISSENT LOG: for every name, surface the strongest MINORITY view verbatim — never average dissent away. ` +
-  `If Lacy Hunt (deflation) or any lens dissented, quote it. A unanimous panel is a flag, not a comfort.\n` +
-  `- Note convergence (how many independent desks surfaced each name).\n` +
+  `- MANDATORY DISSENT LOG (code-enforced): each candidate carries a \`minority\` field — the opposing ` +
+  `voice computed in code, NOT your choice. You MUST quote that exact lens + its reason verbatim for ` +
+  `every name where minority is non-null. Never average dissent away; never substitute your own. If ` +
+  `minority is null the panel was one-sided — say so explicitly (a unanimous panel is a FLAG, not comfort).\n` +
+  `- Convergence: report n_sources per name and FLAG any \`flow_only:true\` name as "13F/congress only — ` +
+  `30-45d lagged, NOT a time-sensitive signal". n_sources is crowdedness, not proven independence.\n` +
   `- A "WHAT WE COULD NOT VERIFY" section listing every [unverified] item and any desk that was rate-limited.\n` +
   `- 13F lag 45d, STOCK Act lag 30-45d — state it.\n` +
   `Output ONLY the memo itself, starting with the line "# INVESTMENT COMMITTEE MEMO". No preamble, ` +
