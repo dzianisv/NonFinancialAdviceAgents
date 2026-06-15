@@ -6,7 +6,7 @@ Native primitives — NO OS crontab (it's stateless and has no notify channel ba
 |---|---|
 | **`/loop`** + `CronCreate`/`CronList`/`CronDelete` | recurring daily scans, **in-session** (agent stays alive → can notify via its own tools) |
 | **`/goal`** | drive one run to a completion condition ("…until the INVESTMENT BRIEF is produced and sent") |
-| **dynamic workflows** | the heavy weekly synthesis — parallel quorum lenses (`weekly-brief.workflow.js`) |
+| **dynamic workflows** | the hedge-fund committee — analyst fan-out → aggregate → panel → risk → CIO memo (`.agents/workflows/hedge-fund-committee.workflow.js`) |
 | **Routines** (cloud) or **Desktop scheduled tasks** | durable unattended cadence — runs with the machine/ session closed |
 | **mobile push** + messaging connector (Telegram MCP) | the notify path — ping + full brief text |
 
@@ -64,11 +64,13 @@ narrative cross-referenced, quorum on top 5, risk veto applied) AND pushed to me
 `/goal` re-runs turns until a fast model confirms the brief is built + sent. Pair with auto mode so each
 turn runs unattended.
 
-## 4. The weekly brief = a dynamic workflow
+## 4. The committee = a dynamic workflow
 
-The heavy synthesis is `weekly-brief.workflow.js` (3 phases, parallel quorum). Run it via the
-`ultracode` keyword or save it as `/weekly-brief` (`/workflows` → `s`). The workflow returns the brief;
-the surrounding `/loop` or routine pushes it to you.
+The heavy synthesis is `.agents/workflows/hedge-fund-committee.workflow.js` (5 phases: analyst fan-out →
+aggregate → investor panel votes independently → risk veto → CIO memo). Run via the Workflow tool
+(`{scriptPath}`) or save as `/hedge-fund-committee` (`/workflows` → `s`). Deep-dive one ticker with
+`args:{ticker:"GOOGL"}`. Returns the decision memo (with mandatory dissent log); the `/loop` or routine
+pushes it to you. (Supersedes the old 3-phase `weekly-brief.workflow.js`.)
 
 ## 5. Notification
 

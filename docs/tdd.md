@@ -66,7 +66,10 @@ dedup ledgers, deduped, weekly), `portfolio-monitor` (holdings triggers → PRIO
 
 ### 1b. Complete wiring — WEEKLY brief (the dynamic workflow)
 
-`09:30 Mon` fires `weekly-brief.workflow.js` (claude-code dynamic workflow; openclaw/hermes run the
+> **v1 — SUPERSEDED by §8** (`.agents/workflows/hedge-fund-committee.workflow.js`, 5-phase org). The
+> 3-phase sketch below is kept only to illustrate the fan-out/fan-in shape.
+
+`09:30 Mon` fires the committee workflow (claude-code dynamic workflow; openclaw/hermes run the
 same pipeline serially in-agent). Parallelism is the design: independent lenses never block.
 
 ```
@@ -220,3 +223,37 @@ Pool files = JSONL, one obj/line, each needs `ticker` (or `symbol`); optional `n
 - **risk-management VETO** over every buy: any name >10% book OR RISK_OFF → VETO all buys.
 - **Dedup ledgers idempotent.** Never re-propose a ticker already in 13F / congress ledger.
 - **Silence default.** A DM = a real fired condition; no "all quiet" chatter.
+
+## 8. v2 — Hedge-fund ORG of agent-employees (the decision architecture)
+
+The v1 daily scanners are LOOSELY coupled (each DMs alone, /tmp pools). v2 models a hedge fund: every
+skill is an **employee with a role and ownership**; signals fan out, aggregate, and a **panel decides one
+coherent call**. Grounded in TradingAgents (arXiv:2412.20138 — analysts→bull/bear debate→trader→risk→fund
+manager), FinRobot (Director-over-specialists), Anthropic orchestrator-workers, and real IC practice
+(analysts→CIO chair→PM owns→CRO veto). Reuse-first: the employees already exist as skills.
+
+### The org chart (existing skills = employees)
+| Desk | Employees (skills) | Owns | Decides? |
+|------|--------------------|------|:--------:|
+| Research analysts | 13f-watch, congressman-stock-watch, trend-stock-research, regime-detection, fomc-monitor, prediction-market-odds, dip-screener, crypto-dip-scanner, fundamental-analysis | gather a structured report | NO |
+| Chief of staff | signal-convergence-alert + the workflow aggregator | cluster by ticker, build ONE briefing packet | NO |
+| Investment committee | multi-lens-quorum lenses (Buffett/Graham/Druckenmiller/Lyn-Alden/**Lacy-Hunt dissent seat**), macro-panel, superforecasting | debate the packet, vote independently | advise |
+| CRO | risk-management | binding VETO + sizing | gate |
+| PM / CIO | hedge-fund-manager | integrate, write the memo, own it | YES |
+
+### Two tiers (do NOT collapse into one)
+- **FAST / interrupt** = the v1 daily cron alerts (dip ≤−30%+RISK_ON, F&G<25, ≥2-source convergence,
+  FOMC surprise) → SAME-DAY DM, labelled "raw signal, not yet vetted". Runs even if the committee is down.
+- **SLOW / committee** = `.agents/workflows/hedge-fund-committee.workflow.js` (Claude Code dynamic workflow):
+  `Analysts (parallel fan-out) → Aggregate (cluster, convergence-weight) → Committee (lenses vote
+  INDEPENDENTLY, parallel = no anchoring) → Risk (CRO veto+size) → CIO memo`. Run weekly, or on one
+  ticker via `args:{ticker}`. Supersedes the thin `weekly-brief.workflow.js`.
+
+### Anti-failure protocol (from the research — these are not optional)
+- **Cost ~15× (Anthropic).** Panel runs ONCE per aggregated cycle, not per signal; only top-5 / ≥3-desk
+  clusters reach full quorum.
+- **Groupthink = 59.5% of debate failures (confident consensus on wrong).** Each lens commits its verdict
+  INDEPENDENTLY before seeing peers (parallel); **dissent log is MANDATORY**; the Lacy-Hunt deflation seat
+  is structurally protected; a unanimous panel is a FLAG.
+- **Non-determinism.** Same input → different output. This is a rigor scaffold, NOT an alpha machine —
+  every actionable trade still passes the backtest gate + human approval (GOAL.md invariants).
