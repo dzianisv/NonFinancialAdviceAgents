@@ -286,8 +286,10 @@ Run via the Workflow tool with `scriptPath` + `args:{question, portfolio, date, 
 Design + the eval loop are documented: `crypto/crypto.{goal,prd,tdd}.md` (product) and
 `crypto/eval/IMPROVE-LOOP.md` (the improve procedure). Hard lessons — violating these wasted a session:
 
-1. **Pairwise, not pointwise.** To decide if an edit improved a workflow, use blind A/B preference
-   (`pairwise-eval.js`), NOT absolute 0–100 scores — pointwise clusters/fluctuates and won't discriminate.
+1. **Prefer pairwise to pointwise for selection.** To decide if an edit improved a workflow, use blind A/B
+   preference (`pairwise-eval.js`) rather than absolute 0–100 scores — pointwise clusters/fluctuates (lit:
+   Zheng 2023/MT-Bench). Caveat: so far pairwise is only validated here on a GROSS-defect pair; its ability to
+   rank SUBTLE improvements is unproven. Use a rubric the proposer did NOT author (else it points at the answer).
 2. **Never self-grade.** The agent that built/edits a workflow must not score it. Blind judges (see only the
    output), roles separated (judge ≠ proposer ≠ executor). A self-graded loop once inflated 76→94 (real ~83).
 3. **Workflows can't nest a heavy target** (`workflow()`→null/throws). The improve loop is supervisor-orchestrated:

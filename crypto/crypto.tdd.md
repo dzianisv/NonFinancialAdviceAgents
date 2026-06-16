@@ -3,7 +3,7 @@
 > How it's built. Implements [crypto.prd.md](crypto.prd.md). Skills live in `.agents/skills/` (discoverable by
 > Claude Code via the `.claude/skills` symlink — see [[claude-code-skill-discovery]]).
 
-## Architecture: a dynamic workflow (`crypto-panel-review`)
+## Architecture: research-crypto-market / research-stock-market (dynamic workflows)
 
 ```
 Phase 1 GATHER (parallel, data-only)   → Phase 2 CONSOLIDATE (1 agent → sourced brief)

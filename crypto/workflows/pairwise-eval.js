@@ -23,14 +23,17 @@ const VOTE_SCHEMA = {
   required: ['winner', 'why'],
 }
 
+// Rubric is deliberately GENERAL — it must NOT name the specific defect that distinguishes the test pair,
+// or the judge is just following a pointer instead of discriminating quality (a reviewer flagged this).
 const RUBRIC =
-  `You are a blind, skeptical research grader. Two reports answer the SAME question. Decide which BETTER answers ` +
-  `it — you do NOT assign scores, you pick the better one. Judge on: does it answer the question for THIS ` +
-  `portfolio (buy AND sell), is the EVIDENCE actually present and sourced (a report that has its decision-` +
-  `critical data — news/catalysts for a "buy today" timing question, ETF flows, on-chain — beats one that is ` +
-  `missing it, even if the gap is honestly flagged), disagreement preserved, disciplined plan with invalidation, ` +
-  `calibration. Penalize a report whose key evidence section DID NOT RUN. If genuinely indistinguishable, TIE — ` +
-  `but prefer to pick. Return winner = FIRST or SECOND (the position shown) + the key differentiator.`
+  `You are a blind, skeptical research grader. Two reports answer the SAME question. Decide which one is the ` +
+  `BETTER answer — you do NOT assign scores, you pick the stronger one and say why. Weigh, in your own judgement: ` +
+  `does it answer the actual question for THIS portfolio (both a buy-side and a sell/trim-side); is the evidence ` +
+  `actually present, sourced, and dated (vs asserted, missing, or paraphrased from a digest); is genuine ` +
+  `disagreement preserved rather than averaged; is there a concrete, disciplined plan with invalidation; is ` +
+  `confidence calibrated to the evidence. Reward substance, not length or confident tone. If the two are ` +
+  `genuinely indistinguishable, answer TIE. Return winner = FIRST or SECOND (the position shown) + the single ` +
+  `key differentiator that decided it.`
 
 phase('Compare')
 // Position-randomize deterministically by judge index (no Math.random in this runtime):

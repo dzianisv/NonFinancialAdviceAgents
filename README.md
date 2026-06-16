@@ -45,13 +45,13 @@ Each skill's description is written as a routing trigger, so the right desk answ
 ```bash
 # Option A — clone the repo, open Claude Code in it; the workflows are project /commands
 git clone https://github.com/dzianisv/backtest && cd backtest
-#   → /hedge-fund-committee   /crypto-panel-review   /research-stock-market   /research-crypto-market
+#   → /hedge-fund-committee   /research-crypto-market   /research-stock-market   /research-crypto-market
 
 # Option B — make them global (available in every project)
 cp backtest/.claude/workflows/*.js ~/.claude/workflows/
 ```
 
-Then run e.g. `/hedge-fund-committee` or `/crypto-panel-review`. (Needs Claude Code ≥ v2.1.154 with Dynamic workflows enabled in `/config`. Workflows are a Claude Code feature — openclaw/hermes use the skills, which orchestrate via their own primitives; the everyday committee question is also answerable by the `agentic-fund-orchestration` skill, which installs normally.)
+Then run e.g. `/hedge-fund-committee` or `/research-crypto-market`. (Needs Claude Code ≥ v2.1.154 with Dynamic workflows enabled in `/config`. Workflows are a Claude Code feature — openclaw/hermes use the skills, which orchestrate via their own primitives; the everyday committee question is also answerable by the `agentic-fund-orchestration` skill, which installs normally.)
 
 > Note: the `.claude/workflows/*.js` entries are symlinks to the canonical scripts in `.agents/workflows/` and `crypto/workflows/` — they resolve on macOS/Linux. On Windows, copy the real files from those dirs instead.
 

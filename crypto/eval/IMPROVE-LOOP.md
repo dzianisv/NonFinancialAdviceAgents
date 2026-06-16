@@ -31,9 +31,13 @@ Research (Zheng 2023 / MT-Bench / AlpacaEval; see survey): LLM judges are far mo
 outputs than assigning an absolute score — relative comparison needs no calibrated scale and tracks human
 preference better. So **selection** (accept/reject) uses pairwise, not a 0-100 number.
 
-**Proof (this session):** `pairwise-eval.js` on iter1 (news seat failed) vs iter4 (complete), 5 judges,
-order swapped by index → **iter4 won 5–0**, every judge citing the failed news seat. Pointwise on the same
-pair gave 88 vs 89 and 63.5 vs 64 — no separation. Pairwise is the reliable selection signal.
+**What's actually shown (honest):** `pairwise-eval.js` on iter1 (news seat literally `[UNAVAILABLE — DID NOT
+RUN]`) vs iter4 (complete), 5 judges, order swapped by index → iter4 won 5–0; pointwise on the same pair gave
+88/89 then 63.5/64. This validates the **plumbing** (parallel judges, position-randomization, tally) and that
+pairwise cleanly flags a **gross defect**. It does NOT yet prove pairwise discriminates **subtle** improvements
+(two fully-complete reports differing only in reasoning) — that is the real use case and is **UNPROVEN**. The
+5-0 is a near-gimme (one report visibly says a section didn't run). Next validation must use a hard pair, under
+a rubric the proposer did not write.
 
 ## Components (all committed, on branch crypto-workflow-research)
 
@@ -41,9 +45,9 @@ pair gave 88 vs 89 and 63.5 vs 64 — no separation. Pairwise is the reliable se
 |---|---|---|
 | `crypto/workflows/research-crypto-market.js` | crypto research target | proven (ran 4×) |
 | `crypto/workflows/research-stock-market.js` | equity research target | proven (NVDA run, report+ledger verified) |
-| `crypto/workflows/pairwise-eval.js` | blind A/B selection | **proven 5–0** |
-| `crypto/workflows/blind-eval.js` | pointwise scoring | kept as a coarse signal only — do NOT use for selection |
-| `crypto/workflows/improve-workflow.js` | self-contained loop | BLOCKED by nesting; superseded by this orchestrated procedure |
+| `crypto/workflows/pairwise-eval.js` | blind A/B selection | works; validated on a GROSS-defect pair only — subtle-case discrimination UNPROVEN |
+| `crypto/workflows/blind-eval.js` | pointwise scoring | **DELETED** (unreliable for selection) — recoverable from git |
+| `crypto/workflows/improve-workflow.js` | self-contained loop | **DELETED** (blocked by nesting) — this orchestrated procedure replaces it; recoverable from git |
 
 ## What's NOT done (honest)
 

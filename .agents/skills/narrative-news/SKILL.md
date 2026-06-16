@@ -1,6 +1,6 @@
 ---
 name: narrative-news
-description: The DATA-ONLY news gather seat for the crypto panel. Orchestrates the feed-* source adapters → crypto-news-store (dedup + state) → emits ONLY the NEW or materially-updated EVENTS (not articles) for the consolidated brief, each tagged PRICED_IN vs ACTIONABLE_CONTEXT with a source_count. Use when running the crypto-panel-review gather phase, when asked "what crypto news/narrative matters right now", "any new catalysts", "narrative seat", or for the FR1.8 news/narrative category. Depends on feed-* + crypto-news-store. Data only — no opinions, no buy/sell.
+description: The DATA-ONLY news gather seat for the crypto panel. Orchestrates the feed-* source adapters → crypto-news-store (dedup + state) → emits ONLY the NEW or materially-updated EVENTS (not articles) for the consolidated brief, each tagged PRICED_IN vs ACTIONABLE_CONTEXT with a source_count. Use when running the research-crypto-market gather phase, when asked "what crypto news/narrative matters right now", "any new catalysts", "narrative seat", or for the FR1.8 news/narrative category. Depends on feed-* + crypto-news-store. Data only — no opinions, no buy/sell.
 license: MIT
 compatibility: opencode
 metadata:
@@ -11,7 +11,7 @@ metadata:
 
 # narrative-news (the news/narrative gather seat — FR1.8)
 
-The **data-only** Gather seat the `crypto-panel-review` workflow calls for the REQUIRED news/narrative
+The **data-only** Gather seat the `research-crypto-market` workflow calls for the REQUIRED news/narrative
 category (PRD FR1.8). It produces **EVENTS, not articles, not opinions** — the panel debates; this seat
 only reports what happened, deduped and state-aware.
 
@@ -104,7 +104,7 @@ tickers, crypto outlets) before use here. Do not run it on the crypto universe a
 
 ## Fit
 
-Phase-1 Gather seat in `crypto-panel-review`. Feeds the consolidate step the deduped event list; the panel
+Phase-1 Gather seat in `research-crypto-market`. Feeds the consolidate step the deduped event list; the panel
 (analyst-crypto, derivatives, Druckenmiller, Alden, Hunt, Napier) reads the brief, not this seat directly.
 
 > Educational, not advice. Events are context + disconfirmation, never a trigger.
