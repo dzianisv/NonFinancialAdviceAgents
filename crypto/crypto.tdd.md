@@ -3,14 +3,22 @@
 > How it's built. Implements [crypto.prd.md](crypto.prd.md). Skills live in `.agents/skills/` (discoverable by
 > Claude Code via the `.claude/skills` symlink — see [[claude-code-skill-discovery]]).
 
-## Architecture: research-crypto-market / research-stock-market (dynamic workflows)
+## Architecture: research-market (unified, LLM-driven)
+
+One workflow (`crypto/workflows/research-market.js`) covers crypto AND equities. A **manager agent** (Phase 0) runs first: it discovers skills live by listing `.agents/skills/`, interprets the raw user query (assets, side, horizon, portfolio), and returns a structured plan naming every component by its real skill directory name. The workflow dispatches from that plan — nothing else is hardcoded.
 
 ```
-Phase 1 GATHER (parallel, data-only)   → Phase 2 CONSOLIDATE (1 agent → sourced brief)
-   ↓                                       ↓
-Phase 3 PANEL (lenses debate brief)    → Phase 4 DECIDE (chair) → Phase 5 WRITE → Phase 6 LEDGER
+Phase 0 INTAKE (manager discovers skills live → plan)
+   ↓
+Phase 1 GATHER (parallel, data-only, manager-selected seats)
+   ↓
+Phase 2 CONSOLIDATE (manager-selected desk merges seats → sourced brief)
+   ↓
+Phase 3 PANEL (manager-selected lenses + non-voting guardrail)
+   ↓
+Phase 4 DECIDE (manager-selected chair) → Phase 5 WRITE → Phase 6 LEDGER
 ```
-**Parameterized, not frozen:** the workflow takes `date`/`anchor` via args (no hard-coded `2026-06-15`); `run_id` + `git_sha` stamped per run (NFR7).
+**Parameterized, not frozen:** the workflow takes `date`/`anchor`/`question`/`portfolio` via args. If `portfolio` is absent, the manager returns `portfolio_provided:false` and the panel answers at the market/asset level — it never fabricates holdings.
 
 ### Phase 1 — Gather seats (one agent each, structured-output schema, no opinions)
 | Seat | Skill / source |
@@ -71,8 +79,10 @@ The dedup/store/embed boundary lives in **"Hybrid news store"** (above), not her
 **Extensible:** adding an outlet = one new `feed-<name>` skill, same contract — no pipeline change (PRD AC7).
 
 ### Phase 3 — Panel (each lens reads the SAME brief; structured verdict)
-Voting: analyst-crypto, derivatives, druckenmiller, alden, **lacy-hunt (dissent)**, napier.
-Non-voting guardrail: morgan-housel (process + survivable sizing; can veto sizing, not the asset call).
+Voting lenses and the non-voting guardrail are **manager-selected at runtime** by reading the live skill catalog — not frozen here. Hard rules the manager enforces (also enforced by the workflow as a fallback):
+- A **bear/dissent** seat is always on the panel (never averaged away).
+- Lenses with predetermined verdicts for the asset class are excluded (`analytics-warren-buffett` / `analytics-benjamin-graham` for cashless crypto assets).
+- Non-voting guardrail: `analytics-morgan-housel` (process + survivable sizing; can veto sizing, not the asset call).
 
 ### Phase 4 — Decide
 Chair: agreement / disagreement (preserved) / tally / decision / tranche plan / key risks / invalidation.
@@ -99,7 +109,7 @@ A ledger agent runs `ledger.py add` for the chair's dated call: `{asset, questio
 | Job | Cadence | Mechanism | Guardrail |
 |---|---|---|---|
 | Dip tripwire + on-chain + **ETF flows** | daily 07:50 UTC | `crypto_dip_scanner.py` cron | silent unless trigger |
-| Full panel memo | weekly | `/schedule` cron runs the workflow (de-hardcode date/anchor) | recommend-only DM |
+| Full panel memo | weekly | `/schedule` cron runs `/research-market` (pass `question` + `date`) | recommend-only DM |
 | Forecast resolve/score | daily | `ledger.py resolve`/`score` cron | human-confirm fuzzy resolutions |
 | Liveness | daily | [[liveness-monitor]] — register the new crons | DM only on stale job |
 
