@@ -32,7 +32,11 @@ forecasts/
 
 # claude code session artifacts
 session.txt
-.claude/
+.claude/*
+# ...but DO ship the dynamic workflow scripts so `git clone` exposes them as /commands
+!.claude/workflows/
+.claude/workflows/*
+!.claude/workflows/*.js
 
 # committee report outputs (recommendations — not committed)
 reports/

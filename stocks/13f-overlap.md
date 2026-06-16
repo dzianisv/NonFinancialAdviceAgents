@@ -42,6 +42,24 @@
 | **ORCL / MRVL** | HOLD / TRIM | Coatue **exited** both |
 | **ESTC** | SELL (tax-loss) | Tiger **exited** (but multi-strats accumulating) |
 
+## AI-semi focus: NVDA vs AVGO vs AMD (gather 2026-06-15, data-only)
+
+Super-investor Q1'26 (period 3/31/2026) activity from dataroma; aggregate-flow lines are Q4'25
+(Dec-2025) per Nasdaq/secform4 — labeled with as-of. No buy/sell opinion; flow cross-check only.
+
+| Ticker | Q1'26 super-investor adds | Q1'26 super-investor trims/exits | dataroma holders | Aggregate flow (as-of) |
+|---|---|---|---|---|
+| **NVDA** | H&H/Duan Yongping +91%, Patient Capital +11%, Tiger +9%, Maverick +6%, Davis +2%; Egerton/Weitz/Century NEW-ish | Tepper −13%, Polen −23%, Jensen −28%, **Loeb −94%**, Kahn sold 100%; Oakmark/Causeway/Mairs small trims | 18 (most-held list) | 2,920 buyers vs 2,375 sellers; instns +1.36% shares; 66.4% of float (Q4'25) |
+| **AVGO** | Jensen +150%, **Tiger +25%**, Oakmark/Nygren +6%, Torray +9%, Mairs +6%, Causeway +2%; **Loeb bought 50k** | Polen −24%, FPA −27%, Cantillon −12%, Dodge&Cox −6%, **Lone Pine sold 100%** | 12 | 2,326 buyers vs 1,744 sellers; instns +127M shares; 71.9% of float (Q4'25) |
+| **AMD** | Maverick/Ainslie bought 677k sh (+1.6% port) | Tepper −32%, **Viking sold 100% (3.74M sh)**, Oakmark sold 100% | not on most-held list | (not pulled this pass) |
+
+**Reads (inference, labeled):** NVDA = widely held but Q1'26 shows two-sided tape among
+super-investors (Duan/Tiger/Maverick adding vs Loeb/Kahn/Polen cutting) — contested at the
+margin, not a clean add or clean trim. AVGO = the cleaner fresh-conviction AI-semi (Tiger +25%,
+Loeb new buy, Jensen +150%) and the one name multiple managers initiated last quarter; this
+extends the prior doc's AVGO consensus row. AMD = weakest institutional conviction of the three —
+Viking and Oakmark both exited entirely, only Maverick adding (matches prior doc's "AMD exits" row).
+
 ## Orphans — no fundamental super-investor owns these
 `TONX` (crypto microcap), `OUST` (quant-only), `COUR` (ex-UDMY; only Baillie Gifford + quants),
 `AAL` (quant/trading flow only), `O` (retail/index dividend name, not HF conviction).
