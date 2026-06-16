@@ -131,18 +131,28 @@ const clustered = Object.values(byTicker).map(e => {
   (b.n_sources - a.n_sources) || (a.flow_only === b.flow_only ? 0 : a.flow_only ? 1 : -1)
 )
 const macro = reports.find(r => r._key === 'macro-regime' || r._key === 'focus-research')
-// GATE before the expensive committee. The old top-5 fill admitted mechanical single-source dips with
-// no convergence and no conviction — spending a 4-lens panel just to PASS on them and bloating the memo.
-// A name EARNS the committee only if it shows convergence (n_sources>=2) OR a desk's high conviction
-// (>=4). If nothing clears (a genuinely thin week), fall back to the 2 best single-source names as
-// WATCH-ONLY rather than forcing a full slate — and tell the CIO it was thin so the memo says so.
+// GATE before the expensive committee. A name EARNS the committee if it shows convergence (n_sources>=2)
+// OR a desk's high conviction (>=4) OR it is a NARRATIVE thesis from the news desk. That last clause is
+// the SanDisk fix: convergence LAGS — by the time a 2nd desk corroborates a story it is already priced.
+// The whole edge (Google -30%, SanDisk's weeks-long FT/WSJ build) is catching a live-catalyst narrative
+// while only the news desk sees it, single-source. Gating discovery on convergence would defeat the
+// system's core purpose, so a news-narrative name always reaches the panel — the panel can still PASS it.
+const NARRATIVE_DESKS = new Set(['news-narrative'])
 let TOP, thinWeek = false
 if (FOCUS) {
   TOP = clustered.slice(0, 1)
 } else {
-  const gated = clustered.filter(c => c.n_sources >= 2 || c.max_conviction >= 4)
+  const gated = clustered.filter(c =>
+    c.n_sources >= 2 ||
+    c.max_conviction >= 4 ||
+    c.sources.some(s => NARRATIVE_DESKS.has(s)))   // live-catalyst news thesis reaches the panel even single-source
   if (gated.length) {
-    TOP = gated.slice(0, 7)
+    // Rank narrative names up so they aren't crowded out of the cap by mechanical dips.
+    TOP = gated.slice().sort((a, b) => {
+      const an = a.sources.some(s => NARRATIVE_DESKS.has(s)) ? 1 : 0
+      const bn = b.sources.some(s => NARRATIVE_DESKS.has(s)) ? 1 : 0
+      return (bn - an) || (b.n_sources - a.n_sources) || (b.max_conviction - a.max_conviction)
+    }).slice(0, 8)
   } else {
     thinWeek = true
     TOP = clustered.slice().sort((a, b) => b.max_conviction - a.max_conviction).slice(0, 2)
