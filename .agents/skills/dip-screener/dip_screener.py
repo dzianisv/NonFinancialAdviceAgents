@@ -100,6 +100,39 @@ def _evaluate(ticker: str, cs, hs, threshold_pct: float, ground: bool = False):
     }
 
 
+def ground_tickers(tickers: list[str]) -> tuple[list[dict], list[str]]:
+    """Price-ground an EXPLICIT ticker list (no dip threshold).
+
+    Returns (hits, fetch_misses). Every ticker that returns data is reported with its
+    live 52w-high / 200dMA metrics regardless of how far it is from its high (threshold
+    set to +inf so _evaluate never filters). Tickers with no Yahoo data (e.g. non-US
+    listings, crypto symbols Yahoo doesn't serve under this name) land in fetch_misses —
+    never fabricated, never falsely 'delisted'."""
+    results = []
+    fetch_misses = []
+    for ticker in tickers:
+        try:
+            cs, hs = _fetch_single(ticker)
+            if cs is None or hs is None or cs.empty or hs.empty:
+                print(f"[dip-screener] FETCH-MISS {ticker}: no data "
+                      f"(non-US listing or unsupported symbol — NOT confirmed delisted)",
+                      file=sys.stderr)
+                fetch_misses.append(ticker)
+                continue
+            # threshold +inf => report the ticker no matter its distance from the high.
+            hit = _evaluate(ticker, cs, hs, float("inf"))
+            if hit is not None:
+                results.append(hit)
+            else:
+                fetch_misses.append(ticker)
+        except Exception as e:
+            print(f"[dip-screener] {ticker} parse error: {e}", file=sys.stderr)
+            fetch_misses.append(ticker)
+        time.sleep(1)
+    results.sort(key=lambda x: x["pct_from_high"])
+    return results, fetch_misses
+
+
 def scan(threshold_pct: float = 20.0) -> tuple[list[dict], list[str]]:
     """Return (hits, fetch_misses).
 
@@ -187,10 +220,10 @@ def ground_tickers(tickers: list[str]) -> tuple[list[dict], list[str]]:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--threshold", type=float, default=20.0)
-    ap.add_argument("--json", action="store_true")
-    ap.add_argument("--tickers", default=None,
+    ap.add_argument("--tickers", type=str, default=None,
                     help="comma-separated tickers to PRICE-GROUND (no dip threshold, no S&P-100 scan); "
                          "emits {grounded, fetch_misses} JSON. For grounding narrative names.")
+    ap.add_argument("--json", action="store_true")
     ap.add_argument("--emit-pool", nargs="?", const=DEFAULT_POOL, default=None,
                     help="append HIGH+MEDIUM dips to the durable convergence pool (default: %(default)s)")
     a = ap.parse_args()
