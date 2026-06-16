@@ -1,6 +1,6 @@
 ---
 name: congressman-stock-watch
-description: Watch recent congressional stock disclosures (STOCK Act — House + Senate) and propose NEW buy-candidates from what members of Congress just purchased. Use when asked "what stocks are congressmen buying", "track congressional trades", "what did Pelosi/McCaul buy", "run the congressional watcher", "congressman stock picks", "STOCK Act tracker", or on a schedule. Fetches Capitol Trades via WebFetch (free, no API key), filters for PURCHASES only, deduplicates against a ledger so the same ticker is never proposed twice. Recommend-only — never trades. Educational, not advice. Note: disclosures lag 30-45 days; congress-members are long-only (personal accounts), not macro smart-money.
+description: "Watch recent congressional stock disclosures (STOCK Act — House + Senate) and propose NEW buy-candidates from what members of Congress just purchased. Use when asked \"what stocks are congressmen buying\", \"track congressional trades\", \"what did Pelosi/McCaul buy\", \"run the congressional watcher\", \"congressman stock picks\", \"STOCK Act tracker\", or on a schedule. Fetches Capitol Trades via WebFetch (free, no API key), filters for PURCHASES only, deduplicates against a ledger so the same ticker is never proposed twice. Recommend-only — never trades. Educational, not advice. Note: disclosures lag 30-45 days; congress-members are long-only (personal accounts), not macro smart-money."
 license: MIT
 compatibility: opencode
 metadata:

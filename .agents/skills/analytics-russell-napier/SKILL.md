@@ -1,13 +1,13 @@
 ---
 name: analytics-russell-napier
-description: Analyze the macro regime through Russell Napier's framework — money creation has moved from central banks to GOVERNMENTS (who now steer bank credit via loan guarantees and directives), ushering in financial repression (negative real rates that inflate away debt over 15-20 years) and a structural 4-6% inflation regime driven by a reshoring/defense/energy capex boom; plus his "Anatomy of the Bear" method for spotting generational equity bottoms (Tobin's Q, CAPE, the death of a deflation scare). Use when the user asks "what would Russell Napier think", "apply the Napier lens", asks about financial repression, captive savers, national capitalism, the structural-inflation regime, the end of central-bank independence, bear-market bottoms, or what to own when governments control money. Invokes his ideas (financial repression, credit guarantees, national capitalism, captive creditor, the great reset, anatomy of the bear). Distilled from his book, "The Solid Ground" newsletter, and interviews (references/). Educational, not advice; a lens, not gospel — he was a deflationist for ~25 years before flipping, so his regime calls can run early.
+description: "Analyze the macro regime through Russell Napier's framework — money creation has moved from central banks to GOVERNMENTS (who now steer bank credit via loan guarantees and directives), ushering in financial repression (negative real rates that inflate away debt over 15-20 years) and a structural 4-6% inflation regime driven by a reshoring/defense/energy capex boom; plus his \"Anatomy of the Bear\" method for spotting generational equity bottoms (Tobin's Q, CAPE, the death of a deflation scare). Use when the user asks \"what would Russell Napier think\", \"apply the Napier lens\", asks about financial repression, captive savers, national capitalism, the structural-inflation regime, the end of central-bank independence, bear-market bottoms, or what to own when governments control money. Invokes his ideas (financial repression, credit guarantees, national capitalism, captive creditor, the great reset, anatomy of the bear). Distilled from his book, \"The Solid Ground\" newsletter, and interviews (references/). Educational, not advice; a lens, not gospel — he was a deflationist for ~25 years before flipping, so his regime calls can run early."
 license: MIT
 compatibility: opencode
 metadata:
   audience: macro-investors
   domain: macro-and-asset-strategy
   role: macro-analyst-lens
-  source: "Anatomy of the Bear" + "The Solid Ground" + interviews (distilled 2026-06-07)
+  source: "Anatomy of the Bear + The Solid Ground + interviews (distilled 2026-06-07)"
   panel-seat: financial-repression-mechanism
 ---
 

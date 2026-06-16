@@ -1,6 +1,6 @@
 ---
 name: superforecasting
-description: Use when the question is a near-term MARKET-OUTCOME forecast under a dated catalyst — any asset (crypto, equities, indices, rates, macro). "Is now a good time to buy X", "where does X go by [date]", "what happens after CPI/FOMC/earnings/the unlock/the ETF decision", "make a prediction", "what are the odds", "will X hold $Y". Distinct from multi-lens-quorum (which renders a buy/hold verdict): this produces a CALIBRATED PROBABILISTIC FORECAST — scenarios with probabilities, anchored to prediction-market + options-implied odds, with measurable invalidation triggers, logged to be scored. Educational, not advice; a forecast is a probability, not a promise.
+description: "Use when the question is a near-term MARKET-OUTCOME forecast under a dated catalyst — any asset (crypto, equities, indices, rates, macro). \"Is now a good time to buy X\", \"where does X go by [date]\", \"what happens after CPI/FOMC/earnings/the unlock/the ETF decision\", \"make a prediction\", \"what are the odds\", \"will X hold $Y\". Distinct from multi-lens-quorum (which renders a buy/hold verdict): this produces a CALIBRATED PROBABILISTIC FORECAST — scenarios with probabilities, anchored to prediction-market + options-implied odds, with measurable invalidation triggers, logged to be scored. Educational, not advice; a forecast is a probability, not a promise."
 license: MIT
 compatibility: opencode
 metadata:

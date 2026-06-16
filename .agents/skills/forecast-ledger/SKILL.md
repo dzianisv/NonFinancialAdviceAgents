@@ -1,6 +1,6 @@
 ---
 name: forecast-ledger
-description: Use when a dated, probabilistic market call is made and should be SCORED later, or when reviewing past forecast accuracy/calibration — "log this forecast", "track this prediction", "how calibrated are my calls", "score my forecasts", "what's my Brier", "which lens/source forecasts best", "did our BTC/FOMC/CPI calls hit". Closes the feedback loop for superforecasting: log a call with its probability + resolution date, resolve it on the date, and score Brier + calibration by lens/source. Educational, not advice; a forecast ungraded is just an opinion.
+description: "Use when a dated, probabilistic market call is made and should be SCORED later, or when reviewing past forecast accuracy/calibration — \"log this forecast\", \"track this prediction\", \"how calibrated are my calls\", \"score my forecasts\", \"what's my Brier\", \"which lens/source forecasts best\", \"did our BTC/FOMC/CPI calls hit\". Closes the feedback loop for superforecasting: log a call with its probability + resolution date, resolve it on the date, and score Brier + calibration by lens/source. Educational, not advice; a forecast ungraded is just an opinion."
 license: MIT
 compatibility: opencode
 metadata:
