@@ -43,5 +43,21 @@ A busy PM ($1M tradfi + ~$177k crypto, no research time) wants a weekly engine t
 ```
 `top_fixes` must be specific and actionable, ranked by score impact — they feed the next iteration.
 
+## Hard caps are CODE, not the judge's memory (deterministic enforcement)
+The blind judge does the soft per-dimension scoring. The HARD penalties above must NOT depend on the
+judge remembering them — after the judge returns a raw `score`, enforce the caps deterministically from the
+run's machine-readable output (`flagged_drops`, `plans`):
+
+```
+node apply_score_caps.mjs '<judgeJson>' '<runJson>'   # → {raw_score, final_score, caps_fired[]}
+```
+
+Use `final_score` (the capped value) as the score of record — log THAT to the CSV. A flagship-exclusion
+(`flagged_drops` non-empty) caps to 35 and an all-PASS plan caps to 45 even if the judge missed it. This is
+the layer that does not rely on my calibration. Self-test: `node apply_score_caps.mjs --selftest`.
+
+The gate invariant itself is guarded by `test_gate_contract.mjs` (bound to the real workflow source) and a
+`hooks/pre-push` git hook that blocks pushing a regression. Enable the hook once per clone: `git config core.hooksPath hooks`.
+
 ## Done when
-A numeric score, per-dimension breakdown, and a ranked top_fixes list are returned. Log a row to `reports/hedge-fund.eval.csv` (date, run_id, score, one-line verdict) if asked to drive the loop.
+A numeric **capped** `final_score`, per-dimension breakdown, and a ranked top_fixes list are returned. Log a row to `reports/hedge-fund.eval.csv` (date, run_id, final_score, one-line verdict).

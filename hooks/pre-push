@@ -1,0 +1,33 @@
+#!/bin/sh
+# Versioned git pre-push hook. Enabled via: git config core.hooksPath hooks
+# Gates push on the hedge-fund-committee INVARIANT tests so the SanDisk regression (a discovered narrative
+# name filtered before the panel) can never be pushed. Naturally scoped: no-ops on any branch/worktree
+# whose working tree lacks these files (e.g. the crypto-workflow branch), and when node is unavailable.
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+command -v node >/dev/null 2>&1 || exit 0
+
+evaldir="$root/.agents/skills/hedge-fund-committee-eval"
+fail=0
+
+if [ -f "$evaldir/test_gate_contract.mjs" ]; then
+  node "$evaldir/test_gate_contract.mjs" >/dev/null 2>&1 || {
+    echo "❌ pre-push: gate-contract test FAILED — a discovered narrative name (SNDK-class) could be filtered before the panel."
+    echo "   Run: node $evaldir/test_gate_contract.mjs"
+    fail=1
+  }
+fi
+
+if [ -f "$evaldir/apply_score_caps.mjs" ]; then
+  node "$evaldir/apply_score_caps.mjs" --selftest >/dev/null 2>&1 || {
+    echo "❌ pre-push: score-cap selftest FAILED — the deterministic flagship/all-PASS caps are broken."
+    echo "   Run: node $evaldir/apply_score_caps.mjs --selftest"
+    fail=1
+  }
+fi
+
+if [ "$fail" -ne 0 ]; then
+  echo "Push blocked. Fix the failing invariant test(s). Override with --no-verify only if you know why (NOT recommended)."
+  exit 1
+fi
+echo "✓ hedge-fund invariant tests passed"
+exit 0
