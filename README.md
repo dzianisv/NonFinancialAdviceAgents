@@ -38,7 +38,22 @@ Each skill's description is written as a routing trigger, so the right desk answ
 
 `--copy` ships the Python helper scripts alongside each `SKILL.md` (needed for the data-pulling skills). For scheduled/proactive operation (daily scans + weekly committee), see [`docs/`](docs/) — `setup-claudecode.md`, `setup-openclaw.md`, `setup-hermes.md`.
 
-> **Workflows** (the multi-agent committee in `.agents/workflows/`) don't travel through the skill installer — they're a clone-the-repo power-user artifact. The everyday committee question is answered by the `agentic-fund-orchestration` skill, which installs normally.
+### The multi-agent workflows (Claude Code only)
+
+`npx skills add` installs **skills**, not the dynamic [Workflow](https://code.claude.com/docs/en/workflows) scripts (the committee / panel orchestrators). Those are a Claude-Code-native feature and travel a different way — they live in `.claude/workflows/` and Claude Code exposes any `.js` there as a `/<name>` command. Two ways to get them:
+
+```bash
+# Option A — clone the repo, open Claude Code in it; the workflows are project /commands
+git clone https://github.com/dzianisv/backtest && cd backtest
+#   → /hedge-fund-committee   /crypto-panel-review   /research-stock-market   /research-crypto-market
+
+# Option B — make them global (available in every project)
+cp backtest/.claude/workflows/*.js ~/.claude/workflows/
+```
+
+Then run e.g. `/hedge-fund-committee` or `/crypto-panel-review`. (Needs Claude Code ≥ v2.1.154 with Dynamic workflows enabled in `/config`. Workflows are a Claude Code feature — openclaw/hermes use the skills, which orchestrate via their own primitives; the everyday committee question is also answerable by the `agentic-fund-orchestration` skill, which installs normally.)
+
+> Note: the `.claude/workflows/*.js` entries are symlinks to the canonical scripts in `.agents/workflows/` and `crypto/workflows/` — they resolve on macOS/Linux. On Windows, copy the real files from those dirs instead.
 
 ---
 
