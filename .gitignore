@@ -42,3 +42,6 @@ session.txt
 reports/
 crypto/news/
 .agents/skills/crypto-news-store/.fetch_tmp.json
+
+# run error log (durable, not committed)
+logs/
