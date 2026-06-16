@@ -86,7 +86,7 @@ Use this when you want to pass specific args (ticker, date, portfolio):
 
 ```js
 Workflow({
-  scriptPath: "/path/to/financial-advisor-agents/crypto/workflows/research-market.js",
+  scriptPath: "./crypto/workflows/research-market.js",
   args: {
     question:  "BTC reached 65k from the drop to 61k. I hold 30% in COIN. Should I buy BTC today?",
     portfolio: "~30% of book in COIN (levered crypto-beta proxy); no direct BTC.",
@@ -100,7 +100,7 @@ Workflow({
 
 ```js
 Workflow({
-  scriptPath: "/path/to/financial-advisor-agents/crypto/workflows/research-market.js",
+  scriptPath: "./crypto/workflows/research-market.js",
   args: {
     question:  "NVDA pulled back 15% from ATH. I'm 40% concentrated in it. Should I trim?",
     portfolio: "40% NVDA, remainder unspecified. $1M tradfi book, no leverage.",
@@ -114,7 +114,7 @@ Workflow({
 
 ```js
 Workflow({
-  scriptPath: "/path/to/financial-advisor-agents/.agents/workflows/hedge-fund-committee.workflow.js",
+  scriptPath: "./.agents/workflows/hedge-fund-committee.workflow.js",
   args: { date: "2026-06-16" }  // no ticker needed — open-universe discovery
 })
 // Output: reports/hedge-fund-brief-<date>.md (30-sec read) + reports/hedge-fund-committee-<date>.md (full memo)
@@ -124,7 +124,7 @@ Workflow({
 
 ```js
 Workflow({
-  scriptPath: "/path/to/financial-advisor-agents/crypto/workflows/pairwise-eval.js",
+  scriptPath: "./crypto/workflows/pairwise-eval.js",
   args: {
     a:        "/path/to/iter1.report.md",   // hypothesis: worse (baseline)
     b:        "/path/to/iter2.report.md",   // hypothesis: better (candidate)
@@ -218,14 +218,6 @@ Key artifacts:
 | [`docs/tdd.md`](docs/tdd.md) | Architecture, wiring diagrams, data contracts |
 | [`.agents/workflows/hedge-fund-committee.workflow.js`](.agents/workflows/) | Weekly committee → ranked next-buy memo |
 
-Core skills: `regime-detection` · `trend-stock-research` · `dip-screener` · `dip-tranches-strategy` · `fomc-monitor` · `prediction-market-odds` · `forecast-ledger` · `hedge-fund-manager` · `tradfi-portfolio-manager` · `superforecasting` · `macro-panel` · `multi-lens-quorum` · `portfolio-monitor` · `portfolio-construction` · `rebalancing` · `risk-management` · `fundamental-analysis` · `stock-chair` · `stock-research-desk` · `13f-watch` · `hedge-fund-13f-analysis` · `congressman-stock-watch` · `signal-convergence-alert` · `agentic-fund-orchestration`
-
-Analyst lenses: `analyst-crypto` · `analyst-derivatives-positioning` · `analyst-systematic-trading` · `analyst-technical-analysis`
-
-Macro-economist panel: `analytics-lyn-alden` · `analytics-ray-dalio` · `analytics-stanley-druckenmiller` · `analytics-lacy-hunt` · `analytics-michael-pettis` · `analytics-russell-napier` · `analytics-warren-buffett` · `analytics-benjamin-graham` · `analytics-morgan-housel`
-
-News feeds: `feed-bloomberg` · `feed-wsj` · `feed-ft` · `feed-bitcoinmagazine` · `feed-coindesk` · `feed-cointelegraph` · `feed-decrypt` · `feed-theblock` · `narrative-news`
-
 **Status:** fast-tier daily scanners live on openclaw (cron + liveness); weekly committee workflow validated (3 iterations); congress stock-watch wired (`congress/`).
 
 ---
@@ -236,9 +228,116 @@ Manages a **~$177k crypto book** with a BTC-as-hurdle filter — only deploy int
 
 Full spec: [`crypto/`](crypto/) — `crypto.goal.md` · `crypto.prd.md` · `crypto.tdd.md` · `crypto.loop.md`
 
-Core skills: `crypto-chair` · `crypto-research-desk` · `crypto-dip-scanner` · `crypto-liquidity-data` · `crypto-onchain-data` · `crypto-news-store` · `crypto-workflow-eval` · `analyst-crypto` · `research-manager` · `defi-portfolio-manager` · `tax-loss-harvesting` · `trend-following`
-
 **Status:** skill tree designed + specced; G-Eval harness baselined (85/100); crypto.loop.md orchestrates daily dip-scan + weekly research desk cycle.
+
+---
+
+## Skills
+
+### Workflows (5 total, all in `.claude/workflows/`)
+
+| Slash command | Description |
+|---|---|
+| `/hedge-fund-committee` | Find the next stocks to BUY and hand over a STAGED ENTRY plan. Open-universe candidate discovery → panel vote → risk veto → scale-in plan. RECOMMEND-ONLY. |
+| `/research-market` | Unified portfolio-aware research (crypto + equities). LLM manager discovers skills live, decides everything — assets, seats, panel, chair. Pass `question` + optional `portfolio` + `date`. |
+| `/multi-lens-quorum` | Convene N independent analyst lenses on ONE judgment call; synthesize consensus without averaging away dissent. |
+| `/trend-stock-research` | Research-first trend-stock screen: prescreen → parallel journalism → non-obvious beneficiary mapping → 3-question skeptic filter → route to multi-lens-quorum. |
+| `/pairwise-eval` | Blind A/B comparison of two research reports — N position-randomized judges, majority vote. Used in the improve loop. |
+
+### Data & monitoring
+
+| Skill | Description |
+|---|---|
+| `13f-watch` | Watch 13F filings, surface new initiations + cross-fund conviction clusters; dedupes candidates |
+| `congressman-stock-watch` | Congressional stock trades feed |
+| `crypto-dip-scanner` | Daily BTC/ETH/SOL/BNB/AVAX dip scanner; alerts on -30%+ from 52w high + extreme fear |
+| `dip-screener` | Equity dip screener |
+| `dip-tranches-strategy` | Staged entry / tranche sizing for dip entries |
+| `fomc-monitor` | Fed FOMC calendar, statement, and dot-plot monitor |
+| `liveness-monitor` | Monitors that scheduled jobs are running; DMs on stale job |
+| `portfolio-monitor` | Portfolio state monitor |
+| `prediction-market-odds` | Polymarket / Kalshi odds for macro/market events |
+| `regime-detection` | Market regime classifier (risk-on / risk-off / transition) |
+| `signal-convergence-alert` | Multi-source convergence signal detector |
+
+### Crypto data
+
+| Skill | Description |
+|---|---|
+| `crypto-liquidity-data` | Crypto liquidity and ETF flow data seat |
+| `crypto-onchain-data` | On-chain valuation data (MVRV-Z, NUPL, etc.) |
+| `analyst-derivatives-positioning` | Derivatives and options positioning data seat |
+
+### News feeds (feed-*)
+
+| Skill | Description |
+|---|---|
+| `feed-bitcoinmagazine` | Bitcoin Magazine RSS/API adapter |
+| `feed-coindesk` | CoinDesk RSS/API adapter |
+| `feed-cointelegraph` | CoinTelegraph RSS/API adapter |
+| `feed-decrypt` | Decrypt RSS/API adapter |
+| `feed-theblock` | The Block RSS/API adapter |
+| `feed-bloomberg` | Bloomberg macro/finance headline adapter |
+| `feed-ft` | Financial Times headline adapter |
+| `feed-wsj` | Wall Street Journal headline adapter |
+
+### Research desks & chairs
+
+| Skill | Description |
+|---|---|
+| `crypto-research-desk` | Consolidates crypto gather seats into one sourced brief |
+| `stock-research-desk` | Consolidates equity gather seats into one sourced brief |
+| `crypto-chair` | Crypto committee chair; portfolio-aware buy/sell decision |
+| `stock-chair` | Equity committee chair; portfolio-aware buy/sell decision |
+| `research-manager` | Intake/triage desk head; discovers skills live, assembles the research desk for any query |
+| `narrative-news` | Consumes feed-* adapters → deduped events with priced-in tags |
+| `crypto-news-store` | Dedup/state store for crypto news events |
+
+### Analyst lenses (analyst-* / analytics-*)
+
+| Skill | Description |
+|---|---|
+| `analyst-crypto` | Crypto analyst lens |
+| `analyst-systematic-trading` | Systematic/quant trading lens |
+| `analyst-technical-analysis` | Technical analysis lens |
+| `analytics-benjamin-graham` | Value investing (Graham) lens |
+| `analytics-lacy-hunt` | Deflationary/rates dissent lens (bear seat) |
+| `analytics-lyn-alden` | Lyn Alden macro/monetary lens |
+| `analytics-michael-pettis` | Global imbalances / trade lens (Pettis) |
+| `analytics-morgan-housel` | Behavioral/sizing guardrail (non-voting) |
+| `analytics-ray-dalio` | Macro cycles lens (Dalio) |
+| `analytics-russell-napier` | Credit/financial repression lens (Napier) |
+| `analytics-stanley-druckenmiller` | Macro momentum lens (Druckenmiller) |
+| `analytics-warren-buffett` | Business quality / intrinsic value lens (equity only) |
+| `macro-panel` | Multi-thinker macro panel conductor |
+| `fundamental-analysis` | Equity fundamentals analysis |
+| `superforecasting` | Tetlock-style probabilistic forecasting |
+
+### Portfolio management
+
+| Skill | Description |
+|---|---|
+| `agentic-fund-orchestration` | Top-level agentic hedge-fund orchestration playbook |
+| `defi-portfolio-manager` | DeFi portfolio management |
+| `hedge-fund-13f-analysis` | 13F filings analysis |
+| `hedge-fund-manager` | Portfolio-level management and sizing |
+| `multi-lens-quorum` | Convene N lenses on a judgment call |
+| `portfolio-construction` | Portfolio construction and allocation |
+| `rebalancing` | Rebalancing logic |
+| `risk-management` | Risk management and position sizing |
+| `tax-loss-harvesting` | Tax-loss harvesting |
+| `tradfi-portfolio-manager` | TradFi portfolio manager skill |
+| `trend-following` | Trend-following strategy |
+| `trend-stock-research` | Research-first trend-stock screen |
+
+### Evaluation & ops
+
+| Skill | Description |
+|---|---|
+| `crypto-workflow-eval` | G-Eval harness for crypto workflow quality |
+| `forecast-ledger` | Dated forecast log with Brier-score tracking |
+| `hedge-fund-committee-eval` | Blind LLM judge for committee run quality |
+| `skill-supervisor` | Skill quality supervision |
 
 ---
 
