@@ -183,10 +183,14 @@ if (!TOP.length) return { regime: macro?.summary, coverage, dead_desks: deadDesk
 // independent of any article. This is what lets the panel tell an EARLY laggard (CMI -8% from high,
 // +23% vs 200dMA) from a LATE/priced-in narrative (SNDK +245% vs 200dMA) instead of guessing or missing.
 const groundJson = await agent(
-  `Run EXACTLY this and return ONLY its stdout (raw JSON, no prose):\n` +
-  `python3 .agents/skills/dip-screener/dip_screener.py --tickers ${TOP.map(t => t.ticker).join(',')}\n` +
-  `It price-grounds these tickers (live yfinance 52w-high/200dMA, no dip threshold). If a ticker isn't ` +
-  `US-listed it lands in fetch_misses — that's fine, do not fabricate. Return the JSON verbatim.`,
+  `Use the /dip-screener skill in PRICE-GROUND mode. The skill's directory contains dip_screener.py — ` +
+  `find its absolute path (the /dip-screener skill tells you its base dir; or \`find . -path '*dip-screener/dip_screener.py'\`) ` +
+  `and run it with python3 against these tickers:\n` +
+  `  python3 <abs path>/dip_screener.py --tickers ${TOP.map(t => t.ticker).join(',')}\n` +
+  `It prints {"grounded":[...],"fetch_misses":[...]} — live yfinance 52w-high/200dMA, no dip threshold. ` +
+  `VERIFY you actually got JSON with a non-empty "grounded" array; if the command errored (path/python), ` +
+  `fix the path and re-run ONCE. A ticker with no yfinance data (e.g. BTC, or a non-US listing) belongs in ` +
+  `fetch_misses — that is correct, do not fabricate it. Return ONLY the raw JSON stdout, no prose.`,
   { label: 'price-ground', phase: 'Aggregate' })
 try {
   const g = JSON.parse((groundJson.match(/\{[\s\S]*\}/) || [])[0] || '{}')

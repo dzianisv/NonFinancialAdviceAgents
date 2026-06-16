@@ -47,6 +47,11 @@ Output fields: `ticker`, `pct_from_high`, `high_52w`, `current`, `sma200`, `pct_
 
 `--json` output is `{"hits": [...], "fetch_misses": [...]}`. A constituent that returns no data is retried once via a single-ticker fetch; if still empty it is reported in `fetch_misses` (and as a `[FETCH-MISS]` line in text mode) — **never silently dropped and never falsely labelled "delisted"** (these are transient Yahoo feed misses, e.g. MMC). The durable `--emit-pool` jsonl contract is unchanged (only HIGH/MEDIUM hits, same row schema).
 
+**Price-ground mode (`--tickers A,B,C`):** ground an ARBITRARY list of tickers — NOT the S&P-100 universe and with NO dip threshold (a name may be UP). Returns `{"grounded": [...], "fetch_misses": [...]}` where each grounded row has the same fields (`current`/`high_52w`/`pct_from_high`/`sma200`/`pct_vs_200d`/`as_of`). Used by the hedge-fund-committee workflow to attach a live, paywall-independent 52w-high/200dMA to narrative names the news desk surfaced (decoupling discovery from pricing). A ticker with no yfinance data lands in `fetch_misses` (honest, not dropped). Example:
+```
+python3 .agents/skills/dip-screener/dip_screener.py --tickers LEU,KGS,POWL,MSFT
+```
+
 **2nd-source cross-check (accepted limitation):** quotes are single-source yfinance. A stooq cross-check was evaluated but stooq is behind a JavaScript/anti-bot wall from the agent sandbox (returns an HTML challenge, not CSV) for all tickers, so it is not a reliable second source here. Treat single-source as a known limitation rather than forcing an unreliable cross-check.
 
 Conviction tiers:
