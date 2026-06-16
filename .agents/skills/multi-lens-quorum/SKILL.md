@@ -178,6 +178,30 @@ weekly-not-daily; revisit clip size if venue fees bite. **Re-run if** BTC reclai
 turns, or the facts above stop holding.
 </example>
 
+## Output format (required — no prose, no hedging paragraphs)
+
+Every quorum result must be delivered in this compact format:
+
+```
+QUORUM — [TICKER/QUESTION] — [date]
+Regime: [RISK_ON / NEUTRAL / RISK_OFF]
+
+Verdict: [BUY / HOLD / AVOID] — [X]/[N] lenses agree
+Conviction: [1-5]/5
+
+Consensus reason: [one sentence — what all agreeing lenses cited]
+Staged entry (if BUY): [e.g. 1/3 now · 1/3 at −X% · 1/3 at −Y%]
+Invalidation: [specific price level or event that kills the thesis]
+
+Dissent: [lens name] — [HOLD/AVOID], conviction [X]/5 — [one sentence why]
+         Flips to BUY if: [specific trigger]
+
+Educational analysis, not advice — you execute.
+```
+
+Do NOT add paragraphs of caveats before this output. Do NOT ask the user for their risk
+tolerance or net worth before running the quorum. Run the lenses, report the result.
+
 ## Done when
 
 - [ ] Convened **only** for a real, reversible-expensive **judgment** call (not a fact/lookup/code fix,
