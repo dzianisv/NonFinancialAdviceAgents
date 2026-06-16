@@ -271,6 +271,30 @@ create/edit skill → execute on real input → evaluate output → feedback (sp
                      (repeat until output is good)
 ```
 
+### Research workflows + the trustworthy improve loop (built 2026-06-16)
+
+The crypto/equity research system = **3 thin workflows** in `crypto/workflows/` (orchestration only —
+ALL substance lives in `.agents/skills/`). Do NOT re-derive this; run/extend it:
+
+- `research-crypto-market.js` — portfolio-aware crypto buy/sell research (gather → consolidate → panel → chair → ledger).
+- `research-stock-market.js` — same shape for equities (Buffett/Graham/Druckenmiller lenses, 13F/congress/fundamentals seats).
+- `pairwise-eval.js` — blind A/B selection for improving a workflow.
+
+Run via the Workflow tool with `scriptPath` + `args:{question, portfolio, date, ticker?}`. Each writes
+`research/research.{crypto,stock}.{date}.md` + a forecast-ledger row.
+
+Design + the eval loop are documented: `crypto/crypto.{goal,prd,tdd}.md` (product) and
+`crypto/eval/IMPROVE-LOOP.md` (the improve procedure). Hard lessons — violating these wasted a session:
+
+1. **Pairwise, not pointwise.** To decide if an edit improved a workflow, use blind A/B preference
+   (`pairwise-eval.js`), NOT absolute 0–100 scores — pointwise clusters/fluctuates and won't discriminate.
+2. **Never self-grade.** The agent that built/edits a workflow must not score it. Blind judges (see only the
+   output), roles separated (judge ≠ proposer ≠ executor). A self-graded loop once inflated 76→94 (real ~83).
+3. **Workflows can't nest a heavy target** (`workflow()`→null/throws). The improve loop is supervisor-orchestrated:
+   run target externally (Workflow tool) → reflect → propose skill edit → re-run → pairwise select → human gate.
+4. **forecast-ledger Brier is the real ground truth.** LLM-judges are a coarse filter; the ledger validates over time.
+5. **Completeness contract:** a missing data category is `[UNAVAILABLE]` (loud), never silently dropped.
+
 ### Before building a NEW skill — STOP (anti-bloat guardrail)
 The product is the **agent + its proactive loop** (cron / heartbeat / dynamic workflow), NOT the skill
 count. Adding a skill is the low-value move; wiring an existing skill onto a reliable schedule is the
