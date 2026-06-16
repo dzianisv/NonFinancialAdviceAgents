@@ -1,3 +1,7 @@
+> **⚠ SCORE CORRECTION (post independent review):** the 76→94 self-graded scores below were produced by a
+> self-graded, anchored eval and are inflated. Independent blind review: **iter1 ≈ 58, iter4 ≈ 83**.
+> The *improvement is real* (3 data gaps fixed) but the absolute numbers are not. See [INDEPENDENT-REVIEW.md](INDEPENDENT-REVIEW.md).
+
 # Crypto workflow — eval loop summary
 
 Test input: *"BTC reached 65k$ from the drop to 61k$. I hold 30% in COIN. I don't have BTC direct exposure. Should I buy it today?"*

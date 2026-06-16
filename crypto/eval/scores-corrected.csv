@@ -1,0 +1,5 @@
+iteration,commit,self_graded_score,independent_score,note
+1,1bdf1e3,76,58,news seat failed; visibly incomplete (blind)
+2,75c8183,88,~80,"news fixed; not independently graded, interpolated"
+3,7feaa8d,91,~81,ETF loud-unavailable; interpolated
+4,60416e7,94,83,strong reasoning; still blind on spot-ETF flows (blind/audit consensus ~82-88)
