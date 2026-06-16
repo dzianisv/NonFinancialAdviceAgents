@@ -32,14 +32,23 @@ const JUDGE_SCHEMA = {
 }
 
 const JUDGE_RUBRIC =
-  `You are an INDEPENDENT, skeptical research grader. You see ONLY the report below. You do NOT know who wrote ` +
-  `the workflow, you have NO prior score, and there is NO target number to hit. Grade 0-100 on YOUR OWN merits. ` +
-  `Weight >=50% on EVIDENCE GROUNDING (every claim sourced+dated, priced odds pulled live not from digests, ` +
-  `news/ETF/on-chain present or honestly [UNAVAILABLE], no fabrication). The rest: does it answer the actual ` +
-  `question, is it portfolio-aware (buy AND sell), is disagreement preserved, is there a disciplined actionable ` +
-  `plan with invalidation, is confidence calibrated. Hard caps: fabricated number/odds-from-digest -> max 40; ` +
-  `ignores the portfolio -> max 50; a data category silently dropped (not flagged [UNAVAILABLE]) -> max 60. ` +
-  `Return module_gaps naming the weakest skill/section. Be harsh and specific.`
+  `You are an INDEPENDENT, HARSH research grader. You see ONLY the report below. You do NOT know who wrote the ` +
+  `workflow, you have NO prior score, there is NO target to hit. Grade 0-100 on YOUR OWN merits. Most real-world ` +
+  `research answers are MEDIOCRE — anchor your scale so 50 = competent-but-with-real-holes, 70 = solid, ` +
+  `85+ = genuinely excellent with the evidence actually present. Do NOT cluster every report at 85-90.\n` +
+  `EVIDENCE GROUNDING is >=50% of the score and is the FLOOR, not a bonus:\n` +
+  `- A DECISION-CRITICAL evidence category that is missing/[UNAVAILABLE] caps the report HARD even if honestly ` +
+  `flagged. Honesty avoids the fabrication cap; it does NOT restore the missing evidence. For a "buy TODAY" ` +
+  `timing question, the news/catalyst read is decision-critical: if the news seat DID NOT RUN, grounding <=25/50 ` +
+  `and TOTAL <= 65. If TWO+ critical categories (e.g. news AND ETF-flows AND on-chain core) are absent, TOTAL <= 55.\n` +
+  `- Every quantitative claim must be sourced+dated; wide ranges from JS-snippets or unresolved conflicts ($54k vs ` +
+  `$76k) are soft evidence — dock for them.\n` +
+  `The remaining <=50%: answers the actual question, portfolio-aware (buy AND sell), disagreement preserved, ` +
+  `disciplined actionable plan with invalidation, calibration (uniform "medium" across all seats = under-calibrated, dock it).\n` +
+  `Hard caps (lowest wins): fabricated number/odds-from-digest -> 40; ignores the portfolio -> 50; a category ` +
+  `SILENTLY dropped (not flagged) -> 60; a decision-critical category [UNAVAILABLE] -> 65.\n` +
+  `Set evidence_grounding (0-50) explicitly. Return module_gaps naming the weakest sections. Be harsh; a report ` +
+  `that cannot see its single most decision-relevant input is NOT an 88.`
 
 phase('Judge')
 const scored = await pipeline(CASES, async (c) => {
