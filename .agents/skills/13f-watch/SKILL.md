@@ -34,6 +34,8 @@ W="python3 .agents/skills/13f-watch/watch.py"   # ledger at $THIRTEENF_LEDGER or
 $W roster                       # who we track (Burry/Buffett/Ackman/Klarman/Li Lu + any in 13f/roster.json)
 ```
 
+Dedup is **ticker + quarter** — the same name can re-surface in a new quarter if managers show fresh action.
+
 1. **Pull recent filings** for each roster manager (`hedge-fund-13f-analysis` method: EDGAR
    `infotable.xml` first, aggregators to corroborate). Resolve any missing CIK via EDGAR company search;
    add it to `13f/roster.json`.
@@ -43,9 +45,9 @@ $W roster                       # who we track (Burry/Buffett/Ackman/Klarman/Li 
    - **Cross-fund cluster** — ≥2 roster managers initiating/holding the same name (highest signal).
    - **Position size** — large % of the manager's 13F AUM = high conviction.
    - **Fresh initiation** in a beaten-down name > a small top-up.
-4. **DEDUPE — the core rule.** For each candidate: `W seen <TICKER>`.
-   - exit 0 (`SEEN … SKIP`) → **already recommended, drop it.** Do not propose again.
-   - exit 1 (`NEW`) → ok to propose.
+4. **DEDUPE — the core rule.** For each candidate: `W seen <TICKER> --quarter <QUARTER>`.
+   - exit 0 (`SEEN … SKIP`) → **already recommended this quarter, drop it.** Do not propose again for this filing period.
+   - exit 1 (`NEW`) → ok to propose. (Name from a prior quarter appears as NEW in a new quarter — fresh action re-qualifies it.)
 5. **Propose the NEW ones** (recommend-only): ticker, manager(s), quarter, action, the WHY (1-2 lines),
    put-checked. Then **record each** so it's never repeated:
    `W record --ticker LULU --manager burry --quarter 2026Q1 --action new --reason "..." --source "EDGAR CIK 1649339"`

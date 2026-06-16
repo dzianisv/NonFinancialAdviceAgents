@@ -2,16 +2,19 @@
 """13f-watch — dedup ledger + manager roster for the 13F buy-watcher.
 
 The script owns the DETERMINISTIC parts: who we track, and what we've ALREADY recommended
-(so the same ticker is never recommended twice). The judgment parts — pulling filings,
-reading puts-vs-longs, interpreting WHY — are the agent's job via the 13f-watch SKILL.md
-(which leans on hedge-fund-13f-analysis).
+(so the same ticker is never recommended twice per quarter). The judgment parts — pulling
+filings, reading puts-vs-longs, interpreting WHY — are the agent's job via the 13f-watch
+SKILL.md (which leans on hedge-fund-13f-analysis).
+
+Dedup scope: ticker + quarter. Same name can surface again in a new quarter if managers
+show fresh action — each quarterly filing cycle is independent.
 
 Storage: JSONL at $THIRTEENF_LEDGER or ./13f/recommended.jsonl
 Roster:  JSON  at ./13f/roster.json (falls back to the verified default below)
 
 Usage:
   watch.py roster
-  watch.py seen <TICKER>                 # exit 0 = already recommended (SKIP); exit 1 = NEW (ok to propose)
+  watch.py seen <TICKER> --quarter 2026Q1   # exit 0 = already recommended this quarter (SKIP); exit 1 = NEW
   watch.py record --ticker LULU --manager burry --quarter 2026Q1 --action new \
                   [--reason "..."] [--price 230] [--source "EDGAR CIK 1649339"]
   watch.py list [--since YYYY-MM-DD]
@@ -62,28 +65,30 @@ def roster(a):
 
 def seen(a):
     t = a.ticker.upper()
-    hit = [r for r in _load() if r["ticker"].upper() == t]
+    q = a.quarter
+    hit = [r for r in _load() if r["ticker"].upper() == t and r["quarter"] == q]
     if hit:
         r = hit[0]
-        print(f'SEEN {t} — recommended {r["recommended_on"]} via {r["manager"]} ({r["quarter"]}); SKIP')
+        print(f'SEEN {t} {q} — recommended {r["recommended_on"]} via {r["manager"]}; SKIP')
         sys.exit(0)
-    print(f"NEW {t} — not yet recommended; ok to propose")
+    print(f"NEW {t} {q} — not yet recommended this quarter; ok to propose")
     sys.exit(1)
 
 
 def record(a):
     rows = _load()
     t = a.ticker.upper()
-    if any(r["ticker"].upper() == t for r in rows):
-        print(f"skip: {t} already recommended — dedup rule, not recording again", file=sys.stderr)
+    q = a.quarter
+    if any(r["ticker"].upper() == t and r["quarter"] == q for r in rows):
+        print(f"skip: {t} {q} already recommended — dedup rule, not recording again", file=sys.stderr)
         sys.exit(3)
     rows.append({
-        "ticker": t, "manager": a.manager, "quarter": a.quarter, "action": a.action,
+        "ticker": t, "manager": a.manager, "quarter": q, "action": a.action,
         "reason": a.reason or "", "price_at_rec": a.price, "source": a.source or "",
         "recommended_on": date.today().isoformat(),
     })
     _save(rows)
-    print(f"recorded {t}  via {a.manager}  {a.quarter}  ({a.action})")
+    print(f"recorded {t}  via {a.manager}  {q}  ({a.action})")
 
 
 def list_(a):
@@ -102,7 +107,10 @@ def main():
     p = argparse.ArgumentParser(description="13f-watch dedup ledger + roster")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("roster").set_defaults(fn=roster)
-    s = sub.add_parser("seen"); s.add_argument("ticker"); s.set_defaults(fn=seen)
+    s = sub.add_parser("seen")
+    s.add_argument("ticker")
+    s.add_argument("--quarter", required=True, help="e.g. 2026Q1 — dedup is scoped per quarter")
+    s.set_defaults(fn=seen)
     s = sub.add_parser("record")
     s.add_argument("--ticker", required=True); s.add_argument("--manager", required=True)
     s.add_argument("--quarter", required=True); s.add_argument("--action", required=True,
