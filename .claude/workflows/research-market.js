@@ -1,1 +1,1 @@
-../../crypto/workflows/research-market.js
+../../.agents/workflows/research-market.workflow.js

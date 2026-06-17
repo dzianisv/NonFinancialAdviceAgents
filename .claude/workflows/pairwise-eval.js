@@ -1,1 +1,1 @@
-../../crypto/workflows/pairwise-eval.js
+../../.agents/workflows/pairwise-eval.workflow.js

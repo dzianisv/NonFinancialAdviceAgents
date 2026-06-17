@@ -1,0 +1,233 @@
+{
+  "generated": "2026-06-17 00:27",
+  "benchmark": "SPY",
+  "period": "400d",
+  "missing_tickers": [],
+  "themes": [
+    {
+      "theme": "ai-memory-storage",
+      "leader": "MU",
+      "etf_proxy": "DRAM",
+      "rs_3m": 1.0685915914505926,
+      "rs_6m": 2.7882868119494644,
+      "breadth": 1.0,
+      "n_breadth": 8,
+      "extension": 1.360270477067885,
+      "accel": -0.01849541073684935,
+      "ret_3m": 1.1902231358714062,
+      "ret_6m": 2.8951313649968773,
+      "leader_pick": {
+        "ticker": "SNDK",
+        "ret_6m": 8.659278880467536,
+        "ext_vs_200d": 2.3580929978236784
+      },
+      "laggard_fyi": {
+        "ticker": "CAMT",
+        "ret_6m": 0.6278696780797506
+      },
+      "n_core": 8,
+      "heat": 100.0,
+      "stage": "LATE"
+    },
+    {
+      "theme": "optical-networking",
+      "leader": "COHR",
+      "etf_proxy": "NONE",
+      "rs_3m": 0.7326630368835442,
+      "rs_6m": 1.3306212415127614,
+      "breadth": 1.0,
+      "n_breadth": 9,
+      "extension": 0.7136903720240885,
+      "accel": -0.15536201002489508,
+      "ret_3m": 0.8542945813043578,
+      "ret_6m": 1.4374657945601745,
+      "leader_pick": {
+        "ticker": "AAOI",
+        "ret_6m": 4.327822527821052,
+        "ext_vs_200d": 1.2629872819186563
+      },
+      "laggard_fyi": {
+        "ticker": "AVGO",
+        "ret_6m": 0.05082250647398223
+      },
+      "n_core": 9,
+      "heat": 88.9,
+      "stage": "LATE"
+    },
+    {
+      "theme": "ai-compute",
+      "leader": "NVDA",
+      "etf_proxy": "SMH",
+      "rs_3m": 0.6351117527929863,
+      "rs_6m": 1.0751479565676265,
+      "breadth": 1.0,
+      "n_breadth": 10,
+      "extension": 0.7239508664480657,
+      "accel": -0.03607578781934201,
+      "ret_3m": 0.7567432972137998,
+      "ret_6m": 1.1819925096150397,
+      "leader_pick": {
+        "ticker": "MU",
+        "ret_6m": 3.23654873461844,
+        "ext_vs_200d": 1.6111622669758368
+      },
+      "laggard_fyi": {
+        "ticker": "AVGO",
+        "ret_6m": 0.05082250647398223
+      },
+      "n_core": 10,
+      "heat": 77.8,
+      "stage": "LATE"
+    },
+    {
+      "theme": "space-satellite",
+      "leader": "RKLB",
+      "etf_proxy": "UFO",
+      "rs_3m": 0.11392725625889194,
+      "rs_6m": 0.477808970675788,
+      "breadth": 1.0,
+      "n_breadth": 10,
+      "extension": 0.28933218684550505,
+      "accel": -0.20706437669097963,
+      "ret_3m": 0.23555880067970553,
+      "ret_6m": 0.5846535237232011,
+      "leader_pick": {
+        "ticker": "IRDM",
+        "ret_6m": 1.3602135642649942,
+        "ext_vs_200d": 0.6941769319172881
+      },
+      "laggard_fyi": {
+        "ticker": "ASTS",
+        "ret_6m": 0.0723598862135939
+      },
+      "n_core": 10,
+      "heat": 66.7,
+      "stage": "LATE"
+    },
+    {
+      "theme": "datacenter-power",
+      "leader": "VRT",
+      "etf_proxy": "GRID",
+      "rs_3m": 0.05382635779158365,
+      "rs_6m": 0.41589749655187225,
+      "breadth": 0.6666666666666666,
+      "n_breadth": 9,
+      "extension": 0.23977180505707343,
+      "accel": -0.06416560624401005,
+      "ret_3m": 0.17545790221239724,
+      "ret_6m": 0.5227420495992854,
+      "leader_pick": {
+        "ticker": "POWL",
+        "ret_6m": 1.607246781613179,
+        "ext_vs_200d": 0.7520198104093929
+      },
+      "laggard_fyi": {
+        "ticker": "BWXT",
+        "ret_6m": 0.1281826064296947
+      },
+      "n_core": 9,
+      "heat": 55.6,
+      "stage": "MID"
+    },
+    {
+      "theme": "quantum-computing",
+      "leader": "IONQ",
+      "etf_proxy": "QTUM",
+      "rs_3m": 0.1542944438101475,
+      "rs_6m": -0.11223654101280955,
+      "breadth": 0.7142857142857143,
+      "n_breadth": 7,
+      "extension": 0.023902272257262998,
+      "accel": -0.0023283388988367126,
+      "ret_3m": 0.2759259882309611,
+      "ret_6m": -0.0053919879653964164,
+      "leader_pick": {
+        "ticker": "LSCC",
+        "ret_6m": 0.8973815196538624,
+        "ext_vs_200d": 0.5750822967436628
+      },
+      "laggard_fyi": {
+        "ticker": "IBM",
+        "ret_6m": -0.11279735463922924
+      },
+      "n_core": 7,
+      "heat": 44.4,
+      "stage": "MID"
+    },
+    {
+      "theme": "robotics-automation",
+      "leader": "ISRG",
+      "etf_proxy": "BOTZ",
+      "rs_3m": -0.01930783895122476,
+      "rs_6m": 0.09836927229381748,
+      "breadth": 0.625,
+      "n_breadth": 8,
+      "extension": 0.12556102091451848,
+      "accel": -0.025173988617636846,
+      "ret_3m": 0.10232370546958883,
+      "ret_6m": 0.20521382534123062,
+      "leader_pick": {
+        "ticker": "TER",
+        "ret_6m": 1.118611184402087,
+        "ext_vs_200d": 0.6360737556635032
+      },
+      "laggard_fyi": {
+        "ticker": "ROK",
+        "ret_6m": 0.15843007420980793
+      },
+      "n_core": 8,
+      "heat": 33.3,
+      "stage": "MID"
+    },
+    {
+      "theme": "nuclear-smr",
+      "leader": "CCJ",
+      "etf_proxy": "NLR",
+      "rs_3m": -0.21016461504557393,
+      "rs_6m": -0.2344368281899029,
+      "breadth": 0.3,
+      "n_breadth": 10,
+      "extension": -0.1719753285331061,
+      "accel": -0.005626537954039206,
+      "ret_3m": -0.08853307062476033,
+      "ret_6m": -0.12759227514248977,
+      "leader_pick": {
+        "ticker": "GEV",
+        "ret_6m": 0.4651714560870195,
+        "ext_vs_200d": 0.2809317723799609
+      },
+      "laggard_fyi": {
+        "ticker": "BWXT",
+        "ret_6m": 0.1281826064296947
+      },
+      "n_core": 10,
+      "heat": 22.2,
+      "stage": "WEAK"
+    },
+    {
+      "theme": "defense-tech",
+      "leader": "PLTR",
+      "etf_proxy": "ITA",
+      "rs_3m": -0.3126686148178547,
+      "rs_6m": -0.2063597237402967,
+      "breadth": 0.3333333333333333,
+      "n_breadth": 9,
+      "extension": -0.1286392609937717,
+      "accel": 0.1007502336773628,
+      "ret_3m": -0.1910370703970411,
+      "ret_6m": -0.09951517069288356,
+      "leader_pick": {
+        "ticker": "MRCY",
+        "ret_6m": 0.5094644336953975,
+        "ext_vs_200d": 0.3570401237636871
+      },
+      "laggard_fyi": {
+        "ticker": "RTX",
+        "ret_6m": 0.05323473096225517
+      },
+      "n_core": 9,
+      "heat": 11.1,
+      "stage": "WEAK"
+    }
+  ]
+}

@@ -6,6 +6,42 @@ A portable skill+workflow layer that turns **Claude Code, openclaw, or hermes** 
 
 The agent proposes; the human approves every order. Recommend-only, always.
 
+## How it works
+
+Two tiers run on any backend. FAST catches same-day setups; SLOW produces a weekly buy brief.
+
+```
+                      DATA SOURCES
+  yfinance | FRED | alternative.me | EDGAR | FT/WSJ | Polymarket
+                         |
+          +--------------+---------------+
+          |                              |
+   FAST (daily cron)             SLOW (weekly workflow)
+   scan -> gate -> DM            hedge-fund-committee
+          |                              |
+  dip-screener                   1. COLLECT  (x6 parallel)
+  crypto-dip-scanner                regime, fomc, 13f,
+  regime-detection                  congress, news, dips
+  fomc-monitor                           |
+  trend-stock-research           2. PANEL  (multi-lens-quorum)
+          |                         4+ analyst lenses
+  signal-convergence-alert               |
+  (>=2 sources match)            3. DECIDE
+          |                         risk veto -> buy brief
+          +-------------+---------------+
+                        |
+                   DM to owner
+              (silent when nothing fires)
+                        |
+       +-----------------------------------+
+       | Claude Code  |  openclaw  | hermes |
+       +-----------------------------------+
+```
+
+- **FAST** -- daily cron fires each scanner independently. A gate must pass (e.g. stock -30% from 52w high AND regime=RISK_ON) before a DM is sent; otherwise the job is silent. The convergence alert cross-references all pools and DMs when the same ticker appears in 2+ sources.
+- **SLOW** -- a weekly multi-agent workflow fans out 6 research desks in parallel, ranks candidates by source count, runs each through a 4-lens analyst panel (Buffett, Druckenmiller, Alden, fundamentals), applies a binding risk-management veto, and produces a ranked buy brief with staged entry plans.
+- **Backend** -- same ~60 skills install identically onto Claude Code, openclaw, or hermes. Only the scheduling primitive differs.
+
 ---
 
 ## Installation
@@ -14,6 +50,11 @@ The agent proposes; the human approves every order. Recommend-only, always.
 
 - **Python 3** with `yfinance` — used by the data-pulling `.py` scripts bundled in `.agents/skills/` (e.g. `dip_screener.py`, `crypto_dip_scanner.py`, `ledger.py`). Install once: `pip install yfinance`.
 - **Claude Code ≥ v2.1.154** with Dynamic Workflows enabled (`/config`) — required to run `/hedge-fund-committee`, `/research-market`, and the other slash-command workflows.
+- **`opencode-drawer-workflows` plugin (v1.6.0+)** — required to run `.workflow.js` files from OpenCode sessions. Provides tools: `workflow`, `workflow_status`, `workflow_stop`, `workflow_save_run`. Install:
+  1. Add `"opencode-drawer-workflows"` to the `plugin` array in `~/.config/opencode/opencode.json`
+  2. `cd ~/.config/opencode && npm install opencode-drawer-workflows`
+  3. Restart OpenCode. Workflow scripts live in `.agents/workflows/` (main: `hedge-fund-committee.workflow.js`).
+  4. Run via: `workflow` tool with `script_path: ".agents/workflows/hedge-fund-committee.workflow.js"`
 
 ### Skills
 
@@ -35,12 +76,12 @@ To install skills onto another runtime (openclaw, hermes, Cursor):
 
 ### Workflows (Claude Code only)
 
-Workflow scripts live in `.agents/workflows/` and `crypto/workflows/`. Symlinks in `.claude/workflows/` register them as slash commands — present in this repo:
+Workflow scripts live in `.agents/workflows/`. Symlinks in `.claude/workflows/` register them as slash commands — present in this repo:
 
 ```
 .claude/workflows/hedge-fund-committee.js   -> ../../.agents/workflows/hedge-fund-committee.workflow.js
-.claude/workflows/research-market.js        -> ../../crypto/workflows/research-market.js
-.claude/workflows/pairwise-eval.js          -> ../../crypto/workflows/pairwise-eval.js
+.claude/workflows/research-market.js        -> ../../.agents/workflows/research-market.workflow.js
+.claude/workflows/pairwise-eval.js          -> ../../.agents/workflows/pairwise-eval.workflow.js
 .claude/workflows/multi-lens-quorum.js      # direct workflow (not a symlink)
 .claude/workflows/trend-stock-research.js   # direct workflow (not a symlink)
 ```
@@ -51,7 +92,7 @@ To use them from another project, copy to `~/.claude/workflows/`:
 cp financial-advisor-agents/.claude/workflows/*.js ~/.claude/workflows/
 ```
 
-> On macOS/Linux the symlinks resolve automatically. On Windows, copy the real files from `.agents/workflows/` and `crypto/workflows/` instead.
+> On macOS/Linux the symlinks resolve automatically. On Windows, copy the real files from `.agents/workflows/` instead.
 
 ---
 
@@ -78,6 +119,21 @@ With the repo open in Claude Code, the workflows are available as:
 /trend-stock-research    ← research-first trend-stock screen → nominees for quorum
 ```
 
+### OpenCode workflow execution
+
+OpenCode runs workflow scripts through its installed `workflow` tool from the `opencode-drawer-workflows` plugin. The plugin supplies the workflow primitives used by `.agents/workflows/*.workflow.js`; pass the script and arguments with the Drawers tool schema:
+
+```json
+{
+  "script_path": ".agents/workflows/research-market.workflow.js",
+  "args": {
+    "question": "Should I buy BTC today?",
+    "portfolio": "no direct BTC",
+    "date": "2026-06-17"
+  }
+}
+```
+
 ### Explicit Workflow tool form
 
 Use this when you want to pass specific args (ticker, date, portfolio):
@@ -86,7 +142,7 @@ Use this when you want to pass specific args (ticker, date, portfolio):
 
 ```js
 Workflow({
-  scriptPath: "./crypto/workflows/research-market.js",
+  scriptPath: "./.agents/workflows/research-market.workflow.js",
   args: {
     question:  "BTC reached 65k from the drop to 61k. I hold 30% in COIN. Should I buy BTC today?",
     portfolio: "~30% of book in COIN (levered crypto-beta proxy); no direct BTC.",
@@ -100,7 +156,7 @@ Workflow({
 
 ```js
 Workflow({
-  scriptPath: "./crypto/workflows/research-market.js",
+  scriptPath: "./.agents/workflows/research-market.workflow.js",
   args: {
     question:  "NVDA pulled back 15% from ATH. I'm 40% concentrated in it. Should I trim?",
     portfolio: "40% NVDA, remainder unspecified. $1M tradfi book, no leverage.",
@@ -124,7 +180,7 @@ Workflow({
 
 ```js
 Workflow({
-  scriptPath: "./crypto/workflows/pairwise-eval.js",
+  scriptPath: "./.agents/workflows/pairwise-eval.workflow.js",
   args: {
     a:        "/path/to/iter1.report.md",   // hypothesis: worse (baseline)
     b:        "/path/to/iter2.report.md",   // hypothesis: better (candidate)
@@ -198,7 +254,7 @@ cp financial-advisor-agents/.claude/workflows/*.js ~/.claude/workflows/
 
 Then run e.g. `/hedge-fund-committee` or `/research-market`. (Needs Claude Code ≥ v2.1.154 with Dynamic workflows enabled in `/config`. Workflows are a Claude Code feature — openclaw/hermes use the skills, which orchestrate via their own primitives.)
 
-> Note: some `.claude/workflows/*.js` entries are symlinks to `.agents/workflows/` and `crypto/workflows/` (they resolve on macOS/Linux; on Windows copy the real files). `multi-lens-quorum.js` and `trend-stock-research.js` are standalone files in `.claude/workflows/` directly.
+> Note: some `.claude/workflows/*.js` entries are symlinks to `.agents/workflows/` (they resolve on macOS/Linux; on Windows copy the real files). `multi-lens-quorum.js` and `trend-stock-research.js` are standalone files in `.claude/workflows/` directly.
 
 ---
 

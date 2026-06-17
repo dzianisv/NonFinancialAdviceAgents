@@ -43,9 +43,8 @@ a rubric the proposer did not write.
 
 | File | Role | Status |
 |---|---|---|
-| `crypto/workflows/research-crypto-market.js` | crypto research target | proven (ran 4×) |
-| `crypto/workflows/research-stock-market.js` | equity research target | proven (NVDA run, report+ledger verified) |
-| `crypto/workflows/pairwise-eval.js` | blind A/B selection | works; validated on a GROSS-defect pair only — subtle-case discrimination UNPROVEN |
+| `.agents/workflows/research-market.workflow.js` | unified crypto+equity research target | proven (ran 4×) |
+| `.agents/workflows/pairwise-eval.workflow.js` | blind A/B selection | works; validated on a GROSS-defect pair only — subtle-case discrimination UNPROVEN |
 | `crypto/workflows/blind-eval.js` | pointwise scoring | **DELETED** (unreliable for selection) — recoverable from git |
 | `crypto/workflows/improve-workflow.js` | self-contained loop | **DELETED** (blocked by nesting) — this orchestrated procedure replaces it; recoverable from git |
 

@@ -4,6 +4,68 @@ Aligns to `docs/prd.md`. RECOMMEND-ONLY. Never trades. Honest-or-`[UNAVAILABLE]`
 
 ## 1. Architecture
 
+### End-to-end data flow (consolidated)
+
+```
+ FAST tier (daily cron, SILENT-unless-alert)        SLOW tier (weekly workflow)
+ ==========================================         ===============================
+
+ DATA SOURCES                                       DATA SOURCES
+ -----------                                        -----------
+ yfinance  FRED  alt.me  SEC   Capitol   Web        yfinance  RSS feeds  Polymarket
+    |       |      |    EDGAR  Trades   search         |      (8 feeds)     |
+    v       v      v      v      v        v            v          v         v
+ +--------+--------+------+------+--------+---+     +-------------------------------------+
+ | dip-   |crypto- |regime|fomc- |13f-    |cong-|   | Phase 1: RESEARCH fan-out (13 desks) |
+ |screener|dip-    |detec-|moni- |watch   |ress-|   |  news(5) + macro + inst-flows +      |
+ |        |scanner |tion  |tor   |        |watch|   |  political + dip + crypto-dip +      |
+ +---+----+---+----+--+---+--+---+---+----+--+--+   |  trend-velocity + prediction-mkt    |
+     |        |       |      |       |       |       +----------------+--------------------+
+     v        v       v      v       v       v                        |
+ pool-dip  pool-   regime  [DM]   pool-   pool-                      v
+ .json     crypto  .json          13f     congress          +-----------------+
+            .json                 .json   .json             | Phase 2: GROUND |
+     |        |       |            |       |                | yfinance verify |
+     +---+----+-------+------------+-------+                | cluster >=2 src |
+         |                                                  +--------+--------+
+         v                                                           |
+ +--------------------+                                              v
+ | signal-convergence |                                   +---------------------+
+ | (>=2 sources? DM)  |                                   | Phase 3: COMMITTEE  |
+ +--------------------+                                   | 5 lenses vote:      |
+         |                                                |  pm-advocate        |
+         v                                                |  buffett            |
+ +---------------------+                                  |  druckenmiller      |
+ | trend-stock-research|                                  |  lacy-hunt          |
+ | (mention velocity   |                                  |  superforecasting   |
+ |  -> pool)           |                                  +----------+----------+
+ +---------------------+                                             |
+                                                                     v
+                                                          +---------------------+
+                                                          | Phase 4: RISK VETO  |
+                                                          | CRO: caps, correl,  |
+                                                          | max-position -> VETO|
+                                                          +----------+----------+
+                                                                     |
+                                                                     v
+                                                          +---------------------+
+                                                          | Phase 5: CIO BRIEF  |
+                                                          | ranked buy memo +   |
+                                                          | staged entry plan   |
+                                                          +----------+----------+
+                                                                     |
+         +-----------------------------------------------------------+
+         |
+         v
+ +-----------------------------------------------------------------------+
+ | DELIVERY (agent-native, per backend)                                  |
+ |  openclaw: cron --target telegram                                     |
+ |  claude-code: push + connector                                        |
+ |  hermes: --target telegram                                            |
+ |  SILENT when no signal fires                                          |
+ +-----------------------------------------------------------------------+
+```
+
 Four layers. Data flows up, decision down, alert out.
 
 ```

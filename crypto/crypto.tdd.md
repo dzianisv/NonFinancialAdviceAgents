@@ -5,7 +5,7 @@
 
 ## Architecture: research-market (unified, LLM-driven)
 
-One workflow (`crypto/workflows/research-market.js`) covers crypto AND equities. A **manager agent** (Phase 0) runs first: it discovers skills live by listing `.agents/skills/`, interprets the raw user query (assets, side, horizon, portfolio), and returns a structured plan naming every component by its real skill directory name. The workflow dispatches from that plan — nothing else is hardcoded.
+One workflow (`.agents/workflows/research-market.workflow.js`) covers crypto AND equities. A **manager agent** (Phase 0) runs first: it discovers skills live by listing `.agents/skills/`, interprets the raw user query (assets, side, horizon, portfolio), and returns a structured plan naming every component by its real skill directory name. The workflow dispatches from that plan — nothing else is hardcoded.
 
 ```
 Phase 0 INTAKE (manager discovers skills live → plan)
