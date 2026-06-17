@@ -119,56 +119,23 @@ advantage of an agent team reading financial journalism.
 
 ### How to read articles (including paywalled sources)
 
-**USE THE BROWSER.** The user has bypass-paywalls-chrome installed. Open the article URL in the
-browser and read `document.body.innerText` — the extension handles access transparently. No tricks
-needed for FT, WSJ, Bloomberg, SA, NYT, The Economist, Barron's, and 100+ more.
+**Delegate to the feed + paywall skills.** Do NOT duplicate their logic here.
 
-Use WHICHEVER browser tool is available in your environment (check in this priority order):
+1. **Headlines + teasers (automated, daily):** The `feed-*` skills + TS pipeline at
+   `.agents/scripts/feeds/` handle RSS ingestion for FT, WSJ, CoinDesk, Decrypt, etc.
+   Run `bun .agents/scripts/feeds/fetch_all.ts --db .db/news.db --days 7` for all feeds.
 
-1. **`chrome-use` CLI** (preferred) — drives the user's real Chrome with their extensions:
-   ```bash
-   chrome-use open "https://www.ft.com/content/<article-id>"
-   chrome-use eval "document.querySelector('article')?.innerText || document.body.innerText"
-   ```
-   The bypass-paywalls extension is already active. Just open and read.
+2. **Full article bodies (interactive):** Use the `bypass-paywalls` skill
+   (`.agents/skills/bypass-paywalls/SKILL.md`) which drives the user's Chrome with the
+   bypass-paywalls-clean extension. Works for FT, WSJ, SA, Bloomberg, NYT, Barron's, 100+ more.
 
-2. **Built-in browser tools** (openclaw/opencode) — if your runtime has `browser_navigate`,
-   `browser_snapshot`, `browser_evaluate` or similar built-in browser commands, use those.
-   Navigate to the URL → evaluate `document.body.innerText` or use snapshot to read.
+3. **Headless body fallback:** `web.archive.org` works for WSJ bodies; FT usually blocked.
+   See `feed-wsj/SKILL.md` and `feed-ft/SKILL.md` for the tested ladder.
 
-3. **`chrome-devtools-remote` MCP** — if available as an MCP tool, use it to navigate and
-   evaluate JavaScript on the page.
+4. **Free sources (no browser needed):** SEC EDGAR, press releases, IR pages — use `web_fetch`.
 
-4. **`playwright` MCP** — headless browser. NOTE: paywalls may NOT be bypassed since the
-   extension isn't loaded. Use as fallback for free sources only.
-
-5. **`web_fetch`** — last resort for URLs that don't require paywall bypass (SEC EDGAR,
-   press releases, free blogs, RSS feeds).
-
-**IMPORTANT**: Do NOT use `web_fetch` for FT/WSJ/SA/Bloomberg — it will hit the paywall.
-Always use a browser tool for paywalled publications.
-
-If NO browser tool is available at all, state clearly: "No browser tool available — cannot read
-paywalled sources. Gap: [what's missing]." Never hallucinate content you couldn't read.
-
-**Verified headless fallback (June 2026, tested live — see [[feed-ft]] / [[feed-wsj]]):** when you have
-no real browser (headless / CI / MCP-only) the chrome-use path is unavailable AND the
-chrome-devtools-remote may be DOWN. In that case the ONLY thing that works from plain bash `curl`/`web_fetch`
-is **web.archive.org**: `curl -L "http://web.archive.org/web/2/<url>"` (check
-`https://archive.org/wayback/available?url=<url>` first). This returns full **WSJ** bodies, but FT serves the
-Wayback crawler its `"Subscribe to read"` wall, so **FT bodies are usually NOT recoverable headlessly** — verify
-the snapshot isn't just the paywall. **archive.today is CAPTCHA-gated (HTTP 429) from datacenter IPs** and the
-**Googlebot-UA / AMP / direct-fetch tricks return 401/403** — do not rely on them here; they only work inside
-the user's real Chrome with bypass-paywalls-clean. ToS-gray; public-archive reading for the owner only, no redistribution.
-
-### Fallback sources (no browser needed)
-
-These are always accessible via `web_fetch`:
-- SEC EDGAR full-text search: `https://efts.sec.gov/LATEST/search-index?q=...`
-- Press releases / IR pages (usually not paywalled)
-- RSS feeds: FT (`ft.com/rss/home`), WSJ (`feeds.a.dj.com/rss/RSSMarketsMain.xml`)
-- archive.today / web.archive.org (check if article is cached)
-- Free sources citing paywalled articles (search headline in quotes)
+If NO browser tool is available, state clearly: "No browser tool — cannot read paywalled sources.
+Gap: [what's missing]." Never hallucinate content you couldn't read.
 </orchestration>
 
 <instructions>
