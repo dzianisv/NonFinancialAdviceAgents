@@ -18,7 +18,7 @@ that actually exist and govern crypto today are:
 | crypto-daytrading | — | **not built** (GOAL workstream C) |
 | strategy-discovery-backtest | — | **not built** (GOAL workstream B; cost-model rules live in `AGENTS.md` + `risk-management`) |
 | (shared trading-discipline backbone) | [`skills/risk-management`](../../skills/risk-management/SKILL.md), [`skills/trend-following`](../../skills/trend-following/SKILL.md) | exist — generic, equity-flavoured |
-| Crypto policy docs | [`crypto/GOAL.md`](../../crypto/GOAL.md), [`crypto/STRATEGY.md`](../../crypto/STRATEGY.md), [`crypto/AGENTS.md`](../../crypto/AGENTS.md), [`crypto/btc-dex.md`](../../crypto/btc-dex.md) | exist |
+| Crypto policy docs | [`GOAL.md §Book 2`](../../GOAL.md), [`crypto/STRATEGY.md`](../../crypto/STRATEGY.md), [`crypto/AGENTS.md`](../../crypto/AGENTS.md), [`crypto/btc-dex.md`](../../crypto/btc-dex.md) | exist |
 
 **The single biggest structural finding:** the live crypto skill (`defi-portfolio-manager`) is a *yield/DeFi*
 manager. It is excellent on smart-contract / depeg / custody-venue risk, but it has **no token-valuation

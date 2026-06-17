@@ -31,7 +31,7 @@ catches — spawn the team.
 sleeve and a vetted higher-yield satellite — but **never hold shitty assets** (the reject list is hard).
 Moderate raises the *yield appetite*, not the *junk tolerance*.
 
-If the repo has `crypto/GOAL.md` / `crypto/STRATEGY.md`, read them first; they own the numeric policy.
+If the repo has `GOAL.md` (§Book 2) / `crypto/STRATEGY.md`, read them first; they own the numeric policy.
 
 ## The team (spawn each as a subagent)
 

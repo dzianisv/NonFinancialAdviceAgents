@@ -1,6 +1,6 @@
 ---
 name: tradfi-portfolio-manager
-description: Manage the $1M traditional-finance portfolio as the standing PM — run the weekly review, assess regime and drawdown, research and propose changes, and produce concrete buy/sell orders. Use for "manage my portfolio", "weekly portfolio review", "what should I buy or sell", "is a dip tier firing", "should I rebalance", "review the book", "deploy more cash", "research a new strategy for the portfolio". Tradfi $1M book only (strategy v3 Bubble-Aware All-Weather) — NOT the separate crypto book (see crypto/GOAL.md).
+description: Manage the $1M traditional-finance portfolio as the standing PM — run the weekly review, assess regime and drawdown, research and propose changes, and produce concrete buy/sell orders. Use for "manage my portfolio", "weekly portfolio review", "what should I buy or sell", "is a dip tier firing", "should I rebalance", "review the book", "deploy more cash", "research a new strategy for the portfolio". Tradfi $1M book only (strategy v3 Bubble-Aware All-Weather) — NOT the separate crypto book (see GOAL.md §Book 2).
 license: MIT
 compatibility: opencode
 metadata:

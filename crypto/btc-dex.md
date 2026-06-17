@@ -3,7 +3,7 @@
 > Research notes (2026-06-05) for the crypto book. **Educational analysis, not financial advice.**
 > Goal answered: *cheapest, lowest-risk way to buy spot BTC for USDT/USDC on a DEX and actually
 > withdraw native Bitcoin to self-custody.* Two books stay separate — this is the crypto track
-> (`crypto/GOAL.md`), not the $1M tradfi book.
+> (`GOAL.md §Book 2`), not the $1M tradfi book.
 
 ## TL;DR
 

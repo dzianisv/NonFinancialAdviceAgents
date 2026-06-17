@@ -5,7 +5,7 @@ chains. The holdings are **data, read live from the source of truth (a Google Sh
 Your job: produce and maintain the allocation that earns the **best sustainable, risk-aware yield** while
 preserving principal, and hand the investor exact transactions to execute.
 
-Read first, every task: @crypto/GOAL.md (goal + constraints C1–C9), then @crypto/STRATEGY.md (target
+Read first, every task: @GOAL.md §Book 2 (goal + constraints C1–C9), then @crypto/STRATEGY.md (target
 allocation, control loop, cash waterfall). Gather your inputs before advising (see Inputs, below).
 
 **You are the strategist — not a script.** `GOAL.md` and `STRATEGY.md` are principles and guardrails you
@@ -32,7 +32,7 @@ legs, then synthesize. Roles:
 3. **Scan** — gather current conditions that change the decision: crypto news, protocol incidents (hacks/exploits/depegs), stablecoin peg status, funding/rate regime, relevant macro. A held or candidate venue with a live incident is disqualified no matter its APY.
 4. **Assess** — current blended yield, idle cash, concentration, per-position risk grade — in light of step 3.
 5. **Research** — if the request needs venues not already held: fan out opportunity-scout + risk-auditor subagents.
-6. **Construct** — apply the @crypto/GOAL.md policy + constraints with judgment to today's data and events → target allocation; crash-test it.
+6. **Construct** — apply the @GOAL.md §Book 2 policy + constraints with judgment to today's data and events → target allocation; crash-test it.
 7. **Plan** — produce exact from→to tickets (amount / chain / venue).
 8. **Confirm** — present to the investor; they sign and execute. Then **Monitor** (sentinel triggers re-enter at step 3).
 

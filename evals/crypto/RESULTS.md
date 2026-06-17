@@ -4,7 +4,7 @@ Educational analysis, not financial advice. Scorer: `run_crypto_eval.py`. Rubric
 
 ## Baseline — v0 (current crypto skills as the executor's context)
 Executors = blind subagents answering with `crypto-daytrading` / `dip-tranches-strategy` /
-`regime-detection` / `risk-management` / `crypto/GOAL.md` preloaded. Judge = strict G-Eval.
+`regime-detection` / `risk-management` / `GOAL.md §Book 2` preloaded. Judge = strict G-Eval.
 
 | scenario | split | risk | grnd | frmwk | hon | act | **score** | gate |
 |----------|-------|------|------|-------|-----|-----|-----------|------|
