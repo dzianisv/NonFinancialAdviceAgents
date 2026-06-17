@@ -24,11 +24,32 @@ from datetime import datetime, timedelta, timezone
 # (07:45) and convergence job (08:30) run in separate sandboxes; the pool MUST live on disk between them.
 # Daily pools carry a freshness window (stale dips/narratives don't count as "today's convergence").
 _POOLS_DIR = os.path.expanduser("~/.openclaw/workspace/investor/pools")
+
+# Repo-local fallback paths (for running outside openclaw, e.g. local dev).
+# Resolved relative to this script's directory → repo root.
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.abspath(os.path.join(_SCRIPT_DIR, "..", "..", ".."))
+
+
+def _resolve_path(env_var: str, openclaw_default: str, repo_fallback: str) -> str:
+    """Return the first existing path: env override > openclaw default > repo-local fallback."""
+    env_val = os.environ.get(env_var)
+    if env_val and os.path.exists(env_val):
+        return env_val
+    if os.path.exists(openclaw_default):
+        return openclaw_default
+    repo_path = os.path.join(_REPO_ROOT, repo_fallback)
+    if os.path.exists(repo_path):
+        return repo_path
+    # Nothing exists yet — return env override (if set) or openclaw default so error messages are clear.
+    return env_val if env_val else openclaw_default
+
+
 POOLS = [
-    ("dip", os.environ.get("DIP_POOL", os.path.join(_POOLS_DIR, "dip_candidates.jsonl")), 5),
-    ("journalism", os.environ.get("NARRATIVE_POOL", os.path.join(_POOLS_DIR, "narrative.jsonl")), 5),
-    ("13f", os.environ.get("THIRTEENF_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/13f/recommended.jsonl")), 14),
-    ("congress", os.environ.get("CONGRESS_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/congress/recommended.jsonl")), 14),
+    ("dip", _resolve_path("DIP_POOL", os.path.join(_POOLS_DIR, "dip_candidates.jsonl"), "pools/dip_candidates.jsonl"), 5),
+    ("journalism", _resolve_path("NARRATIVE_POOL", os.path.join(_POOLS_DIR, "narrative.jsonl"), "pools/narrative.jsonl"), 5),
+    ("13f", _resolve_path("THIRTEENF_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/13f/recommended.jsonl"), ".agents/skills/13f-watch/13f/recommended.jsonl"), 14),
+    ("congress", _resolve_path("CONGRESS_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/congress/recommended.jsonl"), "congress/recommended.jsonl"), 14),
 ]
 
 
@@ -52,7 +73,7 @@ def _load(path: str, max_age_days: int | None) -> list[dict]:
                 if cutoff is not None:
                     # FAIL CLOSED: this feeds an "immediate DM" signal, so a row whose date is
                     # missing or unparseable must NOT leak into "today's convergence". Drop it.
-                    d = r.get("date") or r.get("recorded") or r.get("ts")
+                    d = r.get("date") or r.get("recorded") or r.get("ts") or r.get("recommended_on") or r.get("transaction_date")
                     keep = False
                     if d is not None:
                         try:
