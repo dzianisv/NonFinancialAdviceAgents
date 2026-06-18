@@ -6,7 +6,7 @@
 root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 command -v node >/dev/null 2>&1 || exit 0
 
-evaldir="$root/.agents/skills/hedge-fund-committee-eval"
+evaldir="$root/evals/hf"
 fail=0
 
 if [ -f "$evaldir/test_gate_contract.mjs" ]; then

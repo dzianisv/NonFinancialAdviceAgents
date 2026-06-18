@@ -1,0 +1,15 @@
+[
+  {"name": "HYPE (baseline)", "llama": "hyperliquid", "cg": "hyperliquid"},
+  {"name": "LIGHTER", "llama": "lighter", "cg": "lighter"},
+  {"name": "SYRUP (Maple)", "llama": "maple", "cg": "syrup"},
+  {"name": "AERO (Aerodrome)", "llama": "aerodrome", "cg": "aerodrome-finance"},
+  {"name": "PENDLE", "llama": "pendle", "cg": "pendle"},
+  {"name": "ENA (Ethena)", "llama": "ethena", "cg": "ethena"},
+  {"name": "AAVE", "llama": "aave", "cg": "aave"},
+  {"name": "JUP (Jupiter)", "llama": "jupiter", "cg": "jupiter-exchange-solana"},
+  {"name": "PUMP", "llama": "pump.fun", "cg": "pump-fun"},
+  {"name": "RAY (Raydium)", "llama": "raydium", "cg": "raydium"},
+  {"name": "edgeX", "llama": "edgex", "cg": "edgex"},
+  {"name": "DRIFT", "llama": "drift-trade", "cg": "drift-protocol"},
+  {"name": "ONDO", "llama": "ondo-finance", "cg": "ondo-finance"}
+]
