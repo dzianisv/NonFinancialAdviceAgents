@@ -28,7 +28,7 @@ python3 connectors/notify_executor.py
 Shows valid orders PROPOSED (human-approvable tickets), oversized + no-backtest orders REJECTED.
 
 ## Path to live (per the connector skills)
-`skills/robinhood-connector` and `skills/coinbase-cdp-connector` document the staged path:
+`.agents/skills/robinhood-connector` and `.agents/skills/coinbase-cdp-connector` document the staged path:
 connector → notification → testnet/paper → (PASSed + paper-validated strategy + user sign-off) → live with
 code-side caps. Live requires the user's credentials (Robinhood Agentic account / CDP API key) and is
 intentionally never auto-wired.

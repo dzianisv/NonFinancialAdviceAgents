@@ -130,12 +130,12 @@ trend-stock-research (weekly — reads journalism, surfaces narratives)
 
 | Skill | Role |
 |-------|------|
-| [strategy-discovery-backtest](../skills/strategy-discovery-backtest/SKILL.md) | **THE GATE** — hypothesis→backtest→PASS/FAIL |
-| [crypto-daytrading](../skills/crypto-daytrading/SKILL.md) | Crypto intraday income desk |
-| [stock-daytrading](../skills/stock-daytrading/SKILL.md) | Equity intraday income desk |
-| [crypto-advisor](../skills/crypto-advisor/SKILL.md) | Crypto buy-the-dip / DCA advisor |
-| [coinbase-cdp-connector](../skills/coinbase-cdp-connector/SKILL.md) | Coinbase CDP CLI/MCP execution |
-| [robinhood-connector](../skills/robinhood-connector/SKILL.md) | Robinhood agentic MCP execution |
+| [strategy-discovery-backtest](./strategy-discovery-backtest/SKILL.md) | **THE GATE** — hypothesis→backtest→PASS/FAIL |
+| [crypto-daytrading](./crypto-daytrading/SKILL.md) | Crypto intraday income desk |
+| [stock-daytrading](./stock-daytrading/SKILL.md) | Equity intraday income desk |
+| [crypto-advisor](./crypto-advisor/SKILL.md) | Crypto buy-the-dip / DCA advisor |
+| [coinbase-cdp-connector](./coinbase-cdp-connector/SKILL.md) | Coinbase CDP CLI/MCP execution |
+| [robinhood-connector](./robinhood-connector/SKILL.md) | Robinhood agentic MCP execution |
 
 ### Analytics / book-grounded lenses
 

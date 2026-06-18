@@ -60,7 +60,7 @@ less in inflation-driven equity bears (2022) and grind with lower volatility —
    survived the lost decade. Stock-picking is a low-probability satellite at best.
 4. **If you still want a stock-picking sleeve:** cap it small, use **point-in-time survivorship-safe
    data** (Sharadar/SimFin/EDGAR — never yfinance's current snapshot), and require it to clear the
-   backtest gate (`skills/fundamental-analysis`). Most don't.
+   backtest gate (`.agents/skills/fundamental-analysis`). Most don't.
 5. **Momentum is the one factor with a real edge here** — but it's already captured by the
    `trend-following` skill and MTUM; note MTUM is long-only and gives no crash protection (it fell
    with the market in 2020).

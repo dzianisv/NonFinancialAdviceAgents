@@ -1,7 +1,7 @@
 # 05 — Building the Agentic Systematic Fund
 
 *Engineering + quant building blocks for a small, automated, agent-driven fund.
-Each section maps onto an opencode SKILL.md (see `skills/`). Sources at the end.*
+Each section maps onto an opencode SKILL.md (see `.agents/skills/`). Sources at the end.*
 
 ## Agentic architecture (the team)
 

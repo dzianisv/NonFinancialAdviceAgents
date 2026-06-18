@@ -1,5 +1,6 @@
 ---
 name: liveness-monitor
+deprecated: true
 description: Dead-man's-switch for the advisor's SILENT-unless-alert cron jobs. Each daily scan logs a heartbeat so "nothing fired" is distinguishable from "everything broke"; a daily health check DMs the owner ONLY when an expected job has gone stale (hasn't logged within max-age). Use when asked "are my advisor jobs running", "did the scans run today", "health check the cron", or on the daily health schedule.
 license: MIT
 compatibility: opencode
@@ -8,6 +9,8 @@ metadata:
   domain: cron-liveness-monitoring
   role: dead-mans-switch
 ---
+
+> ⚠️ **DEPRECATED** — Retained for openclaw deployment compatibility only. Not used by OpenCode runtime. See `hedge-fund-manager` for active orchestration.
 
 # Liveness Monitor (so the advisor can't fail silently)
 

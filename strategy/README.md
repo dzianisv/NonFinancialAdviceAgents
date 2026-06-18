@@ -22,6 +22,6 @@ question had an edge worth having.** The journey: *timing → selection → stru
 
 - The **evidence** behind each verdict lives in [`../research/`](../research/README.md) (cited notes)
   and [`../backtests/`](../backtests/README.md) (runnable scripts + saved results).
-- The **current strategy (v3)** is implemented as the agent team in [`../skills/`](../skills/README.md)
+- The **current strategy (v3)** is implemented as the agent team in [`../.agents/skills/`](../.agents/skills/README.md)
   and deployed via the plan in [`v3-bubble-aware-all-weather.md`](v3-bubble-aware-all-weather.md).
 - The **mission** these all serve is in [`../GOAL.md`](../GOAL.md).

@@ -45,7 +45,7 @@ They **chain**: scout picks → quorum judges → backtest times. Never skip or 
 
 ## 3. Step 1 — SCOUT: `trend-stock-research`
 
-**Skill:** `.agents/skills/trend-stock-research/` (or `skills/trend-stock-research/`)
+**Skill:** `.agents/skills/trend-stock-research/`
 
 **What it does:**
 
@@ -64,7 +64,7 @@ They **chain**: scout picks → quorum judges → backtest times. Never skip or 
 
 ## 4. Step 2 — JUDGE: `multi-lens-quorum`
 
-**Skill:** `skills/multi-lens-quorum/`
+**Skill:** `.agents/skills/multi-lens-quorum/`
 
 **What it does:**
 
@@ -114,7 +114,7 @@ Specific, observable events that kill the thesis
 
 ## 5. Step 3 — GATE: `strategy-discovery-backtest`
 
-**Skill:** `skills/strategy-discovery-backtest/`
+**Skill:** `.agents/skills/strategy-discovery-backtest/`
 
 **Applies to:** BUY verdicts only. HOLD OFF / SELL do not proceed.
 

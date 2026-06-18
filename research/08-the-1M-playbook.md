@@ -94,7 +94,7 @@ mix** (or tilt slightly toward whatever fell hardest), not just into QQQ.
   stay Defensive and keep the trend/gold/dry-powder weights up.
 
 ## Automating it (the agentic team — note 05)
-Encode this as the `skills/` SKILL.md set: **regime-detection** (sets exposure), **portfolio-construction**
+Encode this as the `.agents/skills/` SKILL.md set: **regime-detection** (sets exposure), **portfolio-construction**
 (targets above), **risk-management** (deterministic caps + drawdown de-risking), **dip-tranches** (reserve
 deployment), **rebalancing**, **tax-loss-harvesting**. Run notification-first daily; paper-trade before
 live; keep hard caps in code outside the LLM; log everything.

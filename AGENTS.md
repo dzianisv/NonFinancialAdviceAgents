@@ -43,9 +43,9 @@ They **chain**: scout picks → quorum judges → superforecaster times.
 
 ## The skills (your team)
 
-Two skill roots:
+All skills live in **`.agents/skills/`** — one canonical root.
 
-### `.agents/skills/` — operating skills (run the fund)
+### Operating skills (run the fund)
 | Skill | Role |
 |-------|------|
 | `hedge-fund-manager` | **PM/CIO that DELEGATES** each function to a specialist sub-skill subagent, integrates, applies the binding Risk veto, owns the decision. Invoke for "run the fund / manage the book / daily cycle". |
@@ -82,7 +82,7 @@ A notification-first advisor whose job is to **find the next stocks to buy**. Re
 > already runs ~13 jobs); heartbeat is only a stuck-task nudge. The no-python `web_fetch` path in each
 > SKILL.md is a fallback if `yfinance` is ever absent. See memory `openclaw-pod-no-python`.
 
-### `skills/` — desk sub-skills (the analysts the manager delegates to)
+### Desk sub-skills (the analysts the manager delegates to)
 | Skill | Role |
 |-------|------|
 | `strategy-discovery-backtest` | **THE GATE.** Hypothesis→backtest(no look-ahead, real costs)→walk-forward→deflate→stress→PASS/FAIL. Invoked first on any "trade X". |
@@ -98,7 +98,7 @@ A notification-first advisor whose job is to **find the next stocks to buy**. Re
 | `fundamental-analysis` | data/sources, valuation context, defensive-sleeve choice, backtest gate. |
 | `agentic-fund-orchestration` | the top-level daily-loop playbook wiring the desk together. |
 
-Frontmatter on `skills/` modules must keep `compatibility: opencode`.
+Frontmatter on skill modules must keep `compatibility: opencode`.
 
 ## Hard invariants (from @GOAL.md — an action breaking one is rejected)
 0. **SHIP THE ARTIFACT — NEVER OPERATE THE USER'S PRODUCTION SYSTEM.** When the task is "set up / install /
@@ -138,8 +138,7 @@ constraints C1–C9, optimization problem) is in @GOAL.md §Book 2. Do not confl
 ├── backtests/           # Backtest + publisher scripts (run from repo root)
 │   ├── daytrade/        # Intraday harnesses (crypto 24/7, equity RTH) — costs/funding modeled
 │   └── results/         # Cached *_summary.txt + dead-idea log (don't re-test blindly)
-├── skills/              # Desk sub-skills (opencode SKILL.md modules)
-├── .agents/skills/      # Operating skills (hedge-fund-manager, tradfi-pm, skill-supervisor)
+├── .agents/skills/      # ALL skills — operating + desk sub-skills (single canonical root)
 ├── evals/               # Durable eval harnesses — evals/pm, evals/hf (re-run before SKILL.md edits)
 ├── report/              # report/img/ (chart PNGs), report/writeups/ (published md)
 └── archive/             # session log, skills.zip backup
@@ -150,7 +149,7 @@ constraints C1–C9, optimization problem) is in @GOAL.md §Book 2. Do not confl
 - **@GOAL.md** — the mission, the bubble evidence, and the done/not-done checklist. Start here.
 - **`strategy/`** — how our thinking evolved: v1 → v2 → v3 (Bubble-Aware All-Weather, **current**). Start at @strategy/README.md.
 - **`research/`** — 9 cited research notes. Synthesis: `research/08-the-1M-playbook.md`; evidence: `backtests/crash_protection_backtest.py`.
-- **`skills/`** — opencode SKILL.md modules. Each skill documents itself; read the individual SKILL.md for details.
+- **`.agents/skills/`** — opencode SKILL.md modules. Each skill documents itself; read the individual SKILL.md for details.
   Key groupings: desk sub-skills (regime, trend, construction, risk, rebalancing), macro-economist panel
   (`macro-panel` + 7 `analytics-*` lenses), trading-discipline lenses (`analyst-systematic-trading` +
   `analyst-technical-analysis`), forecasting stack (`superforecasting` + `prediction-market-odds` +
@@ -177,7 +176,7 @@ constraints C1–C9, optimization problem) is in @GOAL.md §Book 2. Do not confl
 - Handle missing/delisted tickers gracefully (skip, don't crash).
 - **Always past data only for signals (no look-ahead). Decide on prior close / prior bar.**
 - **Always net of costs** — model commission + spread/slippage (+ funding for crypto perps). See the
-  cost model in `skills/strategy-discovery-backtest`.
+  cost model in `.agents/skills/strategy-discovery-backtest`.
 - Risk-free rate: 4% (2020-2026), 3% (2005-2020), 5% (1999-2005). Starting capital: $1,000,000 unless specified.
 
 ### Improving skills
@@ -195,6 +194,24 @@ create/edit skill → execute on real input → evaluate output → feedback (sp
        └──────────── improve skill ←──────────────────────────────────┘
                      (repeat until output meets success criteria)
 ```
+
+### Workflow compatibility (OpenCode ↔ Claude Code)
+
+Workflow `.js` scripts in `.agents/workflows/` use `agent()`, `parallel()`, `step()`, `args` primitives.
+These are available on **both** runtimes but wired differently:
+
+| | OpenCode | Claude Code (≥ v2.1.154) |
+|---|---|---|
+| Script location | `.agents/workflows/*.workflow.js` | `.claude/workflows/*.js` (symlinks OK) |
+| Trigger | `Workflow` tool (`opencode-drawer-workflows` plugin) | `/command-name`, `ultracode:`, `/effort ultracode` |
+| Model default | **Unreliable** — MUST pass `model:` explicitly to every `agent()` | Uses session model (safe to omit) |
+| Max agents | Plugin-dependent | 16 concurrent, 1,000 total per run |
+| Save/reuse | Manual file placement | `/workflows` → `s` |
+
+**KB reference:** `.agents/knowledgebase/claude-code-workflows.md` — full API, migration checklist, limits.
+
+**Hard rule:** when writing or editing any `.workflow.js`, ALWAYS pass explicit `model:` to every `agent()` call.
+Claude Code ignores it harmlessly; OpenCode breaks without it (falls back to unsupported `gpt-5-mini`).
 
 ### Research workflows + the trustworthy improve loop (built 2026-06-16)
 

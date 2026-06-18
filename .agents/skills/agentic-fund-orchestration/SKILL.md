@@ -1,5 +1,6 @@
 ---
 name: agentic-fund-orchestration
+deprecated: true
 description: Top-level playbook for running a small systematic "hedge fund" as a team of specialized opencode agents — regime analyst, portfolio manager, risk manager (with deterministic veto), execution — coordinated through a shared state object, a notification-first daily loop, paper-trading before live, and hard caps enforced in code outside the LLM. Use this whenever the user wants to orchestrate multiple investing agents, build an automated/agentic portfolio-management system or "AI hedge fund", asks how the regime/portfolio/risk/rebalancing/dip skills fit together, wants a daily decision pipeline, or asks about guardrails for automated trading. Trigger when the user describes wanting an agent team to manage money. Always stress human-in-the-loop and notification-first operation; this is educational, not advice.
 license: MIT
 compatibility: opencode
@@ -8,6 +9,8 @@ metadata:
   domain: systematic-trading
   role: orchestrator
 ---
+
+> ⚠️ **DEPRECATED** — Superseded by `hedge-fund-manager` which delegates to the same sub-skills. Retained for documentation reference only.
 
 # Agentic Fund Orchestration
 

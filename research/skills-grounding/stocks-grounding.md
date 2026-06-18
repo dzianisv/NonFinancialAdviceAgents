@@ -9,11 +9,11 @@ targets *as they exist on disk today* are:
 
 | Brief name | Actual file on disk |
 |---|---|
-| `skills/strategy-discovery-backtest/SKILL.md` (backtest gate) | The gate lives inside `skills/fundamental-analysis/SKILL.md` ("The backtest gate") and `skills/agentic-fund-orchestration/SKILL.md` ("Pitfalls to design against"). There is **no standalone discovery-backtest skill** — see Gap G0. |
-| `skills/stock-daytrading/SKILL.md` | **Does not exist.** GOAL.md workstream B calls for it; only `backtests/daytrade/*.py` scripts exist. See Gap G0. |
-| `.agents/skills/hedge-fund-manager/SKILL.md` | Renamed → `skills/agentic-fund-orchestration/SKILL.md` (team orchestration) |
+| `.agents/skills/strategy-discovery-backtest/SKILL.md` (backtest gate) | The gate lives inside `.agents/skills/fundamental-analysis/SKILL.md` ("The backtest gate") and `.agents/skills/agentic-fund-orchestration/SKILL.md` ("Pitfalls to design against"). There is **no standalone discovery-backtest skill** — see Gap G0. |
+| `.agents/skills/stock-daytrading/SKILL.md` | **Does not exist.** GOAL.md workstream B calls for it; only `backtests/daytrade/*.py` scripts exist. See Gap G0. |
+| `.agents/skills/hedge-fund-manager/SKILL.md` | Renamed → `.agents/skills/agentic-fund-orchestration/SKILL.md` (team orchestration) |
 | `.agents/skills/tradfi-portfolio-manager/SKILL.md` | **Removed.** No tradfi PM skill on disk; `.agents/skills/defi-portfolio-manager/SKILL.md` is the crypto analogue. See Gap G0. |
-| desk sub-skills | `skills/{regime-detection, trend-following, portfolio-construction, risk-management, rebalancing, tax-loss-harvesting, fundamental-analysis}` + `skills/dip-tranches-strategy` — all present. |
+| desk sub-skills | `.agents/skills/{regime-detection, trend-following, portfolio-construction, risk-management, rebalancing, tax-loss-harvesting, fundamental-analysis}` + `.agents/skills/dip-tranches-strategy` — all present. |
 
 GOAL.md (`<context-foundation>`) and AGENTS.md still reference `hedge-fund-manager` and
 `tradfi-portfolio-manager` as if present — a **doc-vs-disk drift** flagged as Gap G0.
@@ -55,7 +55,7 @@ Legend — **Covered** = principle already encoded well; **Gaps** = canonical pr
 **Contradictions** = anything against best practice. Proposed edits quote the current text and give a
 replacement tagged with the principle/book.
 
-### 2.1 `skills/portfolio-construction/SKILL.md`
+### 2.1 `.agents/skills/portfolio-construction/SKILL.md`
 
 | | |
 |---|---|
@@ -90,7 +90,7 @@ replacement tagged with the principle/book.
   > margin-of-safety tilt (Graham), calibrated to where the cycle pendulum sits (Marks), *not* a
   > market-timing call. Move one tier at most; never zero out.
 
-### 2.2 `skills/regime-detection/SKILL.md`
+### 2.2 `.agents/skills/regime-detection/SKILL.md`
 
 | | |
 |---|---|
@@ -110,7 +110,7 @@ replacement tagged with the principle/book.
   > years) but a *strategic vigilance raiser* — "risk is highest where it's least perceived" (Marks).
   > When CAPE and concentration are extreme, bias the floor and the asymmetric bands toward defense.
 
-### 2.3 `skills/trend-following/SKILL.md`
+### 2.3 `.agents/skills/trend-following/SKILL.md`
 
 | | |
 |---|---|
@@ -126,7 +126,7 @@ replacement tagged with the principle/book.
   > the trend sleeve with the value screens in `fundamental-analysis` raises Sharpe more than either
   > alone. Construct them as one paired bet, not two independent ones.
 
-### 2.4 `skills/risk-management/SKILL.md`
+### 2.4 `.agents/skills/risk-management/SKILL.md`
 
 | | |
 |---|---|
@@ -148,7 +148,7 @@ replacement tagged with the principle/book.
   > and floor position vol estimates with a longer/stressed window so a quiet tape can't push gross to the
   > cap just before a spike (the risk-parity / short-vol failure mode).
 
-### 2.5 `skills/rebalancing/SKILL.md`
+### 2.5 `.agents/skills/rebalancing/SKILL.md`
 
 | | |
 |---|---|
@@ -164,7 +164,7 @@ replacement tagged with the principle/book.
   > premium (Swensen). It also neutralizes anchoring and loss-aversion (Kahneman) by pre-committing the
   > trade. Do not suspend the rule because a sleeve "feels" like it should keep running.
 
-### 2.6 `skills/tax-loss-harvesting/SKILL.md`
+### 2.6 `.agents/skills/tax-loss-harvesting/SKILL.md`
 
 | | |
 |---|---|
@@ -179,7 +179,7 @@ replacement tagged with the principle/book.
   > the Cost Matters Hypothesis says minimizing them is a *certain* edge where alpha is uncertain. TLH is
   > one of the few reliably positive-expected-value levers in a taxable book.
 
-### 2.7 `skills/fundamental-analysis/SKILL.md`
+### 2.7 `.agents/skills/fundamental-analysis/SKILL.md`
 
 | | |
 |---|---|
@@ -203,7 +203,7 @@ replacement tagged with the principle/book.
   **Outputs contract**: any `intrinsic_value` field must be an `{low, high, confidence}` interval with
   normalized inputs, never a point estimate.
 
-### 2.8 `skills/agentic-fund-orchestration/SKILL.md` (the team playbook)
+### 2.8 `.agents/skills/agentic-fund-orchestration/SKILL.md` (the team playbook)
 
 | | |
 |---|---|
@@ -226,7 +226,7 @@ replacement tagged with the principle/book.
   > drag) and assert the strategy beats its benchmark *net of that budget* — the Cost Matters Hypothesis
   > makes cost the one certain variable (Bogle).
 
-### 2.9 `skills/dip-tranches-strategy/SKILL.md`
+### 2.9 `.agents/skills/dip-tranches-strategy/SKILL.md`
 
 | | |
 |---|---|
