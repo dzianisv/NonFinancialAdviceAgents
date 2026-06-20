@@ -6,6 +6,19 @@ A portable skill+workflow layer that turns **Claude Code, openclaw, or hermes** 
 
 The agent proposes; the human approves every order. Recommend-only, always.
 
+## Architecture
+
+The `research-market` workflow is an 8-phase dynamic pipeline where a **CIO agent (`research-manager`) discovers all skill components live at runtime** — no roster is hardcoded in the orchestrator. Phases execute as sequential gates; within each gate, work fans out in parallel across assets, keeping per-asset cost O(1) regardless of how many tickers the screener surfaces.
+
+![research-market workflow](docs/research-market-architecture.svg)
+
+Key design properties:
+- **Autonomous screener** — no hardcoded tickers; `sector-screen` derives candidates from ETF holdings, analyst screeners, and earnings transcripts using runtime `screen_criteria`
+- **Per-asset O(1) pipeline** — Gather, Consolidate, Panel, and Ledger all fan out independently per asset; adding more tickers does not change per-asset agent count
+- **MAX_GATHER=3 / MAX_PANEL=3 caps** — hard limits on parallel gather and panel seats per asset, preventing token runaway
+- **CIO discovers skills live** — `research-manager` lists `.agents/skills/` at runtime and selects `gather_skills[]`, `panel_skills[]`, `desk_skill`, and `chair_skill` from what is actually installed
+- **Ledger logs calibrated Brier-scored probabilities** — every per-asset conviction score is recorded via `python3 ledger.py add` for ongoing calibration tracking
+
 ## How it works
 
 Two tiers run on any backend. FAST catches same-day setups; SLOW produces a weekly buy brief.

@@ -1,0 +1,328 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" viewBox="0 0 1200 1380" font-family="system-ui,sans-serif">
+<defs>
+  <marker id="arr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#8b9ab5"/>
+  </marker>
+  <marker id="arr-bypass" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#4a9eff"/>
+  </marker>
+  <marker id="arr-guard" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0,8 3,0 6" fill="#e8a020"/>
+  </marker>
+</defs>
+
+<!-- ═══ BACKGROUND ═══ -->
+<rect width="1200" height="1380" fill="#0d1117"/>
+
+<!-- ═══ TITLE ═══ -->
+<text x="600" y="36" text-anchor="middle" fill="#e6edf3" font-size="20" font-weight="700" letter-spacing="1">research-market — Dynamic Workflow Architecture</text>
+<text x="600" y="56" text-anchor="middle" fill="#8b9ab5" font-size="12">8-phase sequential gates · per-asset O(1) parallelism · CIO discovers skills live at runtime</text>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 0 — INTAKE
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="72" width="1152" height="100" rx="8" fill="#0f1e30" stroke="#1e6fa5" stroke-width="1.5"/>
+<text x="36" y="90" fill="#1e6fa5" font-size="9" font-weight="700" letter-spacing="2">PHASE 0 — INTAKE</text>
+
+<!-- research-manager box -->
+<rect x="400" y="96" width="400" height="64" rx="8" fill="#1e6fa5"/>
+<text x="600" y="118" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">research-manager (CIO)</text>
+<text x="600" y="136" text-anchor="middle" fill="#cce4ff" font-size="11">Discovers skills live · sets screen_scope &amp; screen_criteria</text>
+<text x="600" y="152" text-anchor="middle" fill="#cce4ff" font-size="10">Picks: gather_skills[] · panel_skills[] · desk_skill · chair_skill → PLAN</text>
+
+<!-- bypass note (right side) -->
+<rect x="860" y="102" width="280" height="48" rx="6" fill="#0d2030" stroke="#4a9eff" stroke-width="1.2" stroke-dasharray="5,3"/>
+<text x="1000" y="120" text-anchor="middle" fill="#4a9eff" font-size="11" font-weight="600">BYPASS PATH</text>
+<text x="1000" y="136" text-anchor="middle" fill="#8bb8ff" font-size="10">If ARGS.assets present,</text>
+<text x="1000" y="149" text-anchor="middle" fill="#8bb8ff" font-size="10">skip Phase 1 → go to Phase 2</text>
+
+<!-- Arrow INTAKE → SCREEN -->
+<line x1="600" y1="172" x2="600" y2="192" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 1 — SCREEN
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="192" width="1152" height="100" rx="8" fill="#0f1e30" stroke="#1e6fa5" stroke-width="1.5"/>
+<text x="36" y="210" fill="#1e6fa5" font-size="9" font-weight="700" letter-spacing="2">PHASE 1 — SCREEN</text>
+
+<rect x="300" y="214" width="600" height="64" rx="8" fill="#1e6fa5"/>
+<text x="600" y="236" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">sector-screen</text>
+<text x="600" y="254" text-anchor="middle" fill="#cce4ff" font-size="11">ETF holdings · analyst screeners · earnings transcripts</text>
+<text x="600" y="269" text-anchor="middle" fill="#cce4ff" font-size="10">Applies screen_criteria → returns 5-10 tickers with thesis/catalyst</text>
+
+<!-- Bypass arrow (skipping phase 1) -->
+<path d="M 1000 150 L 1000 192 L 1100 192 L 1100 292 L 1000 292" fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arr-bypass)"/>
+<text x="1106" y="242" fill="#4a9eff" font-size="9" font-style="italic">ARGS.assets bypass</text>
+
+<!-- Arrow SCREEN → GATHER -->
+<line x1="600" y1="292" x2="600" y2="312" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 2 — GATHER (per-asset fan-out)
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="312" width="1152" height="220" rx="8" fill="#0f2820" stroke="#1a7a6e" stroke-width="1.5"/>
+<text x="36" y="330" fill="#1a7a6e" font-size="9" font-weight="700" letter-spacing="2">PHASE 2 — GATHER  (per-asset pipeline · MAX_GATHER=3)</text>
+
+<!-- fan-out label -->
+<text x="600" y="348" text-anchor="middle" fill="#8b9ab5" font-size="11" font-style="italic">Assets fan out in parallel — each asset gets its own gather pipeline</text>
+
+<!-- Asset lane headers -->
+<text x="126" y="368" text-anchor="middle" fill="#7fc9c0" font-size="11" font-weight="600">Asset A</text>
+<text x="336" y="368" text-anchor="middle" fill="#7fc9c0" font-size="11" font-weight="600">Asset B</text>
+<text x="546" y="368" text-anchor="middle" fill="#7fc9c0" font-size="11" font-weight="600">Asset C</text>
+<text x="756" y="368" text-anchor="middle" fill="#7fc9c0" font-size="11" font-weight="600">Asset D</text>
+<text x="966" y="368" text-anchor="middle" fill="#7fc9c0" font-size="11" font-weight="600">Asset …</text>
+
+<!-- Asset A gather pills -->
+<rect x="48"  y="376" width="156" height="36" rx="6" fill="#1a7a6e"/>
+<text x="126" y="390" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[0]</text>
+<text x="126" y="403" text-anchor="middle" fill="#9de0d8" font-size="9">data-only, no opinion</text>
+<rect x="48"  y="418" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".8"/>
+<text x="126" y="432" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[1]</text>
+<text x="126" y="445" text-anchor="middle" fill="#9de0d8" font-size="9">UNAVAILABLE → flagged</text>
+<rect x="48"  y="460" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".6"/>
+<text x="126" y="474" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[2]</text>
+<text x="126" y="487" text-anchor="middle" fill="#9de0d8" font-size="9">max 3 skills</text>
+
+<!-- Asset B gather pills -->
+<rect x="258" y="376" width="156" height="36" rx="6" fill="#1a7a6e"/>
+<text x="336" y="390" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[0]</text>
+<text x="336" y="403" text-anchor="middle" fill="#9de0d8" font-size="9">data-only, no opinion</text>
+<rect x="258" y="418" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".8"/>
+<text x="336" y="432" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[1]</text>
+<text x="336" y="445" text-anchor="middle" fill="#9de0d8" font-size="9">UNAVAILABLE → flagged</text>
+<rect x="258" y="460" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".6"/>
+<text x="336" y="474" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[2]</text>
+<text x="336" y="487" text-anchor="middle" fill="#9de0d8" font-size="9">max 3 skills</text>
+
+<!-- Asset C gather pills -->
+<rect x="468" y="376" width="156" height="36" rx="6" fill="#1a7a6e"/>
+<text x="546" y="390" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[0]</text>
+<text x="546" y="403" text-anchor="middle" fill="#9de0d8" font-size="9">data-only, no opinion</text>
+<rect x="468" y="418" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".8"/>
+<text x="546" y="432" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[1]</text>
+<text x="546" y="445" text-anchor="middle" fill="#9de0d8" font-size="9">UNAVAILABLE → flagged</text>
+<rect x="468" y="460" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".6"/>
+<text x="546" y="474" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[2]</text>
+<text x="546" y="487" text-anchor="middle" fill="#9de0d8" font-size="9">max 3 skills</text>
+
+<!-- Asset D gather pills -->
+<rect x="678" y="376" width="156" height="36" rx="6" fill="#1a7a6e"/>
+<text x="756" y="390" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[0]</text>
+<text x="756" y="403" text-anchor="middle" fill="#9de0d8" font-size="9">data-only, no opinion</text>
+<rect x="678" y="418" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".8"/>
+<text x="756" y="432" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[1]</text>
+<text x="756" y="445" text-anchor="middle" fill="#9de0d8" font-size="9">UNAVAILABLE → flagged</text>
+<rect x="678" y="460" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".6"/>
+<text x="756" y="474" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">gather_skill[2]</text>
+<text x="756" y="487" text-anchor="middle" fill="#9de0d8" font-size="9">max 3 skills</text>
+
+<!-- Asset … gather pills -->
+<rect x="888" y="376" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".5"/>
+<text x="966" y="390" text-anchor="middle" fill="#fff" font-size="10">gather_skill[0]</text>
+<text x="966" y="403" text-anchor="middle" fill="#9de0d8" font-size="9">…</text>
+<rect x="888" y="418" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".35"/>
+<text x="966" y="437" text-anchor="middle" fill="#fff" font-size="10">gather_skill[1]</text>
+<rect x="888" y="460" width="156" height="36" rx="6" fill="#1a7a6e" opacity=".2"/>
+<text x="966" y="479" text-anchor="middle" fill="#fff" font-size="10">gather_skill[2]</text>
+
+<!-- MAX cap badge -->
+<rect x="1060" y="418" width="100" height="30" rx="6" fill="#0d3030" stroke="#1a7a6e" stroke-width="1.2"/>
+<text x="1110" y="430" text-anchor="middle" fill="#1a7a6e" font-size="9" font-weight="700">MAX_GATHER</text>
+<text x="1110" y="443" text-anchor="middle" fill="#7fc9c0" font-size="11" font-weight="700">= 3</text>
+
+<!-- Arrow GATHER → CONSOLIDATE -->
+<line x1="600" y1="532" x2="600" y2="552" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 3 — CONSOLIDATE (per-asset)
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="552" width="1152" height="100" rx="8" fill="#0f2820" stroke="#1a7a6e" stroke-width="1.5"/>
+<text x="36" y="570" fill="#1a7a6e" font-size="9" font-weight="700" letter-spacing="2">PHASE 3 — CONSOLIDATE  (per-asset)</text>
+
+<rect x="300" y="574" width="600" height="64" rx="8" fill="#1a7a6e"/>
+<text x="600" y="596" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">desk_skill</text>
+<text x="600" y="614" text-anchor="middle" fill="#9de0d8" font-size="11">Merges all gather seat findings into single brief per asset</text>
+<text x="600" y="629" text-anchor="middle" fill="#9de0d8" font-size="10">Input: gather_skills[] outputs → Output: one structured brief per asset</text>
+
+<!-- Arrow CONSOLIDATE → PANEL -->
+<line x1="600" y1="652" x2="600" y2="672" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 4 — PANEL (per-asset fan-out)
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="672" width="1152" height="220" rx="8" fill="#1e1030" stroke="#6e4fa5" stroke-width="1.5"/>
+<text x="36" y="690" fill="#6e4fa5" font-size="9" font-weight="700" letter-spacing="2">PHASE 4 — PANEL  (per-asset pipeline · MAX_PANEL=3 · voting lenses)</text>
+
+<text x="600" y="708" text-anchor="middle" fill="#8b9ab5" font-size="11" font-style="italic">Each asset gets its own panel — each lens sees ONE asset only</text>
+
+<!-- Panel lane headers -->
+<text x="126" y="728" text-anchor="middle" fill="#b09ae0" font-size="11" font-weight="600">Asset A</text>
+<text x="336" y="728" text-anchor="middle" fill="#b09ae0" font-size="11" font-weight="600">Asset B</text>
+<text x="546" y="728" text-anchor="middle" fill="#b09ae0" font-size="11" font-weight="600">Asset C</text>
+<text x="756" y="728" text-anchor="middle" fill="#b09ae0" font-size="11" font-weight="600">Asset D</text>
+<text x="966" y="728" text-anchor="middle" fill="#b09ae0" font-size="11" font-weight="600">Asset …</text>
+
+<!-- Asset A panel pills -->
+<rect x="48"  y="736" width="156" height="36" rx="6" fill="#6e4fa5"/>
+<text x="126" y="750" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[0]</text>
+<text x="126" y="763" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="48"  y="778" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".8"/>
+<text x="126" y="792" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[1]</text>
+<text x="126" y="805" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="48"  y="820" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".6"/>
+<text x="126" y="834" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[2]</text>
+<text x="126" y="847" text-anchor="middle" fill="#d0c0f0" font-size="9">max 3 lenses</text>
+
+<!-- Asset B panel pills -->
+<rect x="258" y="736" width="156" height="36" rx="6" fill="#6e4fa5"/>
+<text x="336" y="750" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[0]</text>
+<text x="336" y="763" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="258" y="778" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".8"/>
+<text x="336" y="792" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[1]</text>
+<text x="336" y="805" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="258" y="820" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".6"/>
+<text x="336" y="834" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[2]</text>
+<text x="336" y="847" text-anchor="middle" fill="#d0c0f0" font-size="9">max 3 lenses</text>
+
+<!-- Asset C panel pills -->
+<rect x="468" y="736" width="156" height="36" rx="6" fill="#6e4fa5"/>
+<text x="546" y="750" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[0]</text>
+<text x="546" y="763" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="468" y="778" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".8"/>
+<text x="546" y="792" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[1]</text>
+<text x="546" y="805" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="468" y="820" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".6"/>
+<text x="546" y="834" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[2]</text>
+<text x="546" y="847" text-anchor="middle" fill="#d0c0f0" font-size="9">max 3 lenses</text>
+
+<!-- Asset D panel pills -->
+<rect x="678" y="736" width="156" height="36" rx="6" fill="#6e4fa5"/>
+<text x="756" y="750" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[0]</text>
+<text x="756" y="763" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="678" y="778" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".8"/>
+<text x="756" y="792" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[1]</text>
+<text x="756" y="805" text-anchor="middle" fill="#d0c0f0" font-size="9">voting lens</text>
+<rect x="678" y="820" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".6"/>
+<text x="756" y="834" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">panel_skill[2]</text>
+<text x="756" y="847" text-anchor="middle" fill="#d0c0f0" font-size="9">max 3 lenses</text>
+
+<!-- Asset … panel pills -->
+<rect x="888" y="736" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".5"/>
+<text x="966" y="754" text-anchor="middle" fill="#fff" font-size="10">panel_skill[0]</text>
+<rect x="888" y="778" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".35"/>
+<text x="966" y="796" text-anchor="middle" fill="#fff" font-size="10">panel_skill[1]</text>
+<rect x="888" y="820" width="156" height="36" rx="6" fill="#6e4fa5" opacity=".2"/>
+<text x="966" y="838" text-anchor="middle" fill="#fff" font-size="10">panel_skill[2]</text>
+
+<!-- MAX cap badge -->
+<rect x="1060" y="776" width="100" height="30" rx="6" fill="#1a0d30" stroke="#6e4fa5" stroke-width="1.2"/>
+<text x="1110" y="788" text-anchor="middle" fill="#6e4fa5" font-size="9" font-weight="700">MAX_PANEL</text>
+<text x="1110" y="801" text-anchor="middle" fill="#b09ae0" font-size="11" font-weight="700">= 3</text>
+
+<!-- GUARDRAIL side lane -->
+<rect x="24" y="736" width="14" height="120" rx="3" fill="#e8a020" opacity=".3"/>
+<text x="31" y="756" text-anchor="middle" fill="#e8a020" font-size="8" font-weight="700" transform="rotate(-90 31 790)">GUARDRAIL</text>
+
+<!-- Guardrail box -->
+<rect x="24" y="736" width="14" height="120" rx="3" fill="none" stroke="#e8a020" stroke-width="1.2" stroke-dasharray="4,3"/>
+
+<!-- Guardrail annotation -->
+<line x1="38" y1="796" x2="48" y2="796" stroke="#e8a020" stroke-width="1" stroke-dasharray="3,2"/>
+<rect x="0" y="856" width="280" height="30" rx="4" fill="#1a1200" stroke="#e8a020" stroke-width="1"/>
+<text x="140" y="866" text-anchor="middle" fill="#e8a020" font-size="9" font-weight="600">analytics-morgan-housel</text>
+<text x="140" y="879" text-anchor="middle" fill="#c8880a" font-size="9">NON-VOTING · cross-asset guardrail</text>
+
+<!-- Arrow PANEL → DECIDE -->
+<line x1="600" y1="892" x2="600" y2="912" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+<line x1="140" y1="886" x2="140" y2="912" stroke="#e8a020" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr-guard)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 5 — DECIDE
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="912" width="1152" height="110" rx="8" fill="#1e1030" stroke="#6e4fa5" stroke-width="1.5"/>
+<text x="36" y="930" fill="#6e4fa5" font-size="9" font-weight="700" letter-spacing="2">PHASE 5 — DECIDE  (cross-asset)</text>
+
+<rect x="300" y="934" width="600" height="74" rx="8" fill="#6e4fa5"/>
+<text x="600" y="956" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">chair_skill</text>
+<text x="600" y="974" text-anchor="middle" fill="#d0c0f0" font-size="11">Sees all panelByAsset outputs + guardrail memo · cross-asset view</text>
+<text x="600" y="989" text-anchor="middle" fill="#d0c0f0" font-size="10">Per-asset: {conviction high/med/low · prob 0..1 · action · invalidation}</text>
+<text x="600" y="1003" text-anchor="middle" fill="#d0c0f0" font-size="10">Tally must sum to exact vote count · no fabrication</text>
+
+<!-- Arrow DECIDE → REPORT -->
+<line x1="600" y1="1022" x2="600" y2="1042" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 6 — REPORT
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="1042" width="1152" height="100" rx="8" fill="#1e1200" stroke="#a56e1a" stroke-width="1.5"/>
+<text x="36" y="1060" fill="#a56e1a" font-size="9" font-weight="700" letter-spacing="2">PHASE 6 — REPORT</text>
+
+<rect x="300" y="1064" width="600" height="64" rx="8" fill="#a56e1a"/>
+<text x="600" y="1086" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">write-report agent</text>
+<text x="600" y="1104" text-anchor="middle" fill="#ffe8b0" font-size="11">Write markdown → research/{class}.{date}.md</text>
+<text x="600" y="1119" text-anchor="middle" fill="#ffe8b0" font-size="10">Byte-count verified · retry once on failure</text>
+
+<!-- Arrow REPORT → LEDGER -->
+<line x1="600" y1="1142" x2="600" y2="1162" stroke="#8b9ab5" stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PHASE 7 — LEDGER
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="1162" width="1152" height="130" rx="8" fill="#1e1200" stroke="#a56e1a" stroke-width="1.5"/>
+<text x="36" y="1180" fill="#a56e1a" font-size="9" font-weight="700" letter-spacing="2">PHASE 7 — LEDGER  (parallel per-asset)</text>
+
+<text x="600" y="1198" text-anchor="middle" fill="#8b9ab5" font-size="11" font-style="italic">All assets run in parallel — python3 ledger.py add per ticker</text>
+
+<!-- Ledger asset pills (5 of them) -->
+<rect x="50"  y="1206" width="192" height="68" rx="8" fill="#a56e1a"/>
+<text x="146" y="1226" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ledger.py add</text>
+<text x="146" y="1243" text-anchor="middle" fill="#ffe8b0" font-size="10">Asset A</text>
+<text x="146" y="1259" text-anchor="middle" fill="#ffe8b0" font-size="9">Brier-scored probability</text>
+<text x="146" y="1271" text-anchor="middle" fill="#ffe8b0" font-size="9">calibrated tracking</text>
+
+<rect x="258" y="1206" width="192" height="68" rx="8" fill="#a56e1a" opacity=".85"/>
+<text x="354" y="1226" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ledger.py add</text>
+<text x="354" y="1243" text-anchor="middle" fill="#ffe8b0" font-size="10">Asset B</text>
+<text x="354" y="1259" text-anchor="middle" fill="#ffe8b0" font-size="9">Brier-scored probability</text>
+
+<rect x="466" y="1206" width="192" height="68" rx="8" fill="#a56e1a" opacity=".7"/>
+<text x="562" y="1226" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ledger.py add</text>
+<text x="562" y="1243" text-anchor="middle" fill="#ffe8b0" font-size="10">Asset C</text>
+<text x="562" y="1259" text-anchor="middle" fill="#ffe8b0" font-size="9">Brier-scored probability</text>
+
+<rect x="674" y="1206" width="192" height="68" rx="8" fill="#a56e1a" opacity=".55"/>
+<text x="770" y="1226" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ledger.py add</text>
+<text x="770" y="1243" text-anchor="middle" fill="#ffe8b0" font-size="10">Asset D</text>
+<text x="770" y="1259" text-anchor="middle" fill="#ffe8b0" font-size="9">Brier-scored probability</text>
+
+<rect x="882" y="1206" width="192" height="68" rx="8" fill="#a56e1a" opacity=".35"/>
+<text x="978" y="1226" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">ledger.py add</text>
+<text x="978" y="1243" text-anchor="middle" fill="#ffe8b0" font-size="10">Asset …</text>
+<text x="978" y="1259" text-anchor="middle" fill="#ffe8b0" font-size="9">Brier-scored probability</text>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LEGEND
+═══════════════════════════════════════════════════════════ -->
+<rect x="24" y="1308" width="1152" height="60" rx="8" fill="#111820" stroke="#2a3a50" stroke-width="1"/>
+<text x="36" y="1325" fill="#8b9ab5" font-size="9" font-weight="700" letter-spacing="2">LEGEND</text>
+
+<rect x="50"  y="1330" width="16" height="16" rx="3" fill="#1e6fa5"/>
+<text x="72"  y="1343" fill="#cce4ff" font-size="11">Intake / Screen (blue)</text>
+
+<rect x="220" y="1330" width="16" height="16" rx="3" fill="#1a7a6e"/>
+<text x="242" y="1343" fill="#9de0d8" font-size="11">Gather / Consolidate (teal)</text>
+
+<rect x="430" y="1330" width="16" height="16" rx="3" fill="#6e4fa5"/>
+<text x="452" y="1343" fill="#d0c0f0" font-size="11">Panel / Decide (purple)</text>
+
+<rect x="620" y="1330" width="16" height="16" rx="3" fill="#a56e1a"/>
+<text x="642" y="1343" fill="#ffe8b0" font-size="11">Report / Ledger (orange)</text>
+
+<rect x="810" y="1330" width="22" height="12" rx="3" fill="none" stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="4,2"/>
+<text x="838" y="1343" fill="#8bb8ff" font-size="11">Bypass path</text>
+
+<rect x="960" y="1330" width="22" height="12" rx="3" fill="none" stroke="#e8a020" stroke-width="1.5" stroke-dasharray="3,2"/>
+<text x="988" y="1343" fill="#e8a020" font-size="11">Guardrail (non-voting)</text>
+
+</svg>
