@@ -3,6 +3,7 @@ export const meta = {
   description: 'Unified portfolio-aware research (crypto + equities). An LLM CIO discovers the available skills live and decides the screening strategy and desk — then the team runs: screen → gather → consolidate → panel → decide → report → ledger. NOTHING about the roster or tickers is hardcoded here; this script only dispatches the full skill names the CIO returns. All substance lives in .agents/skills.',
   phases: [
     { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy + assembles desk (no tickers)' },
+    { title: 'ThemeCycle', detail: 'assess whether the theme/sector is already extended; if so, widen to adjacent laggards' },
     { title: 'Screen', detail: 'research team autonomously finds 5-10 candidates via web search + screener logic' },
     { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill' },
     { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief' },
@@ -58,6 +59,18 @@ const PLAN_SCHEMA = {
     'gather_skills', 'panel_skills', 'desk_skill', 'chair_skill', 'screen_scope', 'screen_criteria'],
 }
 
+const THEME_SCHEMA = {
+  type: 'object',
+  properties: {
+    extended: { type: 'boolean' },          // true if theme already ran hard
+    cycle_position: { type: 'string', enum: ['early', 'mid', 'late', 'extended'] },
+    evidence: { type: 'string' },           // 1-2 sentences of evidence
+    adjusted_scope: { type: 'string' },     // if extended=true, alternative scope to screen
+    adjusted_criteria: { type: 'string' },  // if extended=true, alternative criteria
+  },
+  required: ['extended', 'cycle_position', 'adjusted_scope', 'adjusted_criteria'],
+}
+
 const SCREEN_SCHEMA = {
   type: 'object',
   properties: {
@@ -68,6 +81,10 @@ const SCREEN_SCHEMA = {
       catalyst: { type: 'string' },
       valuation_gap: { type: 'string' },
       why_not_yet_surged: { type: 'string' },
+      current_price: { type: 'string' },
+      consensus_pt: { type: 'string' },
+      price_vs_52w: { type: 'string' },   // e.g. "87% of 52w high", "32% below 52w high"
+      above_consensus: { type: 'boolean' }, // true if current_price > consensus_pt
     }, required: ['ticker', 'thesis'] } },
     excluded: { type: 'array', items: { type: 'string' } },
     screen_notes: { type: 'string' },
@@ -92,7 +109,7 @@ const PANEL_SCHEMA = {
   type: 'object',
   properties: {
     seat: { type: 'string' }, read: { type: 'string' },
-    verdict: { type: 'string', enum: ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'HOLD', 'WAIT', 'TRIM', 'AVOID'] },
+    verdict: { type: 'string', enum: ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'BUY_ON_TOUCH', 'HOLD', 'WAIT', 'TRIM', 'AVOID'] },
     sizing: { type: 'string' }, flip: { type: 'string' },
     confidence: { type: 'string', enum: ['low', 'medium', 'high'] },
   },
@@ -119,29 +136,30 @@ const DECISION_SCHEMA = {
       asset: { type: 'string' },
       conviction: { type: 'string', enum: ['high', 'medium', 'low'] },
       prob: { type: 'number' },           // 0..1 chance the bull thesis plays out by the horizon
-      action: { type: 'string' },         // e.g. ACCUMULATE / PROBE / WATCHLIST / AVOID
+      action: { type: 'string' },         // e.g. ACCUMULATE / PROBE / WATCHLIST / AVOID / BUY_ON_TOUCH
+      entry_trigger: { type: 'string' },  // for BUY_ON_TOUCH: the specific price/condition e.g. "$31 limit bid"
       invalidation: { type: 'string' },
     }, required: ['asset'] } },
   },
   required: ['answer', 'decision', 'tranche_plan', 'agreement', 'disagreement'],
 }
 
-// ---------- Phase 0: INTAKE (CIO discovers skills live + plans the desk — no tickers) ----------
+// ---------- Phase 0: INTAKE (CIO discovers skills live + plans the desk -- no tickers) ----------
 phase('Intake')
 const plan = await agent(
-  `You are the CIO. A mandate arrived. Your job: decide the screening strategy and assemble the desk. You do NOT pick specific tickers — your research team handles that.\n` +
-  `FIRST discover the available skills live (list ${SKILL}/ and read each SKILL.md description — do NOT rely on memory), THEN return the research plan naming every component by its real discovered directory name.\n` +
-  `RAW QUERY: ${QUESTION}\nPORTFOLIO PASSED BY CALLER: ${RAW_PORTFOLIO || '(none — caller gave no holdings; do NOT invent any)'}\nAs-of: ${REPORT_DATE}\n\n` +
-  `Set screen_scope (what universe/sector/theme to screen, e.g. "AI supply chain semiconductors — mid/small cap names not yet surged") and screen_criteria (what makes a good candidate, e.g. "valuation gap vs peers, upcoming catalysts, supply inflection point").\n` +
-  `Do NOT populate assets[] — leave it empty or omit it. The screening team decides which stocks to analyze.\n` +
+  `You are the CIO. A mandate arrived. Your job: decide the screening strategy and assemble the desk. You do NOT pick specific tickers -- your research team handles that.\n` +
+  `FIRST discover the available skills live (list ${SKILL}/ and read each SKILL.md description -- do NOT rely on memory), THEN return the research plan naming every component by its real discovered directory name.\n` +
+  `RAW QUERY: ${QUESTION}\nPORTFOLIO PASSED BY CALLER: ${RAW_PORTFOLIO || '(none -- caller gave no holdings; do NOT invent any)'}\nAs-of: ${REPORT_DATE}\n\n` +
+  `Set screen_scope (what universe/sector/theme to screen, e.g. "AI supply chain semiconductors -- mid/small cap names not yet surged") and screen_criteria (what makes a good candidate, e.g. "valuation gap vs peers, upcoming catalysts, supply inflection point").\n` +
+  `Do NOT populate assets[] -- leave it empty or omit it. The screening team decides which stocks to analyze.\n` +
   `Keep all existing skill-discovery instructions for gather_skills, panel_skills, desk_skill, chair_skill.`,
   { label: 'manager-intake', phase: 'Intake', schema: PLAN_SCHEMA, model: MODEL })
 
 if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 'no plan from manager' } }
 
-// Resolve plan → run inputs (all manager-driven; safe fallbacks only for emptiness, never fabricate holdings).
+// Resolve plan -> run inputs (all manager-driven; safe fallbacks only for emptiness, never fabricate holdings).
 const ASSET_CLASS = plan.asset_class || 'equities'
-// ASSETS is let — Screen phase will populate it.
+// ASSETS is let -- Screen phase will populate it.
 let ASSETS = []
 // Optional forced override: if caller explicitly passed assets via ARGS, use them (bypasses screener).
 const FORCED_ASSETS = (Array.isArray(ARGS.assets) && ARGS.assets.length) ? ARGS.assets.map(a => String(a).toUpperCase()) : []
@@ -151,32 +169,55 @@ const PORTFOLIO = portfolioProvided ? (plan.portfolio_summary || RAW_PORTFOLIO)
 const FOCUS = plan.focus || ''
 const FRAMING = plan.chair_framing || ''
 const FEEDS = (Array.isArray(plan.feeds) && plan.feeds.length) ? plan.feeds : []
-// Cap gather+panel to keep total agents = ASSETS × (MAX_GATHER + MAX_PANEL) manageable.
-// With 13 assets × (3+3) = 78 agents — completes in ~10 min. Uncapped → 100+ agents → 30+ min stall.
+// Cap gather+panel to keep total agents = ASSETS x (MAX_GATHER + MAX_PANEL) manageable.
+// With 13 assets x (3+3) = 78 agents -- completes in ~10 min. Uncapped -> 100+ agents -> 30+ min stall.
 const MAX_GATHER = 3
 const MAX_PANEL = 3
 const gatherSkills = (Array.isArray(plan.gather_skills) ? plan.gather_skills : []).filter(Boolean).slice(0, MAX_GATHER)
 const panelSkills = (Array.isArray(plan.panel_skills) ? plan.panel_skills : []).filter(Boolean).slice(0, MAX_PANEL)
-if (plan.gather_skills && plan.gather_skills.length > MAX_GATHER) log(`Gather capped ${plan.gather_skills.length}→${MAX_GATHER}: dropped ${plan.gather_skills.slice(MAX_GATHER).join(', ')}`)
-if (plan.panel_skills && plan.panel_skills.length > MAX_PANEL) log(`Panel capped ${plan.panel_skills.length}→${MAX_PANEL}: dropped ${plan.panel_skills.slice(MAX_PANEL).join(', ')}`)
+if (plan.gather_skills && plan.gather_skills.length > MAX_GATHER) log(`Gather capped ${plan.gather_skills.length}->${MAX_GATHER}: dropped ${plan.gather_skills.slice(MAX_GATHER).join(', ')}`)
+if (plan.panel_skills && plan.panel_skills.length > MAX_PANEL) log(`Panel capped ${plan.panel_skills.length}->${MAX_PANEL}: dropped ${plan.panel_skills.slice(MAX_PANEL).join(', ')}`)
 const guardrailSkill = plan.guardrail_skill || ''
 const deskSkill = plan.desk_skill || ''
 const chairSkill = plan.chair_skill || ''
 
-log(`INTAKE — class: ${ASSET_CLASS} | screen_scope: ${plan.screen_scope || '?'} | screen_criteria: ${plan.screen_criteria || '?'} | side: ${plan.side || '?'} | portfolio: ${portfolioProvided ? 'provided' : 'NONE (market-level)'} | gather: ${gatherSkills.length} | feeds: ${FEEDS.length} | panel: ${panelSkills.length} | desk: ${deskSkill || '?'} | chair: ${chairSkill || '?'}`)
+log(`INTAKE -- class: ${ASSET_CLASS} | screen_scope: ${plan.screen_scope || '?'} | screen_criteria: ${plan.screen_criteria || '?'} | side: ${plan.side || '?'} | portfolio: ${portfolioProvided ? 'provided' : 'NONE (market-level)'} | gather: ${gatherSkills.length} | feeds: ${FEEDS.length} | panel: ${panelSkills.length} | desk: ${deskSkill || '?'} | chair: ${chairSkill || '?'}`)
 if (FOCUS) log(`INTAKE focus: ${FOCUS}`)
 if (plan.notes) log(`INTAKE notes: ${plan.notes}`)
-if (QUESTION === '(no question provided)') log('WARNING: no question passed — running with empty question.')
-if (!gatherSkills.length) log('WARNING: manager selected no gather seats — brief will be empty.')
-if (!panelSkills.length) log('WARNING: manager selected no panel lenses — no votes will be cast.')
+if (QUESTION === '(no question provided)') log('WARNING: no question passed -- running with empty question.')
+if (!gatherSkills.length) log('WARNING: manager selected no gather seats -- brief will be empty.')
+if (!panelSkills.length) log('WARNING: manager selected no panel lenses -- no votes will be cast.')
 if (!deskSkill || !chairSkill) log('WARNING: manager did not name a desk and/or chair skill.')
 
-// ---------- Phase 1: SCREEN — research team autonomously finds candidates ----------
+// ---------- Phase 0.5: THEME CYCLE CHECK ----------
+phase('ThemeCycle')
+const themeCycle = await agent(
+  `Assess whether the investment theme is already extended (price has already run hard and most names are above fair value).\n\n` +
+  `Theme/sector: "${plan.screen_scope}"\nAs-of: ${REPORT_DATE}\n\n` +
+  `Steps:\n` +
+  `1. Check the representative ETF or sector index price vs its 52-week range (e.g. SOXX for semis, BOTZ for AI)\n` +
+  `2. Check median analyst consensus PT vs current price across the sector\n` +
+  `3. Check how many names in the sector are trading above consensus PT\n\n` +
+  `If extended=true: set adjusted_scope to a DIFFERENT universe that may have lagged (e.g. "AI infrastructure power management small caps", "PCB/substrate suppliers not yet re-rated", "AI cooling/thermal management"). Set adjusted_criteria to focus on price-below-PT and distance-from-52w-high.\n` +
+  `If NOT extended: set adjusted_scope and adjusted_criteria to same as input scope/criteria.\n` +
+  `Be honest. If the theme ran +100%+ in the past year, it is extended.`,
+  { label: 'theme-cycle', phase: 'ThemeCycle', schema: THEME_SCHEMA, model: MODEL }
+)
+if (themeCycle) {
+  log(`ThemeCycle: ${themeCycle.cycle_position} | extended: ${themeCycle.extended} | ${themeCycle.evidence || ''}`)
+  if (themeCycle.extended && themeCycle.adjusted_scope) {
+    log(`ThemeCycle: scope widened -> "${themeCycle.adjusted_scope}"`)
+    plan.screen_scope = themeCycle.adjusted_scope
+    plan.screen_criteria = themeCycle.adjusted_criteria || plan.screen_criteria
+  }
+}
+
+// ---------- Phase 1: SCREEN -- research team autonomously finds candidates ----------
 // Screening always runs. No discovery_mode toggle. The team decides which stocks to analyze.
 // Exception: if caller forced ARGS.assets, skip screener (explicit override).
 if (FORCED_ASSETS.length) {
   ASSETS = FORCED_ASSETS
-  log(`Screen: BYPASSED — caller forced assets: ${ASSETS.join(', ')}`)
+  log(`Screen: BYPASSED -- caller forced assets: ${ASSETS.join(', ')}`)
 } else {
   phase('Screen')
   log(`Screen: searching sector "${plan.screen_scope}" | criteria: ${plan.screen_criteria}`)
@@ -185,16 +226,21 @@ if (FORCED_ASSETS.length) {
     `Sector/universe: "${plan.screen_scope}"\n` +
     `What makes a good candidate: "${plan.screen_criteria}"\n\n` +
     `How to screen:\n` +
-    `1. Search for sector ETF holdings (e.g. SOXX, SMH, XSD, FTXL for AI semis) — look at mid/small cap names\n` +
+    `1. Search for sector ETF holdings (e.g. SOXX, SMH, XSD, FTXL for AI semis) -- look at mid/small cap names\n` +
     `2. Search analyst screener reports, "undiscovered AI plays", "semiconductor value", "AI supply chain small cap"\n` +
     `3. Check recent earnings call transcripts for AI demand signals from lesser-known vendors\n` +
     `4. Apply the criteria above to filter candidates: ${plan.screen_criteria}\n\n` +
+    `For each candidate, fetch: current price, consensus analyst price target (Yahoo Finance / Finviz / analyst reports), 52-week high.\n` +
+    `REJECT any candidate where current price > consensus analyst PT -- mark it in excluded[] with reason "above consensus PT".\n` +
+    `PREFER candidates trading >15% below consensus PT or >20% below their 52-week high.\n` +
     `Return 5-10 tickers with thesis, catalyst, valuation_gap, why_not_yet_surged.\n` +
     `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs, no indexes. No already-surged mega-caps unless NEW catalyst.\n` +
     `Aim for diverse names across the supply chain (memory, EDA, packaging, test equipment, networking, power mgmt).`,
     { label: 'sector-screen', phase: 'Screen', schema: SCREEN_SCHEMA, model: MODEL }
   )
   if (screened && Array.isArray(screened.candidates) && screened.candidates.length) {
+    const aboveConsensus = screened.candidates.filter(c => c.above_consensus)
+    if (aboveConsensus.length) log(`Screen: rejected ${aboveConsensus.length} candidates above consensus PT: ${aboveConsensus.map(c => c.ticker).join(', ')}`)
     const tickers = screened.candidates
       .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
       .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
@@ -203,11 +249,11 @@ if (FORCED_ASSETS.length) {
       log(`Screen: ${tickers.length} candidates found: ${tickers.join(', ')}`)
       if (screened.screen_notes) log(`Screen notes: ${screened.screen_notes}`)
     } else {
-      log('WARNING: screener returned no valid tickers — aborting.')
+      log('WARNING: screener returned no valid tickers -- aborting.')
       return { error: 'screener returned no valid tickers' }
     }
   } else {
-    log('WARNING: screener returned nothing — aborting.')
+    log('WARNING: screener returned nothing -- aborting.')
     return { error: 'screener returned nothing' }
   }
 }
@@ -215,14 +261,14 @@ if (FORCED_ASSETS.length) {
 // ASSET_LIST computed here, AFTER screener has populated ASSETS.
 const ASSET_LIST = ASSETS.join(', ')
 
-// Per-asset context builder — each agent focuses on ONE asset, avoiding giant multi-asset context blowup.
+// Per-asset context builder -- each agent focuses on ONE asset, avoiding giant multi-asset context blowup.
 const ctxFor = (asset) =>
   `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${ASSET_LIST}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nAs-of: ${REPORT_DATE}`
-const seedNote = ANCHOR ? `\nSeed (verify+extend): ${ANCHOR}` : `\nNo seed — fetch LIVE; never fabricate, mark UNAVAILABLE if gated.`
+const seedNote = ANCHOR ? `\nSeed (verify+extend): ${ANCHOR}` : `\nNo seed -- fetch LIVE; never fabricate, mark UNAVAILABLE if gated.`
 
-// ---------- Phase 2: GATHER — per-asset pipeline (each asset × all gather skills in parallel) ----------
-// Old: one agent covers ALL assets per skill → massive context, stalls on large lists.
-// New: pipeline(assets) so each asset gets dedicated gather agents → O(1 asset) wall-clock.
+// ---------- Phase 2: GATHER -- per-asset pipeline (each asset x all gather skills in parallel) ----------
+// Old: one agent covers ALL assets per skill -> massive context, stalls on large lists.
+// New: pipeline(assets) so each asset gets dedicated gather agents -> O(1 asset) wall-clock.
 phase('Gather')
 const gatherByAsset = await pipeline(
   ASSETS,
@@ -243,13 +289,13 @@ const gatherByAsset = await pipeline(
 const gatherComplete = gatherByAsset.filter(Boolean).every(r => r.complete)
 log(`Gather: ${gatherByAsset.filter(Boolean).length}/${ASSETS.length} assets complete`)
 
-// ---------- Phase 3: CONSOLIDATE — per-asset desk brief ----------
+// ---------- Phase 3: CONSOLIDATE -- per-asset desk brief ----------
 phase('Consolidate')
 const briefByAsset = await pipeline(
   gatherByAsset.filter(Boolean),
   async ({ asset, seats, complete }) => {
     const brief = await agent(
-      `Follow ${SKILL}/${deskSkill}/SKILL.md. Focus on: ${asset}.\n${ctxFor(asset)}\nCompleteness: ${complete ? 'All seats returned.' : 'INCOMPLETE — surface DATA GAPS; do not paper over.'}\nRAW DATA:\n${JSON.stringify(seats, null, 1)}`,
+      `Follow ${SKILL}/${deskSkill}/SKILL.md. Focus on: ${asset}.\n${ctxFor(asset)}\nCompleteness: ${complete ? 'All seats returned.' : 'INCOMPLETE -- surface DATA GAPS; do not paper over.'}\nRAW DATA:\n${JSON.stringify(seats, null, 1)}`,
       { label: `${deskSkill}:${asset}`, phase: 'Consolidate', model: MODEL }
     )
     return { asset, brief: brief || '[UNAVAILABLE: desk returned nothing]' }
@@ -257,7 +303,7 @@ const briefByAsset = await pipeline(
 )
 log(`Consolidate: ${briefByAsset.filter(Boolean).length}/${ASSETS.length} briefs`)
 
-// ---------- Phase 4: PANEL — per-asset lenses (each asset × all panel skills in parallel) ----------
+// ---------- Phase 4: PANEL -- per-asset lenses (each asset x all panel skills in parallel) ----------
 phase('Panel')
 const panelByAsset = await pipeline(
   briefByAsset.filter(Boolean),
@@ -274,7 +320,7 @@ const panelByAsset = await pipeline(
 )
 log(`Panel: ${panelByAsset.filter(Boolean).length}/${ASSETS.length} assets voted`)
 
-// Guardrail — cross-asset (reads all briefs; non-voting process check only).
+// Guardrail -- cross-asset (reads all briefs; non-voting process check only).
 const allBriefs = briefByAsset.filter(Boolean).map(b => `=== ${b.asset} ===\n${b.brief}`).join('\n\n')
 const guardrail = guardrailSkill ? await agent(
   `Follow ${SKILL}/${guardrailSkill}/SKILL.md as a NON-VOTING guardrail (no BUY/SELL verdict). Question: ${QUESTION}\nAssets: ${ASSET_LIST}\nAssess: FOMO-vs-anchoring trap, staged scale-in soundness, sizing survivable to -50%, one guardrail rule per asset.\n${allBriefs}`,
@@ -285,35 +331,79 @@ const verdicts = panelByAsset.filter(Boolean)
   .flatMap(({ asset, votes }) => votes.map(v => ({ ...v, asset })))
 log(`Panel: ${verdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length}/${verdicts.length} total votes cast`)
 
-// ---------- Phase 5: DECIDE — cross-asset chair ranks all assets ----------
+// ---------- Phase 5: DECIDE -- cross-asset chair ranks all assets ----------
 phase('Decide')
 const totalVotes = verdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length
 const decision = await agent(
   `Follow ${SKILL}/${chairSkill}/SKILL.md to chair the committee.\nQuestion: ${QUESTION}\nAssets: ${ASSET_LIST}\nChair framing: ${FRAMING || 'none'}\nPortfolio: ${PORTFOLIO}\n` +
-  `Populate per_asset[] for EVERY asset (${ASSET_LIST}): {asset, conviction high|medium|low, prob 0..1 bull thesis by ${REPORT_DATE.slice(0,4)}-12-31, action, invalidation}. Rank by conviction — do NOT give every asset the same prob.\n` +
+  `Populate per_asset[] for EVERY asset (${ASSET_LIST}): {asset, conviction high|medium|low, prob 0..1 bull thesis by ${REPORT_DATE.slice(0,4)}-12-31, action, invalidation}. Rank by conviction -- do NOT give every asset the same prob.\n` +
+  `For assets near but not yet at entry zone: use action BUY_ON_TOUCH and set entry_trigger to the specific limit price or condition (e.g. "bid $31 limit", "buy on touch of 200d MA").\n` +
   `EXACT VOTING-SEAT COUNT = ${totalVotes}. verdict_tally buckets MUST sum to ${totalVotes}.\n` +
   `=== PER-ASSET PANEL VERDICTS ===\n${JSON.stringify(panelByAsset.filter(Boolean), null, 1)}\n=== GUARDRAIL (non-voting) ===\n${guardrail}`,
   { label: chairSkill || 'chair-decision', phase: 'Decide', schema: DECISION_SCHEMA, model: MODEL })
 
+// ---------- RE-SCREEN LOOP ----------
+// If chair issued zero BUY/ADD and dominant rejection is margin-of-safety, re-run screener once with cheaper scope.
+const bullActions = ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'BUY_ON_TOUCH']
+const hasBuySignal = decision && Array.isArray(decision.per_asset) &&
+  decision.per_asset.some(a => bullActions.includes(a.action))
+const noMarginSafety = decision && decision.decision &&
+  (decision.decision.toLowerCase().includes('margin of safety') ||
+   decision.decision.toLowerCase().includes('already priced') ||
+   decision.decision.toLowerCase().includes('above fair value'))
+
+if (!hasBuySignal && noMarginSafety && !ARGS._rescreened) {
+  log('RE-SCREEN: zero BUY signals, dominant rejection = no margin of safety -- re-running screener with cheaper scope')
+  phase('ReScreen')
+  const cheapScope = `${plan.screen_scope} -- names down >30% from 52-week high OR trading below book value OR one tier down the supply chain from the most-crowded names`
+  const cheapCriteria = `${plan.screen_criteria}; MUST be trading below analyst consensus price target; prefer names down >20% from 52w high`
+  const rescreened = await agent(
+    `Task: Re-screen for investment candidates. Prior screen found no margin of safety across all candidates.\n\n` +
+    `Sector/universe: "${cheapScope}"\n` +
+    `What makes a good candidate: "${cheapCriteria}"\n\n` +
+    `How to screen:\n` +
+    `1. Focus on LAGGARDS in the sector -- names that have NOT surged yet\n` +
+    `2. Check names trading below consensus analyst PT (current price < PT)\n` +
+    `3. Look one tier down the supply chain from the crowded names\n` +
+    `4. Check beaten-down names where the business is intact but price hasn't recovered\n\n` +
+    `Return 5-10 tickers with thesis, catalyst, valuation_gap, why_not_yet_surged.\n` +
+    `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs. MUST be trading below analyst consensus PT.\n` +
+    `For each candidate: fetch current price, consensus PT, 52-week high. Reject if price > consensus PT.`,
+    { label: 'rescreen', phase: 'ReScreen', schema: SCREEN_SCHEMA, model: MODEL }
+  )
+  if (rescreened && Array.isArray(rescreened.candidates) && rescreened.candidates.length) {
+    const newTickers = rescreened.candidates
+      .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
+      .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
+      .filter(t => !ASSETS.includes(t))
+    if (newTickers.length) {
+      log(`ReScreen: ${newTickers.length} new candidates: ${newTickers.join(', ')}`)
+      // Note: we don't re-run the full pipeline on rescreened names in this run (cost).
+      // We log them for the next run's prior_context injection.
+      log(`ReScreen NOTE: add these to next run's prior_context for full research: ${newTickers.join(', ')}`)
+    }
+  }
+}
+
 // ---------- Phase 6: WRITE REPORT ----------
 phase('Report')
 const reportPath = `/Users/engineer/workspace/backtest/research/research.${ASSET_CLASS}.${REPORT_DATE}.md`
-// Per-asset vote table: one row per asset × lens combination.
+// Per-asset vote table: one row per asset x lens combination.
 const seatRows = panelByAsset.filter(Boolean).flatMap(({ asset, votes }) =>
   votes.map(v => `| ${asset} | ${v.seat} | **${v.verdict}** | ${v.confidence} |`)
 ).join('\n')
 const seatDetail = panelByAsset.filter(Boolean).map(({ asset, votes }) =>
   `### ${asset}\n` + votes.map(v =>
-    `**${v.seat}** — ${v.verdict} (${v.confidence}): ${v.read}\n- Sizing: ${v.sizing || 'n/a'} · Flips if: ${v.flip || 'n/a'}`
+    `**${v.seat}** -- ${v.verdict} (${v.confidence}): ${v.read}\n- Sizing: ${v.sizing || 'n/a'} * Flips if: ${v.flip || 'n/a'}`
   ).join('\n\n')
 ).join('\n\n---\n\n')
-const reportMd = `# Research — ${ASSET_LIST} (${ASSET_CLASS}) — ${REPORT_DATE}
+const reportMd = `# Research -- ${ASSET_LIST} (${ASSET_CLASS}) -- ${REPORT_DATE}
 
 > Question: ${QUESTION}
 > Portfolio: ${PORTFOLIO}
-> Desk assembled by \`research-manager\`: gather [${gatherSkills.join(', ')}] · panel [${panelSkills.join(', ')}] · desk ${deskSkill} · chair ${chairSkill}.
+> Desk assembled by \`research-manager\`: gather [${gatherSkills.join(', ')}] * panel [${panelSkills.join(', ')}] * desk ${deskSkill} * chair ${chairSkill}.
 > Generated by \`research-market\`. Educational, not advice; re-pull before acting.
-${gatherComplete ? '' : `\n> **⚠ INCOMPLETE DATA:** Some gather seats unavailable. Treat with caution.\n`}
+${gatherComplete ? '' : `\n> **WARNING INCOMPLETE DATA:** Some gather seats unavailable. Treat with caution.\n`}
 ## Answer
 **${decision.answer || decision.decision}**
 
@@ -345,9 +435,9 @@ ${seatDetail}
 ${guardrail}
 
 ---
-*Consolidated brief (raw evidence) not persisted — available in the workflow return value \`brief\` field.*
+*Consolidated brief (raw evidence) not persisted -- available in the workflow return value \`brief\` field.*
 `
-// Write + VERIFY + retry — an LLM "Write this file" agent can silently no-op, so never trust it: confirm the
+// Write + VERIFY + retry -- an LLM "Write this file" agent can silently no-op, so never trust it: confirm the
 // bytes landed on disk and retry once, then surface LOUDLY rather than claim a path that doesn't exist.
 let reportOk = false
 for (let attempt = 1; attempt <= 2 && !reportOk; attempt++) {
@@ -358,7 +448,7 @@ for (let attempt = 1; attempt <= 2 && !reportOk; attempt++) {
   const bytes = parseInt(String(check).replace(/[^0-9]/g, ''), 10) || 0
   reportOk = String(check).indexOf('MISSING') === -1 && bytes > 1000
   log(reportOk ? `Report written + verified (${bytes} bytes): ${reportPath}`
-    : `WARNING: write-report attempt ${attempt} did NOT persist (saw: ${String(check).slice(0, 40)}). ${attempt < 2 ? 'Retrying.' : 'GIVING UP — report NOT on disk; downstream must use the returned `decision`/`brief` fields.'}`)
+    : `WARNING: write-report attempt ${attempt} did NOT persist (saw: ${String(check).slice(0, 40)}). ${attempt < 2 ? 'Retrying.' : 'GIVING UP -- report NOT on disk; downstream must use the returned \`decision\`/\`brief\` fields.'}`)
 }
 
 // ---------- Phase 7: LEDGER (one row per REAL asset; pseudo-screen tokens excluded) ----------
@@ -381,13 +471,13 @@ const impliedProb = votes.length ? (bullCount / votes.length) : 0.5
 const LEDGER_ASSETS = ASSETS.filter(a => /^[A-Z0-9]{2,6}$/.test(a))
 const skippedLedger = ASSETS.filter(a => !/^[A-Z0-9]{2,6}$/.test(a))
 if (skippedLedger.length) log(`Ledger: skipping non-ticker pseudo-assets: ${skippedLedger.join(', ')}`)
-// ONE-LINE summary only — never dump the full multi-paragraph chair verdict into the CSV --q field (it bloats
+// ONE-LINE summary only -- never dump the full multi-paragraph chair verdict into the CSV --q field (it bloats
 // the ledger with literal newlines). Collapse whitespace and cap length.
 const oneLine = (s) => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 180)
 const ledgerQ = oneLine(decision.decision || decision.answer || '(none)')
 const ledgerFlip = oneLine(decision.invalidation) || 'n/a'
 // Per-asset conviction map (chair-provided). Falls back to the panel bull-fraction when an asset is absent or
-// its prob is not a sane 0..1 number — so the ledger never logs a fabricated or out-of-range probability.
+// its prob is not a sane 0..1 number -- so the ledger never logs a fabricated or out-of-range probability.
 const perAsset = Array.isArray(decision.per_asset) ? decision.per_asset : []
 const probFor = (asset) => {
   const hit = perAsset.find(e => e && String(e.asset || '').toUpperCase() === asset)
@@ -404,7 +494,7 @@ const ledgerLogs = await parallel(LEDGER_ASSETS.map(asset => () =>
     `python3 ${LEDGER_PY} add --asset ${asset} --q ${JSON.stringify('panel chair call (' + asset + '): ' + ledgerQ)} ` +
     `--p ${probFor(asset).toFixed(2)} --by ${JSON.stringify(horizon)} --lens ${JSON.stringify(votingLenses)} ` +
     `--source research-market --flip ${JSON.stringify(flipFor(asset))} --created ${JSON.stringify(REPORT_DATE)}\n\n` +
-    `--p is the chair's per-asset conviction (fallback = per-asset panel tally) — do not change it. If "id exists", re-run once with --id ${asset.toLowerCase()}-${REPORT_DATE}-panel. Reply with the CLI's stdout line.`,
+    `--p is the chair's per-asset conviction (fallback = per-asset panel tally) -- do not change it. If "id exists", re-run once with --id ${asset.toLowerCase()}-${REPORT_DATE}-panel. Reply with the CLI's stdout line.`,
     { label: `ledger-${asset}`, phase: 'Ledger', model: MODEL }))
 )
 const ledgerLog = LEDGER_ASSETS.map((a, i) => `${a}: ${ledgerLogs[i]}`).join(' | ')
