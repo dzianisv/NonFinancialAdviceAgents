@@ -121,7 +121,7 @@ if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 
 const CALLER_CLASS = ARGS.asset_class || ''
 const CALLER_ASSETS = (Array.isArray(ARGS.assets) && ARGS.assets.length) ? ARGS.assets : []
 const ASSET_CLASS = CALLER_CLASS || plan.asset_class || 'equities'
-const ASSETS = (CALLER_ASSETS.length ? CALLER_ASSETS : (Array.isArray(plan.assets) && plan.assets.length) ? plan.assets : []).map(a => String(a).toUpperCase())
+const ASSETS = (CALLER_ASSETS.length ? CALLER_ASSETS : (Array.isArray(plan.assets) && plan.assets.length) ? plan.assets : ['UNKNOWN']).map(a => String(a).toUpperCase())
 const ASSET_LIST = ASSETS.join(', ')
 const portfolioProvided = !!(plan.portfolio_provided && RAW_PORTFOLIO)
 const PORTFOLIO = portfolioProvided ? (plan.portfolio_summary || RAW_PORTFOLIO)
