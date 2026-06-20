@@ -341,10 +341,10 @@ const decision = await agent(
   { label: chairSkill || 'chair-decision', phase: 'Decide', schema: DECISION_SCHEMA, model: MODEL })
 
 // ---------- RE-SCREEN LOOP ----------
-// If chair issued zero BUY/ADD and the dominant rejection is valuation, re-run screener once
-// with a scope asking for laggards/beaten-down names. The CIO (ThemeCycle) already set the
-// adjusted scope if the theme was extended — use that; otherwise ask the screener to go one
-// tier down the supply chain. NO hardcoded technical filters — the screener decides what cheap means.
+// If chair issued zero BUY/ADD and dominant rejection is valuation, re-screen once with a
+// cheaper/adjacent scope and run the FULL pipeline on the new names. The _rescreened flag
+// prevents infinite loops (cap = 1 retry). Workflow must resolve autonomously — never hand
+// "look deeper" back to the user.
 const bullActions = ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'BUY_ON_TOUCH']
 const hasBuySignal = decision && Array.isArray(decision.per_asset) &&
   decision.per_asset.some(a => bullActions.includes(String(a.action || '').toUpperCase()))
@@ -376,15 +376,108 @@ if (!hasBuySignal && valuationRejection && !ARGS._rescreened) {
     `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs. No names already in: ${ASSET_LIST}`,
     { label: 'rescreen', phase: 'ReScreen', schema: SCREEN_SCHEMA, model: MODEL }
   )
-  if (rescreened && Array.isArray(rescreened.candidates) && rescreened.candidates.length) {
-    const newTickers = rescreened.candidates
-      .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
-      .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
-      .filter(t => !ASSETS.includes(t))
-    if (newTickers.length) {
-      log(`ReScreen: ${newTickers.length} new candidates found: ${newTickers.join(', ')}`)
-      log(`ReScreen: add to next run prior_context for full pipeline: ${newTickers.join(', ')}`)
+  const newTickers = rescreened && Array.isArray(rescreened.candidates)
+    ? rescreened.candidates
+        .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
+        .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
+        .filter(t => !ASSETS.includes(t))
+    : []
+  if (newTickers.length) {
+    log(`ReScreen: ${newTickers.length} new candidates — running full pipeline: ${newTickers.join(', ')}`)
+    const rsAssetList = newTickers.join(', ')
+    const rsCtxFor = (asset) =>
+      `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this re-screen batch: ${rsAssetList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nAs-of: ${REPORT_DATE}`
+
+    // Gather
+    phase('ReScreen-Gather')
+    const rsGatherByAsset = await pipeline(
+      newTickers,
+      async (asset) => {
+        const seats = await parallel(gatherSkills.map(skill => () =>
+          agent(
+            `Follow ${SKILL}/${skill}/SKILL.md as a DATA-ONLY gather seat (no buy/sell opinion). Focus on: ${asset} only.\n${rsCtxFor(asset)}${seedNote}`,
+            { label: `rs-${skill}:${asset}`, phase: 'ReScreen-Gather', schema: DATA_SCHEMA, model: MODEL }
+          )
+        ))
+        const filled = seats.map((r, i) => (r && r.findings) ? r
+          : { seat: gatherSkills[i], status: 'UNAVAILABLE', findings: [], summary: `[UNAVAILABLE: ${gatherSkills[i]} seat failed]` })
+        return { asset, seats: filled, complete: filled.every(r => r.status !== 'UNAVAILABLE') }
+      }
+    )
+
+    // Consolidate
+    phase('ReScreen-Consolidate')
+    const rsBriefByAsset = await pipeline(
+      rsGatherByAsset.filter(Boolean),
+      async ({ asset, seats, complete }) => {
+        const brief = await agent(
+          `Follow ${SKILL}/${deskSkill}/SKILL.md. Focus on: ${asset}.\n${rsCtxFor(asset)}\nCompleteness: ${complete ? 'All seats returned.' : 'INCOMPLETE — surface DATA GAPS.'}\nRAW DATA:\n${JSON.stringify(seats, null, 1)}`,
+          { label: `rs-${deskSkill}:${asset}`, phase: 'ReScreen-Consolidate', model: MODEL }
+        )
+        return { asset, brief: brief || '[UNAVAILABLE: desk returned nothing]' }
+      }
+    )
+
+    // Panel
+    phase('ReScreen-Panel')
+    const rsPanelByAsset = await pipeline(
+      rsBriefByAsset.filter(Boolean),
+      async ({ asset, brief }) => {
+        const votes = await parallel(panelSkills.map(skill => () =>
+          agent(
+            `Apply the lens in ${SKILL}/${skill}/SKILL.md. Focus ONLY on: ${asset}.\n${rsCtxFor(asset)}\nReturn seat, read, verdict, sizing, flip-condition, confidence.\n=== BRIEF (${asset}) ===\n${brief}`,
+            { label: `rs-${skill}:${asset}`, phase: 'ReScreen-Panel', schema: PANEL_SCHEMA, model: MODEL }
+          )
+        ))
+        const filled = votes.map((v, i) => v || { seat: panelSkills[i], read: '[UNAVAILABLE]', verdict: 'WAIT', confidence: 'low' })
+        return { asset, brief, votes: filled }
+      }
+    )
+    const rsVerdicts = rsPanelByAsset.filter(Boolean)
+      .flatMap(({ asset, votes }) => votes.map(v => ({ ...v, asset })))
+    log(`ReScreen-Panel: ${rsVerdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length} votes cast`)
+
+    // Decide
+    phase('ReScreen-Decide')
+    const rsTotalVotes = rsVerdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length
+    const rsDecision = await agent(
+      `Follow ${SKILL}/${chairSkill}/SKILL.md to chair the committee.\nQuestion: ${QUESTION}\nAssets: ${rsAssetList}\nPortfolio: ${PORTFOLIO}\n` +
+      `This is a RE-SCREEN batch — prior batch (${ASSET_LIST}) had zero BUY signals on valuation. These names were selected as adjacent laggards.\n` +
+      `Populate per_asset[] for EVERY asset: {asset, conviction, prob 0..1, action, invalidation, entry_trigger}.\n` +
+      `For assets near entry zone: use BUY_ON_TOUCH + entry_trigger.\n` +
+      `EXACT VOTING-SEAT COUNT = ${rsTotalVotes}. verdict_tally MUST sum to ${rsTotalVotes}.\n` +
+      `=== PER-ASSET PANEL VERDICTS ===\n${JSON.stringify(rsPanelByAsset.filter(Boolean), null, 1)}`,
+      { label: `rs-${chairSkill}`, phase: 'ReScreen-Decide', schema: DECISION_SCHEMA, model: MODEL })
+
+    // Merge re-screen results into main decision/report vars so the Report phase includes them
+    if (rsDecision) {
+      // Append re-screen assets to ASSETS list and merge verdicts for the report
+      ASSETS.push(...newTickers)
+      verdicts.push(...rsVerdicts)
+      panelByAsset.push(...rsPanelByAsset.filter(Boolean))
+      briefByAsset.push(...rsBriefByAsset.filter(Boolean))
+      // Overwrite decision with re-screen decision if it has BUY signals; otherwise keep original
+      const rsHasBuy = Array.isArray(rsDecision.per_asset) &&
+        rsDecision.per_asset.some(a => bullActions.includes(String(a.action || '').toUpperCase()))
+      if (rsHasBuy) {
+        log(`ReScreen-Decide: BUY signals found in re-screen batch — using re-screen decision`)
+        // Merge: combine agreement/disagreement, use re-screen answer/decision
+        decision.answer = `[RE-SCREEN BATCH] ${rsDecision.answer}`
+        decision.decision = `PRIOR BATCH (${ASSET_LIST}): zero buys — all extended.\n\nRE-SCREEN BATCH (${rsAssetList}): ${rsDecision.decision}`
+        decision.buy_side = rsDecision.buy_side
+        decision.tranche_plan = rsDecision.tranche_plan
+        decision.per_asset = [...(decision.per_asset || []), ...(rsDecision.per_asset || [])]
+        decision.agreement = [...(decision.agreement || []), ...(rsDecision.agreement || [])]
+        decision.disagreement = [...(decision.disagreement || []), ...(rsDecision.disagreement || [])]
+        decision.key_risks = [...(decision.key_risks || []), ...(rsDecision.key_risks || [])]
+      } else {
+        log(`ReScreen-Decide: re-screen batch also zero BUYs — both batches exhausted, reporting all`)
+        decision.decision = `BATCH 1 (${ASSET_LIST}): zero buys.\nBATCH 2 re-screen (${rsAssetList}): zero buys.\n${rsDecision.decision}`
+        decision.per_asset = [...(decision.per_asset || []), ...(rsDecision.per_asset || [])]
+      }
     }
+  } else {
+    log('ReScreen: screener returned no new valid tickers — reporting original batch')
   }
 }
 
