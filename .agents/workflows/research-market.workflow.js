@@ -1,12 +1,14 @@
 export const meta = {
   name: 'research-market',
-  description: 'Unified portfolio-aware research (crypto + equities). An LLM MANAGER discovers the available skills live and decides everything — assets, data seats, news feeds, panel lenses, consolidation desk, chair — then the desk runs: gather → consolidate → panel → decide → ledger. NOTHING about the roster is hardcoded here; this script only dispatches the full skill names the manager returns. All substance lives in .agents/skills.',
+  description: 'Unified portfolio-aware research (crypto + equities). An LLM CIO discovers the available skills live and decides the screening strategy and desk — then the team runs: screen → gather → consolidate → panel → decide → report → ledger. NOTHING about the roster or tickers is hardcoded here; this script only dispatches the full skill names the CIO returns. All substance lives in .agents/skills.',
   phases: [
-    { title: 'Intake', detail: 'manager discovers skills live, interprets the query → assets, seats, feeds, panel, desk, chair' },
+    { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy + assembles desk (no tickers)' },
+    { title: 'Screen', detail: 'research team autonomously finds 5-10 candidates via web search + screener logic' },
     { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill' },
     { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief' },
     { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail' },
     { title: 'Decide', detail: 'manager-selected chair: portfolio-aware buy/sell decision' },
+    { title: 'Report', detail: 'write markdown research report to disk' },
     { title: 'Ledger', detail: 'log the dated chair call per asset to the forecast-ledger' },
   ],
 }
@@ -18,7 +20,7 @@ const SKILL = '/Users/engineer/workspace/backtest/.agents/skills'
 const LEDGER_PY = `${SKILL}/forecast-ledger/ledger.py`
 
 // Inputs via args (no long text here). Date can't come from Date.now() (throws in this runtime).
-// The query is interpreted by the LLM MANAGER (Phase 0) which DISCOVERS skills live — no hardcoded roster.
+// The query is interpreted by the LLM CIO (Phase 0) which DISCOVERS skills live — no hardcoded roster.
 // PORTABILITY: some runtimes (OpenCode) deliver `args` as an object; others (Claude Code Workflow tool)
 // deliver it as a JSON STRING. Normalize to an object or EVERY field silently defaults (the "no question"
 // trap that wastes a full run). Never assume args is an object.
@@ -49,17 +51,14 @@ const PLAN_SCHEMA = {
     chair_framing: { type: 'string' },
     focus: { type: 'string' },
     notes: { type: 'string' },
-    // Discovery mode: set true when the query asks to FIND/DISCOVER stocks, not analyze specific ones.
-    // "like NVDA, INTC" = sector hint, not the stock list. Discovery phase will find real candidates.
-    discovery_mode: { type: 'boolean' },
-    discovery_hint: { type: 'string' },  // e.g. "AI supply chain semiconductors, smaller/overlooked names"
-    known_surged: { type: 'array', items: { type: 'string' } },  // stocks already surged to EXCLUDE
+    screen_scope: { type: 'string' },    // what universe/sector/theme to screen
+    screen_criteria: { type: 'string' }, // what makes a good candidate
   },
-  required: ['asset_class', 'assets', 'side', 'portfolio_provided', 'portfolio_summary',
-    'gather_skills', 'panel_skills', 'desk_skill', 'chair_skill'],
+  required: ['asset_class', 'side', 'portfolio_provided', 'portfolio_summary',
+    'gather_skills', 'panel_skills', 'desk_skill', 'chair_skill', 'screen_scope', 'screen_criteria'],
 }
 
-const CANDIDATE_SCHEMA = {
+const SCREEN_SCHEMA = {
   type: 'object',
   properties: {
     candidates: { type: 'array', items: { type: 'object', properties: {
@@ -127,33 +126,25 @@ const DECISION_SCHEMA = {
   required: ['answer', 'decision', 'tranche_plan', 'agreement', 'disagreement'],
 }
 
-// ---------- Phase 0: INTAKE (manager discovers skills live + plans the desk) ----------
+// ---------- Phase 0: INTAKE (CIO discovers skills live + plans the desk — no tickers) ----------
 phase('Intake')
 const plan = await agent(
-  `Follow ${SKILL}/research-manager/SKILL.md as the intake/triage desk head. FIRST discover the available skills ` +
-  `live (list ${SKILL}/ and read each SKILL.md description — do NOT rely on memory), THEN return the research plan ` +
-  `naming every component by its real discovered directory name.\n` +
+  `You are the CIO. A mandate arrived. Your job: decide the screening strategy and assemble the desk. You do NOT pick specific tickers — your research team handles that.\n` +
+  `FIRST discover the available skills live (list ${SKILL}/ and read each SKILL.md description — do NOT rely on memory), THEN return the research plan naming every component by its real discovered directory name.\n` +
   `RAW QUERY: ${QUESTION}\nPORTFOLIO PASSED BY CALLER: ${RAW_PORTFOLIO || '(none — caller gave no holdings; do NOT invent any)'}\nAs-of: ${REPORT_DATE}\n\n` +
-  `DISCOVERY MODE RULES (critical — read carefully):\n` +
-  `- If the query asks to FIND, DISCOVER, or IDENTIFY which stocks WILL surge/run/outperform (forward-looking screening), ` +
-  `set discovery_mode=true. These are queries like "which stocks will surge soon", "find the next big runner", "what's undiscovered in X sector".\n` +
-  `- When the user writes "like NVDA, INTC, QCOM..." those are CATEGORY EXAMPLES (sector hints), NOT the asset list. ` +
-  `They are already-known/already-surged names. Set known_surged[] to those tickers, set discovery_hint to the sector description, ` +
-  `and set assets to ["DISCOVERY-PENDING"] — the discovery phase will find real candidates.\n` +
-  `- Only put specific tickers in assets[] when the user explicitly asks to analyze THOSE SPECIFIC stocks (e.g. "should I buy NVDA", "analyze my AAPL position").\n` +
-  `- In discovery mode, discovery_hint should describe the sector concisely: e.g. "AI supply chain semiconductors — hardware, memory, EDA, advanced packaging, smaller/overlooked names".`,
+  `Set screen_scope (what universe/sector/theme to screen, e.g. "AI supply chain semiconductors — mid/small cap names not yet surged") and screen_criteria (what makes a good candidate, e.g. "valuation gap vs peers, upcoming catalysts, supply inflection point").\n` +
+  `Do NOT populate assets[] — leave it empty or omit it. The screening team decides which stocks to analyze.\n` +
+  `Keep all existing skill-discovery instructions for gather_skills, panel_skills, desk_skill, chair_skill.`,
   { label: 'manager-intake', phase: 'Intake', schema: PLAN_SCHEMA, model: MODEL })
 
 if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 'no plan from manager' } }
 
 // Resolve plan → run inputs (all manager-driven; safe fallbacks only for emptiness, never fabricate holdings).
-// Prefer caller-supplied asset_class/assets over manager inference — avoids crypto default when query is clearly equities.
-const CALLER_CLASS = ARGS.asset_class || ''
-const CALLER_ASSETS = (Array.isArray(ARGS.assets) && ARGS.assets.length) ? ARGS.assets : []
-const ASSET_CLASS = CALLER_CLASS || plan.asset_class || 'equities'
-// ASSETS is `let` because the discovery phase may replace it with screened candidates.
-let ASSETS = (CALLER_ASSETS.length ? CALLER_ASSETS : (Array.isArray(plan.assets) && plan.assets.length) ? plan.assets : ['UNKNOWN']).map(a => String(a).toUpperCase())
-// ASSET_LIST computed after discovery (see below). ctxFor() calls ASSETS.join() so it always reflects current state.
+const ASSET_CLASS = plan.asset_class || 'equities'
+// ASSETS is let — Screen phase will populate it.
+let ASSETS = []
+// Optional forced override: if caller explicitly passed assets via ARGS, use them (bypasses screener).
+const FORCED_ASSETS = (Array.isArray(ARGS.assets) && ARGS.assets.length) ? ARGS.assets.map(a => String(a).toUpperCase()) : []
 const portfolioProvided = !!(plan.portfolio_provided && RAW_PORTFOLIO)
 const PORTFOLIO = portfolioProvided ? (plan.portfolio_summary || RAW_PORTFOLIO)
   : 'NO PORTFOLIO PROVIDED by the user. Do NOT assume, invent, or carry over any holdings. Answer at the market/asset level with general sizing/risk discipline only.'
@@ -172,7 +163,7 @@ const guardrailSkill = plan.guardrail_skill || ''
 const deskSkill = plan.desk_skill || ''
 const chairSkill = plan.chair_skill || ''
 
-log(`INTAKE — class: ${ASSET_CLASS} | assets: ${ASSETS.join(', ')} | discovery: ${plan.discovery_mode ? 'YES' : 'no'} | side: ${plan.side || '?'} | portfolio: ${portfolioProvided ? 'provided' : 'NONE (market-level)'} | gather: ${gatherSkills.length} | feeds: ${FEEDS.length} | panel: ${panelSkills.length} | desk: ${deskSkill || '?'} | chair: ${chairSkill || '?'}`)
+log(`INTAKE — class: ${ASSET_CLASS} | screen_scope: ${plan.screen_scope || '?'} | screen_criteria: ${plan.screen_criteria || '?'} | side: ${plan.side || '?'} | portfolio: ${portfolioProvided ? 'provided' : 'NONE (market-level)'} | gather: ${gatherSkills.length} | feeds: ${FEEDS.length} | panel: ${panelSkills.length} | desk: ${deskSkill || '?'} | chair: ${chairSkill || '?'}`)
 if (FOCUS) log(`INTAKE focus: ${FOCUS}`)
 if (plan.notes) log(`INTAKE notes: ${plan.notes}`)
 if (QUESTION === '(no question provided)') log('WARNING: no question passed — running with empty question.')
@@ -180,53 +171,48 @@ if (!gatherSkills.length) log('WARNING: manager selected no gather seats — bri
 if (!panelSkills.length) log('WARNING: manager selected no panel lenses — no votes will be cast.')
 if (!deskSkill || !chairSkill) log('WARNING: manager did not name a desk and/or chair skill.')
 
-// ---------- Phase 0.5: DISCOVERY — find pre-surge candidates (only when discovery_mode) ----------
-// Triggered when query is about FINDING new stocks, not analyzing specific known ones.
-// Replaces the manager's placeholder ASSETS with screened tickers.
-if (plan.discovery_mode) {
-  phase('Discovery')
-  const knownSurged = [
-    ...(Array.isArray(plan.known_surged) ? plan.known_surged : []),
-    ...CALLER_ASSETS,
-  ].map(a => String(a).toUpperCase()).filter((v, i, arr) => arr.indexOf(v) === i)
-  const hint = plan.discovery_hint || QUESTION
-  log(`Discovery: screening sector "${hint}" | excluding already-surged: ${knownSurged.join(', ') || '(none)'}`)
-  const discovered = await agent(
-    `Task: Screen for UNDERVALUED or PRE-SURGE stocks in this sector: "${hint}"\n\n` +
-    `These names are ALREADY WELL-KNOWN / ALREADY SURGED — EXCLUDE THEM entirely: ${knownSurged.join(', ') || '(none)'}\n\n` +
-    `Find 5-8 overlooked or undervalued stocks in the same sector that show:\n` +
-    `- Valuation discount vs sector peers (P/E, P/S, EV/EBITDA below median)\n` +
-    `- Upcoming catalysts not yet priced in (earnings, product launch, design wins, supply contracts, analyst upgrades)\n` +
-    `- Supply/demand inflection: capacity ramp, shortage relief, new end-market entering\n` +
-    `- Low retail/media awareness relative to their fundamental positioning\n` +
-    `- Institutional accumulation signals or insider buying\n\n` +
+// ---------- Phase 1: SCREEN — research team autonomously finds candidates ----------
+// Screening always runs. No discovery_mode toggle. The team decides which stocks to analyze.
+// Exception: if caller forced ARGS.assets, skip screener (explicit override).
+if (FORCED_ASSETS.length) {
+  ASSETS = FORCED_ASSETS
+  log(`Screen: BYPASSED — caller forced assets: ${ASSETS.join(', ')}`)
+} else {
+  phase('Screen')
+  log(`Screen: searching sector "${plan.screen_scope}" | criteria: ${plan.screen_criteria}`)
+  const screened = await agent(
+    `Task: Screen for investment candidates.\n\n` +
+    `Sector/universe: "${plan.screen_scope}"\n` +
+    `What makes a good candidate: "${plan.screen_criteria}"\n\n` +
     `How to screen:\n` +
     `1. Search for sector ETF holdings (e.g. SOXX, SMH, XSD, FTXL for AI semis) — look at mid/small cap names\n` +
-    `2. Search for analyst screener reports, "undiscovered AI plays", "semiconductor value", "AI supply chain small cap"\n` +
+    `2. Search analyst screener reports, "undiscovered AI plays", "semiconductor value", "AI supply chain small cap"\n` +
     `3. Check recent earnings call transcripts for AI demand signals from lesser-known vendors\n` +
-    `4. Look for stocks with >15% revenue growth but <20x P/E (the "cheap growth" bucket)\n\n` +
-    `Return candidates[] with: ticker (exchange symbol), name, thesis, catalyst, valuation_gap, why_not_yet_surged.\n` +
-    `HARD RULES: Real tickers only (NYSE/NASDAQ). No ETFs, no indexes. Exclude: ${knownSurged.join(', ') || '(none)'}.\n` +
-    `Aim for 6-8 diverse names — across the supply chain (memory, EDA, packaging, test equipment, networking, power mgmt).`,
-    { label: 'sector-discovery', phase: 'Discovery', schema: CANDIDATE_SCHEMA, model: MODEL }
+    `4. Apply the criteria above to filter candidates: ${plan.screen_criteria}\n\n` +
+    `Return 5-10 tickers with thesis, catalyst, valuation_gap, why_not_yet_surged.\n` +
+    `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs, no indexes. No already-surged mega-caps unless NEW catalyst.\n` +
+    `Aim for diverse names across the supply chain (memory, EDA, packaging, test equipment, networking, power mgmt).`,
+    { label: 'sector-screen', phase: 'Screen', schema: SCREEN_SCHEMA, model: MODEL }
   )
-  if (discovered && Array.isArray(discovered.candidates) && discovered.candidates.length) {
-    const newTickers = discovered.candidates
+  if (screened && Array.isArray(screened.candidates) && screened.candidates.length) {
+    const tickers = screened.candidates
       .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
-      .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t) && knownSurged.indexOf(t) === -1)
-    if (newTickers.length) {
-      ASSETS = newTickers
-      log(`Discovery: ${newTickers.length} candidates found: ${newTickers.join(', ')}`)
-      if (discovered.screen_notes) log(`Discovery notes: ${discovered.screen_notes}`)
+      .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
+    if (tickers.length) {
+      ASSETS = tickers
+      log(`Screen: ${tickers.length} candidates found: ${tickers.join(', ')}`)
+      if (screened.screen_notes) log(`Screen notes: ${screened.screen_notes}`)
     } else {
-      log('Discovery: no valid tickers returned — keeping manager assets (fallback)')
+      log('WARNING: screener returned no valid tickers — aborting.')
+      return { error: 'screener returned no valid tickers' }
     }
   } else {
-    log('Discovery: agent returned nothing — keeping manager assets (fallback)')
+    log('WARNING: screener returned nothing — aborting.')
+    return { error: 'screener returned nothing' }
   }
 }
 
-// ASSET_LIST computed here, AFTER discovery may have replaced ASSETS.
+// ASSET_LIST computed here, AFTER screener has populated ASSETS.
 const ASSET_LIST = ASSETS.join(', ')
 
 // Per-asset context builder — each agent focuses on ONE asset, avoiding giant multi-asset context blowup.
@@ -234,7 +220,7 @@ const ctxFor = (asset) =>
   `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${ASSET_LIST}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nAs-of: ${REPORT_DATE}`
 const seedNote = ANCHOR ? `\nSeed (verify+extend): ${ANCHOR}` : `\nNo seed — fetch LIVE; never fabricate, mark UNAVAILABLE if gated.`
 
-// ---------- Phase 1: GATHER — per-asset pipeline (each asset × all gather skills in parallel) ----------
+// ---------- Phase 2: GATHER — per-asset pipeline (each asset × all gather skills in parallel) ----------
 // Old: one agent covers ALL assets per skill → massive context, stalls on large lists.
 // New: pipeline(assets) so each asset gets dedicated gather agents → O(1 asset) wall-clock.
 phase('Gather')
@@ -257,7 +243,7 @@ const gatherByAsset = await pipeline(
 const gatherComplete = gatherByAsset.filter(Boolean).every(r => r.complete)
 log(`Gather: ${gatherByAsset.filter(Boolean).length}/${ASSETS.length} assets complete`)
 
-// ---------- Phase 2: CONSOLIDATE — per-asset desk brief ----------
+// ---------- Phase 3: CONSOLIDATE — per-asset desk brief ----------
 phase('Consolidate')
 const briefByAsset = await pipeline(
   gatherByAsset.filter(Boolean),
@@ -271,7 +257,7 @@ const briefByAsset = await pipeline(
 )
 log(`Consolidate: ${briefByAsset.filter(Boolean).length}/${ASSETS.length} briefs`)
 
-// ---------- Phase 3: PANEL — per-asset lenses (each asset × all panel skills in parallel) ----------
+// ---------- Phase 4: PANEL — per-asset lenses (each asset × all panel skills in parallel) ----------
 phase('Panel')
 const panelByAsset = await pipeline(
   briefByAsset.filter(Boolean),
@@ -299,7 +285,7 @@ const verdicts = panelByAsset.filter(Boolean)
   .flatMap(({ asset, votes }) => votes.map(v => ({ ...v, asset })))
 log(`Panel: ${verdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length}/${verdicts.length} total votes cast`)
 
-// ---------- Phase 4: DECIDE — cross-asset chair ranks all assets ----------
+// ---------- Phase 5: DECIDE — cross-asset chair ranks all assets ----------
 phase('Decide')
 const totalVotes = verdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length
 const decision = await agent(
@@ -309,7 +295,8 @@ const decision = await agent(
   `=== PER-ASSET PANEL VERDICTS ===\n${JSON.stringify(panelByAsset.filter(Boolean), null, 1)}\n=== GUARDRAIL (non-voting) ===\n${guardrail}`,
   { label: chairSkill || 'chair-decision', phase: 'Decide', schema: DECISION_SCHEMA, model: MODEL })
 
-// ---------- Phase 5: WRITE REPORT ----------
+// ---------- Phase 6: WRITE REPORT ----------
+phase('Report')
 const reportPath = `/Users/engineer/workspace/backtest/research/research.${ASSET_CLASS}.${REPORT_DATE}.md`
 // Per-asset vote table: one row per asset × lens combination.
 const seatRows = panelByAsset.filter(Boolean).flatMap(({ asset, votes }) =>
@@ -365,16 +352,16 @@ ${guardrail}
 let reportOk = false
 for (let attempt = 1; attempt <= 2 && !reportOk; attempt++) {
   await agent(`Use the Write tool to create EXACTLY this file:\n${reportPath}\nWrite this content VERBATIM (no edits/summary). Create parent dirs. After writing, run Bash \`wc -c < ${reportPath}\` to confirm. Reply with just the byte count.\n--- BEGIN ---\n${reportMd}\n--- END ---`,
-    { label: attempt === 1 ? 'write-report' : `write-report-retry${attempt}`, phase: 'Decide', model: MODEL })
+    { label: attempt === 1 ? 'write-report' : `write-report-retry${attempt}`, phase: 'Report', model: MODEL })
   const check = await agent(`Run Bash EXACTLY: \`test -f ${reportPath} && wc -c < ${reportPath} || echo MISSING\`. Reply with ONLY the byte count number, or the word MISSING.`,
-    { label: `verify-report-${attempt}`, phase: 'Decide', model: MODEL })
+    { label: `verify-report-${attempt}`, phase: 'Report', model: MODEL })
   const bytes = parseInt(String(check).replace(/[^0-9]/g, ''), 10) || 0
   reportOk = String(check).indexOf('MISSING') === -1 && bytes > 1000
   log(reportOk ? `Report written + verified (${bytes} bytes): ${reportPath}`
     : `WARNING: write-report attempt ${attempt} did NOT persist (saw: ${String(check).slice(0, 40)}). ${attempt < 2 ? 'Retrying.' : 'GIVING UP — report NOT on disk; downstream must use the returned `decision`/`brief` fields.'}`)
 }
 
-// ---------- Phase 6: LEDGER (one row per REAL asset; pseudo-screen tokens excluded) ----------
+// ---------- Phase 7: LEDGER (one row per REAL asset; pseudo-screen tokens excluded) ----------
 phase('Ledger')
 const bull = ['BUY_NOW', 'ADD', 'SCALE', 'DCA']
 // Per-asset implied prob: use only that asset's panel votes (not the full cross-asset pool).
