@@ -161,26 +161,30 @@ const SEARCH_ANGLES = [
 const edgarTasks = themes.flatMap(theme => {
   const themeTickers = tickers.filter(t => t.theme === theme || !t.theme).map(t => t.symbol)
   const startDt = REPORT_DATE.slice(0, 7) + '-01'
-  return DEMAND_PHRASES.map(phrase => () => agent(
-    `Search SEC EDGAR full-text search for demand-signal language in recent filings.\n\n` +
-    `EDGAR full-text API (plain HTTP — no browser needed, call via WebFetch):\n` +
-    `https://efts.sec.gov/LATEST/search-index?q="${phrase}"&forms=8-K,10-K,10-Q&dateRange=custom&startdt=${startDt}&enddt=${REPORT_DATE}\n\n` +
-    `Steps:\n` +
-    `1. WebFetch the URL above. It returns JSON with hits[].file_date, hits[]._source.period_of_report,\n` +
-    `   hits[]._source.entity_name, hits[]._source.file_num, hits[].accession_no.\n` +
-    `2. Filter hits where entity_name matches a focus ticker (case-insensitive).\n` +
-    `3. For each match: set source="SEC EDGAR", source_url="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK="+entity_name.\n` +
-    `4. Infer demand_inflection from the phrase context + entity context.\n\n` +
-    `Focus tickers: ${themeTickers.join(', ')}\n` +
-    `Theme: ${theme} | Phrase: "${phrase}"\n\n` +
-    `Output schema fields required: ticker, company, headline (use phrase as headline), source, source_url,\n` +
-    `demand_inflection, confidence (HIGH/MEDIUM/LOW based on how directly the ticker is named).\n` +
-    `Set already_extended: false (you have no price data).\n` +
-    `Return theme: "${theme}".\n` +
-    `Return empty findings array if no focus ticker appears in hits. Do NOT fabricate.\n` +
-    `Date: ${REPORT_DATE}`,
-    { label: `edgar-${theme.slice(0,8)}-${phrase.slice(0,10).replace(/ /g,'_')}`, phase: 'Journalism', schema: JOURNALISM_SCHEMA, model: MODEL }
-  ))
+  return DEMAND_PHRASES.map(phrase => () => {
+    // URL-encode spaces in phrase so EDGAR doesn't reject with 400 (literal space violates RFC 3986)
+    const encodedPhrase = phrase.replace(/ /g, '%20')
+    return agent(
+      `Search SEC EDGAR full-text search for demand-signal language in recent filings.\n\n` +
+      `EDGAR full-text API (plain HTTP — no browser needed, call via WebFetch):\n` +
+      `https://efts.sec.gov/LATEST/search-index?q="${encodedPhrase}"&forms=8-K,10-K,10-Q&dateRange=custom&startdt=${startDt}&enddt=${REPORT_DATE}\n\n` +
+      `Steps:\n` +
+      `1. WebFetch the URL above. It returns JSON with hits[].file_date, hits[]._source.period_of_report,\n` +
+      `   hits[]._source.entity_name, hits[]._source.file_num, hits[].accession_no.\n` +
+      `2. Filter hits where entity_name matches a focus ticker (case-insensitive).\n` +
+      `3. For each match: set source="SEC EDGAR", source_url="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK="+entity_name.\n` +
+      `4. Infer demand_inflection from the phrase context + entity context.\n\n` +
+      `Focus tickers: ${themeTickers.join(', ')}\n` +
+      `Theme: ${theme} | Phrase: "${phrase}"\n\n` +
+      `Output schema fields required: ticker, company, headline (use phrase as headline), source, source_url,\n` +
+      `demand_inflection, confidence (HIGH/MEDIUM/LOW based on how directly the ticker is named).\n` +
+      `Set already_extended: false (you have no price data).\n` +
+      `Return theme: "${theme}".\n` +
+      `Return empty findings array if no focus ticker appears in hits. Do NOT fabricate.\n` +
+      `Date: ${REPORT_DATE}`,
+      { label: `edgar-${theme.slice(0,8)}-${phrase.slice(0,10).replace(/ /g,'_')}`, phase: 'Journalism', schema: JOURNALISM_SCHEMA, model: MODEL }
+    ).then(r => r ? { ...r, theme } : null)  // override self-reported theme with authoritative closed-over value
+  })
 })
 
 // WebSearch fan-out: (theme × angle) → ~25 independent search agents
@@ -205,7 +209,8 @@ const webSearchTasks = themes.flatMap(theme => {
     `Return theme: "${theme}".\n` +
     `Date: ${REPORT_DATE}`,
     { label: `wsearch-${theme.slice(0,8)}-${angle.slice(0,14).replace(/ /g,'_')}`, phase: 'Journalism', schema: JOURNALISM_SCHEMA, model: MODEL }
-  ))
+  ).then(r => r ? { ...r, theme } : null)  // override self-reported theme with authoritative closed-over value
+  )
 })
 
 // All agents hit independent taps → true parallel breadth (16-slot cap queues excess, all complete)
@@ -423,10 +428,22 @@ ${tickers.slice(0, 10).map(t => `- ${t.symbol} (${t.theme || '?'}) — score ${t
 ${tickers.length > 10 ? `\n... and ${tickers.length - 10} more` : ''}
 `
 
-await agent(
-  `Use the Write tool to create EXACTLY this file:\n${reportPath}\nWrite this content VERBATIM (no edits). Create parent dirs if needed. Reply with the path.\n--- BEGIN ---\n${reportMd}\n--- END ---`,
-    { label: 'write-report', phase: 'Report', model: MODEL }
-)
+// Write + verify loop (mirrors research-market.workflow.js pattern — write-report can silently no-op)
+let reportOk = false
+for (let attempt = 1; attempt <= 2 && !reportOk; attempt++) {
+  await agent(
+    `Use the Write tool to create EXACTLY this file:\n${reportPath}\nWrite this content VERBATIM (no edits). Create parent dirs if needed. Reply with the path.\n--- BEGIN ---\n${reportMd}\n--- END ---`,
+    { label: `write-report-${attempt}`, phase: 'Report', model: MODEL }
+  )
+  const check = await agent(
+    `Run this bash command and return ONLY its raw output, nothing else:\nwc -c "${reportPath}" 2>/dev/null || echo MISSING`,
+    { label: `verify-report-${attempt}`, phase: 'Report', model: MODEL }
+  )
+  const bytes = parseInt(String(check).replace(/[^0-9]/g, ''), 10) || 0
+  reportOk = String(check).indexOf('MISSING') === -1 && bytes > 1000
+  if (!reportOk) log(`Report write attempt ${attempt} failed (bytes=${bytes}); retrying...`)
+}
+if (!reportOk) log('WARNING: report file may be missing or empty after 2 attempts')
 log(`Report written: ${reportPath}`)
 
 // Ledger: log each BUY/SCALE_IN verdict

@@ -22,13 +22,20 @@ import json
 import sys
 import urllib.request
 
-# Trusted protocols — audited, battle-tested, won't rug
+# Trusted protocols — audited, battle-tested, won't rug.
+# Exact-match against DeFiLlama project slug (no substring matching).
 TRUSTED_PROTOCOLS = {
     "morpho-blue", "morpho", "aave-v3", "aave", "maple",
-    "fluid", "fluid-lite", "fluid-lending",
+    "fluid", "fluid-lending",
     "compound-v3", "spark", "avantis",
     "euler-v2", "moonwell", "seamless-protocol",
     "extra-finance-xlend", "steakhouse",
+}
+
+# Projects excluded from AVAILABLE POOLS even if in a trusted protocol family.
+# These are C3/C4 risk-tier or otherwise DO NOT RECOMMEND per SKILL.md.
+EXCLUDED_PROJECTS = {
+    "fluid-lite",  # leveraged loop on synthetics; $21M bad debt March 2026
 }
 
 # Minimum TVL to surface a pool in the available-pools table
@@ -37,7 +44,7 @@ MIN_TVL_M = 1
 # How many pools to show per chain
 TOP_N = 20
 
-def fetch(url, method="GET", data=None, headers=None):
+def fetch(url, method="GET", data=None, headers=None, timeout=30):
     req = urllib.request.Request(url, method=method)
     if headers:
         for k, v in headers.items():
@@ -45,7 +52,7 @@ def fetch(url, method="GET", data=None, headers=None):
     if data:
         req.data = json.dumps(data).encode()
     try:
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             return json.loads(r.read())
     except Exception as e:
         return {"error": str(e)}
@@ -53,7 +60,7 @@ def fetch(url, method="GET", data=None, headers=None):
 def morpho_apys():
     """Query Morpho Blue GraphQL for vault APYs (Base + ETH mainnet)."""
     query = {
-        "query": "{ vaults(first:500, where:{chainId_in:[1,8453]}) { items { name chain { id } address state { netApy } } } }"
+        "query": "{ vaults(first:1000, where:{chainId_in:[1,8453]}) { items { name chain { id } address state { netApy } } } }"
     }
     result = fetch(
         "https://blue-api.morpho.org/graphql",
@@ -84,7 +91,7 @@ def morpho_apys():
 
 def defi_llama_apys():
     """Single DeFiLlama fetch for portfolio APYs + pool discovery data."""
-    result = fetch("https://yields.llama.fi/pools")
+    result = fetch("https://yields.llama.fi/pools", timeout=45)
     if "error" in result or "data" not in result:
         return {"error": result.get("error", "fetch failed")}, []
 
@@ -112,7 +119,10 @@ def defi_llama_apys():
             portfolio_apys["avantis_junior_usdc"] = apy
 
         # --- Pool discovery candidates (stable, single-asset, no-IL, trusted, Base or ETH) ---
-        is_trusted = any(t in proj for t in TRUSTED_PROTOCOLS)
+        # Exact-match on slug (not substring) to prevent "fluid" matching "fluid-lite", etc.
+        is_trusted = proj in TRUSTED_PROTOCOLS and proj not in EXCLUDED_PROJECTS
+        # Normalize chain to title-case so print_pools_section comparison ("Base"/"Ethereum") works
+        chain_display = {"base": "Base", "ethereum": "Ethereum"}.get(chain, p.get("chain", ""))
         if (chain in ["base", "ethereum"]
                 and p.get("stablecoin")
                 and p.get("ilRisk") == "no"
@@ -121,7 +131,7 @@ def defi_llama_apys():
                 and tvl >= MIN_TVL_M * 1e6
                 and is_trusted):
             all_pools.append({
-                "chain": p["chain"],
+                "chain": chain_display,
                 "project": p["project"],
                 "symbol": p["symbol"],
                 "apy": apy,
@@ -138,7 +148,11 @@ def ethena_apy():
     result = fetch("https://ethena.fi/api/yields/protocol-and-staking-yield")
     if "error" in result or "stakingYield" not in result:
         return {"error": result.get("error", "fetch failed")}
-    return {"ethena_susde": round(result["stakingYield"]["value"], 2)}
+    staking = result.get("stakingYield") or {}
+    value = staking.get("value")
+    if value is None:
+        return {"error": "stakingYield.value missing in API response"}
+    return {"ethena_susde": round(value, 2)}
 
 def hyperliquid_vault_apr(user_addr, vault_addr=None):
     """Fetch Hyperliquid HLP vault APR for a given user address."""
