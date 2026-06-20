@@ -206,11 +206,21 @@ Every current position has an implied collateral tier. Every recommended pool mu
 
 **Known vault collateral tiers (Base):**
 - Morpho Seamless USDC / Gauntlet USDC Prime → **C1** (cbBTC, wstETH, WETH)
-- Morpho Universal USDC → **C1** (cbBTC, wstETH, WETH — currently idle)
-- Morpho BBQUSDC (Steakhouse High Yield) → **C3/C4** — includes USDe, USDtb, likely PT tokens. Do NOT recommend as a like-for-like upgrade from C1.
-- Avantis Junior USDC → junior tranche (first-loss vs trader P&L) — flag separately, not a collateral risk but a structural risk
+- Morpho Universal USDC → **C1** (cbBTC, wstETH, WETH — currently idle at 0%)
+- Morpho BBQUSDC (Steakhouse High Yield, `0xBEEFA7B8...`) → **C3/C4** — includes USDe, USDtb, likely PT tokens. Do NOT recommend as a like-for-like upgrade from C1.
+- Avantis Junior USDC → junior tranche (first-loss vs trader P&L) — structural risk, flag separately
 - Morpho MWUSDC / STEAKUSDC → **C1–C2** (verify on morpho.org before recommending)
-- Fluid-lending USDC → **C1** (ETH-backed)
+- Fluid-lending USDC (`7372edda` on DeFiLlama) → **C1** (ETH-backed, straightforward lending)
+
+**Known vault collateral tiers (Ethereum):**
+- Aave-v3 USDC Umbrella (`6f00d46b` on DeFiLlama, 7.13%, TVL $56M) → **C1** — battle-tested, blue-chip collateral, top recommendation for ETH USDC positions
+- Aave-v3 USDT Umbrella (`a90d554a` on DeFiLlama, 6.27%, TVL $84M) → **C2** — best option for idle USDT
+- Fluid-lending USDC (`4438dabc` on DeFiLlama, 6.29%, TVL $114M) → **C1** (ETH-backed)
+- **Fluid-lite USDC (`488f06db` on DeFiLlama, ~8.44%) → C3/C4 — DO NOT RECOMMEND as C1 upgrade.** Leveraged loop vault: deposits USDC → converts to sUSDe/syrupUSDC/syrupUSDT/sUSDai → posts as collateral → borrows USDC → loops. Yield comes from synthetic leverage, not blue-chip lending. $21M bad debt March 2026 (Resolv exploit), $215K key compromise May 2026. Explicitly classified as "Higher Risk" by Summer.fi governance.
+- Morpho ALPHAUSDCDELTAV2 (21.78%) → **C4** — delta-neutral strategy, complex, verify before touching
+- Morpho FAUSDE (7.86%) → **C3** — backed by USDe (Ethena synthetic)
+- Aave-v3 GHO Umbrella (6.51%) → **C3** — GHO is Aave's own synthetic stablecoin
+- Maple Syrup USDC/USDT → **C3** — institutional credit risk (private loans to institutions), not collateral-backed like Morpho/Aave
 
 **Reasoning rules (collateral-aware):**
 - Recommend if gain ≥ 1.5% APY AND TVL > $5M AND collateral tier matches current position
