@@ -2,12 +2,10 @@
 """
 Fetch live APYs for DeFi protocols in the crypto portfolio.
 No API key required. Sources:
-  - Morpho Blue: blue-api.morpho.org/graphql  (Base + ETH vaults)
-  - Maple Syrup: yields.llama.fi/pools         (USDC / USDT)
-  - Ethena sUSDe: ethena.fi/api/yields/...
-  - LIDO stETH: eth-api.lido.fi/v1/...
-  - Hyperliquid vaults: [UNAVAILABLE — no public API]
-  - Avantis: [UNAVAILABLE — no public API]
+  - Morpho Blue: blue-api.morpho.org/graphql      (Base + ETH vaults)
+  - DeFiLlama:  yields.llama.fi/pools             (Maple Syrup, LIDO, ExtraFi XLend, Avantis)
+  - Ethena:     ethena.fi/api/yields/...           (sUSDe staking yield)
+  - Hyperliquid: api.hyperliquid.xyz/info          (HLP vault APR via userVaultEquities)
 """
 
 import json
@@ -87,18 +85,57 @@ def ethena_apy():
         "ethena_susde": round(result["stakingYield"]["value"], 2)
     }
 
-def lido_apy():
-    """Fetch LIDO stETH APR via DeFiLlama (eth-api.lido.fi returns 403 in sandbox)."""
+def defi_llama_apys():
+    """Fetch LIDO, ExtraFi XLend, and Avantis APYs from DeFiLlama yields."""
     result = fetch("https://yields.llama.fi/pools")
     if "error" in result or "data" not in result:
         return {"error": result.get("error", "fetch failed")}
+    out = {}
     for p in result["data"]:
         proj = (p.get("project") or "").lower()
         sym = (p.get("symbol") or "").lower()
         chain = (p.get("chain") or "").lower()
+        apy = round(p.get("apy", 0), 2)
+        # LIDO stETH on Ethereum
         if "lido" in proj and "steth" in sym and chain == "ethereum":
-            return {"lido_steth": round(p.get("apy", 0), 2)}
-    return {"error": "LIDO stETH pool not found in DeFiLlama"}
+            out["lido_steth"] = apy
+        # ExtraFi XLend USDC on Base (project=extra-finance-xlend, not leverage-farming)
+        if proj == "extra-finance-xlend" and "usdc" in sym and chain == "base":
+            out["extrafi_xlend_usdc_base"] = apy
+        # Avantis USDC vault on Base
+        if "avantis" in proj and "usdc" in sym and chain == "base":
+            out["avantis_junior_usdc"] = apy
+    return out
+
+def hyperliquid_vault_apr(user_addr, vault_addr=None):
+    """Fetch Hyperliquid HLP vault APR for a given user address."""
+    # Step 1: get vault address from user's positions
+    equities = fetch(
+        "https://api.hyperliquid.xyz/info",
+        method="POST",
+        data={"type": "userVaultEquities", "user": user_addr},
+        headers={"Content-Type": "application/json"}
+    )
+    if "error" in equities or not isinstance(equities, list) or not equities:
+        return {"error": f"no vault equities for {user_addr}"}
+
+    # Use first vault (or provided address)
+    target = vault_addr or equities[0].get("vaultAddress")
+    if not target:
+        return {"error": "no vaultAddress in equities"}
+
+    # Step 2: get vault APR
+    details = fetch(
+        "https://api.hyperliquid.xyz/info",
+        method="POST",
+        data={"type": "vaultDetails", "vaultAddress": target},
+        headers={"Content-Type": "application/json"}
+    )
+    if "error" in details or "apr" not in details:
+        return {"error": f"no APR for vault {target}"}
+
+    apr_pct = round((details["apr"] or 0) * 100, 2)
+    return {"hyperliquid_hlp_vault": apr_pct, "_vault_name": details.get("name", target)}
 
 def main():
     results = {"sources": {}}
@@ -127,29 +164,36 @@ def main():
         results.update(ethena)
         results["sources"]["ethena"] = "ethena.fi/api/yields"
 
-    print("Fetching LIDO stETH...", flush=True)
-    lido = lido_apy()
-    if "error" in lido:
-        results["sources"]["lido"] = f"[UNAVAILABLE: {lido['error']}]"
+    print("Fetching LIDO / ExtraFi XLend / Avantis (DeFiLlama)...", flush=True)
+    llama = defi_llama_apys()
+    if "error" in llama:
+        results["sources"]["defi_llama"] = f"[UNAVAILABLE: {llama['error']}]"
     else:
-        results.update(lido)
-        results["sources"]["lido"] = "yields.llama.fi/pools (lido)"
+        results.update(llama)
+        results["sources"]["defi_llama"] = "yields.llama.fi/pools"
 
-    # Flag vaults returning 0% from Morpho API — may be winding down or API gap
+    print("Fetching Hyperliquid HLP vault (L3)...", flush=True)
+    hlp = hyperliquid_vault_apr("0x5d039ece117073323ade5057a516864f4c40e653")
+    if "error" in hlp:
+        results["hyperliquid_hlp_vault"] = f"[UNAVAILABLE: {hlp['error']}]"
+        results["sources"]["hyperliquid"] = "[UNAVAILABLE]"
+    else:
+        results["hyperliquid_hlp_vault"] = hlp["hyperliquid_hlp_vault"]
+        results["_hyperliquid_vault_name"] = hlp.get("_vault_name", "")
+        results["sources"]["hyperliquid"] = f"api.hyperliquid.xyz ({hlp.get('_vault_name','')})"
+
+    # Flag vaults returning 0% from Morpho API — confirmed idle/uninvested
     for key in ["morpho_universal_usdc_base", "morpho_extrafi_usdc_base"]:
         if results.get(key) == 0:
-            results[key] = "[UNAVAILABLE — Morpho API returned 0%; verify on morpho.org]"
-
-    # Unavailable (no public API)
-    results["hyperliquid_vaults"] = "[UNAVAILABLE — check app.hyperliquid.xyz/vaults live]"
-    results["avantis_junior_usdc"] = "[UNAVAILABLE — check avantis.trade live]"
+            results[key] = 0.0  # keep as number but flag in output
 
     print("\n--- LIVE APYs ---")
     for k, v in results.items():
-        if k == "sources":
+        if k == "sources" or k.startswith("_"):
             continue
         label = k.replace("_", " ").title()
-        print(f"  {label}: {v}%")
+        suffix = "% ⚠️ IDLE — verify on morpho.org" if v == 0.0 and "morpho" in k else "%"
+        print(f"  {label}: {v}{suffix}")
 
     print("\n--- SOURCES ---")
     for k, v in results["sources"].items():

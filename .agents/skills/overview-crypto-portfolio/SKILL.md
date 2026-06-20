@@ -183,16 +183,16 @@ If a vault returns `[UNAVAILABLE]` from the API (Morpho returning 0%, or blocked
 |---|---|---|
 | Morpho Seamless USDC (Base) | 4.48% | blue-api.morpho.org |
 | Morpho eUSD (Base) | 2.59% | blue-api.morpho.org |
-| Morpho Universal USDC (Base) | [VERIFY — API shows 0%] | morpho.org |
-| Morpho Extrafi XLend USDC | [VERIFY — not in API] | extrafi.io |
+| Morpho Universal USDC (Base) | **0% ⚠️ IDLE** | blue-api.morpho.org (confirmed) |
+| ExtraFi XLend USDC (Base) | **1.29%** | yields.llama.fi (extra-finance-xlend) |
 | Maple Syrup USDC | 4.82% | yields.llama.fi |
 | Maple Syrup USDT | 4.15% | yields.llama.fi |
 | Ethena sUSDe | 3.50% | ethena.fi/api |
 | LIDO stETH | 2.39% | yields.llama.fi |
-| Avantis Junior USDC | [UNAVAILABLE] | check avantis.trade |
-| Hyperliquid Vaults USDC | [UNAVAILABLE] | check app.hyperliquid.xyz |
+| Avantis Junior USDC | **10.25%** | yields.llama.fi |
+| Hyperliquid HLP Vault | **0.13%** | api.hyperliquid.xyz |
 
-**Warning on Universal USDC (Base):** Morpho API returns 0% APY for this vault — either deprecated or API gap. L3 wallet has ~$10k there. Verify live before including in decision matrix.
+**Critical: Universal USDC (Base) confirmed 0% APY.** L3 has $10,186 and L1 has $4,295 earning nothing. These are the highest-priority moves after idle USDT.
 
 ## BTC entry signal context
 
