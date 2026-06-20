@@ -1,9 +1,9 @@
 export const meta = {
   name: 'research-trend-stocks',
-  description: 'Research-first trend-stock discovery pipeline: quantitative pre-screen → parallel journalism reading → non-obvious beneficiary mapping → skeptic filter → route survivors to multi-lens-quorum. Deterministic orchestration of the trend-stock-research skill\'s 5-step method.',
+  description: 'Research-first trend-stock discovery pipeline: quantitative pre-screen → EDGAR×phrase + WebSearch×angle fan-out (50+ parallel HTTP agents, no browser serialization) → non-obvious beneficiary mapping → skeptic filter → multi-lens-quorum. v2: replaced single-browser journalism readers with independent-tap parallelism.',
   phases: [
     { title: 'Pre-screen', detail: 'Run emerging_scan.py --top N; produce ranked ticker list with momentum/vol scores' },
-    { title: 'Journalism', detail: 'Parallel subagents read SA/WSJ/FT for demand inflections per theme' },
+    { title: 'Journalism', detail: 'EDGAR×phrase (30 agents) + WebSearch×angle (25 agents) fan-out — all independent HTTP taps, no browser serialization' },
     { title: 'Beneficiary', detail: 'Map non-obvious beneficiary chains from the journalism findings' },
     { title: 'Skeptic', detail: 'Kill overhyped (+150% 12mo), require concrete catalyst + timeline' },
     { title: 'Quorum', detail: 'Route survivors to multi-lens-quorum for defended buy/hold/pass verdict' },
@@ -137,38 +137,106 @@ if (THEMES) {
 }
 log(`Pre-screen: ${tickers.length} tickers across ${themes.length} themes: ${themes.join(', ')}`)
 
-// ---------- Phase 2: JOURNALISM (parallel reads per theme) ----------
+// ---------- Phase 2: JOURNALISM — EDGAR×phrase + WebSearch×angle fan-out ----------
+// v2 lesson: prior version fanned N agents onto ONE shared browser → serialized → timeouts.
+// Fix: every agent hits an INDEPENDENT tap (EDGAR HTTP or WebSearch). True parallel breadth.
 phase('Journalism')
-const journalismResults = await parallel(themes.map(theme => () => {
-  const themeTickers = tickers.filter(t => t.theme === theme || !t.theme).map(t => t.symbol).join(', ')
-  return agent(
-    `You are a financial journalist research analyst. Your job: read quality financial journalism ` +
-    `(Seeking Alpha, Wall Street Journal, Financial Times, Bloomberg) for DEMAND INFLECTION signals ` +
-    `in the "${theme}" theme.\n\n` +
-    `Tickers to investigate: ${themeTickers || tickers.slice(0, 8).map(t => t.symbol).join(', ')}\n\n` +
-    `For each ticker with a real signal, fill ALL of these fields:\n` +
-    `- ticker, company (full name)\n` +
-    `- headline (exact article title), source (publication), source_url (link)\n` +
-    `- demand_inflection (2-4 sentences: what STRUCTURAL shift is driving demand?)\n` +
-    `- supply_constraint (1-2 sentences: why supply can't catch up — or omit if not applicable)\n` +
-    `- catalyst (specific upcoming event/date that triggers the move)\n` +
-    `- timeline (when does the catalyst resolve? e.g. "Q3 2026 earnings", "Dec 2026")\n` +
-    `- what_would_change_mind (name the ONE thing that kills this thesis)\n` +
-    `- confidence: HIGH / MEDIUM / LOW\n` +
-    `- already_extended: true if the stock is already up >100% in 6 months\n\n` +
-    `How to research:\n` +
-    `1. Use WebFetch to read REAL articles. Mark [UNAVAILABLE] if paywalled/unreachable.\n` +
-    `2. Do NOT fabricate headlines, source_urls, or article content.\n` +
-    `3. Only report findings backed by something you actually read.\n` +
-    `4. Skip tickers with no signal — do not pad with weak findings.\n` +
+
+// EDGAR demand-signal phrases (supply/capacity language that appears in 8-K/10-K/10-Q)
+const DEMAND_PHRASES = [
+  'capacity constrained', 'record backlog', 'sole supplier',
+  'lead times extended', 'supply agreement', 'qualified second source',
+]
+
+// WebSearch angles: snippets carry enough signal (ticker + inflection) without full-text browser
+const SEARCH_ANGLES = [
+  'demand inflection catalyst earnings',
+  'supply constraint pricing power',
+  'non-obvious beneficiary picks-and-shovels',
+  'insider buying institutional accumulation',
+  'analyst upgrade emerging growth secular',
+]
+
+// EDGAR fan-out: (theme × phrase) → ~30 independent HTTP agents, no browser
+const edgarTasks = themes.flatMap(theme => {
+  const themeTickers = tickers.filter(t => t.theme === theme || !t.theme).map(t => t.symbol)
+  const startDt = REPORT_DATE.slice(0, 7) + '-01'
+  return DEMAND_PHRASES.map(phrase => () => agent(
+    `Search SEC EDGAR full-text search for demand-signal language in recent filings.\n\n` +
+    `EDGAR full-text API (plain HTTP — no browser needed, call via WebFetch):\n` +
+    `https://efts.sec.gov/LATEST/search-index?q="${phrase}"&forms=8-K,10-K,10-Q&dateRange=custom&startdt=${startDt}&enddt=${REPORT_DATE}\n\n` +
+    `Steps:\n` +
+    `1. WebFetch the URL above. It returns JSON with hits[].file_date, hits[]._source.period_of_report,\n` +
+    `   hits[]._source.entity_name, hits[]._source.file_num, hits[].accession_no.\n` +
+    `2. Filter hits where entity_name matches a focus ticker (case-insensitive).\n` +
+    `3. For each match: set source="SEC EDGAR", source_url="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK="+entity_name.\n` +
+    `4. Infer demand_inflection from the phrase context + entity context.\n\n` +
+    `Focus tickers: ${themeTickers.join(', ')}\n` +
+    `Theme: ${theme} | Phrase: "${phrase}"\n\n` +
+    `Output schema fields required: ticker, company, headline (use phrase as headline), source, source_url,\n` +
+    `demand_inflection, confidence (HIGH/MEDIUM/LOW based on how directly the ticker is named).\n` +
+    `Set already_extended: false (you have no price data).\n` +
+    `Return theme: "${theme}".\n` +
+    `Return empty findings array if no focus ticker appears in hits. Do NOT fabricate.\n` +
     `Date: ${REPORT_DATE}`,
-    { label: `journalism-${theme}`, phase: 'Journalism', schema: JOURNALISM_SCHEMA, model: MODEL }
-  )
+    { label: `edgar-${theme.slice(0,8)}-${phrase.slice(0,10).replace(/ /g,'_')}`, phase: 'Journalism', schema: JOURNALISM_SCHEMA, model: MODEL }
+  ))
+})
+
+// WebSearch fan-out: (theme × angle) → ~25 independent search agents
+const webSearchTasks = themes.flatMap(theme => {
+  const themeTickers = tickers.filter(t => t.theme === theme || !t.theme).map(t => t.symbol)
+  return SEARCH_ANGLES.map(angle => () => agent(
+    `Search for demand-inflection signals using WebSearch (snippets carry the key data — no browser needed).\n\n` +
+    `Use the WebSearch tool with these queries (try both):\n` +
+    `1. "${theme} ${angle} ${REPORT_DATE.slice(0, 7)}"\n` +
+    `2. "${themeTickers.slice(0, 3).join(' OR ')} ${angle}"\n\n` +
+    `From SEARCH SNIPPETS:\n` +
+    `- Extract: ticker, company, headline (snippet title), source (publication), source_url\n` +
+    `- Infer: demand_inflection (what structural shift does this snippet signal?)\n` +
+    `- Estimate: catalyst, timeline, confidence (HIGH/MEDIUM/LOW)\n` +
+    `- Set already_extended: false (you have no price data)\n\n` +
+    `Rules:\n` +
+    `- Only report findings where the snippet directly mentions a focus ticker.\n` +
+    `- Do NOT click through to articles — snippets only (avoids paywall blocks).\n` +
+    `- Do NOT fabricate. Empty findings array if nothing relevant.\n` +
+    `Focus tickers: ${themeTickers.join(', ')}\n` +
+    `Theme: ${theme} | Angle: ${angle}\n` +
+    `Return theme: "${theme}".\n` +
+    `Date: ${REPORT_DATE}`,
+    { label: `wsearch-${theme.slice(0,8)}-${angle.slice(0,14).replace(/ /g,'_')}`, phase: 'Journalism', schema: JOURNALISM_SCHEMA, model: MODEL }
+  ))
+})
+
+// All agents hit independent taps → true parallel breadth (16-slot cap queues excess, all complete)
+log(`Journalism v2: launching ${edgarTasks.length} EDGAR + ${webSearchTasks.length} WebSearch agents`)
+const rawResults = await parallel([...edgarTasks, ...webSearchTasks])
+
+// Consolidate findings by theme, deduplicate by ticker+headline
+const findingsByTheme = {}
+for (const result of rawResults) {
+  if (!result || !result.findings) continue
+  const th = result.theme || themes[0]
+  if (!findingsByTheme[th]) findingsByTheme[th] = []
+  for (const finding of result.findings) {
+    const key = `${finding.ticker}|${finding.headline}`
+    if (!findingsByTheme[th].some(f => `${f.ticker}|${f.headline}` === key)) {
+      findingsByTheme[th].push(finding)
+    }
+  }
+}
+
+const journalism = themes.map(theme => ({
+  theme,
+  findings: findingsByTheme[theme] || [],
+  summary: findingsByTheme[theme] && findingsByTheme[theme].length
+    ? `${(findingsByTheme[theme] || []).length} findings (EDGAR + WebSearch fan-out)`
+    : '[UNAVAILABLE]',
 }))
 
-const journalism = journalismResults.map((r, i) => r || { theme: themes[i], findings: [], summary: '[UNAVAILABLE]' })
 const totalFindings = journalism.reduce((sum, j) => sum + (j.findings ? j.findings.length : 0), 0)
-log(`Journalism: ${totalFindings} findings across ${themes.length} themes`)
+const agentsReturned = rawResults.filter(Boolean).length
+log(`Journalism v2: ${totalFindings} findings from ${agentsReturned}/${edgarTasks.length + webSearchTasks.length} agents across ${themes.length} themes`)
 
 // In daily/ingest mode, stop here and write partial results
 if (MODE === 'daily') {
