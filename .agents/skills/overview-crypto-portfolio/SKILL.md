@@ -168,20 +168,58 @@ For each stablecoin position, check AVAILABLE POOLS for the relevant chain and f
 
 ```
 UPGRADE: [Position label]
-  Current:  X.XX% ($XX,XXX)
-  Better:   [project] — [symbol] on [chain] @ Y.YY% (TVL $ZM)
+  Current:  X.XX% ($XX,XXX) — Collateral: C1 (wstETH/cbBTC/WETH)
+  Better:   [project] — [symbol] on [chain] @ Y.YY% (TVL $ZM) — Collateral: C1
   Gain:     +X.XX% = +$YYY/yr
   Gas:      ~$0.10 gas (Base)  |OR|  ~$15-30 gas (mainnet)
   Link:     https://defillama.com/yields/pool/<pool-id>
 ```
 
-Reasoning rules (agent applies these, not the script):
-- Recommend if gain ≥ 1.5% APY and TVL > $5M and protocol is in the trusted list
+If collateral tier increases, replace the upgrade block with a warning block instead:
+
+```
+⚠️ RISK MISMATCH — [Position label]
+  Current:  X.XX% — Collateral: C1 (cbBTC/WETH — blue-chip)
+  Candidate: [project] — [symbol] @ Y.YY% — Collateral: C3 (USDe/PT tokens — synthetic)
+  Verdict:  SKIP — collateral risk increase. Not a like-for-like upgrade.
+  If you want C3 exposure: verify vault at https://app.morpho.org/base/vault/<addr>
+```
+
+**Collateral risk classification — apply BEFORE recommending any pool:**
+
+Every current position has an implied collateral tier. Every recommended pool must match or be safer. Never recommend a higher-risk collateral tier without an explicit warning.
+
+| Tier | Collateral accepted | Examples |
+|---|---|---|
+| **C1 — Blue-chip** | Native ETH/BTC and their direct wrappers only | WETH, cbETH, wstETH, cbBTC, WBTC |
+| **C2 — Stable/RWA** | Regulated stablecoins, T-bill-backed assets | USDC, USDT, EURC, sDAI, USD0 |
+| **C3 — Synthetic** | Delta-neutral or algorithmic stablecoins | USDe, USDtb, FRAX, GHO, eUSD |
+| **C4 — Structured** | Fixed-maturity tokens, LP positions, yield-bearing derivatives | PT-* (Pendle), LP tokens, ERC-4626 wrappers of the above |
+
+**Rule: match tiers, never silently upgrade risk.** If the current position is C1, only recommend C1 or C2 targets. If recommending C3/C4, add an explicit block-letter warning:
+```
+⚠️ COLLATERAL RISK INCREASE: this vault lends against [USDe/PT tokens/etc.] —
+   synthetic/structured collateral with depeg or maturity risk. Different risk
+   profile from your current position. Verify vault composition at morpho.org
+   before moving.
+```
+
+**Known vault collateral tiers (Base):**
+- Morpho Seamless USDC / Gauntlet USDC Prime → **C1** (cbBTC, wstETH, WETH)
+- Morpho Universal USDC → **C1** (cbBTC, wstETH, WETH — currently idle)
+- Morpho BBQUSDC (Steakhouse High Yield) → **C3/C4** — includes USDe, USDtb, likely PT tokens. Do NOT recommend as a like-for-like upgrade from C1.
+- Avantis Junior USDC → junior tranche (first-loss vs trader P&L) — flag separately, not a collateral risk but a structural risk
+- Morpho MWUSDC / STEAKUSDC → **C1–C2** (verify on morpho.org before recommending)
+- Fluid-lending USDC → **C1** (ETH-backed)
+
+**Reasoning rules (collateral-aware):**
+- Recommend if gain ≥ 1.5% APY AND TVL > $5M AND collateral tier matches current position
 - Prefer same-chain upgrades (cheaper gas)
-- Base gas ~$0.10/tx — low threshold; ETH mainnet ~$15-30/tx — note break-even time
-- 0% positions (Universal USDC, idle USDT) always flag as priority — any yield is better
-- HLP vault: note it as event-driven (lumpy); don't blindly recommend exiting
-- Include DeFiLlama link, estimated +$X/yr gain, and gas cost note for every recommendation
+- Base gas ~$0.10/tx; ETH mainnet ~$15-30/tx — state break-even days
+- 0% idle positions: any C1/C2 yield is better than 0%; still flag if only C3/C4 options exist
+- HLP vault: event-driven (lumpy) — note, don't blindly recommend exiting
+- Always verify unknown vault collateral at `https://app.morpho.org/base/vault/<address>` before recommending
+- Include DeFiLlama link, +$X/yr gain, gas cost, and collateral tier in every recommendation
 
 </output_format>
 
