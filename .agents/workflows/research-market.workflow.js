@@ -237,13 +237,14 @@ if (themeCycle) {
 // ---------- Phase 1: SCREEN -- research team autonomously finds candidates ----------
 // Screening always runs. No discovery_mode toggle. The team decides which stocks to analyze.
 // Exception: if caller forced ARGS.assets, skip screener (explicit override).
+let screened = null
 if (FORCED_ASSETS.length) {
   ASSETS = FORCED_ASSETS
   log(`Screen: BYPASSED -- caller forced assets: ${ASSETS.join(', ')}`)
 } else {
   phase('Screen')
   log(`Screen: searching sector "${plan.screen_scope}" | criteria: ${plan.screen_criteria}`)
-  const screened = await agent(
+  screened = await agent(
     `Task: Screen for investment candidates.\n\n` +
     `Sector/universe: "${plan.screen_scope}"\n` +
     `What makes a good candidate: "${plan.screen_criteria}"\n\n` +
