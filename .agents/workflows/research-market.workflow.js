@@ -129,8 +129,14 @@ const PORTFOLIO = portfolioProvided ? (plan.portfolio_summary || RAW_PORTFOLIO)
 const FOCUS = plan.focus || ''
 const FRAMING = plan.chair_framing || ''
 const FEEDS = (Array.isArray(plan.feeds) && plan.feeds.length) ? plan.feeds : []
-const gatherSkills = (Array.isArray(plan.gather_skills) ? plan.gather_skills : []).filter(Boolean)
-const panelSkills = (Array.isArray(plan.panel_skills) ? plan.panel_skills : []).filter(Boolean)
+// Cap gather+panel to keep total agents = ASSETS × (MAX_GATHER + MAX_PANEL) manageable.
+// With 13 assets × (3+3) = 78 agents — completes in ~10 min. Uncapped → 100+ agents → 30+ min stall.
+const MAX_GATHER = 3
+const MAX_PANEL = 3
+const gatherSkills = (Array.isArray(plan.gather_skills) ? plan.gather_skills : []).filter(Boolean).slice(0, MAX_GATHER)
+const panelSkills = (Array.isArray(plan.panel_skills) ? plan.panel_skills : []).filter(Boolean).slice(0, MAX_PANEL)
+if (plan.gather_skills && plan.gather_skills.length > MAX_GATHER) log(`Gather capped ${plan.gather_skills.length}→${MAX_GATHER}: dropped ${plan.gather_skills.slice(MAX_GATHER).join(', ')}`)
+if (plan.panel_skills && plan.panel_skills.length > MAX_PANEL) log(`Panel capped ${plan.panel_skills.length}→${MAX_PANEL}: dropped ${plan.panel_skills.slice(MAX_PANEL).join(', ')}`)
 const guardrailSkill = plan.guardrail_skill || ''
 const deskSkill = plan.desk_skill || ''
 const chairSkill = plan.chair_skill || ''
