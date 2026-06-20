@@ -62,11 +62,11 @@ const PLAN_SCHEMA = {
 const THEME_SCHEMA = {
   type: 'object',
   properties: {
-    extended: { type: 'boolean' },          // true if theme already ran hard
+    extended: { type: 'boolean' },
     cycle_position: { type: 'string', enum: ['early', 'mid', 'late', 'extended'] },
-    evidence: { type: 'string' },           // 1-2 sentences of evidence
-    adjusted_scope: { type: 'string' },     // if extended=true, alternative scope to screen
-    adjusted_criteria: { type: 'string' },  // if extended=true, alternative criteria
+    evidence: { type: 'string' },
+    adjusted_scope: { type: 'string' },
+    adjusted_criteria: { type: 'string' },
   },
   required: ['extended', 'cycle_position', 'adjusted_scope', 'adjusted_criteria'],
 }
@@ -83,8 +83,7 @@ const SCREEN_SCHEMA = {
       why_not_yet_surged: { type: 'string' },
       current_price: { type: 'string' },
       consensus_pt: { type: 'string' },
-      price_vs_52w: { type: 'string' },   // e.g. "87% of 52w high", "32% below 52w high"
-      above_consensus: { type: 'boolean' }, // true if current_price > consensus_pt
+      above_consensus_pt: { type: 'boolean' },
     }, required: ['ticker', 'thesis'] } },
     excluded: { type: 'array', items: { type: 'string' } },
     screen_notes: { type: 'string' },
@@ -192,21 +191,21 @@ if (!deskSkill || !chairSkill) log('WARNING: manager did not name a desk and/or 
 // ---------- Phase 0.5: THEME CYCLE CHECK ----------
 phase('ThemeCycle')
 const themeCycle = await agent(
-  `Assess whether the investment theme is already extended (price has already run hard and most names are above fair value).\n\n` +
+  `Assess whether the investment theme is already extended (price has run hard, most names above fair value).\n\n` +
   `Theme/sector: "${plan.screen_scope}"\nAs-of: ${REPORT_DATE}\n\n` +
   `Steps:\n` +
-  `1. Check the representative ETF or sector index price vs its 52-week range (e.g. SOXX for semis, BOTZ for AI)\n` +
-  `2. Check median analyst consensus PT vs current price across the sector\n` +
-  `3. Check how many names in the sector are trading above consensus PT\n\n` +
-  `If extended=true: set adjusted_scope to a DIFFERENT universe that may have lagged (e.g. "AI infrastructure power management small caps", "PCB/substrate suppliers not yet re-rated", "AI cooling/thermal management"). Set adjusted_criteria to focus on price-below-PT and distance-from-52w-high.\n` +
-  `If NOT extended: set adjusted_scope and adjusted_criteria to same as input scope/criteria.\n` +
-  `Be honest. If the theme ran +100%+ in the past year, it is extended.`,
+  `1. Check the representative sector ETF (e.g. SOXX for semis, BOTZ for AI) — is it near multi-year highs?\n` +
+  `2. Check how many sector names trade above analyst consensus price target\n` +
+  `3. Check whether recent sector momentum has been driven by a small number of mega-caps vs broad participation\n\n` +
+  `If extended=true: set adjusted_scope to a DIFFERENT universe that likely lagged (e.g. adjacent supply-chain tiers, smaller names, different geography). Set adjusted_criteria to describe what value/catalyst looks like in that adjacent universe — let the screener decide HOW to find good candidates.\n` +
+  `If NOT extended: set adjusted_scope and adjusted_criteria identical to the input scope/criteria.\n` +
+  `Be honest. State the evidence briefly.`,
   { label: 'theme-cycle', phase: 'ThemeCycle', schema: THEME_SCHEMA, model: MODEL }
 )
 if (themeCycle) {
   log(`ThemeCycle: ${themeCycle.cycle_position} | extended: ${themeCycle.extended} | ${themeCycle.evidence || ''}`)
   if (themeCycle.extended && themeCycle.adjusted_scope) {
-    log(`ThemeCycle: scope widened -> "${themeCycle.adjusted_scope}"`)
+    log(`ThemeCycle: scope widened → "${themeCycle.adjusted_scope}"`)
     plan.screen_scope = themeCycle.adjusted_scope
     plan.screen_criteria = themeCycle.adjusted_criteria || plan.screen_criteria
   }
@@ -230,17 +229,13 @@ if (FORCED_ASSETS.length) {
     `2. Search analyst screener reports, "undiscovered AI plays", "semiconductor value", "AI supply chain small cap"\n` +
     `3. Check recent earnings call transcripts for AI demand signals from lesser-known vendors\n` +
     `4. Apply the criteria above to filter candidates: ${plan.screen_criteria}\n\n` +
-    `For each candidate, fetch: current price, consensus analyst price target (Yahoo Finance / Finviz / analyst reports), 52-week high.\n` +
-    `REJECT any candidate where current price > consensus analyst PT -- mark it in excluded[] with reason "above consensus PT".\n` +
-    `PREFER candidates trading >15% below consensus PT or >20% below their 52-week high.\n` +
+    `For each candidate, fetch and include: current price, analyst consensus price target, whether current price is above consensus PT (above_consensus_pt).\n` +
     `Return 5-10 tickers with thesis, catalyst, valuation_gap, why_not_yet_surged.\n` +
     `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs, no indexes. No already-surged mega-caps unless NEW catalyst.\n` +
     `Aim for diverse names across the supply chain (memory, EDA, packaging, test equipment, networking, power mgmt).`,
     { label: 'sector-screen', phase: 'Screen', schema: SCREEN_SCHEMA, model: MODEL }
   )
   if (screened && Array.isArray(screened.candidates) && screened.candidates.length) {
-    const aboveConsensus = screened.candidates.filter(c => c.above_consensus)
-    if (aboveConsensus.length) log(`Screen: rejected ${aboveConsensus.length} candidates above consensus PT: ${aboveConsensus.map(c => c.ticker).join(', ')}`)
     const tickers = screened.candidates
       .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
       .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
@@ -260,6 +255,9 @@ if (FORCED_ASSETS.length) {
 
 // ASSET_LIST computed here, AFTER screener has populated ASSETS.
 const ASSET_LIST = ASSETS.join(', ')
+
+const abovePT = (screened && Array.isArray(screened.candidates) ? screened.candidates : []).filter(c => c.above_consensus_pt)
+if (abovePT.length) log(`Screen: ${abovePT.length} candidates above consensus PT (chair will judge): ${abovePT.map(c => c.ticker).join(', ')}`)
 
 // Per-asset context builder -- each agent focuses on ONE asset, avoiding giant multi-asset context blowup.
 const ctxFor = (asset) =>
@@ -337,38 +335,45 @@ const totalVotes = verdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).l
 const decision = await agent(
   `Follow ${SKILL}/${chairSkill}/SKILL.md to chair the committee.\nQuestion: ${QUESTION}\nAssets: ${ASSET_LIST}\nChair framing: ${FRAMING || 'none'}\nPortfolio: ${PORTFOLIO}\n` +
   `Populate per_asset[] for EVERY asset (${ASSET_LIST}): {asset, conviction high|medium|low, prob 0..1 bull thesis by ${REPORT_DATE.slice(0,4)}-12-31, action, invalidation}. Rank by conviction -- do NOT give every asset the same prob.\n` +
-  `For assets near but not yet at entry zone: use action BUY_ON_TOUCH and set entry_trigger to the specific limit price or condition (e.g. "bid $31 limit", "buy on touch of 200d MA").\n` +
+  `For assets near but not yet at their entry zone: use action BUY_ON_TOUCH and set entry_trigger to the specific limit price or condition (e.g. "bid $31 limit", "buy on touch of 200d MA $28.50").\n` +
   `EXACT VOTING-SEAT COUNT = ${totalVotes}. verdict_tally buckets MUST sum to ${totalVotes}.\n` +
   `=== PER-ASSET PANEL VERDICTS ===\n${JSON.stringify(panelByAsset.filter(Boolean), null, 1)}\n=== GUARDRAIL (non-voting) ===\n${guardrail}`,
   { label: chairSkill || 'chair-decision', phase: 'Decide', schema: DECISION_SCHEMA, model: MODEL })
 
 // ---------- RE-SCREEN LOOP ----------
-// If chair issued zero BUY/ADD and dominant rejection is margin-of-safety, re-run screener once with cheaper scope.
+// If chair issued zero BUY/ADD and the dominant rejection is valuation, re-run screener once
+// with a scope asking for laggards/beaten-down names. The CIO (ThemeCycle) already set the
+// adjusted scope if the theme was extended — use that; otherwise ask the screener to go one
+// tier down the supply chain. NO hardcoded technical filters — the screener decides what cheap means.
 const bullActions = ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'BUY_ON_TOUCH']
 const hasBuySignal = decision && Array.isArray(decision.per_asset) &&
-  decision.per_asset.some(a => bullActions.includes(a.action))
-const noMarginSafety = decision && decision.decision &&
+  decision.per_asset.some(a => bullActions.includes(String(a.action || '').toUpperCase()))
+const valuationRejection = decision && decision.decision &&
   (decision.decision.toLowerCase().includes('margin of safety') ||
    decision.decision.toLowerCase().includes('already priced') ||
-   decision.decision.toLowerCase().includes('above fair value'))
+   decision.decision.toLowerCase().includes('above fair value') ||
+   decision.decision.toLowerCase().includes('overvalued'))
 
-if (!hasBuySignal && noMarginSafety && !ARGS._rescreened) {
-  log('RE-SCREEN: zero BUY signals, dominant rejection = no margin of safety -- re-running screener with cheaper scope')
+if (!hasBuySignal && valuationRejection && !ARGS._rescreened) {
+  log('RE-SCREEN: zero BUY signals + valuation rejection — re-running screener for beaten-down adjacent names')
   phase('ReScreen')
-  const cheapScope = `${plan.screen_scope} -- names down >30% from 52-week high OR trading below book value OR one tier down the supply chain from the most-crowded names`
-  const cheapCriteria = `${plan.screen_criteria}; MUST be trading below analyst consensus price target; prefer names down >20% from 52w high`
+  const rescreenScope = (themeCycle && themeCycle.extended && themeCycle.adjusted_scope)
+    ? themeCycle.adjusted_scope
+    : `${plan.screen_scope} — focus on names that have NOT participated in the recent re-rating; look one tier down the supply chain or in adjacent sub-sectors`
+  const rescreenCriteria = (themeCycle && themeCycle.extended && themeCycle.adjusted_criteria)
+    ? themeCycle.adjusted_criteria
+    : `${plan.screen_criteria}; prioritize names where the business quality is intact but the stock price has lagged the sector`
   const rescreened = await agent(
-    `Task: Re-screen for investment candidates. Prior screen found no margin of safety across all candidates.\n\n` +
-    `Sector/universe: "${cheapScope}"\n` +
-    `What makes a good candidate: "${cheapCriteria}"\n\n` +
+    `Task: Re-screen for investment candidates. The prior screen returned only expensive names — zero BUY signals, all rejected on valuation.\n\n` +
+    `Sector/universe: "${rescreenScope}"\n` +
+    `What makes a good candidate: "${rescreenCriteria}"\n\n` +
     `How to screen:\n` +
-    `1. Focus on LAGGARDS in the sector -- names that have NOT surged yet\n` +
-    `2. Check names trading below consensus analyst PT (current price < PT)\n` +
-    `3. Look one tier down the supply chain from the crowded names\n` +
-    `4. Check beaten-down names where the business is intact but price hasn't recovered\n\n` +
+    `1. Actively avoid the same names from the prior screen: ${ASSET_LIST}\n` +
+    `2. Look for names that have lagged the broader sector re-rating\n` +
+    `3. Look one tier down the supply chain from the crowded mega-names\n` +
+    `4. Search analyst reports for "undiscovered", "overlooked", "laggard" in this sector\n\n` +
     `Return 5-10 tickers with thesis, catalyst, valuation_gap, why_not_yet_surged.\n` +
-    `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs. MUST be trading below analyst consensus PT.\n` +
-    `For each candidate: fetch current price, consensus PT, 52-week high. Reject if price > consensus PT.`,
+    `HARD RULES: Real NYSE/NASDAQ tickers only. No ETFs. No names already in: ${ASSET_LIST}`,
     { label: 'rescreen', phase: 'ReScreen', schema: SCREEN_SCHEMA, model: MODEL }
   )
   if (rescreened && Array.isArray(rescreened.candidates) && rescreened.candidates.length) {
@@ -377,10 +382,8 @@ if (!hasBuySignal && noMarginSafety && !ARGS._rescreened) {
       .filter(t => /^[A-Z][A-Z0-9]{1,5}$/.test(t))
       .filter(t => !ASSETS.includes(t))
     if (newTickers.length) {
-      log(`ReScreen: ${newTickers.length} new candidates: ${newTickers.join(', ')}`)
-      // Note: we don't re-run the full pipeline on rescreened names in this run (cost).
-      // We log them for the next run's prior_context injection.
-      log(`ReScreen NOTE: add these to next run's prior_context for full research: ${newTickers.join(', ')}`)
+      log(`ReScreen: ${newTickers.length} new candidates found: ${newTickers.join(', ')}`)
+      log(`ReScreen: add to next run prior_context for full pipeline: ${newTickers.join(', ')}`)
     }
   }
 }
