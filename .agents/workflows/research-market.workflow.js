@@ -41,7 +41,6 @@ const PLAN_SCHEMA = {
   type: 'object',
   properties: {
     asset_class: { type: 'string' },
-    assets: { type: 'array', items: { type: 'string' } },
     side: { type: 'string' },
     horizon: { type: 'string' },
     portfolio_provided: { type: 'boolean' },
@@ -183,8 +182,6 @@ if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 
 const ASSET_CLASS = plan.asset_class || 'equities'
 // ASSETS is let -- Screen phase will populate it.
 let ASSETS = []
-// Optional forced override: if caller explicitly passed assets via ARGS, use them (bypasses screener).
-const FORCED_ASSETS = (Array.isArray(ARGS.assets) && ARGS.assets.length) ? ARGS.assets.map(a => String(a).toUpperCase()) : []
 const portfolioProvided = !!(plan.portfolio_provided && RAW_PORTFOLIO)
 const PORTFOLIO = portfolioProvided ? (plan.portfolio_summary || RAW_PORTFOLIO)
   : 'NO PORTFOLIO PROVIDED by the user. Do NOT assume, invent, or carry over any holdings. Answer at the market/asset level with general sizing/risk discipline only.'
@@ -234,14 +231,9 @@ if (themeCycle) {
   }
 }
 
-// ---------- Phase 1: SCREEN -- research team autonomously finds candidates ----------
-// Screening always runs. No discovery_mode toggle. The team decides which stocks to analyze.
-// Exception: if caller forced ARGS.assets, skip screener (explicit override).
+// ---------- Phase 1: SCREEN -- CIO-directed screener always runs ----------
 let screened = null
-if (FORCED_ASSETS.length) {
-  ASSETS = FORCED_ASSETS
-  log(`Screen: BYPASSED -- caller forced assets: ${ASSETS.join(', ')}`)
-} else {
+{
   phase('Screen')
   log(`Screen: searching sector "${plan.screen_scope}" | criteria: ${plan.screen_criteria}`)
   screened = await agent(

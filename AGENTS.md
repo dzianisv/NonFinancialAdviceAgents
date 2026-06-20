@@ -48,7 +48,7 @@ Workflow({ name: "hedge-fund-committee" })
 Workflow({ name: "pairwise-eval", args: { a: "/path/a.md", b: "/path/b.md", rubric: "..." } })
 ```
 
-Never pass `assets: [...]` — overrides the autonomous screener. Only use for explicit ticker forcing.
+Never pass `assets: [...]` — the screener is CIO-directed and always runs. Use `query` to guide what gets screened.
 
 ## Invoking skills
 
