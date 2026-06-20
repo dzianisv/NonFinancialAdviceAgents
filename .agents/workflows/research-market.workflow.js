@@ -23,10 +23,11 @@ const LEDGER_PY = `${SKILL}/forecast-ledger/ledger.py`
 // deliver it as a JSON STRING. Normalize to an object or EVERY field silently defaults (the "no question"
 // trap that wastes a full run). Never assume args is an object.
 const ARGS = (typeof args === 'string')
-  ? (() => { try { return JSON.parse(args) || {} } catch (e) { return {} } })()
+  ? (() => { try { return JSON.parse(args) || {} } catch (e) { return { query: args } } })()
   : (args && typeof args === 'object' ? args : {})
 const REPORT_DATE = ARGS.date || '2026-06-15'
-const QUESTION = ARGS.question || '(no question provided)'
+// Accept both 'question' and 'query' keys — callers use both interchangeably.
+const QUESTION = ARGS.question || ARGS.query || '(no question provided)'
 const RAW_PORTFOLIO = ARGS.portfolio || ''   // empty = caller gave none; manager must NOT invent one
 const ANCHOR = ARGS.anchor || ''             // optional seed; '' → Gather fetches LIVE
 
@@ -116,8 +117,11 @@ const plan = await agent(
 if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 'no plan from manager' } }
 
 // Resolve plan → run inputs (all manager-driven; safe fallbacks only for emptiness, never fabricate holdings).
-const ASSET_CLASS = plan.asset_class || 'crypto'
-const ASSETS = (Array.isArray(plan.assets) && plan.assets.length) ? plan.assets.map(a => String(a).toUpperCase()) : ['BTC']
+// Prefer caller-supplied asset_class/assets over manager inference — avoids crypto default when query is clearly equities.
+const CALLER_CLASS = ARGS.asset_class || ''
+const CALLER_ASSETS = (Array.isArray(ARGS.assets) && ARGS.assets.length) ? ARGS.assets : []
+const ASSET_CLASS = CALLER_CLASS || plan.asset_class || 'equities'
+const ASSETS = (CALLER_ASSETS.length ? CALLER_ASSETS : (Array.isArray(plan.assets) && plan.assets.length) ? plan.assets : ['UNKNOWN']).map(a => String(a).toUpperCase())
 const ASSET_LIST = ASSETS.join(', ')
 const portfolioProvided = !!(plan.portfolio_provided && RAW_PORTFOLIO)
 const PORTFOLIO = portfolioProvided ? (plan.portfolio_summary || RAW_PORTFOLIO)
