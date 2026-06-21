@@ -35,24 +35,25 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
 - The RSS `description`, if present, is FT's own short teaser — you MAY keep it verbatim as `summary` (it is
   publisher-provided, not fabricated). If empty/absent → `[UNAVAILABLE - paywall]`.
 
-## Reading the BODY (verified method, June 2026)
+## Reading the BODY
 
-For the full article body, use the script — **no extension required**:
+For the full article body, use the script:
 
 ```bash
 bun /Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.ts "<ft-url>"
 ```
 
-**Method order for FT:** archive.ph via Chrome CDP → direct fetch (Wayback skipped — FT serves
-"Subscribe to read" wall to Wayback crawler; tested 2026-06-20, 163k bytes, BLOCKED).
+**Method:** Chrome live — navigates to the actual FT URL using your logged-in Chrome session.
+Content IS in DOM when subscribed. **One-time setup required:** open `https://www.ft.com` in
+Chrome and sign in with your FT subscription. After that the script works automatically.
 
-**CAPTCHA:** archive.ph needs a one-time Cloudflare CAPTCHA per browser session. If `[CAPTCHA]` on
-stderr, open `https://archive.ph` in Chrome, solve it, retry.
+**Error `Chrome: paywall in DOM — SETUP REQUIRED`:** sign in to ft.com in Chrome, then retry.
 
 **What does NOT work for FT:**
-- Wayback Machine — FT serves "Subscribe to read" wall; tested 2026-06-20: BLOCKED
+- Wayback Machine — FT serves "Subscribe to read" wall to Wayback; BLOCKED
 - Bing cache (`cc.bingj.com`) — DNS does not resolve
 - Google cache — deprecated, returns error page
+- archive.ph — Cloudflare CAPTCHA every session; abandoned
 - Direct fetch — 403 bot-block from agent IPs; hard paywall in browser
 - 12ft.io — broken SSL (`ERR_CERT_AUTHORITY_INVALID`)
 - archive.ph via curl — Cloudflare CAPTCHA blocks datacenter IPs
