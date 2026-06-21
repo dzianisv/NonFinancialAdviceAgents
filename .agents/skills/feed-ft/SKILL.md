@@ -40,19 +40,22 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
 For the full article body, use the script — **no extension required**:
 
 ```bash
-/Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.ts "<ft-url>"
+bun /Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.ts "<ft-url>"
 ```
 
-**Method:** `archive.ph/newest/<url>` via Chrome (chrome-use). FT hard paywall means content is NOT in
-DOM when paywalled — archive.ph captures it. Verified 2026-06-20 on a live FT article.
+**Method order for FT:** archive.ph via Chrome CDP → direct fetch (Wayback skipped — FT serves
+"Subscribe to read" wall to Wayback crawler; tested 2026-06-20, 163k bytes, BLOCKED).
 
-**CAPTCHA:** archive.ph needs a one-time Cloudflare CAPTCHA per browser session. If `[UNAVAILABLE - archive.ph CAPTCHA]` returned, open `https://archive.ph` in Chrome, solve it, retry.
+**CAPTCHA:** archive.ph needs a one-time Cloudflare CAPTCHA per browser session. If `[CAPTCHA]` on
+stderr, open `https://archive.ph` in Chrome, solve it, retry.
 
 **What does NOT work for FT:**
-- Wayback Machine — FT serves "Subscribe to read" wall to Wayback crawler
+- Wayback Machine — FT serves "Subscribe to read" wall; tested 2026-06-20: BLOCKED
+- Bing cache (`cc.bingj.com`) — DNS does not resolve
+- Google cache — deprecated, returns error page
 - Direct fetch — 403 bot-block from agent IPs; hard paywall in browser
 - 12ft.io — broken SSL (`ERR_CERT_AUTHORITY_INVALID`)
-- bypass-paywalls-clean extension — NOT installed in this Chrome
+- archive.ph via curl — Cloudflare CAPTCHA blocks datacenter IPs
 
 **Legal/ToS:** archive.today is a public archive; for owner's personal research only, never redistribution.
 

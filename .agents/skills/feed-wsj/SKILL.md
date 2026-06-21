@@ -35,15 +35,20 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
 For the full article body, use the script — **no extension required**:
 
 ```bash
-/Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.ts "<wsj-url>"
+bun /Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.ts "<wsj-url>"
 ```
 
-**Method:** `curl -sL "https://web.archive.org/web/2/<url>"` (Wayback Machine). Unlike FT, WSJ does NOT
-serve a paywall page to the Wayback crawler — full article bodies are available headlessly. Verified 2026-06-20.
+**Method order for WSJ:** Wayback Machine (`web.archive.org/web/2/<url>`) → archive.ph via Chrome CDP
+→ direct fetch. Wayback works for WSJ — unlike FT, WSJ does not serve a paywall page to the Wayback
+crawler. Returns HTTP 404 when no snapshot exists for a URL; script falls through to next method.
 
-If no Wayback snapshot exists, the script falls back to archive.ph via Chrome.
+Tested 2026-06-20: Wayback returned `OK` for snapshot URLs; specific articles without snapshots return 404.
 
-**Direct fetch / Googlebot-UA spoof**: HTTP 401 from agent IPs. Do NOT use these.
+**Direct fetch**: HTTP 401 from agent IPs. Do NOT use as primary.
+
+**What does NOT work for WSJ:**
+- Bing cache (`cc.bingj.com`) — DNS does not resolve
+- Google cache — deprecated, returns error page
 
 **Legal/ToS:** web.archive.org is a public archive; for owner's personal research only, never redistribution.
 
