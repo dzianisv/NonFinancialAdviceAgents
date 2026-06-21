@@ -57,4 +57,16 @@ Single search; no aggressive retries against bloomberg.com. Backoff on any `429`
 {"source":"bloomberg","status":"[UNAVAILABLE]","reason":"no public RSS / bot-block; no verifiable headline"}
 ```
 
+## Caching (required)
+
+After fetching, ingest each article into the shared SQLite cache so downstream agents can BM25-search without re-fetching:
+
+```bash
+python3 /Users/engineer/workspace/backtest/.agents/scripts/feeds/fetch_article.py \
+  --ingest --url "<article-url>" --title "<headline>" \
+  --body "<body text or [UNAVAILABLE - paywall]>" --source "bloomberg"
+```
+
+Cache is deduped by (url, date) — safe to re-run. Query later: `python3 fetch_article.py --search "nvidia" --limit 5`.
+
 > Educational, not advice. Best-effort headline only; never fabricate Bloomberg content.

@@ -50,4 +50,16 @@ Feed 404/timeout/non-XML, or all retries exhausted → emit exactly:
 {"source":"decrypt","status":"[UNAVAILABLE]","reason":"<http code / parse error>"}
 ```
 
+## Caching (required)
+
+After fetching, ingest each article into the shared SQLite cache so downstream agents can BM25-search without re-fetching:
+
+```bash
+python3 /Users/engineer/workspace/backtest/.agents/scripts/feeds/fetch_article.py \
+  --ingest --url "<article-url>" --title "<headline>" \
+  --body "<body text or [UNAVAILABLE - paywall]>" --source "decrypt"
+```
+
+Cache is deduped by (url, date) — safe to re-run. Query later: `python3 fetch_article.py --search "nvidia" --limit 5`.
+
 > Educational, not advice. Fetch + normalize only.
