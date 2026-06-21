@@ -37,31 +37,24 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
 
 ## Reading the BODY (verified method, June 2026)
 
-This adapter emits headlines only, but downstream readers (`narrative-news`, `trend-stock-research`)
-sometimes need the article body. **Empirically tested from this agent environment** against live FT/WSJ
-URLs — use this exact ladder, do NOT theorize:
+For the full article body, use the script — **no extension required**:
 
-1. **chrome-use** (user's real Chrome with the `bypass-paywalls-clean` extension): the ONLY method that
-   reliably returns the FT body. Works because BPC spoofs a Googlebot UA, clears the metered-paywall cookie,
-   and disables the paywall JS — all of which need a real configured browser. **Only available on the user's
-   own machine**, not in headless/CI/MCP runs.
-2. **web.archive.org** (`curl -L "http://web.archive.org/web/2/<url>"`, or check
-   `https://archive.org/wayback/available?url=<url>` first): reachable headlessly via plain `curl` from the
-   agent's bash. ⚠️ **FT-specific limitation:** FT serves the Wayback crawler its `"Subscribe to read"` wall,
-   so most FT `/content/` snapshots are the PAYWALL page, not the body — Wayback is unreliable for FT bodies
-   (it works well for WSJ). Always verify the snapshot isn't just `"Subscribe to read"` before using it.
-3. **archive.today** (`archive.ph/newest/<url>`): captures FT bodies better than Wayback, BUT from this
-   environment's datacenter IP it returns a **Cloudflare CAPTCHA (HTTP 429)** to `curl`/`web_fetch` — only
-   usable from a real JS browser (i.e. chrome-use on the user's machine).
-4. **Direct fetch / Googlebot-UA spoof / `?format=amp`**: all return **403** from this IP (FT bot-blocks the
-   datacenter range; the Googlebot spoof needs verified Googlebot reverse-DNS we don't have). Do NOT rely on these.
+```bash
+/Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.sh "<ft-url>"
+```
 
-**Headless verdict:** there is NO reliable way to read the full FT body from a headless/MCP run today.
-Degrade to headline + `[UNAVAILABLE - paywall]`. Full-body FT reads require the user's real Chrome (chrome-use).
-This matches the ladder in [[trend-stock-research]] §"How to read articles".
+**Method:** `archive.ph/newest/<url>` via Chrome (chrome-use). FT hard paywall means content is NOT in
+DOM when paywalled — archive.ph captures it. Verified 2026-06-20 on a live FT article.
 
-**Legal/ToS:** paywall bypass is ToS-gray. web.archive.org / archive.today are public archives; this is for
-the owner's personal research reading only, never redistribution. Honor robots/bot-blocks; do not hammer.
+**CAPTCHA:** archive.ph needs a one-time Cloudflare CAPTCHA per browser session. If `[UNAVAILABLE - archive.ph CAPTCHA]` returned, open `https://archive.ph` in Chrome, solve it, retry.
+
+**What does NOT work for FT:**
+- Wayback Machine — FT serves "Subscribe to read" wall to Wayback crawler
+- Direct fetch — 403 bot-block from agent IPs; hard paywall in browser
+- 12ft.io — broken SSL (`ERR_CERT_AUTHORITY_INVALID`)
+- bypass-paywalls-clean extension — NOT installed in this Chrome
+
+**Legal/ToS:** archive.today is a public archive; for owner's personal research only, never redistribution.
 
 ## Politeness (required)
 
@@ -79,14 +72,9 @@ Conditional GET (ETag/If-Modified-Since; `304` → nothing-new). Exponential bac
 {"source":"ft","status":"[UNAVAILABLE]","reason":"paywall / 403 bot-block / fetch failed"}
 ```
 
-## Interactive fallback — full article body
+## Full-body fallback
 
-When the RSS teaser is not enough and you need the full FT article, use the **bypass-paywalls** skill
-(`~/.agents/skills/bypass-paywalls/SKILL.md`) which navigates the user's Chrome (with
-bypass-paywalls-clean extension) to extract the full body interactively.
-
-The automated path (this skill) handles daily RSS ingestion; the interactive path handles ad-hoc reads.
-This is the same chrome-use + BPC method documented in §"Reading the BODY" above, packaged as a
-reusable skill with prerequisites, storage instructions, and limitations.
+See [[bypass-paywalls]] skill for CAPTCHA instructions and manual usage. Call `read_article.sh`
+directly from agent bash for ad-hoc reads; this skill handles automated daily RSS ingestion only.
 
 > Educational, not advice. Headlines only; never fabricate a paywalled body.

@@ -280,6 +280,7 @@ const bullActions = ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'BUY_ON_TOUCH']
 // Runs once after screen; all gather agents then call fetch_article.py --search instead of
 // hitting live URLs. Cache stored at ~/.agents/cache/articles.db.
 const FETCH_SCRIPT = `${SKILL}/../scripts/feeds/fetch_article.py`
+const READ_SCRIPT = `${SKILL}/../scripts/feeds/read_article.sh`
 const tickerList = ASSETS.join(' OR ')
 if (FEEDS.length) {
   phase('NewsFetch')
@@ -294,11 +295,12 @@ if (FEEDS.length) {
       `Topics to search: "${feedTopics}"\n` +
       `Steps:\n` +
       `1. Fetch headlines from the feed using the Google News RSS method documented in the skill (NOT direct site RSS).\n` +
-      `2. For each headline relevant to [${ASSETS.join(', ')}] or the research theme, ingest it into the article cache:\n` +
-      `   python3 ${FETCH_SCRIPT} --ingest --url "<article-url>" --title "<headline>" --body "<teaser or [UNAVAILABLE - paywall]>" --source "${feedName}"\n` +
-      `3. For WSJ articles specifically: attempt Wayback body fetch first (documented in feed-wsj SKILL.md) before marking body as [UNAVAILABLE - paywall].\n` +
-      `4. For FT articles: body will be [UNAVAILABLE - paywall] unless bypass-paywalls-clean extension is installed in Chrome.\n` +
-      `5. Return count of articles ingested and any errors.\n` +
+      `2. For each headline relevant to [${ASSETS.join(', ')}] or the research theme, fetch the full article body:\n` +
+      `   bash ${READ_SCRIPT} "<article-url>"\n` +
+      `   This handles FT (via archive.ph/Chrome), WSJ (via Wayback), and BI automatically — no extension needed.\n` +
+      `   The script caches results in SQLite automatically.\n` +
+      `3. If read_article.sh returns [UNAVAILABLE - archive.ph CAPTCHA], skip that article and continue.\n` +
+      `4. Return count of articles ingested and any errors.\n` +
       `HARD RULE: never fabricate body text. Teaser from RSS = OK. Invented prose = defect.`,
       { label: `newsfetch:${feedName}`, phase: 'NewsFetch', model: MODEL }
     )
@@ -316,7 +318,7 @@ async function runPipeline(assets, tag) {
   const ph = (s) => tag ? `${s} (${tag})` : s          // namespaced phase name
   // Per-asset context builder -- each agent focuses on ONE asset, avoiding giant multi-asset context blowup.
   const ctxFor = (asset) =>
-    `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${batchList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nArticle cache: python3 ${FETCH_SCRIPT} --search "${asset}" --limit 5  (pre-fetched WSJ/FT/Bloomberg headlines; query before hitting live URLs)\nAs-of: ${REPORT_DATE}`
+    `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${batchList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nArticle cache: python3 ${FETCH_SCRIPT} --search "${asset}" --limit 5  (pre-fetched FT/WSJ/Bloomberg; query before hitting live URLs)\nFull article body: bash ${READ_SCRIPT} "<url>"  (FT→archive.ph/Chrome, WSJ→Wayback, no extension needed)\nAs-of: ${REPORT_DATE}`
 
   // ---------- GATHER -- per-asset pipeline (each asset x all gather skills in parallel) ----------
   // Old: one agent covers ALL assets per skill -> massive context, stalls on large lists.

@@ -32,27 +32,20 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
 
 ## Reading the BODY (verified method, June 2026)
 
-This adapter emits headlines only, but downstream readers (`narrative-news`, `trend-stock-research`)
-sometimes need the article body. **Empirically tested from this agent environment** against live WSJ URLs —
-use this exact ladder, do NOT theorize:
+For the full article body, use the script — **no extension required**:
 
-1. **web.archive.org** — the WORKHORSE for WSJ in headless runs. `curl -L "http://web.archive.org/web/2/<url>"`
-   (or check `https://archive.org/wayback/available?url=<url>` first) returns the **full WSJ article body**
-   (verified: a CPI story snapshot carried the real "Consumer prices were up 4.2%…" paragraphs). Reachable via
-   plain `curl` from the agent's bash with no extension. WSJ snapshots are far more complete than FT's
-   (unlike FT, WSJ does not serve the Wayback crawler a bare paywall wall).
-2. **chrome-use** (user's real Chrome + `bypass-paywalls-clean`): also returns the body (BPC clears the metered
-   cookie / disables paywall JS). **Only on the user's own machine**, not headless/CI/MCP.
-3. **archive.today** (`archive.ph/newest/<url>`): an alternative, BUT from this environment's datacenter IP it
-   returns a **Cloudflare CAPTCHA (HTTP 429)** to `curl`/`web_fetch` — only usable from a real JS browser.
-4. **Direct fetch / Googlebot-UA spoof**: return **HTTP 401** from this IP. Do NOT rely on these.
+```bash
+/Users/engineer/workspace/backtest/.agents/scripts/feeds/read_article.sh "<wsj-url>"
+```
 
-**Headless verdict:** prefer **web.archive.org** for WSJ bodies — it actually works here. If the URL has no
-snapshot yet, degrade to headline + `[UNAVAILABLE - paywall]`; do not fabricate. This matches the ladder in
-[[trend-stock-research]] §"How to read articles".
+**Method:** `curl -sL "https://web.archive.org/web/2/<url>"` (Wayback Machine). Unlike FT, WSJ does NOT
+serve a paywall page to the Wayback crawler — full article bodies are available headlessly. Verified 2026-06-20.
 
-**Legal/ToS:** paywall bypass is ToS-gray. web.archive.org / archive.today are public archives; this is for
-the owner's personal research reading only, never redistribution. Honor robots/bot-blocks; do not hammer.
+If no Wayback snapshot exists, the script falls back to archive.ph via Chrome.
+
+**Direct fetch / Googlebot-UA spoof**: HTTP 401 from agent IPs. Do NOT use these.
+
+**Legal/ToS:** web.archive.org is a public archive; for owner's personal research only, never redistribution.
 
 ## Politeness (required)
 
@@ -70,14 +63,9 @@ Conditional GET (ETag/If-Modified-Since; `304` → nothing-new). Exponential bac
 {"source":"wsj","status":"[UNAVAILABLE]","reason":"paywall / fetch failed"}
 ```
 
-## Interactive fallback — full article body
+## Full-body fallback
 
-When the RSS teaser and Wayback snapshot are not enough and you need the full WSJ article, use the
-**bypass-paywalls** skill (`.agents/skills/bypass-paywalls/SKILL.md`) which navigates the user's
-Chrome (with bypass-paywalls-clean extension) to extract the full body interactively.
-
-The automated path (this skill) handles daily RSS ingestion + Wayback bodies; the interactive path
-handles ad-hoc reads when no Wayback snapshot exists or the snapshot is stale. This is the same
-chrome-use + BPC method documented in §"Reading the BODY" above, packaged as a reusable skill.
+See [[bypass-paywalls]] skill for CAPTCHA instructions and manual usage. Call `read_article.sh`
+directly from agent bash for ad-hoc reads; this skill handles automated daily RSS ingestion only.
 
 > Educational, not advice. Headlines only; never fabricate a paywalled body.
