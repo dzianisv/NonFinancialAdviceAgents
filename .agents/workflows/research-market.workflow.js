@@ -141,6 +141,8 @@ const DECISION_SCHEMA = {
       action: { type: 'string' },         // e.g. ACCUMULATE / PROBE / WATCHLIST / AVOID / BUY_ON_TOUCH
       entry_trigger: { type: 'string' },  // for BUY_ON_TOUCH: the specific price/condition e.g. "$31 limit bid"
       invalidation: { type: 'string' },
+      selection_reason: { type: 'string' }, // why this ticker was selected by the screener (thesis/catalyst/valuation gap)
+      rejection_reason: { type: 'string' }, // for AVOID/WAIT: exactly what failed the margin-of-safety test
     }, required: ['asset'] } },
   },
   required: ['answer', 'decision', 'tranche_plan', 'agreement', 'disagreement'],
@@ -390,7 +392,7 @@ async function runPipeline(assets, tag) {
   const totalVotes = verdicts.filter(v => v.read.indexOf('[UNAVAILABLE') === -1).length
   const decision = await agent(
     `Follow ${SKILL}/${chairSkill}/SKILL.md to chair the committee.\nQuestion: ${QUESTION}\nAssets: ${batchList}\nChair framing: ${FRAMING || 'none'}\nPortfolio: ${PORTFOLIO}\n` +
-    `Populate per_asset[] for EVERY asset (${batchList}): {asset, conviction high|medium|low, prob 0..1 bull thesis by ${REPORT_DATE.slice(0,4)}-12-31, action, invalidation}. Rank by conviction -- do NOT give every asset the same prob.\n` +
+    `Populate per_asset[] for EVERY asset (${batchList}): {asset, conviction high|medium|low, prob 0..1 bull thesis by ${REPORT_DATE.slice(0,4)}-12-31, action, entry_trigger, invalidation, selection_reason (1-2 sentences: why was this ticker selected — what thesis/catalyst/valuation gap made it a candidate), rejection_reason (1-2 sentences for AVOID/WAIT: what SPECIFICALLY failed the margin-of-safety test at the current price — e.g. already re-rated +X%, insider selling, no margin of safety; leave blank for BUY/BUY_ON_TOUCH actions)}. Rank by conviction -- do NOT give every asset the same prob.\n` +
     `For assets near but not yet at their entry zone: use action BUY_ON_TOUCH and set entry_trigger to the specific limit price or condition (e.g. "bid $31 limit", "buy on touch of 200d MA $28.50").\n` +
     `EXACT VOTING-SEAT COUNT = ${totalVotes}. verdict_tally buckets MUST sum to ${totalVotes}.\n` +
     `=== PER-ASSET PANEL VERDICTS ===\n${JSON.stringify(panelByAsset.filter(Boolean), null, 1)}\n=== GUARDRAIL (non-voting) ===\n${guardrail}`,
@@ -525,6 +527,57 @@ const seatDetail = panelByAsset.filter(Boolean).map(({ asset, votes }) =>
     `**${v.seat}** -- ${v.verdict} (${v.confidence}): ${v.read}\n- Sizing: ${v.sizing || 'n/a'} * Flips if: ${v.flip || 'n/a'}`
   ).join('\n\n')
 ).join('\n\n---\n\n')
+
+// Build screener thesis lookup: ticker → {thesis, catalyst, valuation_gap, why_not_yet_surged}
+const screenerMap = {}
+const allCandidates = [
+  ...(screened && Array.isArray(screened.candidates) ? screened.candidates : []),
+]
+for (const c of allCandidates) {
+  const t = String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (t) screenerMap[t] = c
+}
+
+// Per-asset reasoning block: one section per asset with why-selected + why-accepted/rejected
+const perAssetDecisions = Array.isArray(decision.per_asset) ? decision.per_asset : []
+const perAssetReasoning = ASSETS.map(asset => {
+  const sc = screenerMap[asset] || {}
+  const d = perAssetDecisions.find(e => e && String(e.asset || '').toUpperCase() === asset) || {}
+  const panelEntry = (panelByAsset.find(p => p && p.asset === asset) || {})
+  const votes = panelEntry.votes || []
+  const voteSum = votes.map(v => `${v.seat}: ${v.verdict} (${v.confidence})`).join(', ')
+  const action = String(d.action || '').toUpperCase()
+  const isAvoid = ['AVOID', 'WAIT'].includes(action)
+
+  const lines = [`### ${asset}  —  **${d.action || 'n/a'}** (conviction: ${d.conviction || 'n/a'})`]
+
+  // Why selected
+  if (sc.thesis || sc.catalyst || sc.why_not_yet_surged) {
+    lines.push(`**Why selected by screener:**`)
+    if (sc.thesis) lines.push(`- Thesis: ${sc.thesis}`)
+    if (sc.catalyst) lines.push(`- Catalyst: ${sc.catalyst}`)
+    if (sc.valuation_gap) lines.push(`- Valuation gap: ${sc.valuation_gap}`)
+    if (sc.why_not_yet_surged) lines.push(`- Why not yet surged: ${sc.why_not_yet_surged}`)
+  } else if (d.selection_reason) {
+    lines.push(`**Why selected:** ${d.selection_reason}`)
+  }
+
+  // Panel split
+  if (voteSum) lines.push(`**Panel split:** ${voteSum}`)
+
+  // Chair verdict
+  if (d.entry_trigger) lines.push(`**Entry:** ${d.entry_trigger}`)
+  if (d.invalidation) lines.push(`**Invalidation:** ${d.invalidation}`)
+
+  // Why rejected/accepted
+  if (isAvoid && d.rejection_reason) {
+    lines.push(`**Why rejected (${action}):** ${d.rejection_reason}`)
+  } else if (!isAvoid && d.selection_reason) {
+    lines.push(`**Why accepted:** ${d.selection_reason}`)
+  }
+
+  return lines.join('\n')
+}).join('\n\n---\n\n')
 const reportMd = `# Research -- ${FINAL_ASSET_LIST} (${ASSET_CLASS}) -- ${REPORT_DATE}
 
 > Question: ${QUESTION}
@@ -550,6 +603,9 @@ ${(decision.agreement || []).map(a => `- ${a}`).join('\n')}
 ${(decision.disagreement || []).map(d => `- ${d}`).join('\n')}
 ### Key risks
 ${(decision.key_risks || []).map(r => `- ${r}`).join('\n')}
+
+## Per-asset reasoning
+${perAssetReasoning}
 
 ## Panel votes
 | Asset | Seat | Verdict | Confidence |
