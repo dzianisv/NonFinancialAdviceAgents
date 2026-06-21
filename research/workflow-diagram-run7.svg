@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5aabff"/>
+      <stop offset="100%" stop-color="#3a8eef"/>
+    </linearGradient>
+    <linearGradient id="tealGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00e4ba"/>
+      <stop offset="100%" stop-color="#00b494"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffa052"/>
+      <stop offset="100%" stop-color="#ef7c32"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ab69c6"/>
+      <stop offset="100%" stop-color="#8b49a6"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f75c6c"/>
+      <stop offset="100%" stop-color="#c73c4c"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#4a6a8a"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="900" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid lines -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="1">
+    <line x1="0" y1="220" x2="1400" y2="220"/>
+    <line x1="0" y1="600" x2="1400" y2="600"/>
+  </g>
+
+  <!-- =================================================
+       TITLE AREA
+  ================================================= -->
+  <text x="700" y="32" text-anchor="middle" fill="#e8f0ff" font-size="18" font-weight="700" letter-spacing="0.5">research-market wf_5f3c4421-660 · 60 agents · 2026-06-20</text>
+  <text x="700" y="54" text-anchor="middle" fill="#8a9bbf" font-size="13" letter-spacing="0.3">SOXX late-cycle screen → 7 candidates → ZERO BUY signals</text>
+
+  <!-- Agent count badge -->
+  <rect x="1270" y="18" width="110" height="36" rx="18" fill="#4a9eff" opacity="0.2" filter="url(#shadow)"/>
+  <rect x="1270" y="18" width="110" height="36" rx="18" fill="none" stroke="#4a9eff" stroke-width="1.5"/>
+  <text x="1325" y="31" text-anchor="middle" fill="#4a9eff" font-size="10" font-weight="600">TOTAL</text>
+  <text x="1325" y="47" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="800">60 agents</text>
+
+  <!-- =================================================
+       PHASE PIPELINE (y=70 to y=200)
+  ================================================= -->
+
+  <!-- Connecting arrows between phases -->
+  <g stroke="#4a6a8a" stroke-width="1.5" fill="none" marker-end="url(#arrow)">
+    <line x1="196" y1="140" x2="212" y2="140"/>
+    <line x1="330" y1="140" x2="346" y2="140"/>
+    <line x1="464" y1="140" x2="480" y2="140"/>
+    <line x1="598" y1="140" x2="614" y2="140"/>
+    <line x1="732" y1="140" x2="748" y2="140"/>
+    <line x1="882" y1="140" x2="898" y2="140"/>
+    <line x1="1016" y1="140" x2="1032" y2="140"/>
+    <line x1="1166" y1="140" x2="1182" y2="140"/>
+    <line x1="1300" y1="140" x2="1316" y2="140"/>
+  </g>
+
+  <!-- Phase 1: Intake -->
+  <rect x="83" y="80" width="118" height="120" rx="8" fill="url(#blueGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="83" y="80" width="118" height="120" rx="8" fill="none" stroke="#6ab9ff" stroke-width="1"/>
+  <text x="142" y="103" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Intake</text>
+  <text x="142" y="119" text-anchor="middle" fill="#c8e4ff" font-size="10">1 agent</text>
+  <line x1="100" y1="126" x2="184" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="142" y="141" text-anchor="middle" fill="#e0f0ff" font-size="9.5">CIO reads</text>
+  <text x="142" y="154" text-anchor="middle" fill="#e0f0ff" font-size="9.5">mandate,</text>
+  <text x="142" y="167" text-anchor="middle" fill="#e0f0ff" font-size="9.5">defines query</text>
+
+  <!-- Phase 2: Manager -->
+  <rect x="217" y="80" width="118" height="120" rx="8" fill="url(#blueGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="217" y="80" width="118" height="120" rx="8" fill="none" stroke="#6ab9ff" stroke-width="1"/>
+  <text x="276" y="103" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Manager</text>
+  <text x="276" y="119" text-anchor="middle" fill="#c8e4ff" font-size="10">1 agent</text>
+  <line x1="234" y1="126" x2="318" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="276" y="140" text-anchor="middle" fill="#e0f0ff" font-size="9.5">assembles desk</text>
+  <!-- skill pills -->
+  <rect x="224" y="148" width="94" height="13" rx="6" fill="#1a2a4a" stroke="#4a9eff" stroke-width="0.8"/>
+  <text x="271" y="158" text-anchor="middle" fill="#8ac8ff" font-size="8">trend-stock-research</text>
+  <rect x="234" y="164" width="74" height="13" rx="6" fill="#1a2a4a" stroke="#4a9eff" stroke-width="0.8"/>
+  <text x="271" y="174" text-anchor="middle" fill="#8ac8ff" font-size="8">13f-watch</text>
+  <rect x="234" y="180" width="74" height="13" rx="6" fill="#1a2a4a" stroke="#4a9eff" stroke-width="0.8"/>
+  <text x="271" y="190" text-anchor="middle" fill="#8ac8ff" font-size="8">13d-watch</text>
+
+  <!-- Phase 3: ThemeCycle -->
+  <rect x="351" y="80" width="118" height="120" rx="8" fill="url(#blueGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="351" y="80" width="118" height="120" rx="8" fill="none" stroke="#6ab9ff" stroke-width="1"/>
+  <text x="410" y="103" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">ThemeCycle</text>
+  <text x="410" y="119" text-anchor="middle" fill="#c8e4ff" font-size="10">1 agent</text>
+  <line x1="368" y1="126" x2="452" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="410" y="141" text-anchor="middle" fill="#e0f0ff" font-size="9.5">SOXX +89-99%</text>
+  <text x="410" y="155" text-anchor="middle" fill="#e0f0ff" font-size="9.5">YTD →</text>
+  <text x="410" y="169" text-anchor="middle" fill="#ffd080" font-size="9.5" font-weight="600">late-cycle</text>
+
+  <!-- Phase 4: Screen -->
+  <rect x="485" y="80" width="118" height="120" rx="8" fill="url(#tealGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="485" y="80" width="118" height="120" rx="8" fill="none" stroke="#00e4ba" stroke-width="1"/>
+  <text x="544" y="103" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Screen</text>
+  <text x="544" y="119" text-anchor="middle" fill="#c0fff0" font-size="10">1 agent</text>
+  <line x1="502" y1="126" x2="586" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="544" y="140" text-anchor="middle" fill="#e0fff8" font-size="9">7 candidates:</text>
+  <text x="544" y="154" text-anchor="middle" fill="#e0fff8" font-size="9">CLFD ICHR ROG</text>
+  <text x="544" y="168" text-anchor="middle" fill="#e0fff8" font-size="9">MEI PLPC BHE</text>
+  <text x="544" y="182" text-anchor="middle" fill="#e0fff8" font-size="9">POET</text>
+
+  <!-- Phase 5: NewsFetch -->
+  <rect x="619" y="80" width="118" height="120" rx="8" fill="url(#orangeGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="619" y="80" width="118" height="120" rx="8" fill="none" stroke="#ffb062" stroke-width="1"/>
+  <text x="678" y="103" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">NewsFetch</text>
+  <text x="678" y="119" text-anchor="middle" fill="#ffe8c8" font-size="10">3 agents</text>
+  <line x1="636" y1="126" x2="720" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="678" y="141" text-anchor="middle" fill="#fff0e0" font-size="9">Bloomberg 11art</text>
+  <text x="678" y="155" text-anchor="middle" fill="#fff0e0" font-size="9">WSJ 7art</text>
+  <text x="678" y="169" text-anchor="middle" fill="#ffccaa" font-size="8">(paywall)</text>
+  <text x="678" y="182" text-anchor="middle" fill="#fff0e0" font-size="9">FT 7art (paywall)</text>
+
+  <!-- Phase 6: Gather (fan-out indicator) -->
+  <rect x="769" y="70" width="128" height="140" rx="8" fill="url(#tealGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="769" y="70" width="128" height="140" rx="8" fill="none" stroke="#00e4ba" stroke-width="1.5"/>
+  <text x="833" y="96" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Gather</text>
+  <text x="833" y="112" text-anchor="middle" fill="#c0fff0" font-size="10">21 agents</text>
+  <line x1="786" y1="119" x2="880" y2="119" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="833" y="134" text-anchor="middle" fill="#e0fff8" font-size="9">7 tickers × 3 seats</text>
+  <rect x="778" y="142" width="112" height="14" rx="6" fill="#003a2a" stroke="#00d4aa" stroke-width="0.8"/>
+  <text x="834" y="152" text-anchor="middle" fill="#80ffda" font-size="8">trend-stock-research</text>
+  <rect x="790" y="159" width="88" height="14" rx="6" fill="#003a2a" stroke="#00d4aa" stroke-width="0.8"/>
+  <text x="834" y="169" text-anchor="middle" fill="#80ffda" font-size="8">13f-watch</text>
+  <rect x="790" y="176" width="88" height="14" rx="6" fill="#003a2a" stroke="#00d4aa" stroke-width="0.8"/>
+  <text x="834" y="186" text-anchor="middle" fill="#80ffda" font-size="8">13d-watch</text>
+
+  <!-- Phase 7: Consolidate -->
+  <rect x="913" y="70" width="118" height="140" rx="8" fill="url(#tealGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="913" y="70" width="118" height="140" rx="8" fill="none" stroke="#00e4ba" stroke-width="1.5"/>
+  <text x="972" y="96" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Consolidate</text>
+  <text x="972" y="112" text-anchor="middle" fill="#c0fff0" font-size="10">7 agents</text>
+  <line x1="930" y1="119" x2="1014" y2="119" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="972" y="135" text-anchor="middle" fill="#e0fff8" font-size="9">1 desk brief</text>
+  <text x="972" y="150" text-anchor="middle" fill="#e0fff8" font-size="9">per ticker</text>
+
+  <!-- Phase 8: Panel (fan-out indicator) -->
+  <rect x="1047" y="70" width="124" height="140" rx="8" fill="url(#purpleGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="1047" y="70" width="124" height="140" rx="8" fill="none" stroke="#bb79d6" stroke-width="1.5"/>
+  <text x="1109" y="96" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Panel</text>
+  <text x="1109" y="112" text-anchor="middle" fill="#e8c8ff" font-size="10">22 agents</text>
+  <line x1="1064" y1="119" x2="1154" y2="119" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="1109" y="134" text-anchor="middle" fill="#f0e0ff" font-size="9">7 tickers × 3 analysts</text>
+  <text x="1109" y="149" text-anchor="middle" fill="#ddc0ff" font-size="8.5">Druckenmiller</text>
+  <text x="1109" y="162" text-anchor="middle" fill="#ddc0ff" font-size="8.5">Lyn Alden</text>
+  <text x="1109" y="175" text-anchor="middle" fill="#ddc0ff" font-size="8.5">Buffett</text>
+  <text x="1109" y="188" text-anchor="middle" fill="#c0a0e0" font-size="8">+ regime guardrail</text>
+
+  <!-- Phase 9: Decide -->
+  <rect x="1187" y="80" width="118" height="120" rx="8" fill="url(#redGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="1187" y="80" width="118" height="120" rx="8" fill="none" stroke="#f76c7c" stroke-width="1"/>
+  <text x="1246" y="103" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">Decide</text>
+  <text x="1246" y="119" text-anchor="middle" fill="#ffc8c8" font-size="10">1 agent</text>
+  <line x1="1204" y1="126" x2="1288" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="1246" y="141" text-anchor="middle" fill="#ffe8e8" font-size="9.5">Chair synthesizes</text>
+  <text x="1246" y="157" text-anchor="middle" fill="#ff9999" font-size="9.5" font-weight="700">→ ZERO BUY</text>
+  <text x="1246" y="172" text-anchor="middle" fill="#ff9999" font-size="9.5" font-weight="700">signals</text>
+
+  <!-- Phase 10: Ledger -->
+  <rect x="1321" y="80" width="60" height="120" rx="8" fill="url(#blueGrad)" filter="url(#shadow)" opacity="0.9"/>
+  <rect x="1321" y="80" width="60" height="120" rx="8" fill="none" stroke="#6ab9ff" stroke-width="1"/>
+  <text x="1351" y="103" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="700">Ledger</text>
+  <text x="1351" y="119" text-anchor="middle" fill="#c8e4ff" font-size="9.5">1 agent</text>
+  <line x1="1330" y1="126" x2="1372" y2="126" stroke="#ffffff" stroke-width="0.5" opacity="0.3"/>
+  <text x="1351" y="142" text-anchor="middle" fill="#e0f0ff" font-size="9">logs</text>
+  <text x="1351" y="156" text-anchor="middle" fill="#e0f0ff" font-size="9">verdicts</text>
+
+  <!-- Fan-out lines from Screen to Gather section -->
+  <g stroke="#00d4aa" stroke-width="0.8" opacity="0.4" stroke-dasharray="4,3">
+    <line x1="603" y1="100" x2="769" y2="237"/>
+    <line x1="603" y1="110" x2="769" y2="280"/>
+    <line x1="603" y1="120" x2="769" y2="323"/>
+    <line x1="603" y1="130" x2="769" y2="366"/>
+    <line x1="603" y1="140" x2="769" y2="409"/>
+    <line x1="603" y1="150" x2="769" y2="452"/>
+    <line x1="603" y1="160" x2="769" y2="495"/>
+  </g>
+  <!-- Fan-in lines from Panel section to Decide -->
+  <g stroke="#9b59b6" stroke-width="0.8" opacity="0.4" stroke-dasharray="4,3">
+    <line x1="1171" y1="237" x2="1187" y2="100"/>
+    <line x1="1171" y1="280" x2="1187" y2="110"/>
+    <line x1="1171" y1="323" x2="1187" y2="120"/>
+    <line x1="1171" y1="366" x2="1187" y2="130"/>
+    <line x1="1171" y1="409" x2="1187" y2="140"/>
+    <line x1="1171" y1="452" x2="1187" y2="150"/>
+    <line x1="1171" y1="495" x2="1187" y2="160"/>
+  </g>
+
+  <!-- =================================================
+       FAN-OUT SECTION (y=220 to y=580)
+       7 ticker rows, each ~51px tall
+  ================================================= -->
+
+  <!-- Fan-out section background -->
+  <rect x="20" y="218" width="1360" height="376" rx="10" fill="#0d1220" opacity="0.6"/>
+  <rect x="20" y="218" width="1360" height="376" rx="10" fill="none" stroke="#2a3a5a" stroke-width="1"/>
+
+  <!-- Section headers -->
+  <text x="30" y="236" fill="#6a8aaa" font-size="11" font-weight="600">PARALLEL PROCESSING — 7 TICKER LANES</text>
+
+  <!-- Column header labels -->
+  <rect x="25" y="243" width="70" height="16" rx="3" fill="#1a2a3a"/>
+  <text x="60" y="255" text-anchor="middle" fill="#5a7a9a" font-size="10" font-weight="600">TICKER</text>
+
+  <rect x="120" y="243" width="430" height="16" rx="3" fill="#002a1a"/>
+  <text x="335" y="255" text-anchor="middle" fill="#00a07a" font-size="10" font-weight="600">GATHER (trend-stock-research · 13f-watch · 13d-watch)</text>
+
+  <rect x="570" y="243" width="160" height="16" rx="3" fill="#002a1a"/>
+  <text x="650" y="255" text-anchor="middle" fill="#00a07a" font-size="10" font-weight="600">CONSOLIDATE</text>
+
+  <rect x="750" y="243" width="400" height="16" rx="3" fill="#1a0a2a"/>
+  <text x="950" y="255" text-anchor="middle" fill="#9060b0" font-size="10" font-weight="600">PANEL (Druckenmiller · Lyn Alden · Buffett)</text>
+
+  <rect x="1175" y="243" width="185" height="16" rx="3" fill="#2a0a0a"/>
+  <text x="1267" y="255" text-anchor="middle" fill="#c04040" font-size="10" font-weight="600">VERDICT</text>
+
+  <!-- Vertical column dividers -->
+  <g stroke="#2a3a5a" stroke-width="1" opacity="0.7">
+    <line x1="105" y1="240" x2="105" y2="590"/>
+    <line x1="560" y1="240" x2="560" y2="590"/>
+    <line x1="740" y1="240" x2="740" y2="590"/>
+    <line x1="1165" y1="240" x2="1165" y2="590"/>
+  </g>
+  <!-- Sub-dividers for gather columns -->
+  <g stroke="#1a2a3a" stroke-width="0.7" opacity="0.9">
+    <line x1="258" y1="260" x2="258" y2="590"/>
+    <line x1="412" y1="260" x2="412" y2="590"/>
+    <!-- Panel sub-dividers -->
+    <line x1="884" y1="260" x2="884" y2="590"/>
+    <line x1="1022" y1="260" x2="1022" y2="590"/>
+  </g>
+
+  <!-- Sub-column headers -->
+  <text x="189" y="270" text-anchor="middle" fill="#006a4a" font-size="9">trend-research</text>
+  <text x="335" y="270" text-anchor="middle" fill="#006a4a" font-size="9">13f-watch</text>
+  <text x="486" y="270" text-anchor="middle" fill="#006a4a" font-size="9">13d-watch</text>
+  <text x="812" y="270" text-anchor="middle" fill="#6a3a8a" font-size="9">Druckenmiller</text>
+  <text x="953" y="270" text-anchor="middle" fill="#6a3a8a" font-size="9">Lyn Alden</text>
+  <text x="1093" y="270" text-anchor="middle" fill="#6a3a8a" font-size="9">Buffett</text>
+
+  <!-- Row 1: CLFD -->
+  <rect x="22" y="278" width="1356" height="46" rx="0" fill="#0a1525" opacity="0.5"/>
+  <rect x="22" y="278" width="1356" height="46" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="286" width="65" height="28" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="304" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">CLFD</text>
+  <rect x="125" y="287" width="122" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="304" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="287" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="304" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="287" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="304" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="287" width="140" height="26" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="301" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">desk brief</text>
+  <text x="645" y="313" text-anchor="middle" fill="#80e0c0" font-size="8.5">CLFD consolidated</text>
+  <rect x="755" y="287" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="304" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="287" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="304" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="287" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="304" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <rect x="1178" y="287" width="90" height="26" rx="4" fill="#3a1a1a" stroke="#c05050" stroke-width="1"/>
+  <text x="1223" y="304" text-anchor="middle" fill="#ffaaaa" font-size="11" font-weight="700">WAIT</text>
+
+  <!-- Row 2: ICHR -->
+  <rect x="22" y="325" width="1356" height="46" rx="0" fill="#0d1828" opacity="0.5"/>
+  <rect x="22" y="325" width="1356" height="46" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="333" width="65" height="28" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="351" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">ICHR</text>
+  <rect x="125" y="334" width="122" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="351" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="334" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="351" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="334" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="351" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="334" width="140" height="26" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="348" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">desk brief</text>
+  <text x="645" y="360" text-anchor="middle" fill="#80e0c0" font-size="8.5">ICHR consolidated</text>
+  <rect x="755" y="334" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="351" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="334" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="351" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="334" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="351" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <rect x="1178" y="334" width="90" height="26" rx="4" fill="#3a1a1a" stroke="#c05050" stroke-width="1"/>
+  <text x="1223" y="351" text-anchor="middle" fill="#ffaaaa" font-size="11" font-weight="700">WAIT</text>
+
+  <!-- Row 3: ROG -->
+  <rect x="22" y="372" width="1356" height="46" rx="0" fill="#0a1525" opacity="0.5"/>
+  <rect x="22" y="372" width="1356" height="46" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="380" width="65" height="28" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="398" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">ROG</text>
+  <rect x="125" y="381" width="122" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="398" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="381" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="398" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="381" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="398" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="381" width="140" height="26" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="395" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">desk brief</text>
+  <text x="645" y="407" text-anchor="middle" fill="#80e0c0" font-size="8.5">ROG consolidated</text>
+  <rect x="755" y="381" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="398" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="381" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="398" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="381" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="398" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <rect x="1178" y="381" width="90" height="26" rx="4" fill="#3a1a1a" stroke="#c05050" stroke-width="1"/>
+  <text x="1223" y="398" text-anchor="middle" fill="#ffaaaa" font-size="11" font-weight="700">WAIT</text>
+
+  <!-- Row 4: MEI -->
+  <rect x="22" y="419" width="1356" height="46" rx="0" fill="#0d1828" opacity="0.5"/>
+  <rect x="22" y="419" width="1356" height="46" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="427" width="65" height="28" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="445" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">MEI</text>
+  <rect x="125" y="428" width="122" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="445" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="428" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="445" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="428" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="445" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="428" width="140" height="26" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="442" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">desk brief</text>
+  <text x="645" y="454" text-anchor="middle" fill="#80e0c0" font-size="8.5">MEI consolidated</text>
+  <rect x="755" y="428" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="445" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="428" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="445" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="428" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="445" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <!-- MEI special verdict with binary event note -->
+  <rect x="1173" y="425" width="175" height="34" rx="4" fill="#3a1a0a" stroke="#c07030" stroke-width="1"/>
+  <text x="1260" y="439" text-anchor="middle" fill="#ffaaaa" font-size="11" font-weight="700">WAIT</text>
+  <text x="1260" y="452" text-anchor="middle" fill="#ffaa60" font-size="8.5">binary Jun 24</text>
+
+  <!-- Row 5: PLPC -->
+  <rect x="22" y="466" width="1356" height="46" rx="0" fill="#0a1525" opacity="0.5"/>
+  <rect x="22" y="466" width="1356" height="46" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="474" width="65" height="28" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="492" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">PLPC</text>
+  <rect x="125" y="475" width="122" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="492" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="475" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="492" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="475" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="492" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="475" width="140" height="26" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="489" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">desk brief</text>
+  <text x="645" y="501" text-anchor="middle" fill="#80e0c0" font-size="8.5">PLPC consolidated</text>
+  <rect x="755" y="475" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="492" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="475" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="492" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="475" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="492" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <rect x="1178" y="475" width="90" height="26" rx="4" fill="#3a1a1a" stroke="#c05050" stroke-width="1"/>
+  <text x="1223" y="492" text-anchor="middle" fill="#ffaaaa" font-size="11" font-weight="700">WAIT</text>
+
+  <!-- Row 6: BHE -->
+  <rect x="22" y="513" width="1356" height="46" rx="0" fill="#0d1828" opacity="0.5"/>
+  <rect x="22" y="513" width="1356" height="46" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="521" width="65" height="28" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="539" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">BHE</text>
+  <rect x="125" y="522" width="122" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="539" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="522" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="539" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="522" width="118" height="26" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="539" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="522" width="140" height="26" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="536" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">desk brief</text>
+  <text x="645" y="548" text-anchor="middle" fill="#80e0c0" font-size="8.5">BHE consolidated</text>
+  <rect x="755" y="522" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="539" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="522" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="539" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="522" width="118" height="26" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="539" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <!-- BHE special verdict with price zone -->
+  <rect x="1173" y="519" width="175" height="34" rx="4" fill="#1a0800" stroke="#d06030" stroke-width="1.5"/>
+  <text x="1260" y="533" text-anchor="middle" fill="#ffbb80" font-size="11" font-weight="700">WAIT</text>
+  <text x="1260" y="546" text-anchor="middle" fill="#cc9860" font-size="8.5">$80-85 best pullback</text>
+
+  <!-- Row 7: POET -->
+  <rect x="22" y="560" width="1356" height="34" rx="0" fill="#0a1525" opacity="0.5"/>
+  <rect x="22" y="560" width="1356" height="34" rx="0" fill="none" stroke="#1a2a3a" stroke-width="0.5"/>
+  <rect x="30" y="566" width="65" height="22" rx="4" fill="#1a2a4a" stroke="#4a9eff" stroke-width="1"/>
+  <text x="62" y="581" text-anchor="middle" fill="#4a9eff" font-size="12" font-weight="700">POET</text>
+  <rect x="125" y="567" width="122" height="20" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="186" y="581" text-anchor="middle" fill="#80ffda" font-size="9.5">trend-stock-research</text>
+  <rect x="270" y="567" width="118" height="20" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="329" y="581" text-anchor="middle" fill="#80ffda" font-size="9.5">13f-watch agent</text>
+  <rect x="418" y="567" width="118" height="20" rx="4" fill="#003a2a" stroke="#00a07a" stroke-width="0.8"/>
+  <text x="477" y="581" text-anchor="middle" fill="#80ffda" font-size="9.5">13d-watch agent</text>
+  <rect x="575" y="567" width="140" height="20" rx="4" fill="#004a3a" stroke="#00c09a" stroke-width="1"/>
+  <text x="645" y="581" text-anchor="middle" fill="#aafff0" font-size="9.5" font-weight="600">POET consolidated</text>
+  <rect x="755" y="567" width="118" height="20" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="814" y="581" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Druckenmiller</text>
+  <rect x="893" y="567" width="118" height="20" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="952" y="581" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Lyn Alden</text>
+  <rect x="1031" y="567" width="118" height="20" rx="4" fill="#2a0a3a" stroke="#9060b0" stroke-width="0.8"/>
+  <text x="1090" y="581" text-anchor="middle" fill="#ddc0ff" font-size="9.5">Buffett</text>
+  <rect x="1178" y="567" width="90" height="20" rx="4" fill="#3a1a1a" stroke="#c05050" stroke-width="1"/>
+  <text x="1223" y="581" text-anchor="middle" fill="#ffaaaa" font-size="11" font-weight="700">WAIT</text>
+
+  <!-- =================================================
+       VERDICTS SUMMARY ROW (y=600 to y=680)
+  ================================================= -->
+  <rect x="20" y="600" width="1360" height="85" rx="8" fill="#0d1220" opacity="0.8"/>
+  <rect x="20" y="600" width="1360" height="85" rx="8" fill="none" stroke="#2a3a5a" stroke-width="1"/>
+
+  <text x="30" y="618" fill="#6a8aaa" font-size="11" font-weight="600">FINAL VERDICTS — COMMITTEE OUTPUT</text>
+
+  <!-- CLFD -->
+  <rect x="30" y="625" width="174" height="50" rx="6" fill="#1a0a0a" stroke="#c05050" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="117" y="643" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">CLFD</text>
+  <rect x="75" y="649" width="84" height="18" rx="9" fill="#3a0a0a" stroke="#c05050" stroke-width="1"/>
+  <text x="117" y="662" text-anchor="middle" fill="#ffaaaa" font-size="12" font-weight="700">WAIT</text>
+
+  <!-- ICHR -->
+  <rect x="220" y="625" width="174" height="50" rx="6" fill="#1a0a0a" stroke="#c05050" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="307" y="643" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">ICHR</text>
+  <rect x="265" y="649" width="84" height="18" rx="9" fill="#3a0a0a" stroke="#c05050" stroke-width="1"/>
+  <text x="307" y="662" text-anchor="middle" fill="#ffaaaa" font-size="12" font-weight="700">WAIT</text>
+
+  <!-- ROG -->
+  <rect x="410" y="625" width="174" height="50" rx="6" fill="#1a0a0a" stroke="#c05050" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="497" y="643" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">ROG</text>
+  <rect x="455" y="649" width="84" height="18" rx="9" fill="#3a0a0a" stroke="#c05050" stroke-width="1"/>
+  <text x="497" y="662" text-anchor="middle" fill="#ffaaaa" font-size="12" font-weight="700">WAIT</text>
+
+  <!-- MEI -->
+  <rect x="600" y="622" width="192" height="56" rx="6" fill="#2a1200" stroke="#c07030" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="696" y="641" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">MEI</text>
+  <rect x="648" y="647" width="96" height="18" rx="9" fill="#3a1800" stroke="#c07030" stroke-width="1"/>
+  <text x="696" y="660" text-anchor="middle" fill="#ffaa60" font-size="11" font-weight="700">WAIT</text>
+  <text x="696" y="673" text-anchor="middle" fill="#cc8840" font-size="9">binary event Jun 24</text>
+
+  <!-- PLPC -->
+  <rect x="808" y="625" width="174" height="50" rx="6" fill="#1a0a0a" stroke="#c05050" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="895" y="643" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">PLPC</text>
+  <rect x="853" y="649" width="84" height="18" rx="9" fill="#3a0a0a" stroke="#c05050" stroke-width="1"/>
+  <text x="895" y="662" text-anchor="middle" fill="#ffaaaa" font-size="12" font-weight="700">WAIT</text>
+
+  <!-- BHE -->
+  <rect x="994" y="622" width="192" height="56" rx="6" fill="#1a0800" stroke="#d06030" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="1090" y="641" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">BHE</text>
+  <rect x="1042" y="647" width="96" height="18" rx="9" fill="#3a1000" stroke="#c06030" stroke-width="1"/>
+  <text x="1090" y="660" text-anchor="middle" fill="#ffbb80" font-size="11" font-weight="700">WAIT</text>
+  <text x="1090" y="673" text-anchor="middle" fill="#cc9860" font-size="9">$80-85 best pullback</text>
+
+  <!-- POET -->
+  <rect x="1200" y="625" width="174" height="50" rx="6" fill="#1a0a0a" stroke="#c05050" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="1287" y="643" text-anchor="middle" fill="#6a9aff" font-size="13" font-weight="700">POET</text>
+  <rect x="1245" y="649" width="84" height="18" rx="9" fill="#3a0a0a" stroke="#c05050" stroke-width="1"/>
+  <text x="1287" y="662" text-anchor="middle" fill="#ffaaaa" font-size="12" font-weight="700">WAIT</text>
+
+  <!-- =================================================
+       DECISION BANNER
+  ================================================= -->
+  <rect x="20" y="694" width="1360" height="44" rx="8" fill="#2a0505" opacity="0.9"/>
+  <rect x="20" y="694" width="1360" height="44" rx="8" fill="none" stroke="#c03030" stroke-width="1.5"/>
+  <text x="700" y="710" text-anchor="middle" fill="#ff6666" font-size="11" font-weight="600" letter-spacing="2">CHAIR DECISION</text>
+  <text x="700" y="728" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="800" letter-spacing="1">ZERO BUY SIGNALS — ALL SEVEN TICKERS HOLD/WAIT — SOXX LATE-CYCLE RISK TOO HIGH</text>
+
+  <!-- =================================================
+       LEGEND (bottom-right, y=750-860)
+  ================================================= -->
+  <rect x="870" y="754" width="510" height="130" rx="8" fill="#0a1220" opacity="0.9"/>
+  <rect x="870" y="754" width="510" height="130" rx="8" fill="none" stroke="#2a3a5a" stroke-width="1"/>
+  <text x="1125" y="772" text-anchor="middle" fill="#6a8aaa" font-size="11" font-weight="600">LEGEND</text>
+
+  <!-- Col 1 -->
+  <rect x="885" y="782" width="12" height="12" rx="2" fill="#4a9eff"/>
+  <text x="903" y="793" fill="#c8d8f0" font-size="11">CIO / Orchestration</text>
+
+  <rect x="885" y="802" width="12" height="12" rx="2" fill="#00d4aa"/>
+  <text x="903" y="813" fill="#c8d8f0" font-size="11">Data Gather</text>
+
+  <rect x="885" y="822" width="12" height="12" rx="2" fill="#ff8c42"/>
+  <text x="903" y="833" fill="#c8d8f0" font-size="11">News Fetch</text>
+
+  <!-- Col 2 -->
+  <rect x="1055" y="782" width="12" height="12" rx="2" fill="#9b59b6"/>
+  <text x="1073" y="793" fill="#c8d8f0" font-size="11">Analyst Panel</text>
+
+  <rect x="1055" y="802" width="12" height="12" rx="2" fill="#e74c3c"/>
+  <text x="1073" y="813" fill="#c8d8f0" font-size="11">Decision / Chair</text>
+
+  <rect x="1055" y="822" width="12" height="12" rx="2" fill="#3a1a1a" stroke="#c05050" stroke-width="1"/>
+  <text x="1073" y="833" fill="#c8d8f0" font-size="11">WAIT verdict</text>
+
+  <!-- agent counts summary -->
+  <text x="885" y="858" fill="#4a6a8a" font-size="10">Intake 1 · Manager 1 · ThemeCycle 1 · Screen 1 · NewsFetch 3 · Gather 21 · Consolidate 7 · Panel 22 · Decide 1 · Ledger 1  =  60 total</text>
+
+  <!-- =================================================
+       STATS BOX (bottom-left)
+  ================================================= -->
+  <rect x="20" y="754" width="330" height="130" rx="8" fill="#0a1220" opacity="0.9"/>
+  <rect x="20" y="754" width="330" height="130" rx="8" fill="none" stroke="#2a3a5a" stroke-width="1"/>
+  <text x="185" y="772" text-anchor="middle" fill="#6a8aaa" font-size="11" font-weight="600">RUN STATISTICS</text>
+
+  <text x="35" y="793" fill="#4a9eff" font-size="11" font-weight="600">Workflow ID:</text>
+  <text x="130" y="793" fill="#c8d8f0" font-size="11">wf_5f3c4421-660</text>
+
+  <text x="35" y="810" fill="#4a9eff" font-size="11" font-weight="600">Date:</text>
+  <text x="130" y="810" fill="#c8d8f0" font-size="11">2026-06-20</text>
+
+  <text x="35" y="827" fill="#4a9eff" font-size="11" font-weight="600">Total agents:</text>
+  <text x="130" y="827" fill="#ffffff" font-size="13" font-weight="800">60</text>
+
+  <text x="35" y="844" fill="#4a9eff" font-size="11" font-weight="600">Candidates:</text>
+  <text x="130" y="844" fill="#c8d8f0" font-size="11">7 tickers screened</text>
+
+  <text x="35" y="861" fill="#4a9eff" font-size="11" font-weight="600">Buy signals:</text>
+  <text x="130" y="861" fill="#ff6666" font-size="13" font-weight="800">0 — all WAIT</text>
+
+  <!-- =================================================
+       THEME BOX (middle-bottom)
+  ================================================= -->
+  <rect x="370" y="754" width="480" height="130" rx="8" fill="#0a1220" opacity="0.9"/>
+  <rect x="370" y="754" width="480" height="130" rx="8" fill="none" stroke="#2a3a5a" stroke-width="1"/>
+  <text x="610" y="772" text-anchor="middle" fill="#6a8aaa" font-size="11" font-weight="600">THEME CONTEXT</text>
+
+  <text x="385" y="793" fill="#ffd080" font-size="12" font-weight="700">SOXX +89-99% YTD → Late-Cycle Semiconductor Signal</text>
+  <text x="385" y="812" fill="#8a9bbf" font-size="10.5">Sector momentum flagged as extended; Chair applied late-cycle discount to all picks.</text>
+  <text x="385" y="830" fill="#8a9bbf" font-size="10.5">News channels: Bloomberg (11 articles live) · WSJ (7 paywalled) · FT (7 paywalled)</text>
+  <text x="385" y="848" fill="#8a9bbf" font-size="10.5">Analyst seats: Druckenmiller (macro/momentum) · Lyn Alden (macro/value)</text>
+  <text x="385" y="866" fill="#8a9bbf" font-size="10.5">                        Buffett (quality/moat) · Regime guardrail (systemic risk overlay)</text>
+
+</svg>
