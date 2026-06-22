@@ -25,7 +25,7 @@ BTC, ETH, SOL, UNI, HYPE, AAVE, LINK — edit this list to add/remove tokens.
 
 1. **TradingView MCP tools live ONLY in the orchestrator (you).** Subagents spawned via the task tool get a fresh toolset with **no** `tradingview-*` tools — verified. So **YOU** must pull every chart datum yourself. Never tell a subagent to "pull TradingView data" — it cannot. Subagents may only *receive* an already-assembled data package and reason over it (they can still web-fetch F&G / on-chain).
 2. **The chart is a single shared symbol slot.** `chart_set_symbol` changes the one global chart, so two tokens cannot be pulled at once. **Therefore the data loop is strictly sequential, one token at a time.** Track progress in the `todos` table so a `/loop` or an interrupted run resumes cleanly.
-3. **MCP cannot set MA length.** `chart_manage_indicator` ignores the `length` input (an added EMA stays length-9) and has no `update` action → EMA50/EMA200/SMA200 are unreadable from the chart. **Compute MAs from the MCP's returned OHLCV closes** via `scripts/indicators.py`. RSI(14), Bollinger(20,2), MACD(12,26,9) and Volume *do* read correctly from `data_get_study_values` at their defaults — use those directly.
+3. **Read every indicator TradingView can give from TradingView — don't recompute it.** `data_get_study_values` returns RSI(14), Bollinger(20,2), MACD(12,26,9) and Volume correctly at their standard lengths. Use those values verbatim. The **only** gap is moving averages: `chart_manage_indicator` ignores the MA `length` input (an added MA exposes `inputs:[]` and stays stuck at a short default ≈ price; verified BTC read $64,540 when SMA200 was ~$76,600) and has no `update` action. So EMA20 / SMA50 / SMA200 / 200-week-MA — and only those — are computed by `scripts/indicators.py` from the MCP's **own** returned closes (plain rolling means / EWMs; the data source stays 100% TradingView).
 
 TradingView symbol mapping: `BINANCE:{TOKEN}USDT` (e.g. `BINANCE:BTCUSDT`). If a symbol is missing on Binance, try `OKX:{TOKEN}USDT`.
 
@@ -69,13 +69,13 @@ tradingview-chart_set_timeframe  timeframe="D"             → reset
 ```
 Add the RSI / Bollinger Bands / MACD studies once at the start via `chart_manage_indicator action=add`. Do NOT add length-N EMAs — the length input is ignored (constraint 3).
 
-**1b. Compute the moving averages from the returned closes** (computed MAs match TradingView's own values):
+**1b. Read the indicators from TradingView; compute only the moving averages.** From `data_get_study_values` take RSI(14), Bollinger(20,2), MACD line/signal/hist, Volume — verbatim, no recompute. From the daily `summary=true` pull take 52w high/low + avg volume. Then fill the MA gap (computed MAs match TradingView's own values):
 ```bash
 /Users/engineer/.venv/bin/python3 .agents/skills/crypto-portfolio-manager/scripts/indicators.py /tmp/{TOKEN}.json
 ```
-Input JSON shape: `{"symbol","daily_closes":[...],"weekly_closes":[...],"hi52","lo52","vol_last","vol_avg30"}`. Death cross is the classic SMA50/SMA200 (exact, no warmup error).
+Helper input: `{"symbol","price","daily_closes":[...],"weekly_closes":[...]}`. Helper output: EMA20, SMA50, SMA200, 200-week MA, and the death cross (classic SMA50/SMA200, exact). Nothing else — it does not recompute RSI/BB/MACD.
 
-**1c. Assemble the data package** (merge 1a study values + 1b computed MAs): price, %from-52wh, EMA20, SMA50, SMA200, death_cross, RSI, MACD line/signal/hist, BB upper/mid/lower + position, volume vs 30d avg, 200-week MA + %vs it.
+**1c. Assemble the data package** by merging the TradingView study values (RSI, BB, MACD, Volume, 52w hi/lo) with the helper's moving-average block: price, %from-52wh, EMA20, SMA50, SMA200, death_cross, RSI, MACD line/signal/hist, BB upper/mid/lower + position, volume vs 30d avg, 200-week MA + %vs it.
 
 **1d. Run the 5-seat quorum on the package.** Either reason through the 5 seats inline, or spawn the five `analysis-*` seat subagents **in parallel** (on-chain, sentiment, macro, order-flow, narrative) with the package **injected** — seats per token may be parallel because they share nothing; only the *data pull* must be serial. Each seat returns: zone, posture (BULLISH|NEUTRAL|BEARISH), confidence, 1-line bull, 1-line bear, invalidation.
 
