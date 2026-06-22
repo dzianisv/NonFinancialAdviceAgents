@@ -127,32 +127,72 @@ UPDATE todos SET status='done' WHERE id='tok-{TOKEN}';
 | **SELL** | `quorum_verdict = BEARISH`, seats_bear ≥ 4 |
 | **HOLD** | everything else |
 
-## Step 3 — Print signal table + narrative sourcing
+## Step 3 — Print the full run report
+
+Print **three blocks** in this exact order:
+
+### Block 1 — Signal table (one-glance summary)
+```
+=== CRYPTO PORTFOLIO RUN — {timestamp} ===   (data: TradingView MCP)
+
+Token | Signal      | Zone       | Quorum | Bulls/Bears
+------|-------------|------------|--------|------------
+BTC   | HOLD        | FAIR_VALUE | SPLIT  | 2 / 2
+ETH   | BUY (small) | DEEP_VALUE | SPLIT  | 1 / 2
+SOL   | BUY (small) | DEEP_VALUE | SPLIT  | 3 / 1
+...
+```
+
+### Block 2 — Plain-English verdict per token
+For every token write 3–5 sentences a non-expert can understand. Cover:
+- **Why this signal**: what 1–2 facts drove the decision (price vs 200w MA, RSI, death cross, on-chain zone).
+- **Main risk**: the single biggest thing that could make this call wrong.
+- **What to watch**: the one trigger that would change the signal (e.g. "close above SMA50" → HOLD flips to BUY).
+
+Example:
+```
+BTC — HOLD
+BTC is down 42% from its all-time high and is sitting right on the 200-week
+moving average (~$62k), the historical long-term floor. The RSI has recovered
+to neutral (42.6) and the MACD is starting to turn up — early signs the
+selling pressure is fading. However a death cross is active (50-day below
+200-day), macro is hostile (Fed holding rates, strong dollar), and ETF flows
+are still negative. Not cheap enough on-chain to force a buy, not broken
+enough to sell. Watch for a daily close above the 50-day SMA ($71.9k) to
+upgrade to BUY, or a weekly close below $60k to reassess.
+
+ETH — BUY (small)
+ETH has crashed 63% from its 52-week high and is now 30% below its 200-week
+moving average — a level historically associated with cycle bottoms. One panel
+seat is bullish (on-chain deep value), two are bearish (macro headwinds and
+compressed fee revenue from L2 competition). The split verdict with extreme
+undervaluation triggers the "small position" rule: start a toe-hold, don't
+go large. Key risk: ETH could continue losing ground vs BTC if L2 fee erosion
+persists. Upgrade to BUY if price reclaims the 200-week MA (~$2,472).
+```
+
+### Block 3 — News & sources used by the Narrative seat
+List every URL the narrative seat fetched, with a one-line plain-English
+summary of what it said and why it was ranked T1/T2/T3.
 
 ```
-=== PORTFOLIO RUN — {timestamp} ===   (data: TradingView MCP)
+--- NEWS SOURCES ---
 
-Token | Quorum    | Zone       | Signal
-------|-----------|------------|------------
-BTC   | SPLIT     | FAIR_VALUE | HOLD
-ETH   | UNCERTAIN | DOWNTREND  | HOLD
-SOL   | SPLIT     | DEEP_VALUE | BUY (small)
-...
+BTC narrative (posture: BEARISH)
+  [T1] https://... — "..." — ETF outflows: hard flow numbers that directly
+       move price. Ranked T1 because it is a primary data source with
+       specific dollar figures.
+  [T2] https://... — "..." — Bloomberg analysis of Fed rate path. Ranked T2:
+       credible named-source journalism giving macro context.
+  [T3] https://... — "..." — Twitter thread on BTC dominance. Ranked T3:
+       social/opinion, used only to gauge retail sentiment, not to drive verdict.
 
---- NARRATIVE SOURCES (per token) ---
-
-BTC
-  [T1] <source> — "<quote>" | why T1: <reason>
-  [T2] <source> — "<quote>" | why T2: <reason>
-  [T3] <source> — "<quote>" | why T3: <reason>
-  Posture: BEARISH | Invalidation: <condition>
-
-ETH
-  [T1] ...
+ETH narrative (posture: BEARISH)
+  [T1] https://...
   ...
 ```
 
-Self-check before printing: every token has `status='done'` in both `todos` and `token_analysis`, and `seats_bull + seats_bear <= 5` for each.
+Self-check before printing: every token has `status='done'` in `token_analysis`, `seats_bull + seats_bear <= 5` for each, and every narrative source block has ≥3 URLs with actual links (not placeholders).
 
 ## Running continuously
 
