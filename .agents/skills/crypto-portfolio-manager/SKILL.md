@@ -79,6 +79,29 @@ Helper input: `{"symbol","price","daily_closes":[...],"weekly_closes":[...]}`. H
 
 **1d. Run the 5-seat quorum on the package.** Either reason through the 5 seats inline, or spawn the five `analysis-*` seat subagents **in parallel** (on-chain, sentiment, macro, order-flow, narrative) with the package **injected** — seats per token may be parallel because they share nothing; only the *data pull* must be serial. Each seat returns: zone, posture (BULLISH|NEUTRAL|BEARISH), confidence, 1-line bull, 1-line bear, invalidation.
 
+**Narrative seat — mandatory sourcing protocol.** The narrative seat MUST web-fetch at least 3 recent articles/sources before forming its posture. For every source used:
+1. **Fetch it** (web-fetch the URL or the feed).
+2. **Quote the specific sentence or data point** that informed the verdict.
+3. **Rank sources by signal quality** using this rubric:
+   - **Tier 1 — Primary signal** (ranks first): on-chain data with timestamps, exchange/ETF flow reports with actual numbers, regulatory filings, protocol announcements. Weight: 3×.
+   - **Tier 2 — Credible context** (ranks second): Seeking Alpha deep-dives, Bloomberg/Reuters/FT/WSJ analysis with named sources, CoinDesk/TheBlock with on-chain citations. Weight: 2×.
+   - **Tier 3 — Noise / sentiment gauge** (ranks last): social media, unnamed "analysts say", vague macro opinions, recycled press releases. Weight: 0.5×. These inform sentiment only, never the posture verdict.
+4. **Show the reasoning** for each rank: one sentence explaining why this source is Tier 1/2/3 for this token at this moment (e.g. "T1: Glassnode shows 14-day ETF outflow of $3.8B — hard number, directly moves price").
+5. **State what would have changed the verdict** if the evidence were reversed (invalidation anchor).
+
+Narrative seat output format (inline, per token):
+```
+NARRATIVE — {TOKEN}
+Posture: BULLISH | NEUTRAL | BEARISH
+Sources used (ranked):
+  [T1] <title or URL> — "<exact quote>" → why T1: <one sentence>
+  [T2] <title or URL> — "<exact quote>" → why T2: <one sentence>
+  [T3] <title or URL> — "<exact quote>" → why T3: <one sentence>
+Bull: <1-line>
+Bear: <1-line>
+Invalidation: <what reverses this verdict>
+```
+
 **1e. Aggregate into the compact verdict and persist:**
 ```json
 {"symbol":"BTC","quorum_verdict":"BULLISH|SPLIT|BEARISH|UNCERTAIN",
@@ -104,7 +127,7 @@ UPDATE todos SET status='done' WHERE id='tok-{TOKEN}';
 | **SELL** | `quorum_verdict = BEARISH`, seats_bear ≥ 4 |
 | **HOLD** | everything else |
 
-## Step 3 — Print signal table
+## Step 3 — Print signal table + narrative sourcing
 
 ```
 === PORTFOLIO RUN — {timestamp} ===   (data: TradingView MCP)
@@ -115,6 +138,18 @@ BTC   | SPLIT     | FAIR_VALUE | HOLD
 ETH   | UNCERTAIN | DOWNTREND  | HOLD
 SOL   | SPLIT     | DEEP_VALUE | BUY (small)
 ...
+
+--- NARRATIVE SOURCES (per token) ---
+
+BTC
+  [T1] <source> — "<quote>" | why T1: <reason>
+  [T2] <source> — "<quote>" | why T2: <reason>
+  [T3] <source> — "<quote>" | why T3: <reason>
+  Posture: BEARISH | Invalidation: <condition>
+
+ETH
+  [T1] ...
+  ...
 ```
 
 Self-check before printing: every token has `status='done'` in both `todos` and `token_analysis`, and `seats_bull + seats_bear <= 5` for each.
