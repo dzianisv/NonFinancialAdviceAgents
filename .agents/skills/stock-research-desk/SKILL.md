@@ -21,7 +21,7 @@ Merge the raw data seats into ONE dense, factual brief on the stock(s)/portfolio
 6. **CONGRESSIONAL BUYS** — recent STOCK Act purchases in the name/sector (30–45 day lag; long-only personal accounts).
 7. **EQUITY REGIME** — risk-on vs risk-off, exposure dial.
 8. **MACRO (CPI/FOMC/rates/liquidity)** — Fed tone delta, rate path, liquidity backdrop.
-9. **NEWS / NARRATIVE** — catalysts + source-count + priced-in tag (`[UNAVAILABLE]` if no news seat ran).
+9. **NEWS / NARRATIVE** — catalysts + source-count + priced-in tag + url + published_at per event (`[UNAVAILABLE]` if no news seat ran).
 10. **CROSS-SOURCE CONFLICTS** — surface disagreements (e.g. cheap on FCF but technically broken); do not average them away.
 11. **DATA GAPS**.
 
@@ -30,6 +30,24 @@ Merge the raw data seats into ONE dense, factual brief on the stock(s)/portfolio
 - **Completeness contract:** if a required category is `[UNAVAILABLE]`, write `[UNAVAILABLE — <category> seat failed to return]` in its section AND list it in §11 DATA GAPS at the top. Never paper over a gap.
 - Surface conflicts in §10; do not average them away.
 - Be dense and neutral. No verdicts, no sizing, no "should."
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 ## Done when
 All 11 sections present; every figure sourced + dated; gaps and conflicts explicit.

@@ -115,6 +115,27 @@ genuine 2008-style systemic event (VIX > 40, credit spreads blowing out) — the
 capitulate. **If VIX or credit-spread data is unavailable, explicitly note "systemic-event check could not
 be evaluated — data unavailable" rather than assuming no event is occurring.**
 
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
+
+Any news, analyst report, or macro data cited in the weekly note must include URL + date.
+Format: `[Publication] https://url (YYYY-MM-DD) — "verbatim quote"`. Headlines recalled from memory are not sources.
+
 ## What would change the thesis
 
 - AI capex starts earning clear ROI **and** market breadth broadens durably → drift toward Growth-tilt.

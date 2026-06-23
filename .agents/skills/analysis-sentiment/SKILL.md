@@ -86,13 +86,13 @@ cheap zone, and raises caution in a rich one.
 Return a structured list followed by a composite posture block:
 
 ```
-| Metric              | Value          | Signal         | As-of      |
-|---------------------|----------------|----------------|------------|
-| Fear & Greed        | 23 (7d avg 27) | FEAR_EXTREME   | 2026-06-22 |
-| BTC Funding Rate    | +0.03%/8h      | NEUTRAL        | 2026-06-22 |
-| Long/Short Ratio    | 58% long       | NEUTRAL        | 2026-06-22 |
-| 25-delta Skew (BTC) | +4.2%          | FEAR           | 2026-06-22 |
-| Social Volume       | flat/low       | NEUTRAL        | 2026-06-22 |
+| Metric              | Value          | Signal         | As-of      | Source URL                                         |
+|---------------------|----------------|----------------|------------|----------------------------------------------------|
+| Fear & Greed        | 23 (7d avg 27) | FEAR_EXTREME   | 2026-06-22 | https://api.alternative.me/fng/?limit=7            |
+| BTC Funding Rate    | +0.03%/8h      | NEUTRAL        | 2026-06-22 | https://www.coinglass.com/FundingRate              |
+| Long/Short Ratio    | 58% long       | NEUTRAL        | 2026-06-22 | https://www.coinglass.com/LongShortRatio           |
+| 25-delta Skew (BTC) | +4.2%          | FEAR           | 2026-06-22 | https://www.deribit.com/statistics/BTC/volatility-smile |
+| Social Volume       | flat/low       | NEUTRAL        | 2026-06-22 | https://trends.google.com/trends/explore?q=bitcoin |
 
 Composite posture: FEAR
 Contrarian implication: ACCUMULATE (tilt buy schedule; confirm on-chain zone first)
@@ -101,6 +101,24 @@ Key divergences: Funding not yet negative despite extreme F&G — longs not full
 
 No buy/sell call. No price targets. Posture is a *tilt modifier* for a DCA schedule already governed by
 `analyst-crypto`; it does not override the liquidity governor.
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 ## Done when
 

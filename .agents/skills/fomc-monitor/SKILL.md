@@ -43,6 +43,24 @@ unreachable it prints `[UNAVAILABLE]` for that leg — never a fabricated number
 as-of date the script reports. Cross-check against `prediction-market-odds` (Polymarket/Kalshi); if the
 ZQ-implied and crowd numbers disagree by >5pts, report the spread rather than picking one.
 
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
+
 ## Output contract
 
 Every run MUST produce a structured block:
@@ -58,6 +76,9 @@ Tone delta:       +2 / 0 / -1  (directional shift, += more hawkish)
 Key language:     "<exact quote from statement that moved the needle>"
 Changed from:     "<prior statement equivalent phrase>"
 Risk-asset signal: RISK_ON / NEUTRAL / RISK_OFF
+Sources fetched:  HOP1: https://www.federalreserve.gov/newsevents/pressreleases.htm (<fetch-date>)
+                  HOP2: https://www.federalreserve.gov/newsevents/pressreleases/<year>-press-fomc.htm (<fetch-date>)
+                  HOP3: https://www.federalreserve.gov/newsevents/pressreleases/monetary<YYYYMMDD>a.htm (<fetch-date>)
 ─────────────────────────────────────────────
 Summary (2-3 sentences): what the Fed said, what changed, and what it means for equities/rates.
 ```

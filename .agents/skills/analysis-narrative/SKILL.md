@@ -118,7 +118,9 @@ events: [
     title: string,
     classification: PRICED_IN | ACTIONABLE_CONTEXT | NEW_CATALYST,
     source_count: int,           # top-tier outlets covering it
-    market_impact: string        # one line, hard events only
+    market_impact: string,       # one line, hard events only
+    url: string,                 # full https:// URL of primary source article
+    published_at: "YYYY-MM-DDThh:mm:ssZ"  # publication or as-of datetime
   },
   ...
 ]
@@ -132,6 +134,24 @@ narrative_posture: BULLISH_NARRATIVE | NEUTRAL | BEARISH_NARRATIVE
 ```
 
 No buy/sell call. Classification only. Soft events logged but not weighted in `market_impact`.
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 ## Done when
 

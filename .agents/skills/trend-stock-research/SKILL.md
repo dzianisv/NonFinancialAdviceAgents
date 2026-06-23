@@ -78,7 +78,8 @@ ORCHESTRATOR (you)
   │   ├─ Subagent F: "Search SEC EDGAR for supply-constrained filings in <theme_1>"
   │   └─ ... (as many as needed — one subagent per source × theme)
   │
-  │   Each subagent returns: { demand_inflections[], companies_mentioned[], source_citations[] }
+  │   Each subagent returns: { demand_inflections[], companies_mentioned[], source_citations: [{outlet, url, date, quote}] }
+  │   — every citation must have url + date or it is dropped
   │
   ├─ Steps 3-4: SYNTHESIZE subagent findings yourself (reasoning, not reading)
   │   - Map non-obvious beneficiaries from the combined findings
@@ -305,8 +306,8 @@ would decide, do not apply analyst lenses, do not give buy/wait/pass verdicts. H
 <output_format>
 Produce this table for every candidate that survived the skeptic filter:
 
-| Ticker | Demand Inflection | Catalyst + When | Non-obvious Why | Already Priced? | Kills It | Confidence | Source (SA/WSJ/FT/filing) |
-|--------|-------------------|-----------------|-----------------|-----------------|----------|------------|---------------------------|
+| Ticker | Demand Inflection | Catalyst + When | Non-obvious Why | Already Priced? | Kills It | Confidence | Source (outlet https://url YYYY-MM-DD) |
+|--------|-------------------|-----------------|-----------------|-----------------|----------|------------|----------------------------------------|
 
 Then a summary: "Routing [tickers] to multi-lens-quorum for buy/wait/late-chase judgment."
 
@@ -363,7 +364,7 @@ Confidence: MEDIUM (demand inflection is HIGH confidence, but the unlock — spi
 uncertain).
 
 Step 5 output:
-| CLF | AI datacenter power buildout → transformer shortage → GOES bottleneck | Weirton plant ramp Q3 2026 + potential spin | Sole US GOES producer hidden inside commodity steel co | No — near lows, $14 | Flat-rolled losses swamp GOES; no spin signaled | MEDIUM | WSJ (transformer shortage article), SA (filing-backed deep dive), GE Vernova Q1 earnings call |
+| CLF | AI datacenter power buildout → transformer shortage → GOES bottleneck | Weirton plant ramp Q3 2026 + potential spin | Sole US GOES producer hidden inside commodity steel co | No — near lows, $14 | Flat-rolled losses swamp GOES; no spin signaled | MEDIUM | WSJ https://wsj.com/articles/transformer-shortage-data-center (2026-MM-DD), SA https://seekingalpha.com/... (2026-MM-DD), GE Vernova Q1 earnings call |
 
 Routing CLF to multi-lens-quorum for buy/wait/late-chase judgment.
 </execution>
@@ -424,6 +425,24 @@ VERDICT: KILLED. Already priced + no new catalyst + specific downside risk.
 </example>
 
 </examples>
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 <success_criteria>
 The task is complete when:

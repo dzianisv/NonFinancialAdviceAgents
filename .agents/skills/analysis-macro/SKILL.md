@@ -94,11 +94,11 @@ Return a structured block:
 ```
 MACRO PILLARS
 ─────────────────────────────────────────────
-GLI / Fed net liquidity : {EXPANDING|FLAT|CONTRACTING}  (WALCL−RRP−TGA: {value}, asof {date})
-DXY                     : {FALLING|FLAT|RISING} @ {level}  (asof {date})
-US M2 YoY               : {ACCELERATING|FLAT|DECELERATING} ({pct}%, asof {date})
+GLI / Fed net liquidity : {EXPANDING|FLAT|CONTRACTING}  (WALCL−RRP−TGA: {value}, asof {date}, source: https://fred.stlouisfed.org/series/WALCL)
+DXY                     : {FALLING|FLAT|RISING} @ {level}  (asof {date}, source: https://fred.stlouisfed.org/series/DTWEXBGS)
+US M2 YoY               : {ACCELERATING|FLAT|DECELERATING} ({pct}%, asof {date}, source: https://fred.stlouisfed.org/series/M2SL)
 Halving cycle           : {N} months post-halving (Apr 2024) → {EARLY|MID|LATE} cycle
-ETF net flows (5d)      : {value} → regime: {ACCUMULATION|NEUTRAL|DISTRIBUTION}
+ETF net flows (5d)      : {value} → regime: {ACCUMULATION|NEUTRAL|DISTRIBUTION}  (source: https://farside.co.uk/btc/)
 
 SYNTHESIS
 ─────────────────────────────────────────────
@@ -111,6 +111,24 @@ DISCLAIMER: Macro analysis only. Not investment advice.
 
 All metrics must include `asof` date. If a live fetch fails, state `[STALE — manual refresh needed]`.
 Do not output buy/sell signals or price targets.
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 ## Done when
 
