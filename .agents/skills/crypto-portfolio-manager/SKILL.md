@@ -1,6 +1,6 @@
 ---
 name: crypto-portfolio-manager
-description: "Manages the crypto portfolio — runs analysis on every token in the universe (BTC/ETH/SOL/UNI/HYPE/AAVE/LINK) and outputs a BUY/SELL/HOLD decision per token. Run on demand or via /loop. Educational, not advice."
+description: "Manages the crypto portfolio — runs analysis on every token in the universe (BTC/ETH/SOL/TON/HYPE/AAVE/JUP/LINK) and outputs a BUY/SELL/HOLD decision per token. Run on demand or via /loop. Educational, not advice."
 license: MIT
 compatibility: opencode
 metadata:
@@ -25,7 +25,7 @@ The skill analyzes the default token universe, pulls live TradingView data, runs
 
 ### Custom token set
 ```
-Run the crypto portfolio manager on: TON, PUMP, JUP, HYPE
+Run the crypto portfolio manager on: TON, JUP, HYPE
 ```
 
 ### Full prompt (copy-paste for any session)
@@ -51,7 +51,20 @@ Educational, not financial advice.
 
 ## Token universe
 
-BTC, ETH, SOL, UNI, HYPE, AAVE, LINK — edit this list to add/remove tokens.
+| Token | Rationale | TradingView symbol |
+|-------|-----------|-------------------|
+| BTC | Foundational monetary layer; largest market cap | `BINANCE:BTCUSDT` |
+| ETH | Smart-contract platform; stablecoin infra (53% of $300B market) | `BINANCE:ETHUSDT` |
+| SOL | High-performance L1; Solana DeFi base layer | `BINANCE:SOLUSDT` |
+| TON | Telegram L1; 900M-user payment infra (Wallet + USDT); watch Durov legal status | `BINANCE:TONUSDT` |
+| HYPE | Hyperliquid perp DEX; 97% revenue auto-buyback hardcoded; real cashflow token | `OKX:HYPEUSDT` |
+| AAVE | Leading DeFi lending protocol; real yield from spreads + GHO fees; >$1T cumulative loans | `BINANCE:AAVEUSDT` |
+| JUP | Jupiter — Solana DeFi super-app (perps, lending, launchpad, DCA, staking); 15+ fee streams | `BINANCE:JUPUSDT` |
+| LINK | Oracle network; backbone of RWA tokenization (Swift, Euroclear, JPMorgan, UBS) | `BINANCE:LINKUSDT` |
+
+**Dropped from prior universe:**
+- ~~UNI~~ — governance token with NO fee-to-holder mechanism; fee switch failed governance for 2+ years; structural value trap, not infrastructure
+- ~~PUMP~~ — reflexive memecoin (fees = zero in bear markets); not infrastructure; skip until Solana meme volume revives
 
 ---
 
@@ -69,10 +82,14 @@ TradingView symbol mapping: `BINANCE:{TOKEN}USDT` (e.g. `BINANCE:BTCUSDT`). If a
 
 ```sql
 INSERT INTO todos (id, title, description) VALUES
- ('tok-BTC','Analyzing BTC','Pull TradingView D/W OHLCV+studies, compute pkg, run 5-seat quorum, decide signal'),
- ('tok-ETH','Analyzing ETH','idem'), ('tok-SOL','Analyzing SOL','idem'),
- ('tok-UNI','Analyzing UNI','idem'), ('tok-HYPE','Analyzing HYPE','idem'),
- ('tok-AAVE','Analyzing AAVE','idem'), ('tok-LINK','Analyzing LINK','idem');
+ ('tok-BTC', 'Analyzing BTC',  'Pull TradingView D/W OHLCV+studies, compute pkg, run 5-seat quorum, decide signal'),
+ ('tok-ETH', 'Analyzing ETH',  'idem'),
+ ('tok-SOL', 'Analyzing SOL',  'idem'),
+ ('tok-TON', 'Analyzing TON',  'idem — watch Durov legal proceedings'),
+ ('tok-HYPE','Analyzing HYPE', 'idem — use OKX:HYPEUSDT'),
+ ('tok-AAVE','Analyzing AAVE', 'idem'),
+ ('tok-JUP', 'Analyzing JUP',  'idem — Jupiter Solana DeFi super-app'),
+ ('tok-LINK','Analyzing LINK', 'idem');
 ```
 
 Create the verdict tracker once:
