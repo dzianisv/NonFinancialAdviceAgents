@@ -61,3 +61,5 @@ logs/
 
 # SQLite dbs from news feeds (runtime, not tracked)
 *.db
+!.claude/hooks/
+!.claude/settings.json

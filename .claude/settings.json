@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "web_fetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/engineer/workspace/backtest/.claude/hooks/log-web-fetch.sh",
+            "statusMessage": "Logging fetch..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/engineer/workspace/backtest/.claude/hooks/validate-citations.sh",
+            "statusMessage": "Validating citations..."
+          }
+        ]
+      }
+    ]
+  }
+}
