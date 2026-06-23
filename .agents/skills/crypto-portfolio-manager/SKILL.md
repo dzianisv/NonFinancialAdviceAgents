@@ -107,7 +107,7 @@ tradingview-data_get_study_values                          → RSI(14), BB(20,2)
 tradingview-chart_set_timeframe  timeframe="W"
 tradingview-data_get_ohlcv       count=210 summary=false  → weekly closes (for 200-week MA)
 tradingview-chart_set_timeframe  timeframe="D"             → reset to daily
-tradingview-capture_screenshot                             → **REQUIRED** attach this image in the reply for this token
+tradingview-capture_screenshot                             → save screenshot; then call view tool on the returned file_path to embed the image inline in your reply for this token
 ```
 
 **1b. Read the indicators from TradingView; compute only the moving averages.** From `data_get_study_values` take RSI(14), Bollinger(20,2), MACD line/signal/hist, Volume — verbatim, no recompute. From the daily `summary=true` pull take 52w high/low + avg volume. Then fill the MA gap (computed MAs match TradingView's own values):
@@ -126,14 +126,25 @@ Helper input: `{"symbol","price","daily_closes":[...],"weekly_closes":[...]}`. H
 
 **Step-by-step (do this in order, do not skip):**
 
+> ⚠️ **Known broken sources (do NOT use)**:
+> - `coindesk.com/search?q=...` — always returns the same unrelated featured article regardless of query. Never use search URLs.
+> - `decrypt.co/tag/...` — 404 for most tokens.
+> - `cryptopanic.com/news/...` — returns only page title, no articles.
+> Use the **two-step discovery pattern** for news: (1) fetch a listing page to get current article URLs, (2) fetch the actual article URL for the quote.
+
 1. **Call `web_fetch` on at least 3 of these starting URLs** for the token. Pick the most relevant:
-   - Fear & Greed: `https://api.alternative.me/fng/?limit=1` (JSON — T1 primary data)
-   - CoinDesk search: `https://www.coindesk.com/search?q={TOKEN}+2026` (T2)
-   - CoinDesk tag for BTC ETF flows: `https://www.coindesk.com/tag/bitcoin-etf` (T1 if ETF relevant)
-   - Decrypt: `https://decrypt.co/tag/{token}` (T2)
-   - DeFiLlama protocol page (for DeFi tokens): `https://defillama.com/protocol/{token-slug}` (T1)
-   - CryptoPanic: `https://cryptopanic.com/news/{token-symbol}/` (T2/T3)
-   - Token Terminal: `https://tokenterminal.com/terminal/projects/{token-slug}` (T1 for revenue tokens)
+
+   **On-chain data (T1 — always try first):**
+   - Fear & Greed: `https://api.alternative.me/fng/?limit=1` (JSON — hard T1)
+   - DeFiLlama chain page: `https://defillama.com/chain/ethereum` | `https://defillama.com/chain/solana` etc. (T1 — TVL, fees, revenue)
+   - DeFiLlama protocol page: `https://defillama.com/protocol/{token-slug}` e.g. `aave`, `uniswap`, `chainlink` (T1)
+
+   **News discovery — two-step (T2):**
+   - Step 1: fetch the **listing page** to get current article URLs:
+     - `https://www.coindesk.com/markets` → BTC/ETH price/macro news
+     - `https://www.coindesk.com/tech` → DeFi/protocol news
+     - `https://www.theblock.co/latest` → broad crypto news
+   - Step 2: from the listing page response, extract any article URL relevant to the token (e.g. `https://www.coindesk.com/markets/2026/06/21/bitcoin-holds-near-...`), then **fetch that article URL** and quote from its body. The article URL — not the listing page — is what you cite in Block 3.
 
 2. **Read what actually came back.** If the fetch returns an error or no relevant content, write `[FETCH FAILED: <url>]` — do NOT count it toward the 3-source minimum, do NOT invent what it "would have said."
 
@@ -239,25 +250,40 @@ summary of what it said and why it was ranked T1/T2/T3.
 
 ```
 --- NEWS SOURCES ---
-(Only URLs you actually called web_fetch on appear here. No URL = no entry.)
+(Only URLs you actually called web_fetch on appear here. No URL = no entry.
+Every entry MUST start with https:// — source name alone is NOT acceptable.)
 
 BTC narrative (posture: BEARISH)
   [T1] https://api.alternative.me/fng/?limit=1 — "value: 18, value_classification: Extreme Fear" → T1: hard numeric index with timestamp, directly measures crowd fear
-  [T2] https://www.coindesk.com/search?q=bitcoin+ETF+2026 — "Bitcoin ETF products saw $218M outflow on June 21" → T2: named-source journalism with specific dollar figure
-  [FETCH FAILED: https://decrypt.co/tag/bitcoin] — not counted
+  [T2] https://www.coindesk.com/markets/2026/06/21/bitcoin-options-traders-scrambling → "Bitcoin traders are scrambling to buy options bets that would pay off if the selloff deepens" → T2: named-source journalism, live positioning data
+  [T3] https://www.coindesk.com/markets/2026/06/20/bitcoin-54k-analyst-forecast → "Bitcoin price may be headed to $54,000, says analyst who forecast October's all-time high" → T3: analyst opinion, useful for risk framing, no hard data
+  [FETCH FAILED: https://www.theblock.co/latest] — no BTC-specific articles visible
 
 ETH narrative (posture: BULLISH)
-  [T1] https://defillama.com/protocol/lido — "Total Value Locked: $28.4B as of 2026-06-22" → T1: primary on-chain data with date
-  [T2] https://www.coindesk.com/search?q=ethereum+2026 — "SharpLink Gaming adds ETH to treasury" → T2: credible source, specific catalyst
-  [T3] https://cryptopanic.com/news/eth/ — "Community bullish on ETH merge anniversary" → T3: aggregated social sentiment, no hard data
+  [T1] https://defillama.com/chain/ethereum — "Chain Revenue (24h)$65,225... App Revenue (24h)$1.1m... Bridged TVL$349.351b" → T1: primary on-chain metrics with exact daily figures
+  [T2] https://www.coindesk.com/tech/2026/06/21/ethereum-staking-update → "SharpLink Gaming adds ETH to treasury" → T2: credible source, specific catalyst
+  [FETCH FAILED: https://defillama.com/protocol/lido] — returned only funding rounds, no TVL data
 ```
+
+> ⚠️ Wrong (never do this):
+> ```
+> T1 — CoinDesk
+> Quote: "Bitcoin traders are scrambling..."
+> ```
+> Wrong because: no `https://` URL, no actual article link. Source name alone = hallucination risk.
+>
+> Right:
+> ```
+> [T1] https://www.coindesk.com/markets/2026/06/21/bitcoin-options-traders-... — "Bitcoin traders are scrambling..."
+> ```
 
 Self-check before printing:
 - Every token has `status='done'` in `token_analysis`
 - `seats_bull + seats_bear <= 5` for each token
-- Every narrative source entry starts with `https://` (a real URL you called `web_fetch` on) — if any entry has only a title or is labelled [FETCH FAILED], that token's narrative is marked "INSUFFICIENT DATA" not a posture
-- A TradingView screenshot is attached for every token
-- **No source may be cited that was not actually fetched this run** — verify by mentally checking: "did I call web_fetch on this URL?" If no, remove it
+- Every narrative source entry starts with `https://` followed by the **specific article URL** (not a listing/search page) — if any entry has only a source name or no URL, remove it and mark INSUFFICIENT DATA
+- **Two-step verified**: news citations point to the article URL you fetched (step 2), not the listing page (step 1)
+- A TradingView screenshot is embedded inline (via `view` tool on the `file_path`) for every token — not just captured, but visible
+- **No source may be cited that was not actually fetched this run** — verify: "did I call web_fetch on this exact URL?" If no, remove it
 
 ## Step 4 — Citation validation (post-hook)
 
