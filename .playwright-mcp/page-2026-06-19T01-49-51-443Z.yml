@@ -1,0 +1,786 @@
+- generic [active] [ref=e1]:
+  - link "Skip to the content" [ref=e2] [cursor=pointer]:
+    - /url: "#site-content"
+  - table [ref=e3]:
+    - rowgroup [ref=e4]:
+      - row [ref=e5]:
+        - cell [ref=e6]:
+          - banner [ref=e8]:
+            - generic [ref=e9]:
+              - link "Farside" [ref=e11] [cursor=pointer]:
+                - /url: https://farside.co.uk/
+                - img "Farside" [ref=e12]
+              - navigation "Horizontal" [ref=e14]:
+                - list [ref=e15]:
+                  - listitem [ref=e16]:
+                    - link "Fund" [ref=e17] [cursor=pointer]:
+                      - /url: https://farside.co.uk/fund/
+                  - listitem [ref=e18]:
+                    - link "ETF Flows" [ref=e19] [cursor=pointer]:
+                      - /url: "#"
+                    - list [ref=e20]:
+                      - listitem [ref=e21]:
+                        - link "Bitcoin" [ref=e22] [cursor=pointer]:
+                          - /url: https://farside.co.uk/btc/
+                      - listitem [ref=e23]:
+                        - link "Ethereum" [ref=e24] [cursor=pointer]:
+                          - /url: https://farside.co.uk/eth/
+                      - listitem [ref=e25]:
+                        - link "Solana" [ref=e26] [cursor=pointer]:
+                          - /url: https://farside.co.uk/sol/
+                      - listitem [ref=e27]:
+                        - link "Hyperliquid" [ref=e28] [cursor=pointer]:
+                          - /url: https://farside.co.uk/hyp/
+                  - listitem [ref=e29]:
+                    - link "Books" [ref=e30] [cursor=pointer]:
+                      - /url: https://farside.co.uk/books/
+                  - listitem [ref=e31]:
+                    - link "About" [ref=e32] [cursor=pointer]:
+                      - /url: https://farside.co.uk/team/
+                  - listitem [ref=e33]:
+                    - link "Login" [ref=e34] [cursor=pointer]:
+                      - /url: https://farside.co.uk/login/
+                  - listitem [ref=e35]:
+                    - link "Sign Up" [ref=e36] [cursor=pointer]:
+                      - /url: https://farside.co.uk/sign-up/
+  - main [ref=e37]:
+    - article [ref=e38]:
+      - heading "Bitcoin ETF Flow (US$m)" [level=1] [ref=e41]
+      - generic [ref=e43]:
+        - figure [ref=e44]:
+          - table [ref=e45]:
+            - rowgroup [ref=e46]:
+              - row "Blackrock Fidelity Bitwise Ark Invesco Franklin Valkyrie VanEck WTree MS Grayscale Grayscale Total" [ref=e47]:
+                - columnheader [ref=e48]
+                - columnheader "Blackrock" [ref=e49]:
+                  - link "Blackrock" [ref=e51] [cursor=pointer]:
+                    - /url: ""
+                    - img "Blackrock" [ref=e52]
+                - columnheader "Fidelity" [ref=e53]:
+                  - link "Fidelity" [ref=e55] [cursor=pointer]:
+                    - /url: ""
+                    - img "Fidelity" [ref=e56]
+                - columnheader "Bitwise" [ref=e57]:
+                  - link "Bitwise" [ref=e59] [cursor=pointer]:
+                    - /url: ""
+                    - img "Bitwise" [ref=e60]
+                - columnheader "Ark" [ref=e61]:
+                  - link "Ark" [ref=e63] [cursor=pointer]:
+                    - /url: ""
+                    - img "Ark" [ref=e64]
+                - columnheader "Invesco" [ref=e65]:
+                  - link "Invesco" [ref=e67] [cursor=pointer]:
+                    - /url: ""
+                    - img "Invesco" [ref=e68]
+                - columnheader "Franklin" [ref=e69]:
+                  - link "Franklin" [ref=e71] [cursor=pointer]:
+                    - /url: ""
+                    - img "Franklin" [ref=e72]
+                - columnheader "Valkyrie" [ref=e73]:
+                  - link "Valkyrie" [ref=e75] [cursor=pointer]:
+                    - /url: ""
+                    - img "Valkyrie" [ref=e76]
+                - columnheader "VanEck" [ref=e77]:
+                  - link "VanEck" [ref=e79] [cursor=pointer]:
+                    - /url: ""
+                    - img "VanEck" [ref=e80]
+                - columnheader "WTree" [ref=e81]:
+                  - link "WTree" [ref=e83] [cursor=pointer]:
+                    - /url: ""
+                    - img "WTree" [ref=e84]
+                - columnheader "MS" [ref=e85]:
+                  - link "MS" [ref=e87] [cursor=pointer]:
+                    - /url: ""
+                    - img "MS" [ref=e88]
+                - columnheader "Grayscale" [ref=e89]:
+                  - link "Grayscale" [ref=e91] [cursor=pointer]:
+                    - /url: ""
+                    - img "Grayscale" [ref=e92]
+                - columnheader "Grayscale" [ref=e93]:
+                  - link "Grayscale" [ref=e95] [cursor=pointer]:
+                    - /url: ""
+                    - img "Grayscale" [ref=e96]
+                - columnheader "Total" [ref=e97]:
+                  - generic [ref=e98]: Total
+              - row "IBIT FBTC BITB ARKB BTCO EZBC BRRR HODL BTCW MSBT GBTC BTC" [ref=e99]:
+                - columnheader [ref=e100]
+                - columnheader "IBIT" [ref=e101]:
+                  - generic [ref=e102]: IBIT
+                - columnheader "FBTC" [ref=e103]:
+                  - generic [ref=e104]: FBTC
+                - columnheader "BITB" [ref=e105]:
+                  - generic [ref=e106]: BITB
+                - columnheader "ARKB" [ref=e107]:
+                  - generic [ref=e108]: ARKB
+                - columnheader "BTCO" [ref=e109]:
+                  - generic [ref=e110]: BTCO
+                - columnheader "EZBC" [ref=e111]:
+                  - generic [ref=e112]: EZBC
+                - columnheader "BRRR" [ref=e113]:
+                  - generic [ref=e114]: BRRR
+                - columnheader "HODL" [ref=e115]:
+                  - generic [ref=e116]: HODL
+                - columnheader "BTCW" [ref=e117]:
+                  - generic [ref=e118]: BTCW
+                - columnheader "MSBT" [ref=e119]:
+                  - generic [ref=e120]: MSBT
+                - columnheader "GBTC" [ref=e121]:
+                  - generic [ref=e122]: GBTC
+                - columnheader "BTC" [ref=e123]:
+                  - generic [ref=e124]: BTC
+                - columnheader [ref=e125]
+              - row "Fee 0.25% 0.25% 0.20% 0.21% 0.25% 0.19% 0.25% 0.20% 0.25% 0.14% 1.50% 0.15%" [ref=e126]:
+                - columnheader "Fee" [ref=e127]
+                - columnheader "0.25%" [ref=e128]:
+                  - generic [ref=e129]: 0.25%
+                - columnheader "0.25%" [ref=e130]:
+                  - generic [ref=e131]: 0.25%
+                - columnheader "0.20%" [ref=e132]:
+                  - generic [ref=e133]: 0.20%
+                - columnheader "0.21%" [ref=e134]:
+                  - generic [ref=e135]: 0.21%
+                - columnheader "0.25%" [ref=e136]:
+                  - generic [ref=e137]: 0.25%
+                - columnheader "0.19%" [ref=e138]:
+                  - generic [ref=e139]: 0.19%
+                - columnheader "0.25%" [ref=e140]:
+                  - generic [ref=e141]: 0.25%
+                - columnheader "0.20%" [ref=e142]:
+                  - generic [ref=e143]: 0.20%
+                - columnheader "0.25%" [ref=e144]:
+                  - generic [ref=e145]: 0.25%
+                - columnheader "0.14%" [ref=e146]:
+                  - generic [ref=e147]: 0.14%
+                - columnheader "1.50%" [ref=e148]:
+                  - generic [ref=e149]: 1.50%
+                - columnheader "0.15%" [ref=e150]:
+                  - generic [ref=e151]: 0.15%
+                - columnheader [ref=e152]
+            - rowgroup [ref=e153]:
+              - row "01 Jun 2026 (440.3) (37.3) 0.0 (12.3) 0.0 0.0 0.0 0.0 0.0 6.1 0.0 0.0 (483.8)" [ref=e154]:
+                - cell "01 Jun 2026" [ref=e155]
+                - cell "(440.3)" [ref=e156]:
+                  - generic [ref=e158]: (440.3)
+                - cell "(37.3)" [ref=e159]:
+                  - generic [ref=e161]: (37.3)
+                - cell "0.0" [ref=e162]:
+                  - generic [ref=e163]: "0.0"
+                - cell "(12.3)" [ref=e164]:
+                  - generic [ref=e166]: (12.3)
+                - cell "0.0" [ref=e167]:
+                  - generic [ref=e168]: "0.0"
+                - cell "0.0" [ref=e169]:
+                  - generic [ref=e170]: "0.0"
+                - cell "0.0" [ref=e171]:
+                  - generic [ref=e172]: "0.0"
+                - cell "0.0" [ref=e173]:
+                  - generic [ref=e174]: "0.0"
+                - cell "0.0" [ref=e175]:
+                  - generic [ref=e176]: "0.0"
+                - cell "6.1" [ref=e177]:
+                  - generic [ref=e178]: "6.1"
+                - cell "0.0" [ref=e179]:
+                  - generic [ref=e180]: "0.0"
+                - cell "0.0" [ref=e181]:
+                  - generic [ref=e182]: "0.0"
+                - cell "(483.8)" [ref=e183]:
+                  - generic [ref=e185]: (483.8)
+              - row "02 Jun 2026 (388.6) (45.1) 0.0 (16.7) 0.0 0.0 0.0 0.0 0.0 14.8 (83.5) 0.0 (519.1)" [ref=e186]:
+                - cell "02 Jun 2026" [ref=e187]
+                - cell "(388.6)" [ref=e188]:
+                  - generic [ref=e190]: (388.6)
+                - cell "(45.1)" [ref=e191]:
+                  - generic [ref=e193]: (45.1)
+                - cell "0.0" [ref=e194]:
+                  - generic [ref=e195]: "0.0"
+                - cell "(16.7)" [ref=e196]:
+                  - generic [ref=e198]: (16.7)
+                - cell "0.0" [ref=e199]:
+                  - generic [ref=e200]: "0.0"
+                - cell "0.0" [ref=e201]:
+                  - generic [ref=e202]: "0.0"
+                - cell "0.0" [ref=e203]:
+                  - generic [ref=e204]: "0.0"
+                - cell "0.0" [ref=e205]:
+                  - generic [ref=e206]: "0.0"
+                - cell "0.0" [ref=e207]:
+                  - generic [ref=e208]: "0.0"
+                - cell "14.8" [ref=e209]:
+                  - generic [ref=e210]: "14.8"
+                - cell "(83.5)" [ref=e211]:
+                  - generic [ref=e213]: (83.5)
+                - cell "0.0" [ref=e214]:
+                  - generic [ref=e215]: "0.0"
+                - cell "(519.1)" [ref=e216]:
+                  - generic [ref=e218]: (519.1)
+              - row "03 Jun 2026 (342.3) (54.3) 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 (396.6)" [ref=e219]:
+                - cell "03 Jun 2026" [ref=e220]
+                - cell "(342.3)" [ref=e221]:
+                  - generic [ref=e223]: (342.3)
+                - cell "(54.3)" [ref=e224]:
+                  - generic [ref=e226]: (54.3)
+                - cell "0.0" [ref=e227]:
+                  - generic [ref=e228]: "0.0"
+                - cell "0.0" [ref=e229]:
+                  - generic [ref=e230]: "0.0"
+                - cell "0.0" [ref=e231]:
+                  - generic [ref=e232]: "0.0"
+                - cell "0.0" [ref=e233]:
+                  - generic [ref=e234]: "0.0"
+                - cell "0.0" [ref=e235]:
+                  - generic [ref=e236]: "0.0"
+                - cell "0.0" [ref=e237]:
+                  - generic [ref=e238]: "0.0"
+                - cell "0.0" [ref=e239]:
+                  - generic [ref=e240]: "0.0"
+                - cell "0.0" [ref=e241]:
+                  - generic [ref=e242]: "0.0"
+                - cell "0.0" [ref=e243]:
+                  - generic [ref=e244]: "0.0"
+                - cell "0.0" [ref=e245]:
+                  - generic [ref=e246]: "0.0"
+                - cell "(396.6)" [ref=e247]:
+                  - generic [ref=e249]: (396.6)
+              - row "04 Jun 2026 47.7 (5.5) (15.6) (20.7) (12.6) 0.0 0.0 0.0 0.0 9.9 0.0 0.0 3.2" [ref=e250]:
+                - cell "04 Jun 2026" [ref=e251]
+                - cell "47.7" [ref=e252]:
+                  - generic [ref=e253]: "47.7"
+                - cell "(5.5)" [ref=e254]:
+                  - generic [ref=e256]: (5.5)
+                - cell "(15.6)" [ref=e257]:
+                  - generic [ref=e259]: (15.6)
+                - cell "(20.7)" [ref=e260]:
+                  - generic [ref=e262]: (20.7)
+                - cell "(12.6)" [ref=e263]:
+                  - generic [ref=e265]: (12.6)
+                - cell "0.0" [ref=e266]:
+                  - generic [ref=e267]: "0.0"
+                - cell "0.0" [ref=e268]:
+                  - generic [ref=e269]: "0.0"
+                - cell "0.0" [ref=e270]:
+                  - generic [ref=e271]: "0.0"
+                - cell "0.0" [ref=e272]:
+                  - generic [ref=e273]: "0.0"
+                - cell "9.9" [ref=e274]:
+                  - generic [ref=e275]: "9.9"
+                - cell "0.0" [ref=e276]:
+                  - generic [ref=e277]: "0.0"
+                - cell "0.0" [ref=e278]:
+                  - generic [ref=e279]: "0.0"
+                - cell "3.2" [ref=e280]:
+                  - generic [ref=e281]: "3.2"
+              - row "05 Jun 2026 (213.7) (59.7) 0.0 0.0 0.0 0.0 0.0 4.2 0.0 4.3 (60.8) 0.0 (325.7)" [ref=e282]:
+                - cell "05 Jun 2026" [ref=e283]
+                - cell "(213.7)" [ref=e284]:
+                  - generic [ref=e286]: (213.7)
+                - cell "(59.7)" [ref=e287]:
+                  - generic [ref=e289]: (59.7)
+                - cell "0.0" [ref=e290]:
+                  - generic [ref=e291]: "0.0"
+                - cell "0.0" [ref=e292]:
+                  - generic [ref=e293]: "0.0"
+                - cell "0.0" [ref=e294]:
+                  - generic [ref=e295]: "0.0"
+                - cell "0.0" [ref=e296]:
+                  - generic [ref=e297]: "0.0"
+                - cell "0.0" [ref=e298]:
+                  - generic [ref=e299]: "0.0"
+                - cell "4.2" [ref=e300]:
+                  - generic [ref=e301]: "4.2"
+                - cell "0.0" [ref=e302]:
+                  - generic [ref=e303]: "0.0"
+                - cell "4.3" [ref=e304]:
+                  - generic [ref=e305]: "4.3"
+                - cell "(60.8)" [ref=e306]:
+                  - generic [ref=e308]: (60.8)
+                - cell "0.0" [ref=e309]:
+                  - generic [ref=e310]: "0.0"
+                - cell "(325.7)" [ref=e311]:
+                  - generic [ref=e313]: (325.7)
+              - row "08 Jun 2026 (232.9) 59.4 14.1 63.1 0.0 0.0 0.0 0.0 0.0 4.9 0.0 0.0 (91.4)" [ref=e314]:
+                - cell "08 Jun 2026" [ref=e315]
+                - cell "(232.9)" [ref=e316]:
+                  - generic [ref=e318]: (232.9)
+                - cell "59.4" [ref=e319]:
+                  - generic [ref=e320]: "59.4"
+                - cell "14.1" [ref=e321]:
+                  - generic [ref=e322]: "14.1"
+                - cell "63.1" [ref=e323]:
+                  - generic [ref=e324]: "63.1"
+                - cell "0.0" [ref=e325]:
+                  - generic [ref=e326]: "0.0"
+                - cell "0.0" [ref=e327]:
+                  - generic [ref=e328]: "0.0"
+                - cell "0.0" [ref=e329]:
+                  - generic [ref=e330]: "0.0"
+                - cell "0.0" [ref=e331]:
+                  - generic [ref=e332]: "0.0"
+                - cell "0.0" [ref=e333]:
+                  - generic [ref=e334]: "0.0"
+                - cell "4.9" [ref=e335]:
+                  - generic [ref=e336]: "4.9"
+                - cell "0.0" [ref=e337]:
+                  - generic [ref=e338]: "0.0"
+                - cell "0.0" [ref=e339]:
+                  - generic [ref=e340]: "0.0"
+                - cell "(91.4)" [ref=e341]:
+                  - generic [ref=e343]: (91.4)
+              - row "09 Jun 2026 (61.6) (20.2) 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 4.4 (77.4)" [ref=e344]:
+                - cell "09 Jun 2026" [ref=e345]
+                - cell "(61.6)" [ref=e346]:
+                  - generic [ref=e348]: (61.6)
+                - cell "(20.2)" [ref=e349]:
+                  - generic [ref=e351]: (20.2)
+                - cell "0.0" [ref=e352]:
+                  - generic [ref=e353]: "0.0"
+                - cell "0.0" [ref=e354]:
+                  - generic [ref=e355]: "0.0"
+                - cell "0.0" [ref=e356]:
+                  - generic [ref=e357]: "0.0"
+                - cell "0.0" [ref=e358]:
+                  - generic [ref=e359]: "0.0"
+                - cell "0.0" [ref=e360]:
+                  - generic [ref=e361]: "0.0"
+                - cell "0.0" [ref=e362]:
+                  - generic [ref=e363]: "0.0"
+                - cell "0.0" [ref=e364]:
+                  - generic [ref=e365]: "0.0"
+                - cell "0.0" [ref=e366]:
+                  - generic [ref=e367]: "0.0"
+                - cell "0.0" [ref=e368]:
+                  - generic [ref=e369]: "0.0"
+                - cell "4.4" [ref=e370]:
+                  - generic [ref=e371]: "4.4"
+                - cell "(77.4)" [ref=e372]:
+                  - generic [ref=e374]: (77.4)
+              - row "10 Jun 2026 (148.5) 4.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 (87.9) 17.5 (213.9)" [ref=e375]:
+                - cell "10 Jun 2026" [ref=e376]
+                - cell "(148.5)" [ref=e377]:
+                  - generic [ref=e379]: (148.5)
+                - cell "4.0" [ref=e380]:
+                  - generic [ref=e381]: "4.0"
+                - cell "0.0" [ref=e382]:
+                  - generic [ref=e383]: "0.0"
+                - cell "0.0" [ref=e384]:
+                  - generic [ref=e385]: "0.0"
+                - cell "0.0" [ref=e386]:
+                  - generic [ref=e387]: "0.0"
+                - cell "0.0" [ref=e388]:
+                  - generic [ref=e389]: "0.0"
+                - cell "0.0" [ref=e390]:
+                  - generic [ref=e391]: "0.0"
+                - cell "0.0" [ref=e392]:
+                  - generic [ref=e393]: "0.0"
+                - cell "1.0" [ref=e394]:
+                  - generic [ref=e395]: "1.0"
+                - cell "0.0" [ref=e396]:
+                  - generic [ref=e397]: "0.0"
+                - cell "(87.9)" [ref=e398]:
+                  - generic [ref=e400]: (87.9)
+                - cell "17.5" [ref=e401]:
+                  - generic [ref=e402]: "17.5"
+                - cell "(213.9)" [ref=e403]:
+                  - generic [ref=e405]: (213.9)
+              - row "11 Jun 2026 30.3 (5.5) (13.1) (27.2) 0.0 0.0 0.0 (14.8) 0.0 2.2 0.0 5.6 (22.5)" [ref=e406]:
+                - cell "11 Jun 2026" [ref=e407]
+                - cell "30.3" [ref=e408]:
+                  - generic [ref=e409]: "30.3"
+                - cell "(5.5)" [ref=e410]:
+                  - generic [ref=e412]: (5.5)
+                - cell "(13.1)" [ref=e413]:
+                  - generic [ref=e415]: (13.1)
+                - cell "(27.2)" [ref=e416]:
+                  - generic [ref=e418]: (27.2)
+                - cell "0.0" [ref=e419]:
+                  - generic [ref=e420]: "0.0"
+                - cell "0.0" [ref=e421]:
+                  - generic [ref=e422]: "0.0"
+                - cell "0.0" [ref=e423]:
+                  - generic [ref=e424]: "0.0"
+                - cell "(14.8)" [ref=e425]:
+                  - generic [ref=e427]: (14.8)
+                - cell "0.0" [ref=e428]:
+                  - generic [ref=e429]: "0.0"
+                - cell "2.2" [ref=e430]:
+                  - generic [ref=e431]: "2.2"
+                - cell "0.0" [ref=e432]:
+                  - generic [ref=e433]: "0.0"
+                - cell "5.6" [ref=e434]:
+                  - generic [ref=e435]: "5.6"
+                - cell "(22.5)" [ref=e436]:
+                  - generic [ref=e438]: (22.5)
+              - row "12 Jun 2026 57.7 18.0 5.2 3.2 0.0 0.0 0.0 1.8 0.0 0.0 0.0 0.0 85.9" [ref=e439]:
+                - cell "12 Jun 2026" [ref=e440]
+                - cell "57.7" [ref=e441]:
+                  - generic [ref=e442]: "57.7"
+                - cell "18.0" [ref=e443]:
+                  - generic [ref=e444]: "18.0"
+                - cell "5.2" [ref=e445]:
+                  - generic [ref=e446]: "5.2"
+                - cell "3.2" [ref=e447]:
+                  - generic [ref=e448]: "3.2"
+                - cell "0.0" [ref=e449]:
+                  - generic [ref=e450]: "0.0"
+                - cell "0.0" [ref=e451]:
+                  - generic [ref=e452]: "0.0"
+                - cell "0.0" [ref=e453]:
+                  - generic [ref=e454]: "0.0"
+                - cell "1.8" [ref=e455]:
+                  - generic [ref=e456]: "1.8"
+                - cell "0.0" [ref=e457]:
+                  - generic [ref=e458]: "0.0"
+                - cell "0.0" [ref=e459]:
+                  - generic [ref=e460]: "0.0"
+                - cell "0.0" [ref=e461]:
+                  - generic [ref=e462]: "0.0"
+                - cell "0.0" [ref=e463]:
+                  - generic [ref=e464]: "0.0"
+                - cell "85.9" [ref=e465]:
+                  - generic [ref=e466]: "85.9"
+              - row "15 Jun 2026 66.4 (8.7) 0.0 (6.6) 0.0 (5.8) 0.0 (6.1) 0.0 9.4 (124.0) 10.6 (64.8)" [ref=e467]:
+                - cell "15 Jun 2026" [ref=e468]
+                - cell "66.4" [ref=e469]:
+                  - generic [ref=e470]: "66.4"
+                - cell "(8.7)" [ref=e471]:
+                  - generic [ref=e473]: (8.7)
+                - cell "0.0" [ref=e474]:
+                  - generic [ref=e475]: "0.0"
+                - cell "(6.6)" [ref=e476]:
+                  - generic [ref=e478]: (6.6)
+                - cell "0.0" [ref=e479]:
+                  - generic [ref=e480]: "0.0"
+                - cell "(5.8)" [ref=e481]:
+                  - generic [ref=e483]: (5.8)
+                - cell "0.0" [ref=e484]:
+                  - generic [ref=e485]: "0.0"
+                - cell "(6.1)" [ref=e486]:
+                  - generic [ref=e488]: (6.1)
+                - cell "0.0" [ref=e489]:
+                  - generic [ref=e490]: "0.0"
+                - cell "9.4" [ref=e491]:
+                  - generic [ref=e492]: "9.4"
+                - cell "(124.0)" [ref=e493]:
+                  - generic [ref=e495]: (124.0)
+                - cell "10.6" [ref=e496]:
+                  - generic [ref=e497]: "10.6"
+                - cell "(64.8)" [ref=e498]:
+                  - generic [ref=e500]: (64.8)
+              - row "16 Jun 2026 16.4 4.3 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.9 (16.8) 4.4 10.2" [ref=e501]:
+                - cell "16 Jun 2026" [ref=e502]
+                - cell "16.4" [ref=e503]:
+                  - generic [ref=e504]: "16.4"
+                - cell "4.3" [ref=e505]:
+                  - generic [ref=e506]: "4.3"
+                - cell "0.0" [ref=e507]:
+                  - generic [ref=e508]: "0.0"
+                - cell "0.0" [ref=e509]:
+                  - generic [ref=e510]: "0.0"
+                - cell "0.0" [ref=e511]:
+                  - generic [ref=e512]: "0.0"
+                - cell "0.0" [ref=e513]:
+                  - generic [ref=e514]: "0.0"
+                - cell "0.0" [ref=e515]:
+                  - generic [ref=e516]: "0.0"
+                - cell "0.0" [ref=e517]:
+                  - generic [ref=e518]: "0.0"
+                - cell "0.0" [ref=e519]:
+                  - generic [ref=e520]: "0.0"
+                - cell "1.9" [ref=e521]:
+                  - generic [ref=e522]: "1.9"
+                - cell "(16.8)" [ref=e523]:
+                  - generic [ref=e525]: (16.8)
+                - cell "4.4" [ref=e526]:
+                  - generic [ref=e527]: "4.4"
+                - cell "10.2" [ref=e528]:
+                  - generic [ref=e529]: "10.2"
+              - row "17 Jun 2026 (30.8) 14.0 0.0 (43.5) (6.4) 0.0 0.0 (4.1) 0.0 4.1 (15.5) 0.0 (82.2)" [ref=e530]:
+                - cell "17 Jun 2026" [ref=e531]
+                - cell "(30.8)" [ref=e532]:
+                  - generic [ref=e534]: (30.8)
+                - cell "14.0" [ref=e535]:
+                  - generic [ref=e536]: "14.0"
+                - cell "0.0" [ref=e537]:
+                  - generic [ref=e538]: "0.0"
+                - cell "(43.5)" [ref=e539]:
+                  - generic [ref=e541]: (43.5)
+                - cell "(6.4)" [ref=e542]:
+                  - generic [ref=e544]: (6.4)
+                - cell "0.0" [ref=e545]:
+                  - generic [ref=e546]: "0.0"
+                - cell "0.0" [ref=e547]:
+                  - generic [ref=e548]: "0.0"
+                - cell "(4.1)" [ref=e549]:
+                  - generic [ref=e551]: (4.1)
+                - cell "0.0" [ref=e552]:
+                  - generic [ref=e553]: "0.0"
+                - cell "4.1" [ref=e554]:
+                  - generic [ref=e555]: "4.1"
+                - cell "(15.5)" [ref=e556]:
+                  - generic [ref=e558]: (15.5)
+                - cell "0.0" [ref=e559]:
+                  - generic [ref=e560]: "0.0"
+                - cell "(82.2)" [ref=e561]:
+                  - generic [ref=e563]: (82.2)
+              - row "18 Jun 2026 - 0.0 0.0 0.0 0.0 0.0 0.0 (4.4) 0.0 10.4 0.0 0.0 6.0" [ref=e564]:
+                - cell "18 Jun 2026" [ref=e565]
+                - cell "-" [ref=e566]:
+                  - generic [ref=e567]: "-"
+                - cell "0.0" [ref=e568]:
+                  - generic [ref=e569]: "0.0"
+                - cell "0.0" [ref=e570]:
+                  - generic [ref=e571]: "0.0"
+                - cell "0.0" [ref=e572]:
+                  - generic [ref=e573]: "0.0"
+                - cell "0.0" [ref=e574]:
+                  - generic [ref=e575]: "0.0"
+                - cell "0.0" [ref=e576]:
+                  - generic [ref=e577]: "0.0"
+                - cell "0.0" [ref=e578]:
+                  - generic [ref=e579]: "0.0"
+                - cell "(4.4)" [ref=e580]:
+                  - generic [ref=e582]: (4.4)
+                - cell "0.0" [ref=e583]:
+                  - generic [ref=e584]: "0.0"
+                - cell "10.4" [ref=e585]:
+                  - generic [ref=e586]: "10.4"
+                - cell "0.0" [ref=e587]:
+                  - generic [ref=e588]: "0.0"
+                - cell "0.0" [ref=e589]:
+                  - generic [ref=e590]: "0.0"
+                - cell "6.0" [ref=e591]:
+                  - generic [ref=e592]: "6.0"
+              - row "Total 62,166 10,467 2,007 1,202 213 328 328 1,123 93 331 (27,008) 2,291 53,542" [ref=e593]:
+                - cell "Total" [ref=e594]
+                - cell "62,166" [ref=e595]:
+                  - generic [ref=e596]: 62,166
+                - cell "10,467" [ref=e597]:
+                  - generic [ref=e598]: 10,467
+                - cell "2,007" [ref=e599]:
+                  - generic [ref=e600]: 2,007
+                - cell "1,202" [ref=e601]:
+                  - generic [ref=e602]: 1,202
+                - cell "213" [ref=e603]:
+                  - generic [ref=e604]: "213"
+                - cell "328" [ref=e605]:
+                  - generic [ref=e606]: "328"
+                - cell "328" [ref=e607]:
+                  - generic [ref=e608]: "328"
+                - cell "1,123" [ref=e609]:
+                  - generic [ref=e610]: 1,123
+                - cell "93" [ref=e611]:
+                  - generic [ref=e612]: "93"
+                - cell "331" [ref=e613]:
+                  - generic [ref=e614]: "331"
+                - cell "(27,008)" [ref=e615]:
+                  - generic [ref=e617]: (27,008)
+                - cell "2,291" [ref=e618]:
+                  - generic [ref=e619]: 2,291
+                - cell "53,542" [ref=e620]:
+                  - generic [ref=e621]: 53,542
+              - row "Average 101.9 17.1 3.3 2.0 0.3 0.5 0.5 1.8 0.2 6.5 (44.2) 4.9 87.8" [ref=e622]:
+                - cell "Average" [ref=e623]
+                - cell "101.9" [ref=e624]:
+                  - generic [ref=e625]: "101.9"
+                - cell "17.1" [ref=e626]:
+                  - generic [ref=e627]: "17.1"
+                - cell "3.3" [ref=e628]:
+                  - generic [ref=e629]: "3.3"
+                - cell "2.0" [ref=e630]:
+                  - generic [ref=e631]: "2.0"
+                - cell "0.3" [ref=e632]:
+                  - generic [ref=e633]: "0.3"
+                - cell "0.5" [ref=e634]:
+                  - generic [ref=e635]: "0.5"
+                - cell "0.5" [ref=e636]:
+                  - generic [ref=e637]: "0.5"
+                - cell "1.8" [ref=e638]:
+                  - generic [ref=e639]: "1.8"
+                - cell "0.2" [ref=e640]:
+                  - generic [ref=e641]: "0.2"
+                - cell "6.5" [ref=e642]:
+                  - generic [ref=e643]: "6.5"
+                - cell "(44.2)" [ref=e644]:
+                  - generic [ref=e646]: (44.2)
+                - cell "4.9" [ref=e647]:
+                  - generic [ref=e648]: "4.9"
+                - cell "87.8" [ref=e649]:
+                  - generic [ref=e650]: "87.8"
+              - row "Maximum 1,119.9 473.4 237.9 268.7 63.4 60.9 43.4 118.8 118.5 30.6 102.5 191.1 1,373.8" [ref=e651]:
+                - cell "Maximum" [ref=e652]
+                - cell "1,119.9" [ref=e653]:
+                  - generic [ref=e654]: 1,119.9
+                - cell "473.4" [ref=e655]:
+                  - generic [ref=e656]: "473.4"
+                - cell "237.9" [ref=e657]:
+                  - generic [ref=e658]: "237.9"
+                - cell "268.7" [ref=e659]:
+                  - generic [ref=e660]: "268.7"
+                - cell "63.4" [ref=e661]:
+                  - generic [ref=e662]: "63.4"
+                - cell "60.9" [ref=e663]:
+                  - generic [ref=e664]: "60.9"
+                - cell "43.4" [ref=e665]:
+                  - generic [ref=e666]: "43.4"
+                - cell "118.8" [ref=e667]:
+                  - generic [ref=e668]: "118.8"
+                - cell "118.5" [ref=e669]:
+                  - generic [ref=e670]: "118.5"
+                - cell "30.6" [ref=e671]:
+                  - generic [ref=e672]: "30.6"
+                - cell "102.5" [ref=e673]:
+                  - generic [ref=e674]: "102.5"
+                - cell "191.1" [ref=e675]:
+                  - generic [ref=e676]: "191.1"
+                - cell "1,373.8" [ref=e677]:
+                  - generic [ref=e678]: 1,373.8
+              - row "Minimum (528.3) (356.6) (280.7) (327.9) (62.0) (74.1) (74.8) (38.4) (53.8) (5.3) (642.5) (318.2) (1,113.7)" [ref=e679]:
+                - cell "Minimum" [ref=e680]
+                - cell "(528.3)" [ref=e681]:
+                  - generic [ref=e683]: (528.3)
+                - cell "(356.6)" [ref=e684]:
+                  - generic [ref=e686]: (356.6)
+                - cell "(280.7)" [ref=e687]:
+                  - generic [ref=e689]: (280.7)
+                - cell "(327.9)" [ref=e690]:
+                  - generic [ref=e692]: (327.9)
+                - cell "(62.0)" [ref=e693]:
+                  - generic [ref=e695]: (62.0)
+                - cell "(74.1)" [ref=e696]:
+                  - generic [ref=e698]: (74.1)
+                - cell "(74.8)" [ref=e699]:
+                  - generic [ref=e701]: (74.8)
+                - cell "(38.4)" [ref=e702]:
+                  - generic [ref=e704]: (38.4)
+                - cell "(53.8)" [ref=e705]:
+                  - generic [ref=e707]: (53.8)
+                - cell "(5.3)" [ref=e708]:
+                  - generic [ref=e710]: (5.3)
+                - cell "(642.5)" [ref=e711]:
+                  - generic [ref=e713]: (642.5)
+                - cell "(318.2)" [ref=e714]:
+                  - generic [ref=e716]: (318.2)
+                - cell "(1,113.7)" [ref=e717]:
+                  - generic [ref=e719]: (1,113.7)
+        - paragraph [ref=e720]:
+          - text: "Source: Farside Investors"
+          - text: "Note: The above table is generated automatically. Farside Investors is not liable for any errors or inaccuracies in the data. To see an alternative table with all the daily flow data,"
+          - link "click here" [ref=e721] [cursor=pointer]:
+            - /url: /bitcoin-etf-flow-all-data/
+          - text: .
+        - insertion [ref=e723]:
+          - iframe [ref=e725]:
+            - generic [active] [ref=f7e1]:
+              - generic [ref=f7e3]:
+                - link:
+                  - /url: https://googleads.g.doubleclick.net/aclk?sa=l&ai=CUTcjNqA0aueCGfueodAPk-qUyQ-QprfJhwHLxeWk4RW2kB8QASDi1aekAWDJ1uuGgICgGaABnK_7qALIAQOoAwHIA8kEqgSFAk_Qw7TYg-UaoXwU1sYpQ1yHkQA0opc6AsEiECoP4dulPdU0x3vVJmTru3VmDQfaCjC54Zr_V2xbaLp0hDptlfvWwtpkJxNaE1iMxnOaZ_MR9LbCes0rLqLTOjp7NcFF4JgrvplqZKZCmZMNJDwO6Seu9Tlm4nnlimKn7BCRzppTXtsDo4ZCO2MLvKyW5j-Q9sMJX81DKgMb0ttnywToQTFH05fliWm1mGImdd7-7DxMiY51yy5EbegGaGIHfSKQp7lfqegY4jzW5FtieQ_T-6dPgcKcj9_gY0gLq-dc-H0LbeNCHCJel5P_kjrA6GNrQ9g4f1TWeoA1bUyWabUuNWwOZNIvVMAE1ML3kf4FiAXu25GIWaAGA4AHzNCE1wGoB6fMsQKoB-LYsQKoB6a-G6gHzM6xAqgH89EbqAeW2BuoB6qbsQKoB47OG6gHk9gbqAfw4BuoB-6WsQKoB_6esQKoB6--sQKoB9XJG6gH2baxAqgHmgaoB_-esQKoB9-fsQKoB_jCsQKoB_vCsQLYBwHSCDMIgGEQARifAzIIioKAgICAgAg6D4BAgMCAgICAqIACqIOQEEi9_cE6WJLcmI2YkpUDYAGxCdIDW5IHmPkagAoBmAsByAsBogwsKgYKBJbisQJiAgoAahYKFGNvbS5uZXh0ZXJzLmhlcm93YXJzeAGIAQGQAQGqDQJVU8gNAeoNEwiq-5iNmJKVAxV7TwgEHRM1JfnwDQKIDgnYEw3QFQGYFgHKFgIKAPgWAYAXAbIXEBgBKgo1NDY0NDg4NDc5UAa6FwI4AaoYFwkAAAAAdO0wQRIKNTQ2NDQ4ODQ3ORgBshgJEgKwUxgDIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI5_WYjZiSlQMVe08IBB0TNSX5EAEYASAAEgJW0_D_BwE&num=1&cid=CAQShwIAEQoqgbkooJVv1wQ1DHVNj2XaMn6U5XJG5FylxcEhAViMShT8wddpGZKFPgGjC7YpOhbAxm5Z3RDbtJ8LyMeeC7KixeBuvIr27EHCQrTNI_pRJ1eQniJmbpzbtMUf78SYyiBqwJEOW00eBqhmQIXTOEXA-Z72IgyntDLaB60FkF9OpjqSuyeh0ca0GBU_GbGbMjGO6wP_Be6wAeFMbMbdJ-3tkI87kLFg-E1yCOf1Wvq9uoVNqSW5h1ibspycFCB4_IzHT-9eGq46v_vmntngPjZBY73DPVT6uDwQYaWeA6TNAsHrJoBK7HimHTVhnWqHpipu7yoBgvKDPXJ94G27__ftJ4NMhxgB&sig=AOD64_3AISTe0lkKQ4S5MzhUZKmZLAkijw&client=ca-pub-1156672287790544&rf=2&nb=2&adurl=https://www.hero-wars.com/%3Fdelayedsignup%3Dtrue%26nx_source%3Dadx_adwordsdisplay.hw_wb_ux-.cc-us.g-mix.a-mix.au-mix.opt-purchase2.cr-hw_st_iterlootwomensf1b_gif.cn-336_280.lp-delayed.dt-display.cid-23907823086.agid-205659169108.csd-050626.-%26cp%3D.aid-811948473269.acc-9843406488%26gad_source%3D5%26gad_campaignid%3D23907823086%26gclid%3DEAIaIQobChMI5_WYjZiSlQMVe08IBB0TNSX5EAEYASAAEgJW0_D_BwE
+                - img [ref=f7e7] [cursor=pointer]
+                - button [ref=f7e11] [cursor=pointer]:
+                  - img [ref=f7e12]
+              - iframe
+        - paragraph
+        - generic [ref=e730]:
+          - text: "Source: Farside Investors"
+          - text: "Note: These charts are updated automatically in real time"
+        - paragraph
+  - table [ref=e731]:
+    - rowgroup [ref=e732]:
+      - row "How can we assist you? Talk to us" [ref=e733]:
+        - cell "How can we assist you? Talk to us" [ref=e734]:
+          - heading "How can we assist you?" [level=5] [ref=e735]
+          - link "Talk to us" [ref=e738] [cursor=pointer]:
+            - /url: /team#contact
+  - table [ref=e739]:
+    - rowgroup [ref=e740]:
+      - 'row "✉ info@farside.co.uk 25 St James''s Street, London, SW1A 1HA FS Investors Limited (14044760) is an Appointed Representative of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number 757575 and registered with the Securities and Exchange Commission with the registered number 286221. Today''s date is 19 June 2026. Your IP: 162.158.166.212 © 2025 Farside Investors. All rights reserved. Footer Menu" [ref=e741]':
+        - 'cell "✉ info@farside.co.uk 25 St James''s Street, London, SW1A 1HA FS Investors Limited (14044760) is an Appointed Representative of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number 757575 and registered with the Securities and Exchange Commission with the registered number 286221. Today''s date is 19 June 2026. Your IP: 162.158.166.212 © 2025 Farside Investors. All rights reserved. Footer Menu" [ref=e742]':
+          - generic [ref=e744]:
+            - generic [ref=e747]:
+              - link [ref=e748] [cursor=pointer]:
+                - /url: https://farside.co.uk
+                - img [ref=e749]
+              - generic [ref=e750]:
+                - generic [ref=e751]:
+                  - img "✉" [ref=e752]
+                  - link "info@farside.co.uk" [ref=e753] [cursor=pointer]:
+                    - /url: mailto:info@farside.co.uk
+                  - text: 25 St James's Street, London, SW1A 1HA
+                  - link [ref=e754] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/company/farsideinvestors/
+                    - img [ref=e755]
+                  - link [ref=e756] [cursor=pointer]:
+                    - /url: https://twitter.com/FarsideUK
+                    - img [ref=e757]
+                - text: FS Investors Limited (14044760) is an
+                - link "Appointed Representative" [ref=e758] [cursor=pointer]:
+                  - /url: https://register.fca.org.uk/s/firm?id=0014G000030exVXQAY
+                - text: of Brooklands Fund Management Limited which is authorised and regulated by the Financial Conduct Authority with the registered number
+                - link "757575" [ref=e759] [cursor=pointer]:
+                  - /url: https://register.fca.org.uk/s/firm?id=001b000003UbCTEAA3
+                - text: and registered with the Securities and Exchange Commission with the registered number 286221.
+                - text: "Today's date is 19 June 2026. Your IP: 162.158.166.212"
+              - generic [ref=e760]: © 2025 Farside Investors. All rights reserved.
+            - navigation "Footer Menu" [ref=e763]:
+              - list [ref=e765]:
+                - listitem [ref=e766]: Market Data
+                - listitem [ref=e767]:
+                  - link "Bitcoin ETF Flow" [ref=e768] [cursor=pointer]:
+                    - /url: https://farside.co.uk/btc/
+                - listitem [ref=e769]:
+                  - link "Ethereum ETF Flow" [ref=e770] [cursor=pointer]:
+                    - /url: https://farside.co.uk/eth/
+                - listitem [ref=e771]:
+                  - link "Solana ETF Flow" [ref=e772] [cursor=pointer]:
+                    - /url: https://farside.co.uk/sol/
+                - listitem [ref=e773]:
+                  - link "Hyperliquid ETF Flow" [ref=e774] [cursor=pointer]:
+                    - /url: https://farside.co.uk/hyp/
+              - list [ref=e776]:
+                - listitem [ref=e777]: Company
+                - listitem [ref=e778]:
+                  - link "Fund" [ref=e779] [cursor=pointer]:
+                    - /url: https://farside.co.uk/fund/
+                - listitem [ref=e780]:
+                  - link "Books" [ref=e781] [cursor=pointer]:
+                    - /url: https://farside.co.uk/books/
+                - listitem [ref=e782]:
+                  - link "About" [ref=e783] [cursor=pointer]:
+                    - /url: https://farside.co.uk/team/
+                - listitem [ref=e784]:
+                  - link "Contact" [ref=e785] [cursor=pointer]:
+                    - /url: https://farside.co.uk/team/#contact
+                - listitem [ref=e786]:
+                  - link "Privacy Policy" [ref=e787] [cursor=pointer]:
+                    - /url: /privacy-policy/
+                - listitem [ref=e788]:
+                  - link "Complaints" [ref=e789] [cursor=pointer]:
+                    - /url: https://farside.co.uk/wp-content/uploads/2023/07/Procedure2023.pdf
+  - text: 
+  - insertion [ref=e790]:
+    - iframe [ref=e793]:
+      - generic [active] [ref=f14e1]:
+        - generic [ref=f14e6]:
+          - generic [ref=f14e8]:
+            - link "-32%" [ref=f14e11] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C-K3ANqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGACgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgB0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASABEgJyo_D_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_3YoSLXNLumrDGcK2HXEExNt4DBUg&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601099542797016%26sku_id%3D17592327721453%26adg_ctx%3Da-44908205~c-c5c98649%26_x_ns_item_id%3D700351367-17592327721453%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17592327721453%26_x_ns_gid%3D601099542797016%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASABEgJyo_D_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASABEgJyo_D_BwE
+              - generic [ref=f14e14]: "-32%"
+            - link "-14%" [ref=f14e18] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C_bryNqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGAGgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgC0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASACEgJyFPD_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_0QXefoleXZzDCyNhWUSlb-FXAOaA&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601099551598797%26sku_id%3D17592605021198%26adg_ctx%3Da-b9912153~c-beb9448f%26_x_ns_item_id%3D700351367-17592605021198%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17592605021198%26_x_ns_gid%3D601099551598797%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASACEgJyFPD_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASACEgJyFPD_BwE
+              - generic [ref=f14e21]: "-14%"
+            - link [ref=f14e25] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CYm_kNqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGAKgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgD0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASADEgJCH_D_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_1sJKGjXdfDE3woHBJ43DZxItdfPQ&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601101725571031%26sku_id%3D17601205153431%26adg_ctx%3Da-1cb55f41~c-0c89b85e%26_x_ns_item_id%3D700351367-17601205153431%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17601205153431%26_x_ns_gid%3D601101725571031%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASADEgJCH_D_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASADEgJCH_D_BwE
+            - link "-9%" [ref=f14e30] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CUl_MNqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGAOgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgE0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAEEgIABPD_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_2y4TzEIaEpQ-clKWPrcjnv_MYzmg&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601101686666000%26sku_id%3D17601023811834%26adg_ctx%3Da-5a4bb62a~c-452a06cf%26_x_ns_item_id%3D700351367-17601023811834%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17601023811834%26_x_ns_gid%3D601101686666000%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAEEgIABPD_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAEEgIABPD_BwE
+              - generic [ref=f14e33]: "-9%"
+            - link [ref=f14e37] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CUadfNqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGASgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgF0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAFEgKZWvD_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_2Ecx_I2gN2X-tqtQVSMrXbYqVS5A&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601099573146610%26sku_id%3D17592439326358%26adg_ctx%3Da-329edb11~c-e523eb14%26_x_ns_item_id%3D700351367-17592439326358%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17592439326358%26_x_ns_gid%3D601099573146610%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAFEgKZWvD_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAFEgKZWvD_BwE
+            - link [ref=f14e42] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C2kAyNqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGAWgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgG0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAGEgIOovD_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_3TTocYZCBTJFtQv6hCAdbshZXTbQ&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601101152184076%26sku_id%3D17603677855740%26adg_ctx%3Da-45ce0c84~c-6a46f8f6%26_x_ns_item_id%3D700351367-17603677855740%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17603677855740%26_x_ns_gid%3D601101152184076%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAGEgIOovD_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAGEgIOovD_BwE
+            - link [ref=f14e47] [cursor=pointer]:
+              - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=CfK7TNqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGAagBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgH0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAHEgLMqPD_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_2eY7nA_GP27CtsnP9g-RjbnTx4bQ&client=ca-pub-1156672287790544&nb=9&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601099607750926%26sku_id%3D17592559471376%26adg_ctx%3Da-a603f9d8~c-8d961fd3%26_x_ns_item_id%3D700351367-17592559471376%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17592559471376%26_x_ns_gid%3D601099607750926%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAHEgLMqPD_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASAHEgLMqPD_BwE
+          - link [ref=f14e50] [cursor=pointer]:
+            - /url: https://adclick.g.doubleclick.net/aclk?sa=l&ai=C-K3ANqA0aumeGsSqodAPiquLsQKZy_HQhgGu5dGUyBKhpvjz0B0QASDi1aekAWDJ1uuGgICgGaABocCY8SjIAQmoAwHIA8sEqgSDAk_Q4zWSTNY2qu5CrZO994D61vKY3K5JidbTnsDGjA9BTC3HnHD_gk5wyaM0zshunRb5zcr80dXkD2olrsqtflb3QPemSedVKfkk80l52eP-zaxSSCBpaknud58wOf6f-fN_AateG3d3YkBk4JSVtuJJPh2w_qFOnP746Qm9vvYuT7oOiDkx1Ve_Bd-aJTwClix-5EmOKu8Ao264ZnfV19McFOqskNVVrPZaJ_Fid_XTymVnOvcpYS1IDAC2HAXMgEPz920fNnCwb0D2yTLmIZ8KU6nCiIR0lZwAFtDaaY-62972t3G8yr_lkGlLNtv_PVwJzCUcghRAptbaJw8WE5yKg7fABJ6-o9vbBIgFs668h0_6BQYIJRABGACgBi6AB8qGgPcEqAenzLECqAfi2LECqAemvhuoB8zOsQKoB_PRG6gHltgbqAeqm7ECqAeOzhuoB5PYG6gH8OAbqAfulrECqAf-nrECqAevvrECqAfZtrECqAeaBqgH_56xAqgH35-xAqgH-MKxAqgH4tixAqgH4tixAqgH4tixAtgHAPoHFGNvbS5laW5ub3ZhdGlvbi50ZW11wAgB0ggzCIBhEAEYnwMyCIqCgICAgIAIOg-AQIDAgICAgKiAAqiDkBBIvf3BOlii9JmNmJKVA2ABgAoBkAsDmAsByAsBgAwBogxGKgoKCI7fsQKV4rECSAFiFgoUY29tLmVpbm5vdmF0aW9uLnRlbXVqFgoUY29tLmVpbm5vdmF0aW9uLnRlbXV4AYgBAZABAaoNAlVTyA0B6g0TCNKVmo2YkpUDFURVCAQditUiJvANAogOCdgTDIgUBtAVAZgWAcoWAgoA-BYBgBcBshcEGAFQBroXAjgBshgJEgKqURguIgEA0BgB6BgBwhkCCAE&ae=1&gclid=EAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASABEgJyo_D_BwE&num=1&cid=CAQShgIAEQoqgQctdxfvib15MYlgeX4XtXjBIfkOX4jetqO970L_OCLnavihRLREfRLpJu0y2LzmWMdCBs7mTw1NAxp9kd--UL7dactsRAIfK7Nzyrj-8nyNSnvWx-ECJa4FoAugk4tKXYGE1QfH6Dr7Lcdaq4241X9-s2gLAg-cHN3DH6edUHZOXMEbezPuLXp-xI24Ox4KH717ovnU2GsswHw1Y7aMIVKRkZg8ZZpoXZdl67dIffO-L19wh4b_rLWU56oGwk80J6OatwxkOm_zKmybwkFSZa6boYvxMWdi8UntRFQDgLWifeucysBoTyYi4Au3PFTd5CbAB9iVVUom5quWzOY7D6AnGAE&sig=AOD64_3YoSLXNLumrDGcK2HXEExNt4DBUg&client=ca-pub-1156672287790544&nb=19&adurl=https://www.temu.com/ul/kuiper/un3.html%3F_bg_fs%3D1%26subj%3Ddpa-un-dal%26_p_jump_id%3D1028%26_x_vst_scene%3Dadg%26goods_id%3D601099542797016%26sku_id%3D17592327721453%26adg_ctx%3Da-44908205~c-c5c98649%26_x_ns_item_id%3D700351367-17592327721453%26_x_ads_sub_channel%3Dfeed%26_p_rfs%3D1%26_x_ns_prz_type%3D-1%26locale_override%3D211~en~USD%26_x_ns_sku_id%3D17592327721453%26_x_ns_gid%3D601099542797016%26_x_ads_channel%3Dgoogle%26_x_ns_lan%3Den%26_x_gmc_account%3D700351367%26_x_login_type%3DGoogle%26_x_ns_gg_lnk_type%3Ddsa%26_x_bg_adid%3Dgd0-udp-1773897940995%26topic_classify%3D129%26_x_ads_account%3D3166518545%26_x_ads_set%3D21222070067%26_x_ads_id%3D162058002206%26_x_ads_creative_id%3D701931623944%26_x_ns_source%3Dd%26_x_ns_gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASABEgJyo_D_BwE%26_x_ns_placement%3Dfarside.co.uk%26_x_ns_match_type%3D%26_x_ns_ad_position%3D%26_x_ns_product_id%3D%26_x_ns_target%3Drunofnetwork%253A%253A100%26_x_ns_devicemodel%3D%26_x_ns_wbraid%3D%7Bwbraid%7D%26_x_ns_gbraid%3D%7Bgbraid%7D%26_x_ns_targetid%3D%26gad_source%3D5%26gad_campaignid%3D21222070067%26gclid%3DEAIaIQobChMI6ZGajZiSlQMVRFUIBB2K1SImEAEYASABEgJyo_D_BwE
+            - img [ref=f14e52]
+        - img [ref=f14e56] [cursor=pointer]
+        - button [ref=f14e60] [cursor=pointer]:
+          - img [ref=f14e61]
+        - iframe

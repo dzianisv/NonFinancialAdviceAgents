@@ -1,0 +1,523 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#content"
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img "US Flag" [ref=e7]
+        - paragraph [ref=e8]: An official website of the United States Government
+      - button "Here's how you know Expand More" [ref=e9] [cursor=pointer]:
+        - generic [ref=e10]: Here's how you know
+        - img "Expand More" [ref=e11]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - img ".gov icon" [ref=e14]
+        - paragraph [ref=e15]:
+          - strong [ref=e16]: Official websites use .gov
+          - text: A
+          - strong [ref=e17]: .gov
+          - text: website belongs to an official government organization in the United States.
+      - generic [ref=e18]:
+        - img "HTTPS icon" [ref=e19]
+        - paragraph [ref=e20]:
+          - strong [ref=e21]: Secure .gov websites use HTTPS
+          - text: A
+          - strong [ref=e22]: lock
+          - text: (
+          - img "Locked padlock icon" [ref=e24]
+          - text: ) or
+          - strong [ref=e26]: https://
+          - text: means you've safely connected to the .gov website. Share sensitive information only on official, secure websites.
+  - navigation [ref=e27]:
+    - generic [ref=e28]:
+      - list [ref=e29]:
+        - listitem [ref=e30]: Stay Connected ·
+        - listitem [ref=e31]:
+          - link "Recent Postings" [ref=e32] [cursor=pointer]:
+            - /url: /recentpostings.htm
+          - text: ·
+        - listitem [ref=e33]:
+          - link "Calendar" [ref=e34] [cursor=pointer]:
+            - /url: /newsevents/calendar.htm
+          - text: ·
+        - listitem [ref=e35]:
+          - link "Publications" [ref=e36] [cursor=pointer]:
+            - /url: /publications.htm
+          - text: ·
+        - listitem [ref=e37]:
+          - link "Site Map" [ref=e38] [cursor=pointer]:
+            - /url: /sitemap.htm
+          - text: ·
+        - listitem [ref=e39]:
+          - link "A-Z index" [ref=e40] [cursor=pointer]:
+            - /url: /azindex.htm
+          - text: ·
+        - listitem [ref=e41]:
+          - link "Careers" [ref=e42] [cursor=pointer]:
+            - /url: /careers.htm
+          - text: ·
+        - listitem [ref=e43]:
+          - link "FAQs" [ref=e44] [cursor=pointer]:
+            - /url: /faqs.htm
+          - text: ·
+        - listitem [ref=e45]:
+          - link "Videos" [ref=e46] [cursor=pointer]:
+            - /url: /videos.htm
+          - text: ·
+        - listitem [ref=e47]:
+          - link "Contact" [ref=e48] [cursor=pointer]:
+            - /url: /aboutthefed/contact-us-topics.htm
+      - search [ref=e49]:
+        - generic [ref=e50]:
+          - generic [ref=e51]: Search
+          - textbox "Search" [ref=e52]
+          - button "Submit Search Button" [ref=e54] [cursor=pointer]:
+            - generic [ref=e55]: Submit Search Button
+        - link "Advanced" [ref=e58] [cursor=pointer]:
+          - /url: //www.fedsearch.org/board_public/
+  - banner [ref=e59]:
+    - link "Board of Governors of the Federal Reserve System The Federal Reserve, the central bank of the United States, provides the nation with a safe, flexible, and stable monetary and financial system." [ref=e60] [cursor=pointer]:
+      - /url: /default.htm
+      - generic [ref=e61]:
+        - heading "Board of Governors of the Federal Reserve System" [level=1] [ref=e62]
+        - paragraph [ref=e63]:
+          - emphasis [ref=e64]: The Federal Reserve, the central bank of the United States, provides the nation with a safe, flexible, and stable monetary and financial system.
+  - navigation [ref=e65]:
+    - menubar [ref=e66]:
+      - menuitem "About the Fed" [ref=e67]:
+        - link "About the Fed" [ref=e68] [cursor=pointer]:
+          - /url: /aboutthefed.htm
+          - text: About
+          - text: the Fed
+      - menuitem "News & Events" [ref=e69]:
+        - link "News & Events" [ref=e70] [cursor=pointer]:
+          - /url: /newsevents.htm
+          - text: News
+          - text: "& Events"
+      - menuitem "Monetary Policy" [ref=e71]:
+        - link "Monetary Policy" [ref=e72] [cursor=pointer]:
+          - /url: /monetarypolicy.htm
+          - text: Monetary
+          - text: Policy
+      - menuitem "Supervision & Regulation" [ref=e73]:
+        - link "Supervision & Regulation" [ref=e74] [cursor=pointer]:
+          - /url: /supervisionreg.htm
+          - text: Supervision
+          - text: "& Regulation"
+      - menuitem "Financial Stability" [ref=e75]:
+        - link "Financial Stability" [ref=e76] [cursor=pointer]:
+          - /url: /financial-stability.htm
+          - text: Financial
+          - text: Stability
+      - menuitem "Payment Systems" [ref=e77]:
+        - link "Payment Systems" [ref=e78] [cursor=pointer]:
+          - /url: /paymentsystems.htm
+          - text: Payment
+          - text: Systems
+      - menuitem "Economic Research" [ref=e79]:
+        - link "Economic Research" [ref=e80] [cursor=pointer]:
+          - /url: /econres.htm
+          - text: Economic
+          - text: Research
+      - menuitem "Data" [ref=e81]:
+        - link "Data" [ref=e82] [cursor=pointer]:
+          - /url: /data.htm
+      - menuitem "Consumers & Communities" [ref=e83]:
+        - link "Consumers & Communities" [ref=e84] [cursor=pointer]:
+          - /url: /consumerscommunities.htm
+          - text: Consumers
+          - text: "& Communities"
+  - main [ref=e85]:
+    - generic [ref=e87]:
+      - list [ref=e88]:
+        - listitem [ref=e89]:
+          - link "Home" [ref=e90] [cursor=pointer]:
+            - /url: /default.htm
+        - listitem [ref=e91]:
+          - text: ">"
+          - link "News & Events" [ref=e92] [cursor=pointer]:
+            - /url: /newsevents.htm
+      - generic [ref=e93]:
+        - heading "Press Releases" [level=2] [ref=e95]
+        - link "RSS" [ref=e97] [cursor=pointer]:
+          - /url: /feeds/press_all.xml
+          - generic [ref=e99]: RSS
+    - generic [ref=e102]:
+      - heading "Filter by:" [level=3] [ref=e103]
+      - generic [ref=e104]:
+        - group "Date:" [ref=e105]:
+          - strong [ref=e108]: "Date:"
+          - generic [ref=e110]:
+            - generic [ref=e111]:
+              - generic [ref=e112]: From Date
+              - textbox "From Date" [ref=e115]:
+                - /placeholder: "From Date:"
+                - text: 1/3/2006
+              - button "Open Calendar" [ref=e117] [cursor=pointer]
+            - paragraph [ref=e119]: to
+            - generic [ref=e120]:
+              - generic [ref=e121]: To Date
+              - textbox "To Date" [ref=e124]:
+                - /placeholder: "To Date:"
+                - text: 6/18/2026
+              - button "Open Calendar" [ref=e126] [cursor=pointer]
+        - group "Type:" [ref=e128]:
+          - strong [ref=e131]: "Type:"
+          - generic [ref=e132]:
+            - generic [ref=e134] [cursor=pointer]:
+              - checkbox "Monetary Policy" [ref=e135]
+              - text: Monetary Policy
+            - generic [ref=e137] [cursor=pointer]:
+              - checkbox "Orders on Banking Applications" [ref=e138]
+              - text: Orders on Banking Applications
+            - generic [ref=e140] [cursor=pointer]:
+              - checkbox "Enforcement Actions" [ref=e141]
+              - text: Enforcement Actions
+            - generic [ref=e143] [cursor=pointer]:
+              - checkbox "Banking and Consumer Regulatory Policy" [ref=e144]
+              - text: Banking and Consumer Regulatory Policy
+            - generic [ref=e146] [cursor=pointer]:
+              - checkbox "Other Announcements" [ref=e147]
+              - text: Other Announcements
+        - link "Submit" [ref=e149] [cursor=pointer]:
+          - /url: "#"
+          - text: Submit
+        - paragraph [ref=e151]:
+          - text: "Note: Press Releases prior to 2006 are available in our"
+          - link "archive" [ref=e152] [cursor=pointer]:
+            - /url: /newsevents/pressreleases/press-release-archive.htm
+    - generic [ref=e153]:
+      - generic [ref=e154]:
+        - generic [ref=e155]:
+          - time [ref=e157]: 6/18/2026
+          - generic [ref=e158]:
+            - paragraph [ref=e159]:
+              - link "Federal Reserve Board issues enforcement action with former employee of Bank of Eufaula and S N B Bancshares, Inc." [ref=e161] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/enforcement20260618b.htm
+            - paragraph [ref=e162]:
+              - emphasis [ref=e164]: Enforcement Actions
+        - generic [ref=e165]:
+          - time [ref=e167]: 6/18/2026
+          - generic [ref=e168]:
+            - paragraph [ref=e169]:
+              - link "Federal Reserve Board issues enforcement action with former employee of Manufacturers and Traders Trust Company" [ref=e171] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/enforcement20260618a.htm
+            - paragraph [ref=e172]:
+              - emphasis [ref=e174]: Enforcement Actions
+        - generic [ref=e175]:
+          - time [ref=e177]: 6/18/2026
+          - generic [ref=e178]:
+            - paragraph [ref=e179]:
+              - link "Federal Reserve Board requests comment on proposal to require certain payment stablecoin issuers to maintain an effective customer identification program" [ref=e181] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/bcreg20260618a.htm
+            - paragraph [ref=e182]:
+              - emphasis [ref=e184]: Banking and Consumer Regulatory Policy
+        - generic [ref=e185]:
+          - time [ref=e187]: 6/17/2026
+          - generic [ref=e188]:
+            - paragraph [ref=e189]:
+              - link "Federal Reserve Board and Federal Open Market Committee release economic projections from the June 16-17 FOMC meeting" [ref=e191] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/monetary20260617b.htm
+            - paragraph [ref=e192]:
+              - emphasis [ref=e194]: Monetary Policy
+        - generic [ref=e195]:
+          - time [ref=e197]: 6/17/2026
+          - generic [ref=e198]:
+            - paragraph [ref=e199]:
+              - link "Federal Reserve issues FOMC statement" [ref=e201] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/monetary20260617a.htm
+            - paragraph [ref=e202]:
+              - emphasis [ref=e204]: Monetary Policy
+        - generic [ref=e205]:
+          - time [ref=e207]: 6/11/2026
+          - generic [ref=e208]:
+            - paragraph [ref=e209]:
+              - link "Federal Reserve Board announces final rule that establishes data standards for certain information collections" [ref=e211] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/bcreg20260611a.htm
+            - paragraph [ref=e212]:
+              - emphasis [ref=e214]: Banking and Consumer Regulatory Policy
+        - generic [ref=e215]:
+          - time [ref=e217]: 6/9/2026
+          - generic [ref=e218]:
+            - paragraph [ref=e219]:
+              - link "Federal Reserve Board announces that results from its annual bank stress test will be released on Wednesday, June 24, at 4 p.m. EDT." [ref=e221] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/bcreg20260609a.htm
+            - paragraph [ref=e222]:
+              - emphasis [ref=e224]: Banking and Consumer Regulatory Policy
+        - generic [ref=e225]:
+          - time [ref=e227]: 6/2/2026
+          - generic [ref=e228]:
+            - paragraph [ref=e229]:
+              - link "Agencies remove additional references to reputation risk" [ref=e231] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/bcreg20260602a.htm
+            - paragraph [ref=e232]:
+              - emphasis [ref=e234]: Banking and Consumer Regulatory Policy
+        - generic [ref=e235]:
+          - time [ref=e237]: 5/28/2026
+          - generic [ref=e238]:
+            - paragraph [ref=e239]:
+              - link "Federal Reserve Board issues enforcement actions with former employee of Atlantic Union Bank and former employee of Frost Bank" [ref=e241] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/enforcement20260528a.htm
+            - paragraph [ref=e242]:
+              - emphasis [ref=e244]: Enforcement Actions
+        - generic [ref=e245]:
+          - time [ref=e247]: 5/26/2026
+          - generic [ref=e248]:
+            - paragraph [ref=e249]:
+              - link "Minutes of the Board's discount rate meeting on April 20 and 29, 2026" [ref=e251] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/monetary20260526a.htm
+            - paragraph [ref=e252]:
+              - emphasis [ref=e254]: Monetary Policy
+        - generic [ref=e255]:
+          - time [ref=e257]: 5/22/2026
+          - generic [ref=e258]:
+            - paragraph [ref=e259]:
+              - link "Kevin Warsh takes oath of office as chairman and a member of the Board of Governors of the Federal Reserve System, and the Federal Open Market Committee unanimously selects Warsh as its chairman" [ref=e261] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/other20260522a.htm
+            - paragraph [ref=e262]:
+              - emphasis [ref=e264]: Other Announcements
+        - generic [ref=e265]:
+          - time [ref=e267]: 5/22/2026
+          - generic [ref=e268]:
+            - paragraph [ref=e269]:
+              - link "Agencies publish resolution plan feedback letters for certain domestic and foreign banking organizations" [ref=e271] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/bcreg20260522a.htm
+            - paragraph [ref=e272]:
+              - emphasis [ref=e274]: Banking and Consumer Regulatory Policy
+        - generic [ref=e275]:
+          - time [ref=e277]: 5/21/2026
+          - generic [ref=e278]:
+            - paragraph [ref=e279]:
+              - link "Federal Reserve Board issues enforcement action with former employee of Commerce Bank" [ref=e281] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/enforcement20260521a.htm
+            - paragraph [ref=e282]:
+              - emphasis [ref=e284]: Enforcement Actions
+        - generic [ref=e285]:
+          - time [ref=e287]: 5/20/2026
+          - generic [ref=e288]:
+            - paragraph [ref=e289]:
+              - link "Federal Reserve Board requests public comment on a proposal to establish a \"payment account,\" which legally eligible financial institutions could use for the specific purpose of clearing and settling their payments" [ref=e291] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/other20260520a.htm
+            - paragraph [ref=e292]:
+              - emphasis [ref=e294]: Other Announcements
+        - generic [ref=e295]:
+          - time [ref=e297]: 5/20/2026
+          - generic [ref=e298]:
+            - paragraph [ref=e299]:
+              - link "Minutes of the Federal Open Market Committee, April 28-29, 2026" [ref=e301] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/monetary20260520a.htm
+            - paragraph [ref=e302]:
+              - emphasis [ref=e304]: Monetary Policy
+        - generic [ref=e305]:
+          - time [ref=e307]: 5/19/2026
+          - generic [ref=e308]:
+            - paragraph [ref=e309]:
+              - link "Agencies request comment on financial institutions rating system" [ref=e311] [cursor=pointer]:
+                - /url: https://www.ffiec.gov/news/press-releases/2026/pr-05-19
+            - paragraph [ref=e312]:
+              - emphasis [ref=e314]: Other Announcements
+        - generic [ref=e315]:
+          - time [ref=e317]: 5/15/2026
+          - generic [ref=e318]:
+            - paragraph [ref=e319]:
+              - link "Federal Reserve Board names Jerome H. Powell as chair pro tempore; Powell will serve as chair pro tempore until Kevin M. Warsh is sworn in as the new chair" [ref=e321] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/other20260515a.htm
+            - paragraph [ref=e322]:
+              - emphasis [ref=e324]: Other Announcements
+        - generic [ref=e325]:
+          - time [ref=e327]: 5/15/2026
+          - generic [ref=e328]:
+            - paragraph [ref=e329]:
+              - link "Federal Reserve Board announces it does not object to the conversion of United Texas Bank, of Dallas, Texas, from a bank supervised by the Federal Reserve to a national bank supervised by the Office of the Comptroller of the Currency" [ref=e331] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/orders20260515b.htm
+            - paragraph [ref=e332]:
+              - emphasis [ref=e334]: Orders on Banking Applications
+        - generic [ref=e335]:
+          - time [ref=e337]: 5/15/2026
+          - generic [ref=e338]:
+            - paragraph [ref=e339]:
+              - link "Federal Reserve Board announces approval of application by the Stephen M. Calk 2025 Trust" [ref=e341] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/orders20260515a.htm
+            - paragraph [ref=e342]:
+              - emphasis [ref=e344]: Orders on Banking Applications
+        - generic [ref=e345]:
+          - time [ref=e347]: 5/15/2026
+          - generic [ref=e348]:
+            - paragraph [ref=e349]:
+              - link "Federal Reserve Board announces termination of enforcement actions with UBS Group AG, Credit Suisse AG, Credit Suisse Holdings (USA), Inc., and Credit Suisse AG, New York Branch" [ref=e351] [cursor=pointer]:
+                - /url: /newsevents/pressreleases/enforcement20260515a.htm
+            - paragraph [ref=e352]:
+              - emphasis [ref=e354]: Enforcement Actions
+        - navigation "Page navigation" [ref=e357]:
+          - list [ref=e358] [cursor=pointer]:
+            - listitem:
+              - button "Previous" [disabled] [ref=e359]
+            - listitem:
+              - button "Page 1" [ref=e360]: "1"
+            - listitem:
+              - button "Page 2" [ref=e361]: "2"
+            - listitem:
+              - button "Page 3" [ref=e362]: "3"
+            - listitem:
+              - button "Page 4" [ref=e363]: "4"
+            - listitem:
+              - button "Page 5" [ref=e364]: "5"
+            - listitem:
+              - button "Page 6" [ref=e365]: "6"
+            - listitem:
+              - button "Page 7" [ref=e366]: "7"
+            - listitem:
+              - button "Page 8" [ref=e367]: "8"
+            - listitem:
+              - button "Jump to page 9" [ref=e368]: ...
+            - listitem:
+              - button "Page 230" [ref=e369]: "230"
+            - listitem:
+              - button "Next" [ref=e370]
+      - generic [ref=e371]:
+        - generic [ref=e372]:
+          - heading "Sign-up" [level=5] [ref=e374]
+          - list [ref=e376]:
+            - listitem [ref=e377]: Email Alerts
+            - listitem [ref=e379]:
+              - generic [ref=e381]:
+                - generic [ref=e382]: Enter Email for Gov Delivery Signup
+                - textbox "Enter Email for Gov Delivery Signup" [ref=e383]:
+                  - /placeholder: Enter e-mail
+                - button [ref=e385] [cursor=pointer]
+            - listitem [ref=e387]:
+              - link "RSS" [ref=e388] [cursor=pointer]:
+                - /url: /feeds/press_all.xml
+                - text: RSS
+        - generic [ref=e390]:
+          - heading "Related Content" [level=5] [ref=e392]
+          - list [ref=e394]:
+            - listitem [ref=e395]:
+              - link "Recent Postings" [ref=e396] [cursor=pointer]:
+                - /url: /recentpostings.htm
+            - listitem [ref=e397]:
+              - link "Regulatory Reform" [ref=e398] [cursor=pointer]:
+                - /url: /reform.htm
+            - listitem [ref=e399]:
+              - link "FOIA" [ref=e400] [cursor=pointer]:
+                - /url: /foia/about_foia.htm
+    - generic [ref=e402]: "Last Update: March 13, 2017"
+  - contentinfo [ref=e403]:
+    - generic [ref=e404]:
+      - generic [ref=e405]:
+        - heading "Board of Governors of the Federal Reserve System" [level=6] [ref=e406]:
+          - text: Board of Governors
+          - emphasis [ref=e407]: of the
+          - text: Federal Reserve System
+        - list [ref=e408]:
+          - listitem [ref=e409]:
+            - link "About the Fed" [ref=e410] [cursor=pointer]:
+              - /url: /aboutthefed.htm
+          - listitem [ref=e411]:
+            - link "News & Events" [ref=e412] [cursor=pointer]:
+              - /url: /newsevents.htm
+          - listitem [ref=e413]:
+            - link "Monetary Policy" [ref=e414] [cursor=pointer]:
+              - /url: /monetarypolicy.htm
+          - listitem [ref=e415]:
+            - link "Supervision & Regulation" [ref=e416] [cursor=pointer]:
+              - /url: /supervisionreg.htm
+          - listitem [ref=e417]:
+            - link "Financial Stability" [ref=e418] [cursor=pointer]:
+              - /url: /financial-stability.htm
+          - listitem [ref=e419]:
+            - link "Payment Systems" [ref=e420] [cursor=pointer]:
+              - /url: /paymentsystems.htm
+          - listitem [ref=e421]:
+            - link "Economic Research" [ref=e422] [cursor=pointer]:
+              - /url: /econres.htm
+          - listitem [ref=e423]:
+            - link "Data" [ref=e424] [cursor=pointer]:
+              - /url: /data.htm
+          - listitem [ref=e425]:
+            - link "Consumers & Communities" [ref=e426] [cursor=pointer]:
+              - /url: /consumerscommunities.htm
+          - listitem [ref=e427]:
+            - link "Connect with the Board" [ref=e428] [cursor=pointer]:
+              - /url: /aboutthefed/aroundtheboard/stayconnected-qr-code-2.htm
+      - generic [ref=e429]:
+        - heading "Tools and Information" [level=6] [ref=e430]
+        - list [ref=e431]:
+          - listitem [ref=e432]:
+            - link "Contact" [ref=e433] [cursor=pointer]:
+              - /url: /aboutthefed/contact-us-topics.htm
+          - listitem [ref=e434]:
+            - link "Publications" [ref=e435] [cursor=pointer]:
+              - /url: /publications.htm
+          - listitem [ref=e436]:
+            - link "Freedom of Information (FOIA)" [ref=e437] [cursor=pointer]:
+              - /url: /foia/about_foia.htm
+          - listitem [ref=e438]:
+            - link "Office of Inspector General" [ref=e439] [cursor=pointer]:
+              - /url: https://oig.federalreserve.gov/
+          - listitem [ref=e440]:
+            - link "Budget & Performance" [ref=e441] [cursor=pointer]:
+              - /url: /publications/annual-report.htm
+            - text: "|"
+            - link "Audit" [ref=e442] [cursor=pointer]:
+              - /url: /regreform/audit.htm
+          - listitem [ref=e443]:
+            - link "No FEAR Act" [ref=e444] [cursor=pointer]:
+              - /url: /eeo.htm
+          - listitem [ref=e445]:
+            - link "Español" [ref=e446] [cursor=pointer]:
+              - /url: /espanol.htm
+          - listitem [ref=e447]:
+            - link "Website Policies" [ref=e448] [cursor=pointer]:
+              - /url: /website-linking-policies.htm
+            - text: "|"
+            - link "Privacy Program" [ref=e449] [cursor=pointer]:
+              - /url: /privacy.htm
+          - listitem [ref=e450]:
+            - link "Accessibility" [ref=e451] [cursor=pointer]:
+              - /url: /accessibility.htm
+      - generic [ref=e452]:
+        - generic [ref=e453]:
+          - heading "Stay Connected" [level=6] [ref=e454]
+          - link "Federal Reserve Facebook Page" [ref=e455] [cursor=pointer]:
+            - /url: https://www.facebook.com/federalreserve
+            - generic [ref=e456]: Federal Reserve Facebook Page
+          - link "Federal Reserve Instagram Page" [ref=e457] [cursor=pointer]:
+            - /url: https://www.instagram.com/federalreserveboard/
+            - generic [ref=e458]: Federal Reserve Instagram Page
+          - link "Federal Reserve YouTube Page" [ref=e459] [cursor=pointer]:
+            - /url: https://www.youtube.com/federalreserve
+            - generic [ref=e460]: Federal Reserve YouTube Page
+          - link "Federal Reserve Flickr Page" [ref=e461] [cursor=pointer]:
+            - /url: https://www.flickr.com/photos/federalreserve/
+            - generic [ref=e462]: Federal Reserve Flickr Page
+          - link "Federal Reserve LinkedIn Page" [ref=e463] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/federal-reserve-board
+            - generic [ref=e464]: Federal Reserve LinkedIn Page
+          - link "Federal Reserve Threads Page" [ref=e465] [cursor=pointer]:
+            - /url: https://www.threads.net/@federalreserveboard
+            - generic [ref=e466]: Federal Reserve Threads Page
+          - link "Link to Federal Reserve X Page" [ref=e467] [cursor=pointer]:
+            - /url: https://x.com/federalreserve
+            - generic [ref=e468]: Link to Federal Reserve X Page
+          - link "Link to Federal Reserve Bluesky Page" [ref=e469] [cursor=pointer]:
+            - /url: https://bsky.app/profile/federalreserve.gov
+            - generic [ref=e470]: Link to Federal Reserve Bluesky Page
+          - link "Subscribe to RSS" [ref=e471] [cursor=pointer]:
+            - /url: /feeds/feeds.htm
+            - generic [ref=e472]: Subscribe to RSS
+          - link "Subscribe to Email" [ref=e473] [cursor=pointer]:
+            - /url: /subscribe.htm
+            - generic [ref=e474]: Subscribe to Email
+        - link "Link to USA.gov" [ref=e475] [cursor=pointer]:
+          - /url: https://www.usa.gov/
+          - img "Link to USA.gov" [ref=e476]
+        - link "Link to Open.gov" [ref=e477] [cursor=pointer]:
+          - /url: /open/open.htm
+          - img "Link to Open.gov" [ref=e478]
+    - generic [ref=e480]:
+      - paragraph [ref=e481]:
+        - text: Board of Governors
+        - emphasis [ref=e482]: of the
+        - text: Federal Reserve System
+      - paragraph [ref=e483]: ●20th Street and Constitution Avenue N.W., Washington, DC 20551

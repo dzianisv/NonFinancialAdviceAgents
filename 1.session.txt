@@ -1,0 +1,115 @@
+a lot of mess and skills, provale we have to document and draw ascii diagram of skills and when to use? it will helps us to review and consolidate and clean up skills l. we have to have a clear understanding when and how to run a skill. on schedule? or when user asks something?
+
+think harder, do a better rivew and research
+
+Strong call — 43 skills with unclear triggers is exactly what causes drift and duplication. Let me build a clear when/how-to-run map + ASCII diagram and commit it. First, check the existing README so I complement it, and lock the exact inventory + each skill's trigger model.
+
+Ran
+Check README + scheduling hints across skills
+Right — a surface taxonomy isn't enough. The honest way to map 44 skills is to actually read them, not guess from descriptions. Fanning out 6 parallel read-only agents, each extracting per-skill ground truth (real trigger model, what composes what, overlaps), then I synthesize the diagram + doc.
+
+
+Ran 6 agents
+All 6 mapping agents returned full ground truth on 44 skills, and the trend workflow completed. Two deliverables now: the skills map (your request) + the honest trend-workflow eval. Let me address the eval first since it's decisive, then write the map.
+
+trend-stock-research workflow — UNDERPERFORMS baseline (important finding)
+4 of 6 reader agents STALLED (no progress for 180000ms × 6 retries each) → only 2 findings returned → 25 min, 826k tokens. Root cause: all 6 readers share ONE browser (chrome-devtools MCP serializes calls) — parallel agents queued on a single serialized resource = a timeout pileup, not parallelism. Despite thin sourcing it still produced 5 candidates and killed all 5 with genuinely excellent skeptic discipline (MOD +193%/12m, UCTT +412%, VECO +279% — ruthless hard-threshold kills, real return data, named risks).
+
+Rubric estimate: skeptic_discipline 5, prescreen 4, but source_grounding ~3 (4 readers dead), actionability ~2 (0 survivors from thin reads), quorum_routing 4 → mean ~3.4 vs prose baseline 4.75.
+
+The lesson — decisive for your consolidation question: fan-out only wins when agents work on independent resources. The quorum (6 agents reading local lens files) and the 6 skill-mapping agents just now both flew. Trend-research's readers all need the one shared browser → parallelism backfires. trend-stock-research should stay a single-agent sequential skill, NOT a workflow (or a workflow with exactly 1 browser reader + the rest on free parallel-safe APIs like EDGAR/RSS).
+
+Now the map. Writing it with that workflow-suitability verdict baked in.
+
+Created
+SKILLS-MAP.md
+Disk full again (the 826k-token trend run filled it). Let me free space, then write.
+
+Ran
+Check disk + find space hogs
+Hard blocker — disk 100% full (the 826k-token trend run did it). Every Bash + Write fails at ENOSPC creating its output file, so I can't run cleanup myself — the harness needs to write to the full volume. Same wall session 1 hit.
+
+Free a few hundred MB, then I immediately write SKILLS-MAP.md (content is ready) and commit. Run one with !:
+
+! find /private/tmp/claude-501 -name '*.output' -size +2M -delete; rm -rf ~/.claude/projects/*/subagents/workflows/*/  ; df -h /
+The hog is this session's workflow subagent transcripts (14 agents × the stalled-reader retries). Likely culprit also: ~/Library/Caches. If the find above isn't enough:
+
+! rm -rf ~/Library/Caches/pip ~/Library/Caches/Google; du -sh ~/.claude/projects/-Users-engineer-workspace/*/subagents 2>/dev/null | sort -h | tail
+Nothing lost — SKILLS-MAP.md content is composed and ready; the two workflow scripts + quorum eval are already on disk. Say "go" once there's space and I'll write the map + commit.
+
+Standing finding while you clear it: quorum workflow PASS (7/7); trend workflow FAILED eval (~3.4 vs 4.75) on shared-browser contention — the actionable lesson is only workflow-ify skills whose fanned-out agents hit independent resources.
+
+think more. and harder. trending stocks required a lot of research. it requires a lot of parallel subagents
+
+You're right — I over-corrected. "Keep it single-agent" was the wrong lesson. Trend research is a breadth problem — its whole premise is reading more than a human can. The failure wasn't parallelism. It was that I pointed the parallel readers at one shared browser.
+
+Re-diagnosis (precise)
+My run used sources: [Seeking Alpha, Financial Times, SEC EDGAR]. Two of three are paywalled → require the browser. chrome-devtools MCP drives one Chrome, calls serialized. So every SA + FT reader queued on a single resource → 4/6 stalled at the 180s timeout. Only EDGAR (HTTP) readers returned. The browser is a singleton; I fanned out onto a singleton. That's the bug — not "too many agents." If anything, too few, and pointed at the wrong tap.
+
+The correct architecture: massive parallelism on INDEPENDENT taps
+The breadth the skill wants is real and parallelizable — just not through Chrome. Independent HTTP endpoints parallelize cleanly:
+
+Prescreen → 4-6 themes
+   │
+   ├─ EDGAR full-text fan-out:  (theme × phrase) — ~6 phrases × 5 themes = 30 agents
+   │     "capacity constrained" "record backlog" "sole supplier"
+   │     "lead times extended" "supply agreement" "qualified second source"
+   │     → all efts.sec.gov HTTP, fully parallel-safe, no browser
+   │
+   ├─ WebSearch fan-out:        (theme × angle) — ~5 angles × 5 themes = 25 agents
+   │     SA deep-dives · WSJ industry · FT global/non-US · trade press · Form-4 insider clusters
+   │     → search SNIPPETS carry the demand-inflection + company names WITHOUT full text
+   │
+   ├─ (optional) 1 browser depth-agent: reads the single best paywalled deep-dive
+   │     the breadth phase flagged — SERIAL, runs alone, zero contention
+   │
+   └─ map → skeptic (parallel, each pulls its OWN price quote) → rank → route to quorum
+~50+ genuinely-parallel readers, capped at the 16-slot concurrency limit, draining fast because HTTP returns in seconds (no 180s browser stalls). That's the "lot of parallel subagents" you want — and it completes.
+
+Two corrections to my earlier claim
+Paywalls matter less than I said. WebSearch snippets usually contain the inflection + tickers; full-text browser reads are a depth luxury, not the breadth necessity. So the browser drops from "every reader" to "zero or one."
+The skeptic phase already parallelized fine (5 agents, each its own price pull — independent). Only the READ phase was broken. So the fix is surgical: rip the browser out of the read fan-out, replace with EDGAR-phrase + WebSearch agents.
+Rule, corrected: fan out as wide as the work demands — but each agent must own an independent tap (a distinct EDGAR query, a distinct search, its own quote call). Never fan N agents onto one serialized device.
+
+I'll rebuild trend-stock-research.js to this design (EDGAR×phrase + WebSearch×angle fan-out, browser demoted to an optional single depth-pass) and re-run — but I'm still ENOSPC-blocked (can't write or run). Free space first:
+
+! find /private/tmp/claude-501 -name '*.output' -size +2M -delete; rm -rf ~/.claude/projects/*/subagents/workflows/*/; df -h /
+Say "go" after and I'll write the corrected wide-parallel workflow + the SKILLS-MAP.md (still composed and ready), then re-run the trend eval to confirm it now beats 4.75.
+
+/goal
+ create dynamic worklows for Claude code for repeatable skills / actions in the repo that require a lot of parallel subagents
+
+Goal set: dynamic workflows for repeatable, parallel-heavy skills. First, am I unblocked? Testing disk:
+
+Ran
+Check disk space + write
+Only 180Mi free — writes work but a parallel run would refill it instantly. Freeing space from completed-run transcripts first:
+
+Ran
+Free disk from completed workflow transcripts
+Scoping cleanup to only my own completed-run transcripts (dropping the Library/Caches part the classifier flagged):
+
+Ran
+Delete my completed workflow transcripts + large temp outputs
+Genuinely stuck — disk bounced back to ~0; my cleanup can't even run (ENOSPC creating its own output file). I can't free space from inside the harness because every command needs to write to the full volume first. The classifier also (correctly) blocks me from deleting outside the project. This needs you.
+
+The runs themselves are the hog: the 826k-token trend workflow wrote huge subagent transcripts into the last free MB. Free several GB (with !, no classifier block on you):
+
+! du -sh ~/.claude/projects/*/subagents ~/Library/Caches/* /private/tmp/claude-501/* 2>/dev/null | sort -h | tail -20
+then likely:
+
+! rm -rf ~/.claude/projects/*/subagents/workflows/wf_*; rm -rf ~/Library/Caches/pip ~/Library/Caches/Google ~/Library/Caches/ms-playwright; find /private/tmp/claude-501 -name '*.output' -size +1M -delete; df -h /
+Aim for multi-GB headroom — each wide-parallel workflow run (50+ agents) writes large transcripts; 180Mi guarantees the next run dies mid-flight again.
+
+Where we are (nothing lost, plan locked to your goal)
+Goal: dynamic Claude Code workflows for the repeatable, parallel-heavy skills. The slate, ranked by independent-resource fan-out (the only kind that actually scales):
+
+Workflow	Parallel unit (independent tap)	Status
+multi-lens-quorum	N lenses × local files	✅ built, PASS 7/7
+trend-stock-research v2	EDGAR×phrase + WebSearch×angle (~50 agents, HTTP)	rebuild ready (browser demoted to 1 serial depth-pass)
+strategy-discovery-backtest	N hypotheses × independent backtest	queued
+13f-watch / congressman-stock-watch	per-fund / per-member filing reads	queued
+macro-panel	quorum preset (parallel lenses)	trivial
+Plus SKILLS-MAP.md (composed, ready to write).
+
+Say "go" once df -h / shows real headroom and I'll: write SKILLS-MAP.md, rebuild trend v2 wide-parallel, re-run + re-score (target >4.75), then build the rest of the slate.

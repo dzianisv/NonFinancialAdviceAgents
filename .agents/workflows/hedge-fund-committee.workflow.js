@@ -92,7 +92,7 @@ const NEWS_SEATS = [
   { desk: 'news-reddit',     prompt: 'You are the retail-sentiment analyst. Scan Reddit (r/stocks, r/wallstreetbets, r/investing) via the public JSON (e.g. https://www.reddit.com/r/wallstreetbets/hot.json?limit=50) for tickers with unusual, BUILDING attention plus a real catalyst — distinguish a durable narrative from a one-day meme squeeze (skip pure pumps).' + NEWS_RULES },
 ]
 const DESKS = [
-  { desk: 'macro-regime',        prompt: 'You are the macro/regime analyst. Run /regime-detection AND /fomc-monitor. Summary = regime (RISK_ON/NEUTRAL/RISK_OFF) + exposure dial + Fed tone/next-meeting. candidates: [] unless a regime/Fed shift implies a specific tilt.' },
+  { desk: 'macro-regime',        prompt: 'You are the macro/regime analyst. Run /regime-detection AND /feed-fomc. Summary = regime (RISK_ON/NEUTRAL/RISK_OFF) + exposure dial + Fed tone/next-meeting. candidates: [] unless a regime/Fed shift implies a specific tilt.' },
   { desk: 'institutional-flows', prompt: 'You are the institutional-flows analyst. Run /13f-watch (Burry/Buffett/Ackman/Klarman/Li Lu). Return ONLY new, deduped institutional BUYS as candidates (source=13F, evidence=fund+filing). Drop puts/trims/exits. State the 45-day lag.' },
   { desk: 'political-flows',     prompt: 'You are the political-flows analyst. Run /congressman-stock-watch (last 90d). Return only NEW deduped congressional PURCHASES as candidates (evidence=member+date+amount). State the 30-45d disclosure lag. If the source is rate-limited, say so and return [].' },
   ...NEWS_SEATS,

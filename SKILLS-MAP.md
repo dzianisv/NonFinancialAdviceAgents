@@ -55,7 +55,7 @@ QUESTION TYPE
 | dip-screener | daily | silent-unless-signal |
 | regime-detection | daily | silent-unless-transition |
 | signal-convergence-alert | daily | silent-unless-≥2-pool-hits |
-| fomc-monitor | daily | silent-unless-fed-event |
+| feed-fomc | daily | silent-unless-fed-event |
 | trend-stock-research (mention_velocity.py) | daily | feeds convergence pool |
 | 13f-watch | weekly | silent-unless-new-filing |
 | 13d-watch | weekly | silent-unless-activist->5% |

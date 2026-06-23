@@ -34,7 +34,7 @@ Complete a codebase consolidation that merges the duplicate `skills/` directory 
 ## Key Decisions
 - **Leave openclaw pod paths alone**: `docs/tdd.md` lines 203/208 reference runtime paths on the openclaw deployment pod, not repo-relative paths
 - **Leave historical prose refs**: `research/07-reading-list.md:49`, `evals/crypto/RESULTS.md:35`, `thoughts/ledgers/*` are logs/prose not navigation links
-- **fedwatch_zq.py canonical in fomc-monitor**: prediction-market-odds copy replaced with 2-line pointer comment
+- **fedwatch_zq.py canonical in feed-fomc**: prediction-market-odds copy replaced with 2-line pointer comment
 - **Deprecation = YAML flag + visible blockquote**: both mechanisms used for liveness-monitor and agentic-fund-orchestration
 
 ## Next Steps

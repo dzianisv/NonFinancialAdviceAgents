@@ -26,7 +26,7 @@ Phase 4 DECIDE (manager-selected chair) → Phase 5 WRITE → Phase 6 LEDGER
 | odds | [[prediction-market-odds]] → Polymarket Gamma, Kalshi |
 | price + on-chain | yfinance + checkonchain/lookintobitcoin/newhedge |
 | derivatives | [[analyst-derivatives-positioning]] → Deribit, Coinglass |
-| macro | [[fomc-monitor]] → federalreserve.gov, BLS |
+| macro | [[feed-fomc]] → federalreserve.gov, BLS |
 | liquidity | Howell, Fed B/S, DXY, M2 |
 | **etf-flows** | **TODO: build.** Farside / SoSoValue spot BTC/ETH ETF **net daily flow + trend** — hard data, not opinion. Feeds NFR4 hard-event tier. |
 | sentiment/regime | [[regime-detection]] → alternative.me F&G |

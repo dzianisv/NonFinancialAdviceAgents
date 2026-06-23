@@ -19,7 +19,7 @@ prompt must be self-contained. Emit [SILENT] when a job has nothing to report.
 STEP 1 — INSTALL SKILLS (include the .py helpers, not just SKILL.md):
   npx -y skills add dzianisv/backtest --agent hermes-agent --copy
   Then: hermes skills list  — confirm dip-screener, crypto-dip-scanner, signal-convergence-alert,
-  liveness-monitor, trend-stock-research, regime-detection, fomc-monitor, 13f-watch,
+  liveness-monitor, trend-stock-research, regime-detection, feed-fomc, 13f-watch,
   congressman-stock-watch, multi-lens-quorum, risk-management, forecast-ledger appear.
   Create a durable pool dir: mkdir -p ~/.openclaw/workspace/investor/pools
   (or set $DIP_POOL/$NARRATIVE_POOL env to a persistent path your cron sessions share — NOT /tmp).

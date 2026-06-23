@@ -64,5 +64,5 @@ Complete tier-2 skills consolidation cleanup: fix remaining bare `skills/` path 
 - `/Users/engineer/workspace/backtest/.agents/skills/prediction-market-odds/fedwatch_zq.py` — replaced with 2-line pointer
 
 ### Shell Commands Run
-- `diff .agents/skills/fomc-monitor/fedwatch_zq.py .agents/skills/prediction-market-odds/fedwatch_zq.py` → empty (identical)
+- `diff .agents/skills/feed-fomc/fedwatch_zq.py .agents/skills/prediction-market-odds/fedwatch_zq.py` → empty (identical)
 - `grep` for `\bskills/[^.]` in `research/skills-grounding/` → found 18 matches (all now fixed)

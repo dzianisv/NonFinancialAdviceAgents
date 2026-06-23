@@ -1,0 +1,2149 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - img [ref=e6] [cursor=pointer]
+      - link "Legend NEW" [ref=e9] [cursor=pointer]:
+        - /url: https://legend.coinglass.com
+        - generic [ref=e10]:
+          - generic [ref=e11]: Legend
+          - generic [ref=e12]: NEW
+    - generic [ref=e13]:
+      - banner [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e18]:
+            - link "24h Volume $184,768,060,277 -10.90%" [ref=e19] [cursor=pointer]:
+              - /url: /pro/futures/FuturesVolume
+              - generic [ref=e20]:
+                - text: 24h Volume
+                - generic [ref=e21]: $184,768,060,277
+                - generic [ref=e22]: "-10.90%"
+            - link "Open Interest $106,061,054,124 -2.20%" [ref=e23] [cursor=pointer]:
+              - /url: /pro/futures/Cryptofutures
+              - generic [ref=e24]:
+                - text: Open Interest
+                - generic [ref=e25]: $106,061,054,124
+                - generic [ref=e26]: "-2.20%"
+            - link "24h Liquidation $467,225,744 +6.70%" [ref=e27] [cursor=pointer]:
+              - /url: /liquidations
+              - generic [ref=e28]:
+                - text: 24h Liquidation
+                - generic [ref=e29]: $467,225,744
+                - generic [ref=e30]: +6.70%
+            - link "24h Long/Short 49.25%/50.75%" [ref=e31] [cursor=pointer]:
+              - /url: /LongShortRatio
+              - generic [ref=e32]:
+                - text: 24h Long/Short
+                - generic [ref=e33]: 49.25%/50.75%
+          - generic [ref=e35]:
+            - link "API" [ref=e37] [cursor=pointer]:
+              - /url: /CryptoApi
+            - link "Download APP" [ref=e39] [cursor=pointer]:
+              - /url: /download
+            - generic [ref=e41] [cursor=pointer]:
+              - combobox [ref=e42]: English
+              - img [ref=e44]
+              - textbox [ref=e46]: en
+            - img [ref=e48] [cursor=pointer]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - link [ref=e53] [cursor=pointer]:
+              - /url: /
+              - img [ref=e54]
+            - link "Market" [ref=e56] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e57]: Market
+            - link "Stock" [ref=e58] [cursor=pointer]:
+              - /url: /stock
+            - link "Exchanges" [ref=e59] [cursor=pointer]:
+              - /url: /exchanges
+              - generic [ref=e60]: Exchanges
+            - link "Open Interest" [ref=e61] [cursor=pointer]:
+              - /url: /open-interest/BTC
+            - link "Funding Rate" [ref=e62] [cursor=pointer]:
+              - /url: /FundingRate
+              - generic [ref=e63]: Funding Rate
+            - link "Liquidation" [ref=e64] [cursor=pointer]:
+              - /url: /liquidations
+              - generic [ref=e65]: Liquidation
+            - generic [ref=e66] [cursor=pointer]: Data
+            - link "Supercharts" [ref=e67] [cursor=pointer]:
+              - /url: https://www.coinglass.com/tv
+              - generic [ref=e68]: Supercharts
+            - link "Legend" [ref=e69] [cursor=pointer]:
+              - /url: https://legend.coinglass.com
+            - generic [ref=e70]: More
+          - generic [ref=e72]:
+            - generic [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]:
+                - img [ref=e77]
+                - generic [ref=e79]: Search
+              - generic [ref=e80]: /
+            - link "Login" [ref=e81] [cursor=pointer]:
+              - /url: /login
+              - button "Login" [ref=e82]
+      - generic [ref=e84] [cursor=pointer]:
+        - img "bitunix" [ref=e86]
+        - img [ref=e88]
+      - generic [ref=e90]:
+        - generic [ref=e92]:
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - generic [ref=e97]:
+                - generic [ref=e98]:
+                  - generic [ref=e99]:
+                    - heading "Liquidation Heatmap" [level=2] [ref=e100]
+                    - tablist [ref=e102]:
+                      - tab "1 hour" [selected] [ref=e103] [cursor=pointer]
+                      - tab "4 hour" [ref=e104] [cursor=pointer]
+                      - tab "12 hour" [ref=e105] [cursor=pointer]
+                      - tab "24 hour" [ref=e106] [cursor=pointer]
+                  - tablist [ref=e108]:
+                    - tab "Symbol" [selected] [ref=e109] [cursor=pointer]
+                    - tab "Exchanges" [ref=e110] [cursor=pointer]
+                - generic [ref=e112]:
+                  - link "ETH $796.69K" [ref=e2610] [cursor=pointer]:
+                    - /url: /liquidations/ETH
+                    - generic [ref=e2613]:
+                      - generic [ref=e2614]: ETH
+                      - generic [ref=e2616]: $796.69K
+                  - link "SKHYNIX $261.25K" [ref=e2619] [cursor=pointer]:
+                    - /url: /liquidations/SKHYNIX
+                    - generic [ref=e2622]:
+                      - generic [ref=e2623]: SKHYNIX
+                      - generic [ref=e2625]: $261.25K
+                  - generic [ref=e2630]:
+                    - generic [ref=e2631]: XYZ:SMH
+                    - generic [ref=e2633]: $204.05K
+                  - link "HYPE $180.29K" [ref=e2636] [cursor=pointer]:
+                    - /url: /liquidations/HYPE
+                    - generic [ref=e2639]:
+                      - generic [ref=e2640]: HYPE
+                      - generic [ref=e2642]: $180.29K
+                  - link "BASED $130.17K" [ref=e2645] [cursor=pointer]:
+                    - /url: /liquidations/BASED
+                    - generic [ref=e2648]:
+                      - generic [ref=e2649]: BASED
+                      - generic [ref=e2651]: $130.17K
+                  - link "BTC $123.36K" [ref=e2654] [cursor=pointer]:
+                    - /url: /liquidations/BTC
+                    - generic [ref=e2657]:
+                      - generic [ref=e2658]: BTC
+                      - generic [ref=e2660]: $123.36K
+                  - link "VELVET $120.79K" [ref=e2663] [cursor=pointer]:
+                    - /url: /liquidations/VELVET
+                    - generic [ref=e2666]:
+                      - generic [ref=e2667]: VELVET
+                      - generic [ref=e2669]: $120.79K
+                  - link "SYN $115.46K" [ref=e2672] [cursor=pointer]:
+                    - /url: /liquidations/SYN
+                    - generic [ref=e2675]:
+                      - generic [ref=e2676]: SYN
+                      - generic [ref=e2678]: $115.46K
+                  - generic [ref=e2683]:
+                    - generic [ref=e2684]: Others
+                    - generic [ref=e2686]: $101.45K
+                  - link "ESPORTS $96.38K" [ref=e2689] [cursor=pointer]:
+                    - /url: /liquidations/ESPORTS
+                    - generic [ref=e2692]:
+                      - generic [ref=e2693]: ESPORTS
+                      - generic [ref=e2695]: $96.38K
+                  - link "SOL $85.86K" [ref=e2698] [cursor=pointer]:
+                    - /url: /liquidations/SOL
+                    - generic [ref=e2701]:
+                      - generic [ref=e2702]: SOL
+                      - generic [ref=e2704]: $85.86K
+                  - link "OPENAI $58.59K" [ref=e2707] [cursor=pointer]:
+                    - /url: /liquidations/OPENAI
+                    - generic [ref=e2710]:
+                      - generic [ref=e2711]: OPENAI
+                      - generic [ref=e2713]: $58.59K
+                  - link "INTC" [ref=e2716] [cursor=pointer]:
+                    - /url: /liquidations/INTC
+                    - generic [ref=e2720]: INTC
+                  - link "XAU" [ref=e2723] [cursor=pointer]:
+                    - /url: /liquidations/XAU
+                    - generic [ref=e2727]: XAU
+                  - link "LAB" [ref=e2730] [cursor=pointer]:
+                    - /url: /liquidations/LAB
+                    - generic [ref=e2734]: LAB
+                  - link "BSB" [ref=e2737] [cursor=pointer]:
+                    - /url: /liquidations/BSB
+                    - generic [ref=e2741]: BSB
+                  - generic [ref=e2747]: XYZ:SILVER
+                  - link "RE" [ref=e2750] [cursor=pointer]:
+                    - /url: /liquidations/RE
+                    - generic [ref=e2754]: RE
+                  - link "DEXE" [ref=e2757] [cursor=pointer]:
+                    - /url: /liquidations/DEXE
+                    - generic [ref=e2761]: DEXE
+                  - link "NEAR" [ref=e2764] [cursor=pointer]:
+                    - /url: /liquidations/NEAR
+                    - generic [ref=e2768]: NEAR
+                  - link "WLD" [ref=e2771] [cursor=pointer]:
+                    - /url: /liquidations/WLD
+                    - generic [ref=e2775]: WLD
+                  - link "UNI" [ref=e2778] [cursor=pointer]:
+                    - /url: /liquidations/UNI
+                    - generic [ref=e2782]: UNI
+                  - link "EIGEN" [ref=e2785] [cursor=pointer]:
+                    - /url: /liquidations/EIGEN
+                    - generic [ref=e2789]: EIGEN
+                  - link "ZEC" [ref=e2792] [cursor=pointer]:
+                    - /url: /liquidations/ZEC
+                    - generic [ref=e2796]: ZEC
+                  - link "XPL" [ref=e2799] [cursor=pointer]:
+                    - /url: /liquidations/XPL
+                    - generic [ref=e2803]: XPL
+                  - link "OP" [ref=e2806] [cursor=pointer]:
+                    - /url: /liquidations/OP
+                    - generic [ref=e2810]: OP
+                  - link "XLM" [ref=e2813] [cursor=pointer]:
+                    - /url: /liquidations/XLM
+                    - generic [ref=e2817]: XLM
+                  - link "SPCX" [ref=e2820] [cursor=pointer]:
+                    - /url: /liquidations/SPCX
+                    - generic [ref=e2824]: SPCX
+                  - link "GUA" [ref=e2827] [cursor=pointer]:
+                    - /url: /liquidations/GUA
+                    - generic [ref=e2831]: GUA
+                  - link "AERGO" [ref=e2834] [cursor=pointer]:
+                    - /url: /liquidations/AERGO
+                    - generic [ref=e2838]: AERGO
+                  - link "TRUST" [ref=e2841] [cursor=pointer]:
+                    - /url: /liquidations/TRUST
+                    - generic [ref=e2845]: TRUST
+                  - link "SPX" [ref=e2848] [cursor=pointer]:
+                    - /url: /liquidations/SPX
+                    - generic [ref=e2852]: SPX
+                  - link "ORDI" [ref=e2855] [cursor=pointer]:
+                    - /url: /liquidations/ORDI
+                    - generic [ref=e2859]: ORDI
+                  - link "ZEREBRO" [ref=e2862] [cursor=pointer]:
+                    - /url: /liquidations/ZEREBRO
+                    - generic [ref=e2866]: ZEREBRO
+                  - link "CLO" [ref=e2869] [cursor=pointer]:
+                    - /url: /liquidations/CLO
+                    - generic [ref=e2873]: CLO
+                  - link "TAG" [ref=e2876] [cursor=pointer]:
+                    - /url: /liquidations/TAG
+                    - generic [ref=e2880]: TAG
+                  - link "JTO" [ref=e2883] [cursor=pointer]:
+                    - /url: /liquidations/JTO
+                    - generic [ref=e2887]: JTO
+                  - link "THETA" [ref=e2890] [cursor=pointer]:
+                    - /url: /liquidations/THETA
+                    - generic [ref=e2894]: THETA
+                  - link "MRVL" [ref=e2897] [cursor=pointer]:
+                    - /url: /liquidations/MRVL
+                    - generic [ref=e2901]: MRVL
+                  - generic [ref=e2907]: XYZ:SKHX
+                  - link "HNT" [ref=e2910] [cursor=pointer]:
+                    - /url: /liquidations/HNT
+                    - generic [ref=e2914]: HNT
+                  - link "SOXL" [ref=e2917] [cursor=pointer]:
+                    - /url: /liquidations/SOXL
+                    - generic [ref=e2921]: SOXL
+                  - link "MEGA" [ref=e2924] [cursor=pointer]:
+                    - /url: /liquidations/MEGA
+                    - generic [ref=e2928]: MEGA
+                  - link "SIREN" [ref=e2931] [cursor=pointer]:
+                    - /url: /liquidations/SIREN
+                    - generic [ref=e2935]: SIREN
+                  - generic [ref=e2941]: XYZ:INTC
+                  - link "XAG" [ref=e2944] [cursor=pointer]:
+                    - /url: /liquidations/XAG
+                    - generic [ref=e2948]: XAG
+                  - link "DOGE" [ref=e2951] [cursor=pointer]:
+                    - /url: /liquidations/DOGE
+                    - generic [ref=e2955]: DOGE
+                  - link "TAC" [ref=e2958] [cursor=pointer]:
+                    - /url: /liquidations/TAC
+                    - generic [ref=e2962]: TAC
+                  - link "ASTEROID" [ref=e2965] [cursor=pointer]:
+                    - /url: /liquidations/ASTEROID
+                    - generic [ref=e2969]: ASTEROID
+                  - link "ARKM" [ref=e2972] [cursor=pointer]:
+                    - /url: /liquidations/ARKM
+                    - generic [ref=e2976]: ARKM
+                  - link "WDC" [ref=e2979] [cursor=pointer]:
+                    - /url: /liquidations/WDC
+                    - generic [ref=e2983]: WDC
+              - generic [ref=e493]:
+                - generic [ref=e494]:
+                  - heading "Total Liquidations" [level=2] [ref=e495]
+                  - generic [ref=e497]:
+                    - button "Long" [ref=e498] [cursor=pointer]
+                    - button "Short" [ref=e499] [cursor=pointer]
+                    - button "Trade" [ref=e500] [cursor=pointer]
+                - generic [ref=e502]:
+                  - generic [ref=e504]:
+                    - generic [ref=e505]:
+                      - generic [ref=e506]: 1h Rekt
+                      - generic [ref=e507]: $2.92M
+                    - generic [ref=e508]:
+                      - generic [ref=e509]: Long
+                      - generic [ref=e510]: $1.19M
+                    - generic [ref=e511]:
+                      - generic [ref=e512]: Short
+                      - generic [ref=e513]: $1.74M
+                  - generic [ref=e515]:
+                    - generic [ref=e516]:
+                      - generic [ref=e517]: 4h Rekt
+                      - generic [ref=e518]: $10.57M
+                    - generic [ref=e519]:
+                      - generic [ref=e520]: Long
+                      - generic [ref=e521]: $4.80M
+                    - generic [ref=e522]:
+                      - generic [ref=e523]: Short
+                      - generic [ref=e524]: $5.77M
+                  - generic [ref=e526]:
+                    - generic [ref=e527]:
+                      - generic [ref=e528]: 12h Rekt
+                      - generic [ref=e529]: $322.15M
+                    - generic [ref=e530]:
+                      - generic [ref=e531]: Long
+                      - generic [ref=e532]: $257.70M
+                    - generic [ref=e533]:
+                      - generic [ref=e534]: Short
+                      - generic [ref=e535]: $64.45M
+                  - generic [ref=e537]:
+                    - generic [ref=e538]:
+                      - generic [ref=e539]: 24h Rekt
+                      - generic [ref=e540]: $467.23M
+                    - generic [ref=e541]:
+                      - generic [ref=e542]: Long
+                      - generic [ref=e543]: $376.02M
+                    - generic [ref=e544]:
+                      - generic [ref=e545]: Short
+                      - generic [ref=e546]: $91.20M
+                  - generic [ref=e549]:
+                    - generic [ref=e550]: According to CoinGlass data, In the past 24 hours, 120,090 traders were liquidated, the total liquidations comes in at $467.23 million.
+                    - generic [ref=e551]: The largest single liquidation order happened on Aster - ETHUSDT value $10.49M.
+            - generic [ref=e553]:
+              - generic [ref=e555]:
+                - generic [ref=e557]:
+                  - generic [ref=e558]:
+                    - heading "Exchange Liquidations" [level=2] [ref=e559]
+                    - generic [ref=e561]:
+                      - generic [ref=e562]:
+                        - combobox [ref=e564]: All
+                        - button "Open" [ref=e565] [cursor=pointer]:
+                          - img [ref=e566]
+                      - generic [ref=e568] [cursor=pointer]:
+                        - combobox [ref=e569]: 4 hour
+                        - img [ref=e571]
+                        - textbox [ref=e573]: h4
+                  - generic [ref=e574]:
+                    - generic [ref=e575]: Exchanges
+                    - generic [ref=e576]: Liquidations
+                    - generic [ref=e577]: Long
+                    - generic [ref=e578]: Short
+                    - generic [ref=e579]: Rate
+                    - generic [ref=e580]: Rate
+                    - generic [ref=e581]: All
+                    - generic "10,574,588.298" [ref=e583]: $10.57M
+                    - generic "4,800,764.271" [ref=e585]: $4.80M
+                    - generic "5,773,824.028" [ref=e587]: $5.77M
+                    - generic [ref=e589]: 100%
+                    - generic [ref=e591]: 54.6%Short
+                    - link "Binance Binance" [ref=e593] [cursor=pointer]:
+                      - /url: /exchanges/Binance
+                      - generic [ref=e594]:
+                        - img "Binance" [ref=e595]
+                        - generic [ref=e596]: Binance
+                    - generic "5,547,369.345" [ref=e598]: $5.55M
+                    - generic "2,523,702.736" [ref=e600]: $2.52M
+                    - generic "3,023,666.609" [ref=e602]: $3.02M
+                    - generic [ref=e604]: 52.46%
+                    - generic [ref=e606]: 54.51%Short
+                    - link "OKX OKX" [ref=e608] [cursor=pointer]:
+                      - /url: /exchanges/OKX
+                      - generic [ref=e609]:
+                        - img "OKX" [ref=e610]
+                        - generic [ref=e611]: OKX
+                    - generic "1,592,392.544" [ref=e613]: $1.59M
+                    - generic "763,810.044" [ref=e615]: $763.81K
+                    - generic "828,582.5" [ref=e617]: $828.58K
+                    - generic [ref=e619]: 15.06%
+                    - generic [ref=e621]: 52.03%Short
+                    - link "Gate Gate" [ref=e623] [cursor=pointer]:
+                      - /url: /exchanges/Gate
+                      - generic [ref=e624]:
+                        - img "Gate" [ref=e625]
+                        - generic [ref=e626]: Gate
+                    - generic "943,199.238" [ref=e628]: $943.20K
+                    - generic "472,384.119" [ref=e630]: $472.38K
+                    - generic "470,815.119" [ref=e632]: $470.82K
+                    - generic [ref=e634]: 8.92%
+                    - generic [ref=e636]: 50.08%Long
+                    - link "Bybit Bybit" [ref=e638] [cursor=pointer]:
+                      - /url: /exchanges/Bybit
+                      - generic [ref=e639]:
+                        - img "Bybit" [ref=e640]
+                        - generic [ref=e641]: Bybit
+                    - generic "833,880.76" [ref=e643]: $833.88K
+                    - generic "464,915.23" [ref=e645]: $464.92K
+                    - generic "368,965.53" [ref=e647]: $368.97K
+                    - generic [ref=e649]: 7.89%
+                    - generic [ref=e651]: 55.75%Long
+                    - link "Hyperliquid Hyperliquid" [ref=e653] [cursor=pointer]:
+                      - /url: /exchanges/Hyperliquid
+                      - generic [ref=e654]:
+                        - img "Hyperliquid" [ref=e655]
+                        - generic [ref=e656]: Hyperliquid
+                    - generic "626,584.237" [ref=e658]: $626.58K
+                    - generic "163,462.06" [ref=e660]: $163.46K
+                    - generic "463,122.176" [ref=e662]: $463.12K
+                    - generic [ref=e664]: 5.93%
+                    - generic [ref=e666]: 73.91%Short
+                    - link "Bitget Bitget" [ref=e668] [cursor=pointer]:
+                      - /url: /exchanges/Bitget
+                      - generic [ref=e669]:
+                        - img "Bitget" [ref=e670]
+                        - generic [ref=e671]: Bitget
+                    - generic "508,904.004" [ref=e673]: $508.90K
+                    - generic "336,630.701" [ref=e675]: $336.63K
+                    - generic "172,273.302" [ref=e677]: $172.27K
+                    - generic [ref=e679]: 4.81%
+                    - generic [ref=e681]: 66.15%Long
+                    - link "HTX HTX" [ref=e683] [cursor=pointer]:
+                      - /url: /exchanges/HTX
+                      - generic [ref=e684]:
+                        - img "HTX" [ref=e685]
+                        - generic [ref=e686]: HTX
+                    - generic "383,562.285" [ref=e688]: $383.56K
+                    - generic "25,181.504" [ref=e690]: $25.18K
+                    - generic "358,380.781" [ref=e692]: $358.38K
+                    - generic [ref=e694]: 3.63%
+                    - generic [ref=e696]: 93.43%Short
+                    - generic [ref=e698]:
+                      - img "Aster" [ref=e699]
+                      - generic [ref=e700]: Aster
+                    - generic "65,559.314" [ref=e702]: $65.56K
+                    - generic "17,493.347" [ref=e704]: $17.49K
+                    - generic "48,065.967" [ref=e706]: $48.07K
+                    - generic [ref=e708]: 0.62%
+                    - generic [ref=e710]: 73.32%Short
+                    - generic [ref=e712]:
+                      - img "Lighter" [ref=e713]
+                      - generic [ref=e714]: Lighter
+                    - generic "42,363.988" [ref=e716]: $42.36K
+                    - generic "5,581.665" [ref=e718]: $5.58K
+                    - generic "36,782.323" [ref=e720]: $36.78K
+                    - generic [ref=e722]: 0.4%
+                    - generic [ref=e724]: 86.82%Short
+                    - link "CoinEx CoinEx" [ref=e726] [cursor=pointer]:
+                      - /url: /exchanges/CoinEx
+                      - generic [ref=e727]:
+                        - img "CoinEx" [ref=e728]
+                        - generic [ref=e729]: CoinEx
+                    - generic "30,770.685" [ref=e731]: $30.77K
+                    - generic "27,600.966" [ref=e733]: $27.60K
+                    - generic "3,169.72" [ref=e735]: $3.17K
+                    - generic [ref=e737]: 0.29%
+                    - generic [ref=e739]: 89.7%Long
+                    - link "Bitmex Bitmex" [ref=e741] [cursor=pointer]:
+                      - /url: /exchanges/Bitmex
+                      - generic [ref=e742]:
+                        - img "Bitmex" [ref=e743]
+                        - generic [ref=e744]: Bitmex
+                    - generic "1.899" [ref=e746]: $1.90
+                    - generic "1.899" [ref=e748]: $1.90
+                    - generic "0" [ref=e750]: $0
+                    - generic [ref=e752]: 0%
+                    - generic [ref=e754]: 100%Long
+                    - link "Bitfinex Bitfinex" [ref=e756] [cursor=pointer]:
+                      - /url: /exchanges/Bitfinex
+                      - generic [ref=e757]:
+                        - img "Bitfinex" [ref=e758]
+                        - generic [ref=e759]: Bitfinex
+                    - generic "0" [ref=e761]: $0
+                    - generic "0" [ref=e763]: $0
+                    - generic "0" [ref=e765]: $0
+                    - generic [ref=e767]: 0%
+                    - generic [ref=e769]: 0%Long
+                  - img [ref=e771]
+                - generic [ref=e784]:
+                  - generic [ref=e785]:
+                    - heading "Top 10 Crypto Liquidation Events of All Time" [level=2] [ref=e786]
+                    - generic [ref=e787]:
+                      - generic [ref=e788]: ⚠️ About Liquidation Order Push Frequency Limits
+                      - link "Read More>>" [ref=e789] [cursor=pointer]:
+                        - /url: /pro/futures/liquidation-events
+                        - generic [ref=e790]: Read More>>
+                  - generic [ref=e796]:
+                    - table [ref=e798]:
+                      - rowgroup [ref=e804]:
+                        - row "Ranking Time Liquidations Events" [ref=e805]:
+                          - columnheader "Ranking" [ref=e806]
+                          - columnheader "Time" [ref=e807] [cursor=pointer]:
+                            - generic [ref=e809]: Time
+                          - columnheader "Liquidations" [ref=e810] [cursor=pointer]:
+                            - generic [ref=e812]: Liquidations
+                          - columnheader "Events" [ref=e813]
+                    - table [ref=e815]:
+                      - rowgroup [ref=e821]:
+                        - row "🥇 2025-10-10 $19.16B U.S. tariff hike on China" [ref=e822]:
+                          - cell "🥇" [ref=e823]:
+                            - generic [ref=e824]: 🥇
+                          - cell "2025-10-10" [ref=e825]:
+                            - generic [ref=e826]: 2025-10-10
+                          - cell "$19.16B" [ref=e827]:
+                            - generic [ref=e830]: $19.16B
+                          - cell "U.S. tariff hike on China" [ref=e831]:
+                            - generic [ref=e832]: U.S. tariff hike on China
+                        - row "🥈 2021-04-17 $9.94B AML crackdown rumor + mining halt" [ref=e833]:
+                          - cell "🥈" [ref=e834]:
+                            - generic [ref=e835]: 🥈
+                          - cell "2021-04-17" [ref=e836]:
+                            - generic [ref=e837]: 2021-04-17
+                          - cell "$9.94B" [ref=e838]:
+                            - generic [ref=e841]: $9.94B
+                          - cell "AML crackdown rumor + mining halt" [ref=e842]:
+                            - generic [ref=e843]: AML crackdown rumor + mining halt
+                        - row "🥉 2021-05-18 $9.01B Tesla stance reversal + regulatory tightening" [ref=e844]:
+                          - cell "🥉" [ref=e845]:
+                            - generic [ref=e846]: 🥉
+                          - cell "2021-05-18" [ref=e847]:
+                            - generic [ref=e848]: 2021-05-18
+                          - cell "$9.01B" [ref=e849]:
+                            - generic [ref=e852]: $9.01B
+                          - cell "Tesla stance reversal + regulatory tightening" [ref=e853]:
+                            - generic [ref=e854]: Tesla stance reversal + regulatory tightening
+                        - row "4 2021-02-21 $4.10B Overheated rally correction" [ref=e855]:
+                          - cell "4" [ref=e856]:
+                            - generic [ref=e857]: "4"
+                          - cell "2021-02-21" [ref=e858]:
+                            - generic [ref=e859]: 2021-02-21
+                          - cell "$4.10B" [ref=e860]:
+                            - generic [ref=e863]: $4.10B
+                          - cell "Overheated rally correction" [ref=e864]:
+                            - generic [ref=e865]: Overheated rally correction
+                        - row "5 2021-09-06 $3.65B El Salvador BTC law launch dump" [ref=e866]:
+                          - cell "5" [ref=e867]:
+                            - generic [ref=e868]: "5"
+                          - cell "2021-09-06" [ref=e869]:
+                            - generic [ref=e870]: 2021-09-06
+                          - cell "$3.65B" [ref=e871]:
+                            - generic [ref=e874]: $3.65B
+                          - cell "El Salvador BTC law launch dump" [ref=e875]:
+                            - generic [ref=e876]: El Salvador BTC law launch dump
+                        - row "6 2025-09-21 $3.62B Over-leveraged longs flushed" [ref=e877]:
+                          - cell "6" [ref=e878]:
+                            - generic [ref=e879]: "6"
+                          - cell "2025-09-21" [ref=e880]:
+                            - generic [ref=e881]: 2025-09-21
+                          - cell "$3.62B" [ref=e882]:
+                            - generic [ref=e885]: $3.62B
+                          - cell "Over-leveraged longs flushed" [ref=e886]:
+                            - generic [ref=e887]: Over-leveraged longs flushed
+                        - row "7 2021-02-22 $3.15B Yellen anti-BTC remarks" [ref=e888]:
+                          - cell "7" [ref=e889]:
+                            - generic [ref=e890]: "7"
+                          - cell "2021-02-22" [ref=e891]:
+                            - generic [ref=e892]: 2021-02-22
+                          - cell "$3.15B" [ref=e893]:
+                            - generic [ref=e896]: $3.15B
+                          - cell "Yellen anti-BTC remarks" [ref=e897]:
+                            - generic [ref=e898]: Yellen anti-BTC remarks
+                        - row "8 2021-04-22 $2.92B U.S. capital-gains tax hike plan" [ref=e899]:
+                          - cell "8" [ref=e900]:
+                            - generic [ref=e901]: "8"
+                          - cell "2021-04-22" [ref=e902]:
+                            - generic [ref=e903]: 2021-04-22
+                          - cell "$2.92B" [ref=e904]:
+                            - generic [ref=e907]: $2.92B
+                          - cell "U.S. capital-gains tax hike plan" [ref=e908]:
+                            - generic [ref=e909]: U.S. capital-gains tax hike plan
+                        - row "9 2021-04-15 $2.77B Turkey crypto-payment ban" [ref=e910]:
+                          - cell "9" [ref=e911]:
+                            - generic [ref=e912]: "9"
+                          - cell "2021-04-15" [ref=e913]:
+                            - generic [ref=e914]: 2021-04-15
+                          - cell "$2.77B" [ref=e915]:
+                            - generic [ref=e918]: $2.77B
+                          - cell "Turkey crypto-payment ban" [ref=e919]:
+                            - generic [ref=e920]: Turkey crypto-payment ban
+                        - row "10 2026-01-30 $2.56B Over-leveraged longs flushed" [ref=e921]:
+                          - cell "10" [ref=e922]:
+                            - generic [ref=e923]: "10"
+                          - cell "2026-01-30" [ref=e924]:
+                            - generic [ref=e925]: 2026-01-30
+                          - cell "$2.56B" [ref=e926]:
+                            - generic [ref=e929]: $2.56B
+                          - cell "Over-leveraged longs flushed" [ref=e930]:
+                            - generic [ref=e931]: Over-leveraged longs flushed
+                  - img [ref=e933]
+              - generic [ref=e946]:
+                - generic [ref=e947]:
+                  - generic [ref=e948]:
+                    - heading "Real-Time Liquidations" [level=2] [ref=e949]
+                    - img [ref=e951] [cursor=pointer]
+                  - generic [ref=e954]:
+                    - generic [ref=e955]:
+                      - combobox [ref=e957]: All
+                      - button "Open" [ref=e958] [cursor=pointer]:
+                        - img [ref=e959]
+                    - generic [ref=e961] [cursor=pointer]:
+                      - combobox [ref=e962]: Exchanges
+                      - img [ref=e964]
+                      - textbox [ref=e966]: all
+                    - generic [ref=e967] [cursor=pointer]:
+                      - combobox [ref=e968]: Value
+                      - img [ref=e970]
+                      - textbox [ref=e972]: "0"
+                - generic [ref=e973]:
+                  - generic [ref=e974]: Symbol
+                  - generic [ref=e975]: Price
+                  - generic [ref=e976]: Value
+                  - generic [ref=e977]: Time
+                - generic [ref=e980]:
+                  - generic [ref=e981]:
+                    - generic [ref=e982]:
+                      - img [ref=e983]
+                      - generic [ref=e984]: REUSDT
+                    - generic [ref=e986]: $0.4589446
+                    - generic "6,844.7" [ref=e988]: $6.84K
+                    - generic "2026-06-18 18:52:22" [ref=e990]: 18:52:22
+                  - generic [ref=e991]:
+                    - generic [ref=e992]:
+                      - img [ref=e993]
+                      - generic [ref=e994]: REUSDT
+                    - generic [ref=e996]: $0.4628265
+                    - generic "1,511.129" [ref=e998]: $1.51K
+                    - generic "2026-06-18 18:52:05" [ref=e1000]: 18:52:05
+                  - generic [ref=e1001]:
+                    - generic [ref=e1002]:
+                      - img [ref=e1003]
+                      - generic [ref=e1004]: REUSDT
+                    - generic [ref=e1006]: $0.4616426
+                    - generic "5,173.629" [ref=e1008]: $5.17K
+                    - generic "2026-06-18 18:52:04" [ref=e1010]: 18:52:04
+                  - generic [ref=e1011]:
+                    - generic [ref=e1012]:
+                      - img [ref=e1013]
+                      - generic [ref=e1014]: XAGUSDT
+                    - generic [ref=e1016]: $65.06
+                    - generic "2,071.445" [ref=e1018]: $2.07K
+                    - generic "2026-06-18 18:52:04" [ref=e1020]: 18:52:04
+                  - generic [ref=e1021]:
+                    - generic [ref=e1022]:
+                      - img [ref=e1023]
+                      - generic [ref=e1024]: REUSDT
+                    - generic [ref=e1026]: $0.4607691
+                    - generic "3,217.551" [ref=e1028]: $3.22K
+                    - generic "2026-06-18 18:52:04" [ref=e1030]: 18:52:04
+                  - generic [ref=e1031]:
+                    - generic [ref=e1032]:
+                      - img [ref=e1033]
+                      - generic [ref=e1034]: REUSDT
+                    - generic [ref=e1036]: $0.4545
+                    - generic "2,026.616" [ref=e1038]: $2.03K
+                    - generic "2026-06-18 18:52:02" [ref=e1040]: 18:52:02
+                  - generic [ref=e1041]:
+                    - generic [ref=e1042]:
+                      - img [ref=e1043]
+                      - generic [ref=e1044]: REUSDT
+                    - generic [ref=e1046]: $0.451276
+                    - generic "1,305.09" [ref=e1048]: $1.31K
+                    - generic "2026-06-18 18:51:57" [ref=e1050]: 18:51:57
+                  - generic [ref=e1051]:
+                    - generic [ref=e1052]:
+                      - img [ref=e1053]
+                      - generic [ref=e1054]: INTCUSDT_UMCBL
+                    - generic [ref=e1056]: $138.577930986252
+                    - generic "1,553.459" [ref=e1058]: $1.55K
+                    - generic "2026-06-18 18:51:57" [ref=e1060]: 18:51:57
+                  - generic [ref=e1061]:
+                    - generic [ref=e1062]:
+                      - img [ref=e1063]
+                      - generic [ref=e1064]: BASEDUSDT
+                    - generic [ref=e1066]: $0.103413
+                    - generic "1,379.426" [ref=e1068]: $1.38K
+                    - generic "2026-06-18 18:51:56" [ref=e1070]: 18:51:56
+                  - generic [ref=e1071]:
+                    - generic [ref=e1072]:
+                      - img [ref=e1073]
+                      - generic [ref=e1074]: 1000PEPEUSDT
+                    - generic [ref=e1076]: $0.0028626
+                    - generic "1,322.521" [ref=e1078]: $1.32K
+                    - generic "2026-06-18 18:51:35" [ref=e1080]: 18:51:35
+                  - generic [ref=e1081]:
+                    - generic [ref=e1082]:
+                      - img [ref=e1083]
+                      - generic [ref=e1084]: XYZ:SILVER-USD
+                    - generic [ref=e1086]: $65.076
+                    - generic "35,287.136" [ref=e1088]: $35.29K
+                    - generic "2026-06-18 18:51:27" [ref=e1090]: 18:51:27
+                  - generic [ref=e1091]:
+                    - generic [ref=e1092]:
+                      - img [ref=e1093]
+                      - generic [ref=e1094]: XYZ:SILVER-USD
+                    - generic [ref=e1096]: $65.064
+                    - generic "3,213.305" [ref=e1098]: $3.21K
+                    - generic "2026-06-18 18:51:27" [ref=e1100]: 18:51:27
+                  - generic [ref=e1101]:
+                    - generic [ref=e1102]:
+                      - img [ref=e1103]
+                      - generic [ref=e1104]: AERGOUSDT
+                    - generic [ref=e1106]: $0.0340233
+                    - generic "2,575.087" [ref=e1108]: $2.58K
+                    - generic "2026-06-18 18:51:09" [ref=e1110]: 18:51:09
+                  - generic [ref=e1111]:
+                    - generic [ref=e1112]:
+                      - img [ref=e1113]
+                      - generic [ref=e1114]: VELVETUSDT
+                    - generic [ref=e1116]: $0.4859219
+                    - generic "1,264.369" [ref=e1118]: $1.26K
+                    - generic "2026-06-18 18:50:26" [ref=e1120]: 18:50:26
+                  - generic [ref=e1121]:
+                    - generic [ref=e1122]:
+                      - img [ref=e1123]
+                      - generic [ref=e1124]: REUSDT
+                    - generic [ref=e1126]: $0.4468634
+                    - generic "1,803.541" [ref=e1128]: $1.80K
+                    - generic "2026-06-18 18:50:07" [ref=e1130]: 18:50:07
+                  - generic [ref=e1131]:
+                    - generic [ref=e1132]:
+                      - img [ref=e1133]
+                      - generic [ref=e1134]: BASED-USDT-SWAP
+                    - generic [ref=e1136]: $0.10221
+                    - generic "1,226.52" [ref=e1138]: $1.23K
+                    - generic "2026-06-18 18:49:37" [ref=e1140]: 18:49:37
+                  - generic [ref=e1141]:
+                    - generic [ref=e1142]:
+                      - img [ref=e1143]
+                      - generic [ref=e1144]: BASED-USDT-SWAP
+                    - generic [ref=e1146]: $0.10333
+                    - generic "1,037.433" [ref=e1148]: $1.04K
+                    - generic "2026-06-18 18:49:35" [ref=e1150]: 18:49:35
+                  - generic [ref=e1151]:
+                    - generic [ref=e1152]:
+                      - img [ref=e1153]
+                      - generic [ref=e1154]: MRVL-USDT-SWAP
+                    - generic [ref=e1156]: $305.39
+                    - generic "4,935.102" [ref=e1158]: $4.94K
+                    - generic "2026-06-18 18:49:13" [ref=e1160]: 18:49:13
+                  - generic [ref=e1161]:
+                    - generic [ref=e1162]:
+                      - img [ref=e1163]
+                      - generic [ref=e1164]: MRVLUSDT
+                    - generic [ref=e1166]: $308.20601
+                    - generic "2,736.869" [ref=e1168]: $2.74K
+                    - generic "2026-06-18 18:49:04" [ref=e1170]: 18:49:04
+                  - generic [ref=e1171]:
+                    - generic [ref=e1172]:
+                      - img [ref=e1173]
+                      - generic [ref=e1174]: XAGUSDT
+                    - generic [ref=e1176]: $64.82
+                    - generic "1,641.307" [ref=e1178]: $1.64K
+                    - generic "2026-06-18 18:48:50" [ref=e1180]: 18:48:50
+                  - generic [ref=e1181]:
+                    - generic [ref=e1182]:
+                      - img [ref=e1183]
+                      - generic [ref=e1184]: INTCUSDT
+                    - generic [ref=e1186]: $136.91589
+                    - generic "4,692.108" [ref=e1188]: $4.69K
+                    - generic "2026-06-18 18:46:53" [ref=e1190]: 18:46:53
+                  - generic [ref=e1191]:
+                    - generic [ref=e1192]:
+                      - img [ref=e1193]
+                      - generic [ref=e1194]: INTCUSDT
+                    - generic [ref=e1196]: $136.69226
+                    - generic "7,919.95" [ref=e1198]: $7.92K
+                    - generic "2026-06-18 18:45:57" [ref=e1200]: 18:45:57
+                  - generic [ref=e1201]:
+                    - generic [ref=e1202]:
+                      - img [ref=e1203]
+                      - generic [ref=e1204]: XYZ:SMH-USD
+                    - generic [ref=e1206]: $687.21
+                    - generic "133,332.243" [ref=e1208]: $133.33K
+                    - generic "2026-06-18 18:45:33" [ref=e1210]: 18:45:33
+                  - generic [ref=e1211]:
+                    - generic [ref=e1212]:
+                      - img [ref=e1213]
+                      - generic [ref=e1214]: XYZ:SMH-USD
+                    - generic [ref=e1216]: $685.41
+                    - generic "33,328.637" [ref=e1218]: $33.33K
+                    - generic "2026-06-18 18:45:30" [ref=e1220]: 18:45:30
+                  - generic [ref=e1221]:
+                    - generic [ref=e1222]:
+                      - img [ref=e1223]
+                      - generic [ref=e1224]: BASEDUSDT
+                    - generic [ref=e1226]: $0.1052945
+                    - generic "2,094.202" [ref=e1228]: $2.09K
+                    - generic "2026-06-18 18:45:14" [ref=e1230]: 18:45:14
+                  - generic [ref=e1231]:
+                    - generic [ref=e1232]:
+                      - img [ref=e1233]
+                      - generic [ref=e1234]: BASED-USDT-SWAP
+                    - generic [ref=e1236]: $0.10627
+                    - generic "1,209.353" [ref=e1238]: $1.21K
+                    - generic "2026-06-18 18:45:10" [ref=e1240]: 18:45:10
+                  - generic [ref=e1241]:
+                    - generic [ref=e1242]:
+                      - img [ref=e1243]
+                      - generic [ref=e1244]: JTO-USDT-SWAP
+                    - generic [ref=e1246]: $0.7677
+                    - generic "1,229.855" [ref=e1248]: $1.23K
+                    - generic "2026-06-18 18:43:38" [ref=e1250]: 18:43:38
+                  - generic [ref=e1251]:
+                    - generic [ref=e1252]:
+                      - img [ref=e1253]
+                      - generic [ref=e1254]: CHIPUSDT_UMCBL
+                    - generic [ref=e1256]: $0.038319375097
+                    - generic "1,052.901" [ref=e1258]: $1.05K
+                    - generic "2026-06-18 18:42:36" [ref=e1260]: 18:42:36
+                  - generic [ref=e1261]:
+                    - generic [ref=e1262]:
+                      - img [ref=e1263]
+                      - generic [ref=e1264]: VELVETUSDT
+                    - generic [ref=e1266]: $0.4929753
+                    - generic "1,232.931" [ref=e1268]: $1.23K
+                    - generic "2026-06-18 18:42:30" [ref=e1270]: 18:42:30
+                  - generic [ref=e1271]:
+                    - generic [ref=e1272]:
+                      - img [ref=e1273]
+                      - generic [ref=e1274]: ASTEROID_USDT
+                    - generic [ref=e1276]: $0.000166222244
+                    - generic "1,703.778" [ref=e1278]: $1.70K
+                    - generic "2026-06-18 18:41:32" [ref=e1280]: 18:41:32
+                  - generic [ref=e1281]:
+                    - generic [ref=e1282]:
+                      - img [ref=e1283]
+                      - generic [ref=e1284]: LABUSDT
+                    - generic [ref=e1286]: $17.035
+                    - generic "1,192.45" [ref=e1288]: $1.19K
+                    - generic "2026-06-18 18:40:55" [ref=e1290]: 18:40:55
+                  - generic [ref=e1291]:
+                    - generic [ref=e1292]:
+                      - img [ref=e1293]
+                      - generic [ref=e1294]: LAB_USDT
+                    - generic [ref=e1296]: $17.484317272727
+                    - generic "1,923.275" [ref=e1298]: $1.92K
+                    - generic "2026-06-18 18:40:44" [ref=e1300]: 18:40:44
+                  - generic [ref=e1301]:
+                    - generic [ref=e1302]:
+                      - img [ref=e1303]
+                      - generic [ref=e1304]: PAXGUSDT
+                    - generic [ref=e1306]: $4178.6265
+                    - generic "1,508.484" [ref=e1308]: $1.51K
+                    - generic "2026-06-18 18:40:41" [ref=e1310]: 18:40:41
+                  - generic [ref=e1311]:
+                    - generic [ref=e1312]:
+                      - img [ref=e1313]
+                      - generic [ref=e1314]: XYZ:SMH-USD
+                    - generic [ref=e1316]: $683.49
+                    - generic "5,940.583" [ref=e1318]: $5.94K
+                    - generic "2026-06-18 18:40:39" [ref=e1320]: 18:40:39
+                  - generic [ref=e1321]:
+                    - generic [ref=e1322]:
+                      - img [ref=e1323]
+                      - generic [ref=e1324]: BASEDUSDT
+                    - generic [ref=e1326]: $0.1043048
+                    - generic "9,866.713" [ref=e1328]: $9.87K
+                    - generic "2026-06-18 18:40:37" [ref=e1330]: 18:40:37
+                  - generic [ref=e1331]:
+                    - generic [ref=e1332]:
+                      - img [ref=e1333]
+                      - generic [ref=e1334]: BASED-USDT-SWAP
+                    - generic [ref=e1336]: $0.10493
+                    - generic "2,388.207" [ref=e1338]: $2.39K
+                    - generic "2026-06-18 18:40:30" [ref=e1340]: 18:40:30
+                  - generic [ref=e1341]:
+                    - generic [ref=e1342]:
+                      - img [ref=e1343]
+                      - generic [ref=e1344]: BASEDUSDT
+                    - generic [ref=e1346]: $0.10601
+                    - generic "5,110.318" [ref=e1348]: $5.11K
+                    - generic "2026-06-18 18:40:28" [ref=e1350]: 18:40:28
+                  - generic [ref=e1351]:
+                    - generic [ref=e1352]:
+                      - img [ref=e1353]
+                      - generic [ref=e1354]: XYZ:SMH-USD
+                    - generic [ref=e1356]: $674.46
+                    - generic "30,714.555" [ref=e1358]: $30.71K
+                    - generic "2026-06-18 18:40:06" [ref=e1360]: 18:40:06
+                  - generic [ref=e1361]:
+                    - generic [ref=e1362]:
+                      - img [ref=e1363]
+                      - generic [ref=e1364]: BASED-USDT-SWAP
+                    - generic [ref=e1366]: $0.10279
+                    - generic "2,565.638" [ref=e1368]: $2.57K
+                    - generic "2026-06-18 18:38:56" [ref=e1370]: 18:38:56
+                  - generic [ref=e1371]:
+                    - generic [ref=e1372]:
+                      - img [ref=e1373]
+                      - generic [ref=e1374]: VELVETUSDT
+                    - generic [ref=e1376]: $0.4845514
+                    - generic "4,948.723" [ref=e1378]: $4.95K
+                    - generic "2026-06-18 18:38:04" [ref=e1380]: 18:38:04
+                  - generic [ref=e1381]:
+                    - generic [ref=e1382]:
+                      - img [ref=e1383]
+                      - generic [ref=e1384]: BASEDUSDT_UMCBL
+                    - generic [ref=e1386]: $0.10419
+                    - generic "2,297.702" [ref=e1388]: $2.30K
+                    - generic "2026-06-18 18:37:57" [ref=e1390]: 18:37:57
+                  - generic [ref=e1391]:
+                    - generic [ref=e1392]:
+                      - img [ref=e1393]
+                      - generic [ref=e1394]: BASEDUSDT
+                    - generic [ref=e1396]: $0.10505
+                    - generic "2,101" [ref=e1398]: $2.10K
+                    - generic "2026-06-18 18:37:56" [ref=e1400]: 18:37:56
+                  - generic [ref=e1401]:
+                    - generic [ref=e1402]:
+                      - img [ref=e1403]
+                      - generic [ref=e1404]: BASED-USDT-SWAP
+                    - generic [ref=e1406]: $0.10493
+                    - generic "9,193.967" [ref=e1408]: $9.19K
+                    - generic "2026-06-18 18:37:56" [ref=e1410]: 18:37:56
+                  - generic [ref=e1411]:
+                    - generic [ref=e1412]:
+                      - img [ref=e1413]
+                      - generic [ref=e1414]: INTCUSDT
+                    - generic [ref=e1416]: $136.10875
+                    - generic "34,264.017" [ref=e1418]: $34.26K
+                    - generic "2026-06-18 18:37:51" [ref=e1420]: 18:37:51
+                  - generic [ref=e1421]:
+                    - generic [ref=e1422]:
+                      - img [ref=e1423]
+                      - generic [ref=e1424]: XYZ:INTC-USD
+                    - generic [ref=e1426]: $135.95
+                    - generic "5,236.288" [ref=e1428]: $5.24K
+                    - generic "2026-06-18 18:37:42" [ref=e1430]: 18:37:42
+          - generic [ref=e1432]:
+            - generic [ref=e1433]:
+              - heading "Cryptocurrency Liquidation History" [level=2] [ref=e1434]
+              - generic [ref=e1435]:
+                - tablist [ref=e1438]:
+                  - tab "1 day" [ref=e1439] [cursor=pointer]
+                  - tab "7 day" [ref=e1440] [cursor=pointer]
+                  - tab "30 day" [ref=e1441] [cursor=pointer]
+                  - tab "90 day" [selected] [ref=e1442] [cursor=pointer]
+                  - tab "All" [ref=e1443] [cursor=pointer]
+                - generic [ref=e1444]:
+                  - combobox [ref=e1446]: All
+                  - button "Open" [ref=e1447] [cursor=pointer]:
+                    - img [ref=e1448]
+            - generic [ref=e1451]:
+              - progressbar [ref=e1454]:
+                - img [ref=e1455]
+                - img [ref=e1458]
+              - generic [ref=e1461]:
+                - generic:
+                  - generic:
+                    - img
+          - generic [ref=e1466]:
+            - generic [ref=e1467]:
+              - heading "Bitcoin Price vs. Cryptocurrency Liquidation" [level=2] [ref=e1468]
+              - generic [ref=e1469]:
+                - tablist [ref=e1472]:
+                  - tab "1 day" [ref=e1473] [cursor=pointer]
+                  - tab "7 day" [ref=e1474] [cursor=pointer]
+                  - tab "30 day" [ref=e1475] [cursor=pointer]
+                  - tab "90 day" [selected] [ref=e1476] [cursor=pointer]
+                  - tab "All" [ref=e1477] [cursor=pointer]
+                - generic [ref=e1478]:
+                  - combobox [ref=e1480]: All
+                  - button "Open" [ref=e1481] [cursor=pointer]:
+                    - img [ref=e1482]
+            - generic [ref=e1485]:
+              - progressbar [ref=e1488]:
+                - img [ref=e1489]
+                - img [ref=e1492]
+              - generic [ref=e1495]:
+                - generic:
+                  - generic:
+                    - img
+          - generic [ref=e1500]:
+            - generic [ref=e1501]:
+              - heading "Cryptocurrency Liquidation History Chart" [level=2] [ref=e1502]
+              - generic [ref=e1503]:
+                - tablist [ref=e1506]:
+                  - tab "1 day" [ref=e1507] [cursor=pointer]
+                  - tab "7 day" [ref=e1508] [cursor=pointer]
+                  - tab "30 day" [ref=e1509] [cursor=pointer]
+                  - tab "90 day" [selected] [ref=e1510] [cursor=pointer]
+                  - tab "All" [ref=e1511] [cursor=pointer]
+                - generic [ref=e1512]:
+                  - combobox [ref=e1514]: All
+                  - button "Open" [ref=e1515] [cursor=pointer]:
+                    - img [ref=e1516]
+            - generic [ref=e1519]:
+              - progressbar [ref=e1522]:
+                - img [ref=e1523]
+                - img [ref=e1526]
+              - generic [ref=e1529]:
+                - generic:
+                  - generic:
+                    - img
+          - generic [ref=e1534]:
+            - generic [ref=e1535]: Top Liquidated Coins (Last 1 Hour)
+            - generic [ref=e1536]:
+              - link "ETH ETH $608.84K $187.84K XXXXX Liquidation History" [ref=e1538] [cursor=pointer]:
+                - /url: /liquidations/ETH
+                - generic [ref=e1540]:
+                  - generic [ref=e1541]:
+                    - generic [ref=e1544]:
+                      - img "ETH" [ref=e1545]
+                      - generic [ref=e1546]: ETH
+                    - generic [ref=e1548]:
+                      - generic [ref=e1549]: $608.84K
+                      - generic [ref=e1550]: $187.84K
+                  - img "XXXXX Liquidation History" [ref=e1551]
+              - link "SKHYNIX SKHYNIX $261.25K $0 XXXXX Liquidation History" [ref=e1553] [cursor=pointer]:
+                - /url: /liquidations/SKHYNIX
+                - generic [ref=e1555]:
+                  - generic [ref=e1556]:
+                    - generic [ref=e1559]:
+                      - img "SKHYNIX" [ref=e1560]
+                      - generic [ref=e1561]: SKHYNIX
+                    - generic [ref=e1563]:
+                      - generic [ref=e1564]: $261.25K
+                      - generic [ref=e1565]: $0
+                  - img "XXXXX Liquidation History" [ref=e1566]
+              - link "HYPE HYPE $228.18 $180.05K XXXXX Liquidation History" [ref=e1568] [cursor=pointer]:
+                - /url: /liquidations/HYPE
+                - generic [ref=e1570]:
+                  - generic [ref=e1571]:
+                    - generic [ref=e1574]:
+                      - img "HYPE" [ref=e1575]
+                      - generic [ref=e1576]: HYPE
+                    - generic [ref=e1578]:
+                      - generic [ref=e1579]: $228.18
+                      - generic [ref=e1580]: $180.05K
+                  - img "XXXXX Liquidation History" [ref=e1581]
+              - link "BASED BASED $78.00K $52.16K XXXXX Liquidation History" [ref=e1583] [cursor=pointer]:
+                - /url: /liquidations/BASED
+                - generic [ref=e1585]:
+                  - generic [ref=e1586]:
+                    - generic [ref=e1589]:
+                      - img "BASED" [ref=e1590]
+                      - generic [ref=e1591]: BASED
+                    - generic [ref=e1593]:
+                      - generic [ref=e1594]: $78.00K
+                      - generic [ref=e1595]: $52.16K
+                  - img "XXXXX Liquidation History" [ref=e1596]
+              - link "BTC BTC $11.20K $112.15K XXXXX Liquidation History" [ref=e1598] [cursor=pointer]:
+                - /url: /liquidations/BTC
+                - generic [ref=e1600]:
+                  - generic [ref=e1601]:
+                    - generic [ref=e1604]:
+                      - img "BTC" [ref=e1605]
+                      - generic [ref=e1606]: BTC
+                    - generic [ref=e1608]:
+                      - generic [ref=e1609]: $11.20K
+                      - generic [ref=e1610]: $112.15K
+                  - img "XXXXX Liquidation History" [ref=e1611]
+              - link "VELVET VELVET $52.85K $67.93K XXXXX Liquidation History" [ref=e1613] [cursor=pointer]:
+                - /url: /liquidations/VELVET
+                - generic [ref=e1615]:
+                  - generic [ref=e1616]:
+                    - generic [ref=e1619]:
+                      - img "VELVET" [ref=e1620]
+                      - generic [ref=e1621]: VELVET
+                    - generic [ref=e1623]:
+                      - generic [ref=e1624]: $52.85K
+                      - generic [ref=e1625]: $67.93K
+                  - img "XXXXX Liquidation History" [ref=e1626]
+          - generic [ref=e1627]:
+            - heading "Total Liquidations" [level=2] [ref=e1628]
+            - generic [ref=e1629]:
+              - generic [ref=e1630] [cursor=pointer]:
+                - combobox [ref=e1631]: Liquidation Value
+                - img [ref=e1633]
+                - textbox [ref=e1635]: usd
+              - generic [ref=e1636]:
+                - img [ref=e1638]
+                - textbox [ref=e1641]
+          - generic [ref=e1646]:
+            - table [ref=e1648]:
+              - rowgroup [ref=e1662]:
+                - row "Ranking Symbol Price Price (24h%) 1h Long 1h Short 4h Long 4h Short 12h Long 12h Short 24h Long 24h Short" [ref=e1663]:
+                  - columnheader "Ranking" [ref=e1664]
+                  - columnheader "Symbol" [ref=e1665]:
+                    - generic [ref=e1666]: Symbol
+                  - columnheader "Price" [ref=e1667] [cursor=pointer]:
+                    - generic [ref=e1669]: Price
+                  - columnheader "Price (24h%)" [ref=e1670] [cursor=pointer]:
+                    - generic [ref=e1672]: Price (24h%)
+                  - columnheader "1h Long" [ref=e1673] [cursor=pointer]:
+                    - generic [ref=e1675]: 1h Long
+                  - columnheader "1h Short" [ref=e1676] [cursor=pointer]:
+                    - generic [ref=e1678]: 1h Short
+                  - columnheader "4h Long" [ref=e1679] [cursor=pointer]:
+                    - generic [ref=e1681]: 4h Long
+                  - columnheader "4h Short" [ref=e1682] [cursor=pointer]:
+                    - generic [ref=e1684]: 4h Short
+                  - columnheader "12h Long" [ref=e1685] [cursor=pointer]:
+                    - generic [ref=e1687]: 12h Long
+                  - columnheader "12h Short" [ref=e1688] [cursor=pointer]:
+                    - generic [ref=e1690]: 12h Short
+                  - columnheader "24h Long" [ref=e1691] [cursor=pointer]:
+                    - generic [ref=e1693]: 24h Long
+                  - columnheader "24h Short" [ref=e1694] [cursor=pointer]:
+                    - generic [ref=e1696]: 24h Short
+            - table [ref=e1698]:
+              - rowgroup [ref=e1702]:
+                - row "1 BTC BTC $62917.9 -2.36% 112,150.46 11,204.786 434,869.671 427,415.59 101,831,304.55 10,875,420.037 127,970,249.419 15,691,212.78" [ref=e1703]:
+                  - cell "1" [ref=e1704]:
+                    - generic [ref=e1705]: "1"
+                  - cell "BTC BTC" [ref=e1706]:
+                    - link "BTC BTC" [ref=e1709] [cursor=pointer]:
+                      - /url: /currencies/BTC
+                      - generic [ref=e1710]:
+                        - img "BTC" [ref=e1711]
+                        - generic [ref=e1712]: BTC
+                  - cell "$62917.9" [ref=e1713]:
+                    - generic [ref=e1714]: $62917.9
+                  - cell "-2.36%" [ref=e1715]:
+                    - generic [ref=e1716]: "-2.36%"
+                  - cell "112,150.46" [ref=e1717]:
+                    - link "112,150.46" [ref=e1718] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "112,150.46" [ref=e1719]: $112.15K
+                  - cell "11,204.786" [ref=e1720]:
+                    - link "11,204.786" [ref=e1721] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "11,204.786" [ref=e1722]: $11.20K
+                  - cell "434,869.671" [ref=e1723]:
+                    - link "434,869.671" [ref=e1724] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "434,869.671" [ref=e1725]: $434.87K
+                  - cell "427,415.59" [ref=e1726]:
+                    - link "427,415.59" [ref=e1727] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "427,415.59" [ref=e1728]: $427.42K
+                  - cell "101,831,304.55" [ref=e1729]:
+                    - link "101,831,304.55" [ref=e1730] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "101,831,304.55" [ref=e1731]: $101.83M
+                  - cell "10,875,420.037" [ref=e1732]:
+                    - link "10,875,420.037" [ref=e1733] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "10,875,420.037" [ref=e1734]: $10.88M
+                  - cell "127,970,249.419" [ref=e1735]:
+                    - link "127,970,249.419" [ref=e1736] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "127,970,249.419" [ref=e1737]: $127.97M
+                  - cell "15,691,212.78" [ref=e1738]:
+                    - link "15,691,212.78" [ref=e1739] [cursor=pointer]:
+                      - /url: /liquidations/BTC
+                      - generic "15,691,212.78" [ref=e1740]: $15.69M
+                - row "2 ETH ETH $1709.36 -2.45% 187,841.524 608,843.65 443,710.764 1,293,987.388 68,870,636.523 22,776,961.832 85,667,700.918 25,834,991.964" [ref=e1741]:
+                  - cell "2" [ref=e1742]:
+                    - generic [ref=e1743]: "2"
+                  - cell "ETH ETH" [ref=e1744]:
+                    - link "ETH ETH" [ref=e1747] [cursor=pointer]:
+                      - /url: /currencies/ETH
+                      - generic [ref=e1748]:
+                        - img "ETH" [ref=e1749]
+                        - generic [ref=e1750]: ETH
+                  - cell "$1709.36" [ref=e1751]:
+                    - generic [ref=e1752]: $1709.36
+                  - cell "-2.45%" [ref=e1753]:
+                    - generic [ref=e1754]: "-2.45%"
+                  - cell "187,841.524" [ref=e1755]:
+                    - link "187,841.524" [ref=e1756] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "187,841.524" [ref=e1757]: $187.84K
+                  - cell "608,843.65" [ref=e1758]:
+                    - link "608,843.65" [ref=e1759] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "608,843.65" [ref=e1760]: $608.84K
+                  - cell "443,710.764" [ref=e1761]:
+                    - link "443,710.764" [ref=e1762] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "443,710.764" [ref=e1763]: $443.71K
+                  - cell "1,293,987.388" [ref=e1764]:
+                    - link "1,293,987.388" [ref=e1765] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "1,293,987.388" [ref=e1766]: $1.29M
+                  - cell "68,870,636.523" [ref=e1767]:
+                    - link "68,870,636.523" [ref=e1768] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "68,870,636.523" [ref=e1769]: $68.87M
+                  - cell "22,776,961.832" [ref=e1770]:
+                    - link "22,776,961.832" [ref=e1771] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "22,776,961.832" [ref=e1772]: $22.78M
+                  - cell "85,667,700.918" [ref=e1773]:
+                    - link "85,667,700.918" [ref=e1774] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "85,667,700.918" [ref=e1775]: $85.67M
+                  - cell "25,834,991.964" [ref=e1776]:
+                    - link "25,834,991.964" [ref=e1777] [cursor=pointer]:
+                      - /url: /liquidations/ETH
+                      - generic "25,834,991.964" [ref=e1778]: $25.83M
+                - row "3 SOL SOL $69.8 -3.10% 12,740.405 73,114.674 32,869.537 146,484.259 10,667,289.17 1,219,587.325 13,068,053.819 1,762,514.393" [ref=e1779]:
+                  - cell "3" [ref=e1780]:
+                    - generic [ref=e1781]: "3"
+                  - cell "SOL SOL" [ref=e1782]:
+                    - link "SOL SOL" [ref=e1785] [cursor=pointer]:
+                      - /url: /currencies/SOL
+                      - generic [ref=e1786]:
+                        - img "SOL" [ref=e1787]
+                        - generic [ref=e1788]: SOL
+                  - cell "$69.8" [ref=e1789]:
+                    - generic [ref=e1790]: $69.8
+                  - cell "-3.10%" [ref=e1791]:
+                    - generic [ref=e1792]: "-3.10%"
+                  - cell "12,740.405" [ref=e1793]:
+                    - link "12,740.405" [ref=e1794] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "12,740.405" [ref=e1795]: $12.74K
+                  - cell "73,114.674" [ref=e1796]:
+                    - link "73,114.674" [ref=e1797] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "73,114.674" [ref=e1798]: $73.11K
+                  - cell "32,869.537" [ref=e1799]:
+                    - link "32,869.537" [ref=e1800] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "32,869.537" [ref=e1801]: $32.87K
+                  - cell "146,484.259" [ref=e1802]:
+                    - link "146,484.259" [ref=e1803] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "146,484.259" [ref=e1804]: $146.48K
+                  - cell "10,667,289.17" [ref=e1805]:
+                    - link "10,667,289.17" [ref=e1806] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "10,667,289.17" [ref=e1807]: $10.67M
+                  - cell "1,219,587.325" [ref=e1808]:
+                    - link "1,219,587.325" [ref=e1809] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "1,219,587.325" [ref=e1810]: $1.22M
+                  - cell "13,068,053.819" [ref=e1811]:
+                    - link "13,068,053.819" [ref=e1812] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "13,068,053.819" [ref=e1813]: $13.07M
+                  - cell "1,762,514.393" [ref=e1814]:
+                    - link "1,762,514.393" [ref=e1815] [cursor=pointer]:
+                      - /url: /liquidations/SOL
+                      - generic "1,762,514.393" [ref=e1816]: $1.76M
+                - row "4 HYPE HYPE $67.502 -6.62% 180,059.224 228.181 206,696.689 19,753.348 4,154,405.652 328,222.107 9,585,885.575 1,571,619.305" [ref=e1817]:
+                  - cell "4" [ref=e1818]:
+                    - generic [ref=e1819]: "4"
+                  - cell "HYPE HYPE" [ref=e1820]:
+                    - link "HYPE HYPE" [ref=e1823] [cursor=pointer]:
+                      - /url: /currencies/HYPE
+                      - generic [ref=e1824]:
+                        - img "HYPE" [ref=e1825]
+                        - generic [ref=e1826]: HYPE
+                  - cell "$67.502" [ref=e1827]:
+                    - generic [ref=e1828]: $67.502
+                  - cell "-6.62%" [ref=e1829]:
+                    - generic [ref=e1830]: "-6.62%"
+                  - cell "180,059.224" [ref=e1831]:
+                    - link "180,059.224" [ref=e1832] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "180,059.224" [ref=e1833]: $180.06K
+                  - cell "228.181" [ref=e1834]:
+                    - link "228.181" [ref=e1835] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "228.181" [ref=e1836]: $228.18
+                  - cell "206,696.689" [ref=e1837]:
+                    - link "206,696.689" [ref=e1838] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "206,696.689" [ref=e1839]: $206.70K
+                  - cell "19,753.348" [ref=e1840]:
+                    - link "19,753.348" [ref=e1841] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "19,753.348" [ref=e1842]: $19.75K
+                  - cell "4,154,405.652" [ref=e1843]:
+                    - link "4,154,405.652" [ref=e1844] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "4,154,405.652" [ref=e1845]: $4.15M
+                  - cell "328,222.107" [ref=e1846]:
+                    - link "328,222.107" [ref=e1847] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "328,222.107" [ref=e1848]: $328.22K
+                  - cell "9,585,885.575" [ref=e1849]:
+                    - link "9,585,885.575" [ref=e1850] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "9,585,885.575" [ref=e1851]: $9.59M
+                  - cell "1,571,619.305" [ref=e1852]:
+                    - link "1,571,619.305" [ref=e1853] [cursor=pointer]:
+                      - /url: /liquidations/HYPE
+                      - generic "1,571,619.305" [ref=e1854]: $1.57M
+                - row "5 XRP XRP $1.1491 -2.98% 116.072 2,778.342 4,293.049 12,850.875 3,467,994.942 200,716.884 5,930,127.777 413,881.448" [ref=e1855]:
+                  - cell "5" [ref=e1856]:
+                    - generic [ref=e1857]: "5"
+                  - cell "XRP XRP" [ref=e1858]:
+                    - link "XRP XRP" [ref=e1861] [cursor=pointer]:
+                      - /url: /currencies/XRP
+                      - generic [ref=e1862]:
+                        - img "XRP" [ref=e1863]
+                        - generic [ref=e1864]: XRP
+                  - cell "$1.1491" [ref=e1865]:
+                    - generic [ref=e1866]: $1.1491
+                  - cell "-2.98%" [ref=e1867]:
+                    - generic [ref=e1868]: "-2.98%"
+                  - cell "116.072" [ref=e1869]:
+                    - link "116.072" [ref=e1870] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "116.072" [ref=e1871]: $116.07
+                  - cell "2,778.342" [ref=e1872]:
+                    - link "2,778.342" [ref=e1873] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "2,778.342" [ref=e1874]: $2.78K
+                  - cell "4,293.049" [ref=e1875]:
+                    - link "4,293.049" [ref=e1876] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "4,293.049" [ref=e1877]: $4.29K
+                  - cell "12,850.875" [ref=e1878]:
+                    - link "12,850.875" [ref=e1879] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "12,850.875" [ref=e1880]: $12.85K
+                  - cell "3,467,994.942" [ref=e1881]:
+                    - link "3,467,994.942" [ref=e1882] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "3,467,994.942" [ref=e1883]: $3.47M
+                  - cell "200,716.884" [ref=e1884]:
+                    - link "200,716.884" [ref=e1885] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "200,716.884" [ref=e1886]: $200.72K
+                  - cell "5,930,127.777" [ref=e1887]:
+                    - link "5,930,127.777" [ref=e1888] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "5,930,127.777" [ref=e1889]: $5.93M
+                  - cell "413,881.448" [ref=e1890]:
+                    - link "413,881.448" [ref=e1891] [cursor=pointer]:
+                      - /url: /liquidations/XRP
+                      - generic "413,881.448" [ref=e1892]: $413.88K
+                - row "6 DOGE DOGE $0.08377 -2.63% 0 5,229.495 829.455 22,207.667 3,659,389.383 80,996.539 5,368,750.264 332,251.828" [ref=e1893]:
+                  - cell "6" [ref=e1894]:
+                    - generic [ref=e1895]: "6"
+                  - cell "DOGE DOGE" [ref=e1896]:
+                    - link "DOGE DOGE" [ref=e1899] [cursor=pointer]:
+                      - /url: /currencies/DOGE
+                      - generic [ref=e1900]:
+                        - img "DOGE" [ref=e1901]
+                        - generic [ref=e1902]: DOGE
+                  - cell "$0.08377" [ref=e1903]:
+                    - generic [ref=e1904]: $0.08377
+                  - cell "-2.63%" [ref=e1905]:
+                    - generic [ref=e1906]: "-2.63%"
+                  - cell "0" [ref=e1907]:
+                    - link "0" [ref=e1908] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "0" [ref=e1909]: $0
+                  - cell "5,229.495" [ref=e1910]:
+                    - link "5,229.495" [ref=e1911] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "5,229.495" [ref=e1912]: $5.23K
+                  - cell "829.455" [ref=e1913]:
+                    - link "829.455" [ref=e1914] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "829.455" [ref=e1915]: $829.45
+                  - cell "22,207.667" [ref=e1916]:
+                    - link "22,207.667" [ref=e1917] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "22,207.667" [ref=e1918]: $22.21K
+                  - cell "3,659,389.383" [ref=e1919]:
+                    - link "3,659,389.383" [ref=e1920] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "3,659,389.383" [ref=e1921]: $3.66M
+                  - cell "80,996.539" [ref=e1922]:
+                    - link "80,996.539" [ref=e1923] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "80,996.539" [ref=e1924]: $81.00K
+                  - cell "5,368,750.264" [ref=e1925]:
+                    - link "5,368,750.264" [ref=e1926] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "5,368,750.264" [ref=e1927]: $5.37M
+                  - cell "332,251.828" [ref=e1928]:
+                    - link "332,251.828" [ref=e1929] [cursor=pointer]:
+                      - /url: /liquidations/DOGE
+                      - generic "332,251.828" [ref=e1930]: $332.25K
+                - row "7 ZEC ZEC $450.9 -6.49% 18,091.321 930.893 59,693.364 62,158.62 2,903,299.813 469,557.384 6,588,229.67 873,054.814" [ref=e1931]:
+                  - cell "7" [ref=e1932]:
+                    - generic [ref=e1933]: "7"
+                  - cell "ZEC ZEC" [ref=e1934]:
+                    - link "ZEC ZEC" [ref=e1937] [cursor=pointer]:
+                      - /url: /currencies/ZEC
+                      - generic [ref=e1938]:
+                        - img "ZEC" [ref=e1939]
+                        - generic [ref=e1940]: ZEC
+                  - cell "$450.9" [ref=e1941]:
+                    - generic [ref=e1942]: $450.9
+                  - cell "-6.49%" [ref=e1943]:
+                    - generic [ref=e1944]: "-6.49%"
+                  - cell "18,091.321" [ref=e1945]:
+                    - link "18,091.321" [ref=e1946] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "18,091.321" [ref=e1947]: $18.09K
+                  - cell "930.893" [ref=e1948]:
+                    - link "930.893" [ref=e1949] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "930.893" [ref=e1950]: $930.89
+                  - cell "59,693.364" [ref=e1951]:
+                    - link "59,693.364" [ref=e1952] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "59,693.364" [ref=e1953]: $59.69K
+                  - cell "62,158.62" [ref=e1954]:
+                    - link "62,158.62" [ref=e1955] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "62,158.62" [ref=e1956]: $62.16K
+                  - cell "2,903,299.813" [ref=e1957]:
+                    - link "2,903,299.813" [ref=e1958] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "2,903,299.813" [ref=e1959]: $2.90M
+                  - cell "469,557.384" [ref=e1960]:
+                    - link "469,557.384" [ref=e1961] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "469,557.384" [ref=e1962]: $469.56K
+                  - cell "6,588,229.67" [ref=e1963]:
+                    - link "6,588,229.67" [ref=e1964] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "6,588,229.67" [ref=e1965]: $6.59M
+                  - cell "873,054.814" [ref=e1966]:
+                    - link "873,054.814" [ref=e1967] [cursor=pointer]:
+                      - /url: /liquidations/ZEC
+                      - generic "873,054.814" [ref=e1968]: $873.05K
+                - row "8 BNB BNB $581.42 -3.29% 0 822.246 769.445 822.246 2,393,153.738 31,804.351 3,372,152.467 38,976.173" [ref=e1969]:
+                  - cell "8" [ref=e1970]:
+                    - generic [ref=e1971]: "8"
+                  - cell "BNB BNB" [ref=e1972]:
+                    - link "BNB BNB" [ref=e1975] [cursor=pointer]:
+                      - /url: /currencies/BNB
+                      - generic [ref=e1976]:
+                        - img "BNB" [ref=e1977]
+                        - generic [ref=e1978]: BNB
+                  - cell "$581.42" [ref=e1979]:
+                    - generic [ref=e1980]: $581.42
+                  - cell "-3.29%" [ref=e1981]:
+                    - generic [ref=e1982]: "-3.29%"
+                  - cell "0" [ref=e1983]:
+                    - link "0" [ref=e1984] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "0" [ref=e1985]: $0
+                  - cell "822.246" [ref=e1986]:
+                    - link "822.246" [ref=e1987] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "822.246" [ref=e1988]: $822.25
+                  - cell "769.445" [ref=e1989]:
+                    - link "769.445" [ref=e1990] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "769.445" [ref=e1991]: $769.44
+                  - cell "822.246" [ref=e1992]:
+                    - link "822.246" [ref=e1993] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "822.246" [ref=e1994]: $822.25
+                  - cell "2,393,153.738" [ref=e1995]:
+                    - link "2,393,153.738" [ref=e1996] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "2,393,153.738" [ref=e1997]: $2.39M
+                  - cell "31,804.351" [ref=e1998]:
+                    - link "31,804.351" [ref=e1999] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "31,804.351" [ref=e2000]: $31.80K
+                  - cell "3,372,152.467" [ref=e2001]:
+                    - link "3,372,152.467" [ref=e2002] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "3,372,152.467" [ref=e2003]: $3.37M
+                  - cell "38,976.173" [ref=e2004]:
+                    - link "38,976.173" [ref=e2005] [cursor=pointer]:
+                      - /url: /liquidations/BNB
+                      - generic "38,976.173" [ref=e2006]: $38.98K
+                - row "9 SPCX SPCX $181.71 -5.57% 1,901.676 9,913.047 261,249.115 22,491.928 6,982,231.025 4,873,346.051 14,480,670.026 5,883,082.067" [ref=e2007]:
+                  - cell "9" [ref=e2008]:
+                    - generic [ref=e2009]: "9"
+                  - cell "SPCX SPCX" [ref=e2010]:
+                    - link "SPCX SPCX" [ref=e2013] [cursor=pointer]:
+                      - /url: /currencies/SPCX
+                      - generic [ref=e2014]:
+                        - img "SPCX" [ref=e2015]
+                        - generic [ref=e2016]: SPCX
+                  - cell "$181.71" [ref=e2017]:
+                    - generic [ref=e2018]: $181.71
+                  - cell "-5.57%" [ref=e2019]:
+                    - generic [ref=e2020]: "-5.57%"
+                  - cell "1,901.676" [ref=e2021]:
+                    - link "1,901.676" [ref=e2022] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "1,901.676" [ref=e2023]: $1.90K
+                  - cell "9,913.047" [ref=e2024]:
+                    - link "9,913.047" [ref=e2025] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "9,913.047" [ref=e2026]: $9.91K
+                  - cell "261,249.115" [ref=e2027]:
+                    - link "261,249.115" [ref=e2028] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "261,249.115" [ref=e2029]: $261.25K
+                  - cell "22,491.928" [ref=e2030]:
+                    - link "22,491.928" [ref=e2031] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "22,491.928" [ref=e2032]: $22.49K
+                  - cell "6,982,231.025" [ref=e2033]:
+                    - link "6,982,231.025" [ref=e2034] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "6,982,231.025" [ref=e2035]: $6.98M
+                  - cell "4,873,346.051" [ref=e2036]:
+                    - link "4,873,346.051" [ref=e2037] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "4,873,346.051" [ref=e2038]: $4.87M
+                  - cell "14,480,670.026" [ref=e2039]:
+                    - link "14,480,670.026" [ref=e2040] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "14,480,670.026" [ref=e2041]: $14.48M
+                  - cell "5,883,082.067" [ref=e2042]:
+                    - link "5,883,082.067" [ref=e2043] [cursor=pointer]:
+                      - /url: /liquidations/SPCX
+                      - generic "5,883,082.067" [ref=e2044]: $5.88M
+                - row "10 XAU XAU $4187.29 -3.08% 53,047.268 233.264 505,021.571 258.411 1,561,441.432 56,276.469 2,552,722.906 166,701.63" [ref=e2045]:
+                  - cell "10" [ref=e2046]:
+                    - generic [ref=e2047]: "10"
+                  - cell "XAU XAU" [ref=e2048]:
+                    - link "XAU XAU" [ref=e2051] [cursor=pointer]:
+                      - /url: /currencies/XAU
+                      - generic [ref=e2052]:
+                        - img "XAU" [ref=e2053]
+                        - generic [ref=e2054]: XAU
+                  - cell "$4187.29" [ref=e2055]:
+                    - generic [ref=e2056]: $4187.29
+                  - cell "-3.08%" [ref=e2057]:
+                    - generic [ref=e2058]: "-3.08%"
+                  - cell "53,047.268" [ref=e2059]:
+                    - link "53,047.268" [ref=e2060] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "53,047.268" [ref=e2061]: $53.05K
+                  - cell "233.264" [ref=e2062]:
+                    - link "233.264" [ref=e2063] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "233.264" [ref=e2064]: $233.26
+                  - cell "505,021.571" [ref=e2065]:
+                    - link "505,021.571" [ref=e2066] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "505,021.571" [ref=e2067]: $505.02K
+                  - cell "258.411" [ref=e2068]:
+                    - link "258.411" [ref=e2069] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "258.411" [ref=e2070]: $258.41
+                  - cell "1,561,441.432" [ref=e2071]:
+                    - link "1,561,441.432" [ref=e2072] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "1,561,441.432" [ref=e2073]: $1.56M
+                  - cell "56,276.469" [ref=e2074]:
+                    - link "56,276.469" [ref=e2075] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "56,276.469" [ref=e2076]: $56.28K
+                  - cell "2,552,722.906" [ref=e2077]:
+                    - link "2,552,722.906" [ref=e2078] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "2,552,722.906" [ref=e2079]: $2.55M
+                  - cell "166,701.63" [ref=e2080]:
+                    - link "166,701.63" [ref=e2081] [cursor=pointer]:
+                      - /url: /liquidations/XAU
+                      - generic "166,701.63" [ref=e2082]: $166.70K
+                - row "11 XAUT XAUT $4171.1 -2.97% 95.085 0 25,747.196 0 72,148.059 106.259 82,538.476 1,978.363" [ref=e2083]:
+                  - cell "11" [ref=e2084]:
+                    - generic [ref=e2085]: "11"
+                  - cell "XAUT XAUT" [ref=e2086]:
+                    - link "XAUT XAUT" [ref=e2089] [cursor=pointer]:
+                      - /url: /currencies/XAUT
+                      - generic [ref=e2090]:
+                        - img "XAUT" [ref=e2091]
+                        - generic [ref=e2092]: XAUT
+                  - cell "$4171.1" [ref=e2093]:
+                    - generic [ref=e2094]: $4171.1
+                  - cell "-2.97%" [ref=e2095]:
+                    - generic [ref=e2096]: "-2.97%"
+                  - cell "95.085" [ref=e2097]:
+                    - link "95.085" [ref=e2098] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "95.085" [ref=e2099]: $95.08
+                  - cell "0" [ref=e2100]:
+                    - link "0" [ref=e2101] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "0" [ref=e2102]: $0
+                  - cell "25,747.196" [ref=e2103]:
+                    - link "25,747.196" [ref=e2104] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "25,747.196" [ref=e2105]: $25.75K
+                  - cell "0" [ref=e2106]:
+                    - link "0" [ref=e2107] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "0" [ref=e2108]: $0
+                  - cell "72,148.059" [ref=e2109]:
+                    - link "72,148.059" [ref=e2110] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "72,148.059" [ref=e2111]: $72.15K
+                  - cell "106.259" [ref=e2112]:
+                    - link "106.259" [ref=e2113] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "106.259" [ref=e2114]: $106.26
+                  - cell "82,538.476" [ref=e2115]:
+                    - link "82,538.476" [ref=e2116] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "82,538.476" [ref=e2117]: $82.54K
+                  - cell "1,978.363" [ref=e2118]:
+                    - link "1,978.363" [ref=e2119] [cursor=pointer]:
+                      - /url: /liquidations/XAUT
+                      - generic "1,978.363" [ref=e2120]: $1.98K
+                - row "12 SUI SUI $0.7293 -3.80% 470.261 2,319.25 578.471 16,338.468 1,452,631.81 101,218.191 2,601,529.477 129,903.868" [ref=e2121]:
+                  - cell "12" [ref=e2122]:
+                    - generic [ref=e2123]: "12"
+                  - cell "SUI SUI" [ref=e2124]:
+                    - link "SUI SUI" [ref=e2127] [cursor=pointer]:
+                      - /url: /currencies/SUI
+                      - generic [ref=e2128]:
+                        - img "SUI" [ref=e2129]
+                        - generic [ref=e2130]: SUI
+                  - cell "$0.7293" [ref=e2131]:
+                    - generic [ref=e2132]: $0.7293
+                  - cell "-3.80%" [ref=e2133]:
+                    - generic [ref=e2134]: "-3.80%"
+                  - cell "470.261" [ref=e2135]:
+                    - link "470.261" [ref=e2136] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "470.261" [ref=e2137]: $470.26
+                  - cell "2,319.25" [ref=e2138]:
+                    - link "2,319.25" [ref=e2139] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "2,319.25" [ref=e2140]: $2.32K
+                  - cell "578.471" [ref=e2141]:
+                    - link "578.471" [ref=e2142] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "578.471" [ref=e2143]: $578.47
+                  - cell "16,338.468" [ref=e2144]:
+                    - link "16,338.468" [ref=e2145] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "16,338.468" [ref=e2146]: $16.34K
+                  - cell "1,452,631.81" [ref=e2147]:
+                    - link "1,452,631.81" [ref=e2148] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "1,452,631.81" [ref=e2149]: $1.45M
+                  - cell "101,218.191" [ref=e2150]:
+                    - link "101,218.191" [ref=e2151] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "101,218.191" [ref=e2152]: $101.22K
+                  - cell "2,601,529.477" [ref=e2153]:
+                    - link "2,601,529.477" [ref=e2154] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "2,601,529.477" [ref=e2155]: $2.60M
+                  - cell "129,903.868" [ref=e2156]:
+                    - link "129,903.868" [ref=e2157] [cursor=pointer]:
+                      - /url: /liquidations/SUI
+                      - generic "129,903.868" [ref=e2158]: $129.90K
+                - row "13 WLD WLD $0.6504 +0.25% 24,673.242 256.788 109,702.849 345,510.146 858,076.51 1,171,264.991 2,738,793.919 1,867,070.182" [ref=e2159]:
+                  - cell "13" [ref=e2160]:
+                    - generic [ref=e2161]: "13"
+                  - cell "WLD WLD" [ref=e2162]:
+                    - link "WLD WLD" [ref=e2165] [cursor=pointer]:
+                      - /url: /currencies/WLD
+                      - generic [ref=e2166]:
+                        - img "WLD" [ref=e2167]
+                        - generic [ref=e2168]: WLD
+                  - cell "$0.6504" [ref=e2169]:
+                    - generic [ref=e2170]: $0.6504
+                  - cell "+0.25%" [ref=e2171]:
+                    - generic [ref=e2172]: +0.25%
+                  - cell "24,673.242" [ref=e2173]:
+                    - link "24,673.242" [ref=e2174] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "24,673.242" [ref=e2175]: $24.67K
+                  - cell "256.788" [ref=e2176]:
+                    - link "256.788" [ref=e2177] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "256.788" [ref=e2178]: $256.79
+                  - cell "109,702.849" [ref=e2179]:
+                    - link "109,702.849" [ref=e2180] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "109,702.849" [ref=e2181]: $109.70K
+                  - cell "345,510.146" [ref=e2182]:
+                    - link "345,510.146" [ref=e2183] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "345,510.146" [ref=e2184]: $345.51K
+                  - cell "858,076.51" [ref=e2185]:
+                    - link "858,076.51" [ref=e2186] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "858,076.51" [ref=e2187]: $858.08K
+                  - cell "1,171,264.991" [ref=e2188]:
+                    - link "1,171,264.991" [ref=e2189] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "1,171,264.991" [ref=e2190]: $1.17M
+                  - cell "2,738,793.919" [ref=e2191]:
+                    - link "2,738,793.919" [ref=e2192] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "2,738,793.919" [ref=e2193]: $2.74M
+                  - cell "1,867,070.182" [ref=e2194]:
+                    - link "1,867,070.182" [ref=e2195] [cursor=pointer]:
+                      - /url: /liquidations/WLD
+                      - generic "1,867,070.182" [ref=e2196]: $1.87M
+                - row "14 MU MU $1142.38 +5.88% 0 149.789 0 43,231.458 110,133.369 864,892.009 166,455.302 1,023,602.052" [ref=e2197]:
+                  - cell "14" [ref=e2198]:
+                    - generic [ref=e2199]: "14"
+                  - cell "MU MU" [ref=e2200]:
+                    - link "MU MU" [ref=e2203] [cursor=pointer]:
+                      - /url: /currencies/MU
+                      - generic [ref=e2204]:
+                        - img "MU" [ref=e2205]
+                        - generic [ref=e2206]: MU
+                  - cell "$1142.38" [ref=e2207]:
+                    - generic [ref=e2208]: $1142.38
+                  - cell "+5.88%" [ref=e2209]:
+                    - generic [ref=e2210]: +5.88%
+                  - cell "0" [ref=e2211]:
+                    - link "0" [ref=e2212] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "0" [ref=e2213]: $0
+                  - cell "149.789" [ref=e2214]:
+                    - link "149.789" [ref=e2215] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "149.789" [ref=e2216]: $149.79
+                  - cell "0" [ref=e2217]:
+                    - link "0" [ref=e2218] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "0" [ref=e2219]: $0
+                  - cell "43,231.458" [ref=e2220]:
+                    - link "43,231.458" [ref=e2221] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "43,231.458" [ref=e2222]: $43.23K
+                  - cell "110,133.369" [ref=e2223]:
+                    - link "110,133.369" [ref=e2224] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "110,133.369" [ref=e2225]: $110.13K
+                  - cell "864,892.009" [ref=e2226]:
+                    - link "864,892.009" [ref=e2227] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "864,892.009" [ref=e2228]: $864.89K
+                  - cell "166,455.302" [ref=e2229]:
+                    - link "166,455.302" [ref=e2230] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "166,455.302" [ref=e2231]: $166.46K
+                  - cell "1,023,602.052" [ref=e2232]:
+                    - link "1,023,602.052" [ref=e2233] [cursor=pointer]:
+                      - /url: /liquidations/MU
+                      - generic "1,023,602.052" [ref=e2234]: $1.02M
+                - row "15 NEAR NEAR $2.217 +0.05% 25,483.645 476.408 32,743.981 15,991.001 1,517,283.128 44,188.303 2,137,131.645 197,061.303" [ref=e2235]:
+                  - cell "15" [ref=e2236]:
+                    - generic [ref=e2237]: "15"
+                  - cell "NEAR NEAR" [ref=e2238]:
+                    - link "NEAR NEAR" [ref=e2241] [cursor=pointer]:
+                      - /url: /currencies/NEAR
+                      - generic [ref=e2242]:
+                        - img "NEAR" [ref=e2243]
+                        - generic [ref=e2244]: NEAR
+                  - cell "$2.217" [ref=e2245]:
+                    - generic [ref=e2246]: $2.217
+                  - cell "+0.05%" [ref=e2247]:
+                    - generic [ref=e2248]: +0.05%
+                  - cell "25,483.645" [ref=e2249]:
+                    - link "25,483.645" [ref=e2250] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "25,483.645" [ref=e2251]: $25.48K
+                  - cell "476.408" [ref=e2252]:
+                    - link "476.408" [ref=e2253] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "476.408" [ref=e2254]: $476.41
+                  - cell "32,743.981" [ref=e2255]:
+                    - link "32,743.981" [ref=e2256] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "32,743.981" [ref=e2257]: $32.74K
+                  - cell "15,991.001" [ref=e2258]:
+                    - link "15,991.001" [ref=e2259] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "15,991.001" [ref=e2260]: $15.99K
+                  - cell "1,517,283.128" [ref=e2261]:
+                    - link "1,517,283.128" [ref=e2262] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "1,517,283.128" [ref=e2263]: $1.52M
+                  - cell "44,188.303" [ref=e2264]:
+                    - link "44,188.303" [ref=e2265] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "44,188.303" [ref=e2266]: $44.19K
+                  - cell "2,137,131.645" [ref=e2267]:
+                    - link "2,137,131.645" [ref=e2268] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "2,137,131.645" [ref=e2269]: $2.14M
+                  - cell "197,061.303" [ref=e2270]:
+                    - link "197,061.303" [ref=e2271] [cursor=pointer]:
+                      - /url: /liquidations/NEAR
+                      - generic "197,061.303" [ref=e2272]: $197.06K
+                - row "16 LINK LINK $8.009 -0.66% 0 0 381.983 66,130.039 379,088.308 85,078.731 629,827.315 87,426.174" [ref=e2273]:
+                  - cell "16" [ref=e2274]:
+                    - generic [ref=e2275]: "16"
+                  - cell "LINK LINK" [ref=e2276]:
+                    - link "LINK LINK" [ref=e2279] [cursor=pointer]:
+                      - /url: /currencies/LINK
+                      - generic [ref=e2280]:
+                        - img "LINK" [ref=e2281]
+                        - generic [ref=e2282]: LINK
+                  - cell "$8.009" [ref=e2283]:
+                    - generic [ref=e2284]: $8.009
+                  - cell "-0.66%" [ref=e2285]:
+                    - generic [ref=e2286]: "-0.66%"
+                  - cell "0" [ref=e2287]:
+                    - link "0" [ref=e2288] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "0" [ref=e2289]: $0
+                  - cell "0" [ref=e2290]:
+                    - link "0" [ref=e2291] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "0" [ref=e2292]: $0
+                  - cell "381.983" [ref=e2293]:
+                    - link "381.983" [ref=e2294] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "381.983" [ref=e2295]: $381.98
+                  - cell "66,130.039" [ref=e2296]:
+                    - link "66,130.039" [ref=e2297] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "66,130.039" [ref=e2298]: $66.13K
+                  - cell "379,088.308" [ref=e2299]:
+                    - link "379,088.308" [ref=e2300] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "379,088.308" [ref=e2301]: $379.09K
+                  - cell "85,078.731" [ref=e2302]:
+                    - link "85,078.731" [ref=e2303] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "85,078.731" [ref=e2304]: $85.08K
+                  - cell "629,827.315" [ref=e2305]:
+                    - link "629,827.315" [ref=e2306] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "629,827.315" [ref=e2307]: $629.83K
+                  - cell "87,426.174" [ref=e2308]:
+                    - link "87,426.174" [ref=e2309] [cursor=pointer]:
+                      - /url: /liquidations/LINK
+                      - generic "87,426.174" [ref=e2310]: $87.43K
+                - row "17 CL CL $75.66 +1.10% 0 77.224 2,754.529 3,746.08 240,477.382 330,734.993 2,674,391.282 390,366.06" [ref=e2311]:
+                  - cell "17" [ref=e2312]:
+                    - generic [ref=e2313]: "17"
+                  - cell "CL CL" [ref=e2314]:
+                    - link "CL CL" [ref=e2317] [cursor=pointer]:
+                      - /url: /currencies/CL
+                      - generic [ref=e2318]:
+                        - img "CL" [ref=e2319]
+                        - generic [ref=e2320]: CL
+                  - cell "$75.66" [ref=e2321]:
+                    - generic [ref=e2322]: $75.66
+                  - cell "+1.10%" [ref=e2323]:
+                    - generic [ref=e2324]: +1.10%
+                  - cell "0" [ref=e2325]:
+                    - link "0" [ref=e2326] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "0" [ref=e2327]: $0
+                  - cell "77.224" [ref=e2328]:
+                    - link "77.224" [ref=e2329] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "77.224" [ref=e2330]: $77.22
+                  - cell "2,754.529" [ref=e2331]:
+                    - link "2,754.529" [ref=e2332] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "2,754.529" [ref=e2333]: $2.75K
+                  - cell "3,746.08" [ref=e2334]:
+                    - link "3,746.08" [ref=e2335] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "3,746.08" [ref=e2336]: $3.75K
+                  - cell "240,477.382" [ref=e2337]:
+                    - link "240,477.382" [ref=e2338] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "240,477.382" [ref=e2339]: $240.48K
+                  - cell "330,734.993" [ref=e2340]:
+                    - link "330,734.993" [ref=e2341] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "330,734.993" [ref=e2342]: $330.73K
+                  - cell "2,674,391.282" [ref=e2343]:
+                    - link "2,674,391.282" [ref=e2344] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "2,674,391.282" [ref=e2345]: $2.67M
+                  - cell "390,366.06" [ref=e2346]:
+                    - link "390,366.06" [ref=e2347] [cursor=pointer]:
+                      - /url: /liquidations/CL
+                      - generic "390,366.06" [ref=e2348]: $390.37K
+                - row "18 LAB LAB $17.892 +35.47% 14,825.648 26,455.022 23,614.347 157,998.287 59,450.044 688,047.539 190,407.087 1,824,703.046" [ref=e2349]:
+                  - cell "18" [ref=e2350]:
+                    - generic [ref=e2351]: "18"
+                  - cell "LAB LAB" [ref=e2352]:
+                    - link "LAB LAB" [ref=e2355] [cursor=pointer]:
+                      - /url: /currencies/LAB
+                      - generic [ref=e2356]:
+                        - img "LAB" [ref=e2357]
+                        - generic [ref=e2358]: LAB
+                  - cell "$17.892" [ref=e2359]:
+                    - generic [ref=e2360]: $17.892
+                  - cell "+35.47%" [ref=e2361]:
+                    - generic [ref=e2362]: +35.47%
+                  - cell "14,825.648" [ref=e2363]:
+                    - link "14,825.648" [ref=e2364] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "14,825.648" [ref=e2365]: $14.83K
+                  - cell "26,455.022" [ref=e2366]:
+                    - link "26,455.022" [ref=e2367] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "26,455.022" [ref=e2368]: $26.46K
+                  - cell "23,614.347" [ref=e2369]:
+                    - link "23,614.347" [ref=e2370] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "23,614.347" [ref=e2371]: $23.61K
+                  - cell "157,998.287" [ref=e2372]:
+                    - link "157,998.287" [ref=e2373] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "157,998.287" [ref=e2374]: $158.00K
+                  - cell "59,450.044" [ref=e2375]:
+                    - link "59,450.044" [ref=e2376] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "59,450.044" [ref=e2377]: $59.45K
+                  - cell "688,047.539" [ref=e2378]:
+                    - link "688,047.539" [ref=e2379] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "688,047.539" [ref=e2380]: $688.05K
+                  - cell "190,407.087" [ref=e2381]:
+                    - link "190,407.087" [ref=e2382] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "190,407.087" [ref=e2383]: $190.41K
+                  - cell "1,824,703.046" [ref=e2384]:
+                    - link "1,824,703.046" [ref=e2385] [cursor=pointer]:
+                      - /url: /liquidations/LAB
+                      - generic "1,824,703.046" [ref=e2386]: $1.82M
+                - row "19 ASTER ASTER $0.6351 -9.65% 2,967.33 84.631 11,705.452 122.733 518,355.741 11,872.219 6,521,380.17 74,330.705" [ref=e2387]:
+                  - cell "19" [ref=e2388]:
+                    - generic [ref=e2389]: "19"
+                  - cell "ASTER ASTER" [ref=e2390]:
+                    - link "ASTER ASTER" [ref=e2393] [cursor=pointer]:
+                      - /url: /currencies/ASTER
+                      - generic [ref=e2394]:
+                        - img "ASTER" [ref=e2395]
+                        - generic [ref=e2396]: ASTER
+                  - cell "$0.6351" [ref=e2397]:
+                    - generic [ref=e2398]: $0.6351
+                  - cell "-9.65%" [ref=e2399]:
+                    - generic [ref=e2400]: "-9.65%"
+                  - cell "2,967.33" [ref=e2401]:
+                    - link "2,967.33" [ref=e2402] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "2,967.33" [ref=e2403]: $2.97K
+                  - cell "84.631" [ref=e2404]:
+                    - link "84.631" [ref=e2405] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "84.631" [ref=e2406]: $84.63
+                  - cell "11,705.452" [ref=e2407]:
+                    - link "11,705.452" [ref=e2408] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "11,705.452" [ref=e2409]: $11.71K
+                  - cell "122.733" [ref=e2410]:
+                    - link "122.733" [ref=e2411] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "122.733" [ref=e2412]: $122.73
+                  - cell "518,355.741" [ref=e2413]:
+                    - link "518,355.741" [ref=e2414] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "518,355.741" [ref=e2415]: $518.36K
+                  - cell "11,872.219" [ref=e2416]:
+                    - link "11,872.219" [ref=e2417] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "11,872.219" [ref=e2418]: $11.87K
+                  - cell "6,521,380.17" [ref=e2419]:
+                    - link "6,521,380.17" [ref=e2420] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "6,521,380.17" [ref=e2421]: $6.52M
+                  - cell "74,330.705" [ref=e2422]:
+                    - link "74,330.705" [ref=e2423] [cursor=pointer]:
+                      - /url: /liquidations/ASTER
+                      - generic "74,330.705" [ref=e2424]: $74.33K
+                - row "20 ADA ADA $0.1644 -1.67% 0 473.348 5.044 4,862.018 843,737.862 51,791.612 1,026,481.968 69,729.284" [ref=e2425]:
+                  - cell "20" [ref=e2426]:
+                    - generic [ref=e2427]: "20"
+                  - cell "ADA ADA" [ref=e2428]:
+                    - link "ADA ADA" [ref=e2431] [cursor=pointer]:
+                      - /url: /currencies/ADA
+                      - generic [ref=e2432]:
+                        - img "ADA" [ref=e2433]
+                        - generic [ref=e2434]: ADA
+                  - cell "$0.1644" [ref=e2435]:
+                    - generic [ref=e2436]: $0.1644
+                  - cell "-1.67%" [ref=e2437]:
+                    - generic [ref=e2438]: "-1.67%"
+                  - cell "0" [ref=e2439]:
+                    - link "0" [ref=e2440] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "0" [ref=e2441]: $0
+                  - cell "473.348" [ref=e2442]:
+                    - link "473.348" [ref=e2443] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "473.348" [ref=e2444]: $473.35
+                  - cell "5.044" [ref=e2445]:
+                    - link "5.044" [ref=e2446] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "5.044" [ref=e2447]: $5.04
+                  - cell "4,862.018" [ref=e2448]:
+                    - link "4,862.018" [ref=e2449] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "4,862.018" [ref=e2450]: $4.86K
+                  - cell "843,737.862" [ref=e2451]:
+                    - link "843,737.862" [ref=e2452] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "843,737.862" [ref=e2453]: $843.74K
+                  - cell "51,791.612" [ref=e2454]:
+                    - link "51,791.612" [ref=e2455] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "51,791.612" [ref=e2456]: $51.79K
+                  - cell "1,026,481.968" [ref=e2457]:
+                    - link "1,026,481.968" [ref=e2458] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "1,026,481.968" [ref=e2459]: $1.03M
+                  - cell "69,729.284" [ref=e2460]:
+                    - link "69,729.284" [ref=e2461] [cursor=pointer]:
+                      - /url: /liquidations/ADA
+                      - generic "69,729.284" [ref=e2462]: $69.73K
+          - list [ref=e2463]:
+            - listitem "上一页" [ref=e2464]:
+              - button [disabled]:
+                - img
+            - listitem "1" [ref=e2465]:
+              - button "1" [ref=e2466] [cursor=pointer]
+            - listitem "2" [ref=e2467]:
+              - button "2" [ref=e2468] [cursor=pointer]
+            - listitem "3" [ref=e2469]:
+              - button "3" [ref=e2470] [cursor=pointer]
+            - listitem "4" [ref=e2471]:
+              - button "4" [ref=e2472] [cursor=pointer]
+            - listitem "5" [ref=e2473]:
+              - button "5" [ref=e2474] [cursor=pointer]
+            - listitem "向后 5 页" [ref=e2475]:
+              - button "..." [ref=e2476] [cursor=pointer]
+            - listitem "48" [ref=e2477]:
+              - button "48" [ref=e2478] [cursor=pointer]
+            - listitem "下一页" [ref=e2479]:
+              - button [ref=e2480] [cursor=pointer]:
+                - img [ref=e2481]
+            - listitem
+        - generic [ref=e2485]:
+          - paragraph [ref=e2486]:
+            - strong [ref=e2487]: What Is Crypto Liquidation?
+          - paragraph [ref=e2488]: Crypto liquidation refers to the process of forcibly closing a trader's positions in the cryptocurrency market. It occurs when a trader's margin account can no longer support their open positions due to significant losses or a lack of sufficient margin to meet the maintenance requirements.
+          - paragraph [ref=e2489]: When a trader's account falls below the required margin level, the exchange or brokerage platform may initiate the liquidation process. This means that the trader's positions will be forcibly closed at the market price to cover losses and outstanding debts.
+          - paragraph [ref=e2490]: The liquidation process aims to protect both the trader and the exchange from further losses. By closing the positions, it helps ensure that the trader does not accumulate more debt and that the exchange can recover the owed funds. The liquidation can happen automatically or be triggered by reaching predetermined margin thresholds set by the exchange.
+          - paragraph [ref=e2491]: It's important to note that crypto liquidation can result in significant financial losses for the trader. Therefore, it's crucial for traders to manage their risk effectively, monitor their margin levels, and employ risk management strategies to avoid or mitigate the possibility of liquidation.
+          - paragraph [ref=e2492]:
+            - strong [ref=e2493]: What is Rekt in crypto？
+          - paragraph [ref=e2494]: In the context of cryptocurrency, "Rekt" can be referred to as "liquidation" in professional terms.
+          - paragraph [ref=e2495]: "\"Rekt\" is a slang term commonly used in the cryptocurrency community to describe a situation where a trader or investor suffers significant losses or gets \"wrecked\" financially. It is derived from the word \"wrecked\" and is used to express the idea of someone being ruined or destroyed due to their poor trading decisions or unfortunate market movements."
+          - paragraph [ref=e2496]: When someone says they got "Rekt" in crypto, it typically means that they experienced a substantial loss in their cryptocurrency investments or trades. It is often used humorously or as a way to empathize with others who have faced similar losses in the volatile and unpredictable crypto market.
+          - heading "Data Source and Notes" [level=2] [ref=e2497]
+          - paragraph [ref=e2498]:
+            - text: Data is aggregated from public channels and official APIs of major exchanges.
+            - text: Since
+            - strong [ref=e2499]: April 24, 2021
+            - text: ","
+            - strong [ref=e2500]: Binance
+            - text: has limited its liquidation data push frequency to
+            - strong [ref=e2501]: a maximum of one update per second
+            - text: .
+            - text: Since
+            - strong [ref=e2502]: September 2021
+            - text: ","
+            - strong [ref=e2503]: OKX (formerly OKEx)
+            - text: has also adjusted its liquidation data push frequency to
+            - strong [ref=e2504]: a maximum of one update per second
+            - text: .
+            - text: As a result, during periods of extreme market volatility, liquidation data from these exchanges may show
+            - strong [ref=e2505]: second-level aggregation or slight delays
+            - text: .
+          - paragraph [ref=e2506]:
+            - text: This change originates from rate limitations on the exchange side.
+            - strong [ref=e2507]: CoinGlass
+            - text: has accordingly optimized its data collection and processing logic to ensure that users can still access real-time liquidation orders and historical data through our developer APIs.
+          - heading "Developer APIs" [level=2] [ref=e2508]
+          - paragraph [ref=e2509]
+          - list [ref=e2510]:
+            - listitem [ref=e2511]:
+              - paragraph [ref=e2512]:
+                - strong [ref=e2513]: "Real-time Liquidation Orders:"
+                - text: 👉
+                - strong [ref=e2515] [cursor=pointer]: CoinGlass
+                - strong [ref=e2516]:
+                  - link "Liquidation Orders API" [ref=e2517] [cursor=pointer]:
+                    - /url: https://docs.coinglass.com/reference/liquidation-order
+                  - text: Documentation
+                - text: — Retrieve the latest liquidation order data (including exchange, symbol, direction, amount, and other real-time information), as well as single large-scale liquidations and anomaly alerts.
+            - listitem [ref=e2518]:
+              - paragraph [ref=e2519]:
+                - strong [ref=e2520]: "Historical Liquidation Data:"
+                - text: 👉
+                - strong [ref=e2522] [cursor=pointer]: CoinGlass
+                - strong [ref=e2523]:
+                  - link "Liquidation History API" [ref=e2524] [cursor=pointer]:
+                    - /url: https://docs.coinglass.com/reference/aggregated-liquidation-history
+                  - text: Documentation
+                - text: — Query liquidation records within a specified time range and access up to
+                - strong [ref=e2525]: five years of historical liquidation data
+                - text: .
+      - insertion [ref=e2527]
+      - generic [ref=e2530]:
+        - generic [ref=e2531]:
+          - img [ref=e2534]
+          - generic [ref=e2547]:
+            - generic [ref=e2548]: About
+            - link "About Us" [ref=e2549] [cursor=pointer]:
+              - /url: /aboutus
+              - generic [ref=e2550]: About Us
+            - link "Contact Us" [ref=e2551] [cursor=pointer]:
+              - /url: mailto:contact@coinglass.com
+              - generic [ref=e2552]: Contact Us
+            - link "Disclaimer" [ref=e2553] [cursor=pointer]:
+              - /url: /Disclaimer
+              - generic [ref=e2554]: Disclaimer
+            - link "Terms of Use" [ref=e2555] [cursor=pointer]:
+              - /url: /terms
+              - generic [ref=e2556]: Terms of Use
+            - link "Privacy Policy" [ref=e2557] [cursor=pointer]:
+              - /url: /privacy-policy
+              - generic [ref=e2558]: Privacy Policy
+          - generic [ref=e2560]:
+            - generic [ref=e2561]: Products
+            - link "Legend" [ref=e2562] [cursor=pointer]:
+              - /url: https://legend.coinglass.com
+              - generic [ref=e2563]: Legend
+            - link "Crypto APP" [ref=e2564] [cursor=pointer]:
+              - /url: /download
+              - generic [ref=e2565]: Crypto APP
+            - link "Crypto API" [ref=e2566] [cursor=pointer]:
+              - /url: /CryptoApi
+              - generic [ref=e2567]: Crypto API
+            - link "Pricing" [ref=e2568] [cursor=pointer]:
+              - /url: /pricing
+              - generic [ref=e2569]: Pricing
+            - link "Crypto Chart" [ref=e2570] [cursor=pointer]:
+              - /url: /pro
+              - generic [ref=e2571]: Crypto Chart
+          - generic [ref=e2573]:
+            - generic [ref=e2574]: More
+            - link "Learning Center" [ref=e2575] [cursor=pointer]:
+              - /url: /learn
+              - generic [ref=e2576]: Learning Center
+            - link "Alerts" [ref=e2577] [cursor=pointer]:
+              - /url: /alert
+              - generic [ref=e2578]: Alerts
+          - generic [ref=e2580]:
+            - link "Donations" [ref=e2581] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e2582]: Donations
+            - link "BTC" [ref=e2583] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e2584]: BTC
+            - link "ETH" [ref=e2585] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e2586]: ETH
+            - link "USDT" [ref=e2587] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e2588]: USDT
+          - generic [ref=e2590]:
+            - generic [ref=e2591]: Community
+            - link "X(Twitter)" [ref=e2592] [cursor=pointer]:
+              - /url: https://twitter.com/coinglass_com
+              - generic [ref=e2593]: X(Twitter)
+            - link "Telegram" [ref=e2594] [cursor=pointer]:
+              - /url: https://t.me/Coinglass
+              - generic [ref=e2595]: Telegram
+        - generic [ref=e2596]:
+          - generic [ref=e2597]: © 2026 CoinGlass, all rights reserved
+          - generic [ref=e2598]:
+            - link "app-store" [ref=e2599] [cursor=pointer]:
+              - /url: /download
+              - img "app-store" [ref=e2600]
+            - link "google-play" [ref=e2601] [cursor=pointer]:
+              - /url: /download
+              - img "google-play" [ref=e2602]
+  - alert [ref=e2603]

@@ -501,7 +501,7 @@ The memo's tranche structure is sound. The survivability question is the open on
 
 **ETH technical:** -50.2% below 200d MA (most extreme of the three). Daily RSI: 11 — lowest on record per dip-tranches-strategy seat. Weekly RSI 31. 8 consecutive monthly red candles not confirmed for ETH; confirmed for SOL.
 
-**SOL technical:** Death cross active (50d $85 crossed below 200d MA $131 per fomc-monitor seat). 8 consecutive monthly red candles — first in SOL history. Monthly RSI 38.84 (more extreme than FTX-collapse lows 2022).
+**SOL technical:** Death cross active (50d $85 crossed below 200d MA $131 per feed-fomc seat). 8 consecutive monthly red candles — first in SOL history. Monthly RSI 38.84 (more extreme than FTX-collapse lows 2022).
 
 **HYPE:** Made ALL-TIME HIGH of $76.85 on June 16, 2026 — 3 days before this report. Up ~900% from Nov 2024 launch price of ~$7.56. Current pullback of -13% is entirely within the same 3-day window as the broader market selloff. Not a beaten-down asset on any price-history metric.
 
@@ -511,10 +511,10 @@ The memo's tranche structure is sound. The survivability question is the open on
 
 **CANONICAL NUMBER RESOLUTIONS (§10 conflicts resolved here first):**
 - BTC MVRV-Z: Multiple seats report 0.38 (bitcoin-data.com, crypto-onchain-data) vs 0.41 (AhaSignals, multiple). → **DESK CANONICAL: 0.38** (bitcoin-data.com direct scrape is the primary fetch; 0.41 is secondary-source AhaSignals as-of Feb 2026). Use 0.38 throughout.
-- BTC realized price: crypto-onchain-data reported $52,985 (direct from bitcoin-data.com); fomc-monitor cited aggregate $62,120; crypto-liquidity-data cited LTH realized price $49,479 and short-term holder basis $96,113 (Feb data). → **DESK CANONICAL: $52,985** (whole-network realized price, crypto-onchain-data, direct fetch). LTH realized price $49,479 is a sub-component. STH basis (~$96,113 in Feb) is now out of date given price compression.
+- BTC realized price: crypto-onchain-data reported $52,985 (direct from bitcoin-data.com); feed-fomc cited aggregate $62,120; crypto-liquidity-data cited LTH realized price $49,479 and short-term holder basis $96,113 (Feb data). → **DESK CANONICAL: $52,985** (whole-network realized price, crypto-onchain-data, direct fetch). LTH realized price $49,479 is a sub-component. STH basis (~$96,113 in Feb) is now out of date given price compression.
 - BTC NUPL: crypto-onchain-data direct fetch: 0.159; prediction-market-odds seat: 0.28 (Feb data from AhaSignals); crypto-token-screener: 0.20–0.22. → **DESK CANONICAL: 0.159** (direct bitcoin-data.com fetch, more recent and primary). 0.20–0.22 range is consistent with some staleness; flag as "low Hope/Fear zone".
 - ETH realized price: crypto-onchain-data estimated ~$2,058 (March basis); crypto-liquidity-data cited ~$2,285 (Glassnode via secondary); dip-tranches-strategy cited "$1,400–$1,700 long-term acceptance range". → **DESK CANONICAL: ~$2,058** for the aggregate network realized price as-of March 2026; note that by June 2026 this figure has likely compressed slightly as selling has lowered it, so treat as upper bound. Current spot $1,687 is 18% below the $2,058 figure.
-- HYPE 30d fee revenue: regime-detection/fomc-monitor cited $56.7M/30d; crypto-token-screener screener output showed $792.4M run-rate (annualized) and $880.3M annualized holder revenue. → **DESK CANONICAL: $56.7M/30d protocol fees** ($880.3M annualized, crypto-token-screener screen.py live DefiLlama pull); the $792.4M run-rate is the 30d×12 annualized figure and is consistent.
+- HYPE 30d fee revenue: regime-detection/feed-fomc cited $56.7M/30d; crypto-token-screener screener output showed $792.4M run-rate (annualized) and $880.3M annualized holder revenue. → **DESK CANONICAL: $56.7M/30d protocol fees** ($880.3M annualized, crypto-token-screener screen.py live DefiLlama pull); the $792.4M run-rate is the 30d×12 annualized figure and is consistent.
 
 ### BTC On-Chain
 
@@ -544,7 +544,7 @@ The memo's tranche structure is sound. The survivability question is the open on
 | Spot vs realized price | Spot $1,687 = **~18% below** realized price | Derived | 2026-06-19 |
 | MVRV ratio | ~0.74–0.82 (range across seats; canonical ~0.80) | Multiple secondary (Glassnode gated) | Jun 2026 |
 | MVRV-Z | Reported "approaching -0.7" (one source, Binance Square June 8); another: 0–2 range; another: 0.47 | Multiple conflicting — see §10 | Jun 2026 |
-| % supply profitable | ~30% (matched COVID crash Mar 2020 and Dec 2019) | Cointelegraph/fomc-monitor | Jun 2026 |
+| % supply profitable | ~30% (matched COVID crash Mar 2020 and Dec 2019) | Cointelegraph/feed-fomc | Jun 2026 |
 | 200w MA | $2,471 | yfinance | 2026-06-19 |
 | Spot vs 200w MA | -31.7% (significantly below — historically rare) | yfinance | 2026-06-19 |
 | Daily fee burn | ~3.26 ETH/day post-Pectra (down 71% from ~11 ETH/day) | yellow.com/bitget secondary | Jun 2026 |
@@ -568,7 +568,7 @@ The memo's tranche structure is sound. The survivability question is the open on
 | 8 consecutive monthly red candles | First time in SOL history | bitcoinist.com | Jun 2026 |
 | TVL | ~$5.49B (down from $12.5B Aug 2025 peak, -56%) | ccn.com/mexc.com | Apr–Jun 2026 |
 | Monthly active users | 34.1M (2-year low) | ccn.com | Jun 2026 |
-| DEX volume (weekly) | $11.49B (#1 globally, 51% above ETH's $7.62B) | fomc-monitor/phemex | Jun 2026 |
+| DEX volume (weekly) | $11.49B (#1 globally, 51% above ETH's $7.62B) | feed-fomc/phemex | Jun 2026 |
 | Daily network fees | ~$875K–$1.03M/day (down 84% in SOL-denomination from Jan 2026 peak of ~33k SOL/day) | SpotedCrypto/ainvest | Jun 2026 |
 | SOL REV (real economic value) | $63M/month; 31% of global on-chain tx demand (#1 globally ahead of Tron 28%, Ethereum 23%) | ainvest/SpotedCrypto | Jun 2026 |
 | Stablecoin on-chain supply | $17B | phemex secondary | Jun 2026 |
@@ -724,8 +724,8 @@ The memo's tranche structure is sound. The survivability question is the open on
 | BTC dominance | 58.2%–60.88% (near cycle highs; Bitcoin-dominant market, adverse for alts) | 2026-06-19 |
 | Altcoin Season Index | 33–45 / 100 (Bitcoin-dominant; alt season requires >50 and BTC dominance reversal below ~54%) | 2026-06-19 |
 | Not in alt season | Capital concentrated in AI tokens, tokenized RWA, infrastructure — NOT broad alt rotation | Jun 2026 |
-| BTC Sharpe ratio | -20 on June 11 (matches every prior cycle low since 2015: 2015, 2018-19, 2022-23) | CoinDesk/fomc-monitor | 2026-06-11 |
-| RHODL ratio | Rolling over from peak, matching 2015 and 2022 bottom patterns | fomc-monitor | Jun 2026 |
+| BTC Sharpe ratio | -20 on June 11 (matches every prior cycle low since 2015: 2015, 2018-19, 2022-23) | CoinDesk/feed-fomc | 2026-06-11 |
+| RHODL ratio | Rolling over from peak, matching 2015 and 2022 bottom patterns | feed-fomc | Jun 2026 |
 | Rekt Capital bear market completion | ~70% complete | Rekt Capital/Cointelegraph | 2026-06-18 |
 | Joe Carlasare | Trader sentiment worse than FTX collapse | Marex via CoinDesk | 2026-06-18 |
 | Macro regime ensemble score | +0.50 (borderline RISK-ON; credit spread dissenting) | regime-detection | 2026-06-19 |
@@ -814,16 +814,16 @@ All conflicts resolved with a DESK CANONICAL value below. Downstream sections us
 | Conflict | Sources | Resolution | DESK CANONICAL |
 |---|---|---|---|
 | BTC 52w high: $126,198 (dip-scanner, intraday) vs $115,271 (crypto-onchain-data, yfinance daily) | dip-scanner vs crypto-onchain-data | yfinance daily closing basis is the correct reference for 52w high screens | **$115,271** (closing-price 52w high); $126,198 is the intraday ATH |
-| BTC MVRV-Z: 0.38 (bitcoin-data.com direct, Jun 18) vs 0.41 (AhaSignals, Feb 27) vs 0.57 (fomc-monitor secondary) | crypto-onchain-data vs multiple others | Most recent primary source wins | **0.38** (bitcoin-data.com, 2026-06-18) |
+| BTC MVRV-Z: 0.38 (bitcoin-data.com direct, Jun 18) vs 0.41 (AhaSignals, Feb 27) vs 0.57 (feed-fomc secondary) | crypto-onchain-data vs multiple others | Most recent primary source wins | **0.38** (bitcoin-data.com, 2026-06-18) |
 | BTC NUPL: 0.159 (bitcoin-data.com direct) vs 0.28 (AhaSignals Feb) vs 0.20–0.22 (VanEck Jun) | crypto-onchain-data vs prediction-market-odds vs crypto-token-screener | Most recent primary source; VanEck Jun range directionally consistent | **0.159** (bitcoin-data.com, 2026-06-18); note: VanEck mid-June "18th percentile of 4yr range" is consistent at direction level |
-| BTC realized price: $52,985 (bitcoin-data.com) vs $62,120 (fomc-monitor aggregate) vs $49,479 LTH (MacroMicro) | crypto-onchain-data vs fomc-monitor vs crypto-liquidity-data | $52,985 is whole-network from direct primary fetch; $62,120 likely includes some different methodology; $49,479 is explicitly long-term-holders only | **$52,985** (whole-network, bitcoin-data.com, 2026-06-18). LTH: $49,479. STH: [UNAVAILABLE current] |
+| BTC realized price: $52,985 (bitcoin-data.com) vs $62,120 (feed-fomc aggregate) vs $49,479 LTH (MacroMicro) | crypto-onchain-data vs feed-fomc vs crypto-liquidity-data | $52,985 is whole-network from direct primary fetch; $62,120 likely includes some different methodology; $49,479 is explicitly long-term-holders only | **$52,985** (whole-network, bitcoin-data.com, 2026-06-18). LTH: $49,479. STH: [UNAVAILABLE current] |
 | ETH realized price: $2,058 (CryptoRank/March) vs $2,285 (Glassnode via crypto-liquidity-data) | multiple | $2,285 is the more recent secondary source; $2,058 is an older March read. But both are secondary (Glassnode gated). Neither can be confirmed directly. | **~$2,058 (upper bound, March 2026)** — use cautiously; current figure likely $1,950–$2,050 given continued selling. Spot at $1,687 is below both estimates. |
 | ETH MVRV-Z: "approaching -0.7" (Binance Square June 8 per regime-detection) vs 0.47 (crypto-token-screener) vs "0–2 range" (KuCoin) | Multiple conflicting — wide range | Binance Square is an informal post; crypto-token-screener uses CryptoNews/KuCoin secondary. MVRV ratio 0.74–0.82 is more consistently sourced; Z-score is discrepant. | **MVRV ratio: ~0.80** (canonical midpoint of 0.74–0.82 range). **MVRV-Z: [CONFLICTED — range −0.7 to +0.47 across unverified sources; cannot canonicalize; Glassnode primary source gated].** Flag as a key data gap. |
-| BTC 200d MA: $77,122 (yfinance, crypto-onchain-data) vs $91,772 (dip-scanner) vs $65,192 (live market search sources, fomc-monitor) | Three different values | yfinance 1yr daily series uses 200 trading days of data back from June 19, which includes the $120K+ peak months — this correctly computes a higher 200d MA. "Live market" search source of $65,192 likely uses a shorter window or miscalculation. yfinance is the correct methodology for a 200-day MA. | **$77,122** (yfinance 200 daily closes, 2026-06-19). Distance from 200d MA: -19.1%. |
+| BTC 200d MA: $77,122 (yfinance, crypto-onchain-data) vs $91,772 (dip-scanner) vs $65,192 (live market search sources, feed-fomc) | Three different values | yfinance 1yr daily series uses 200 trading days of data back from June 19, which includes the $120K+ peak months — this correctly computes a higher 200d MA. "Live market" search source of $65,192 likely uses a shorter window or miscalculation. yfinance is the correct methodology for a 200-day MA. | **$77,122** (yfinance 200 daily closes, 2026-06-19). Distance from 200d MA: -19.1%. |
 | SOL 52w high: $208.37 (crypto-onchain-data, yfinance) vs $253.21 (dip-scanner) | Two different | yfinance closing-price vs intraday | **$208.37** (closing-price 52w high, yfinance). ATH $294.33 (Jan 19, 2025, intraday CoinMarketCap). |
 | HYPE 30d fee revenue: $56.7M (intellectia/multiple narrative seats) vs $792.4M run-rate / $880.3M annualized (screen.py) | crypto-token-screener screen.py vs manual sources | $56.7M is the 30-day total; $880.3M is annualized ($56.7M × ~15.5 ≈ not exact, but $880.3M / 12 = $73.4M/month; there is a ~$17M/month discrepancy). Accept screen.py as primary DefiLlama pull: $73.4M/month holder revenue, $880.3M annualized. | **$880.3M/yr annualized holder revenue (DefiLlama screen.py, 2026-06-19)**. The $56.7M/30d figure from narrative sources is slightly lower; use $880.3M/$12 = $73.4M/month as canonical monthly run-rate. |
 | Liquidity backdrop: global M2 expanding ($101.8T, +2.03%) vs Howell cycle contracting | Multiple | Not a conflict — these are different measurements. Stock (M2 dollar level) is expanding; cycle flow / rate-of-change is decelerating. Both are true simultaneously. | Surface explicitly: M2 stock expanding; M2 growth rate decelerating; Howell 65-month cycle in post-peak downswing. All three coexist. |
-| BTC DXY read: "~100.84" (dip-scanner) vs "~99.3" (fomc-monitor) vs "100.72–100.81" (crypto-liquidity-data) | Three seats | Crypto-liquidity-data used tradingeconomics/CNBC directly; fomc-monitor slightly older. | **DXY: ~100.72–100.81** (canonical range, TradingEconomics/CNBC, 2026-06-18). Directional: strengthening, near 1-year high. |
+| BTC DXY read: "~100.84" (dip-scanner) vs "~99.3" (feed-fomc) vs "100.72–100.81" (crypto-liquidity-data) | Three seats | Crypto-liquidity-data used tradingeconomics/CNBC directly; feed-fomc slightly older. | **DXY: ~100.72–100.81** (canonical range, TradingEconomics/CNBC, 2026-06-18). Directional: strengthening, near 1-year high. |
 
 ---
 
@@ -837,7 +837,7 @@ All conflicts resolved with a DESK CANONICAL value below. Downstream sections us
 | SOL MVRV-Z, NUPL, realized price in dollars (Glassnode/Santiment gated; no open-source alternative) | HIGH IMPACT — SOL cheapness case rests on MVRV 0.65 ratio from secondary source (FXEmpire citing Glassnode June 15); no dollar anchor |
 | SOL options data (Deribit BTC/ETH only; no accessible liquid SOL options venue) | HIGH IMPACT on derivatives seat — no put skew or DVOL for SOL; crowded-long risk (max funding) not confirmed by options hedge |
 | BTC/ETH/SOL spot ETF daily flows June 13–19, 2026 (farside.co.uk 403; coinglass placeholder zeros) | Moderate — trend direction known (outflows with partial reversal); exact magnitude in final week unknown |
-| SOL 200-day MA discrepancy ($98.09 per yfinance vs $131 per fomc-monitor/spotedcrypto death cross article) | Low — yfinance is canonical; death cross dates may differ by calculation window |
+| SOL 200-day MA discrepancy ($98.09 per yfinance vs $131 per feed-fomc/spotedcrypto death cross article) | Low — yfinance is canonical; death cross dates may differ by calculation window |
 | Global M2 Howell proprietary index level (commentary only; no numerical index value) | Low — directional "post-peak downswing" is the relevant signal |
 | Binance perp funding rates and OI (geo-blocked 451) | Moderate — largest venue; Deribit + OKX data is sufficient directional proxy |
 | Bybit funding rates (403) | Low — Deribit + OKX sufficient |

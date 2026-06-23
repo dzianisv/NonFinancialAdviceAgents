@@ -50,7 +50,7 @@ run in parallel, return compact verdicts, and keep the main context clean.
 | Macro/liquidity only | **`analysis-macro`** subagent |
 | Order flow / liquidations | **`analysis-orderflow`** subagent |
 | News / narrative | **`analysis-narrative`** subagent |
-| FOMC / Fed / rates | **`fomc-monitor`** + **`prediction-market-odds`** subagents (parallel) |
+| FOMC / Fed / rates | **`feed-fomc`** + **`prediction-market-odds`** subagents (parallel) |
 | Alt selection | **`crypto-token-screener`** subagent |
 | Regime classification | **`regime-detection`** subagent |
 | Sizing veto | **`risk-management`** subagent |
@@ -58,7 +58,7 @@ run in parallel, return compact verdicts, and keep the main context clean.
 **Parallel dispatch template** — spawn these simultaneously, do not await one before launching the next:
 ```
 subagent-1: analysis-comprehensive-crypto  ← market state (5 seats + TradingView data)
-subagent-2: fomc-monitor                   ← if macro/Fed is relevant
+subagent-2: feed-fomc                   ← if macro/Fed is relevant
 subagent-3: narrative-news                 ← latest catalysts
 ```
 Collect all verdicts, then synthesize the answer in main context.
@@ -71,7 +71,7 @@ needs the zone verdict from the analysis subagent first). Even then, batch what 
 | When | Load (as subagent) |
 |------|------|
 | Any timing / deploy / "is now good?" question | **`analysis-comprehensive-crypto`** — full panel: TradingView MCP data + on-chain + sentiment + macro + orderflow + narrative. Do NOT just load `analyst-crypto` inline — spawn the full panel. |
-| Any FOMC / Fed / rates mention | **`fomc-monitor`** → tone + language delta. Then **`prediction-market-odds`** → CME FedWatch rate path. Spawn both in parallel. |
+| Any FOMC / Fed / rates mention | **`feed-fomc`** → tone + language delta. Then **`prediction-market-odds`** → CME FedWatch rate path. Spawn both in parallel. |
 | Any "is the derivatives positioning bullish/bearish?" | **`analysis-orderflow`** — funding rates, OI, liquidation clusters, CVD, CME gap. |
 | Any alt selection | **`crypto-token-screener`** — 6-point BTC-hurdle filter before any tilt on an alt. |
 

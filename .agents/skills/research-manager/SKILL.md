@@ -23,7 +23,7 @@ cd /Users/engineer/workspace/backtest/.agents/skills
 for d in */; do n="${d%/}"; desc=$(grep -m1 '^description:' "$n/SKILL.md" 2>/dev/null | sed 's/^description: //'); echo "$n :: $desc"; done
 ```
 Read the list. Group by convention (this is the discovery rule, not a fixed roster):
-- **Data/gather seats** — market/price/on-chain/positioning/macro/liquidity/odds/regime/news skills (e.g. `*-onchain-data`, `*-liquidity-data`, `prediction-market-odds`, `fomc-monitor`, `regime-detection`, `derivatives-positioning-data`, `narrative-news`).
+- **Data/gather seats** — market/price/on-chain/positioning/macro/liquidity/odds/regime/news skills (e.g. `*-onchain-data`, `*-liquidity-data`, `prediction-market-odds`, `feed-fomc`, `regime-detection`, `derivatives-positioning-data`, `narrative-news`).
 - **News feeds** — everything matching `feed-*`.
 - **Panel lenses** — everything matching `analyst-*` and `analytics-*` (each is a thinker/analytic lens). Read each description to match the lens to the query.
 - **Consolidation desk** — `*-research-desk`.

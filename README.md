@@ -35,7 +35,7 @@ Two tiers run on any backend. FAST catches same-day setups; SLOW produces a week
   dip-screener                   1. COLLECT  (x6 parallel)
   crypto-dip-scanner                regime, fomc, 13f,
   regime-detection                  congress, news, dips
-  fomc-monitor                           |
+  feed-fomc                           |
   trend-stock-research           2. PANEL  (multi-lens-quorum)
           |                         4+ analyst lenses
   signal-convergence-alert               |
@@ -110,7 +110,7 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
 <text x="417" y="178" text-anchor="middle" fill="#888" font-size="9">trades disclosures</text>
 
 <rect x="504" y="146" width="112" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="560" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">fomc-monitor</text>
+<text x="560" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">feed-fomc</text>
 <text x="560" y="178" text-anchor="middle" fill="#888" font-size="9">Fed rates / statements</text>
 
 <rect x="626" y="146" width="144" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
@@ -564,7 +564,7 @@ Full spec: [`crypto/`](crypto/) — `crypto.goal.md` · `crypto.prd.md` · `cryp
 | `crypto-dip-scanner` | Daily BTC/ETH/SOL/BNB/AVAX dip scanner; alerts on -30%+ from 52w high + extreme fear |
 | `dip-screener` | Equity dip screener |
 | `dip-tranches-strategy` | Staged entry / tranche sizing for dip entries |
-| `fomc-monitor` | Fed FOMC calendar, statement, and dot-plot monitor |
+| `feed-fomc` | Fed FOMC calendar, statement, and dot-plot monitor |
 | `liveness-monitor` | Monitors that scheduled jobs are running; DMs on stale job |
 | `portfolio-monitor` | Portfolio state monitor |
 | `prediction-market-odds` | Polymarket / Kalshi odds for macro/market events |

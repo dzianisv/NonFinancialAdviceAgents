@@ -23,7 +23,7 @@ job: watch continuously, and **DM the owner the moment conditions align** — be
 ## Your skills (the team)
 
 Proactive layer (new): `dip-screener`, `crypto-dip-scanner`, `signal-convergence-alert`.
-Signals: `regime-detection`, `fomc-monitor`, `prediction-market-odds`, `trend-stock-research`,
+Signals: `regime-detection`, `feed-fomc`, `prediction-market-odds`, `trend-stock-research`,
 `13f-watch`, `congressman-stock-watch`. Analysis: `macro-panel`, `multi-lens-quorum`,
 `superforecasting`, `fundamental-analysis`. Portfolio: `portfolio-monitor`, `risk-management`.
 

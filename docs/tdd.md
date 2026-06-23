@@ -79,7 +79,7 @@ Four layers. Data flows up, decision down, alert out.
                         live web: yfinance / FRED / alternative.me / SEC EDGAR / FT-WSJ / Polymarket
 ```
 
-- (a) Data: scripted skills (`.py`, `--json` contract, exceptions → skip/empty, never invent) AND prompt-only skills that fetch via the agent's `web_fetch`/browser (e.g. fomc-monitor, trend-stock-research, 13f-watch). Mixed by design.
+- (a) Data: scripted skills (`.py`, `--json` contract, exceptions → skip/empty, never invent) AND prompt-only skills that fetch via the agent's `web_fetch`/browser (e.g. feed-fomc, trend-stock-research, 13f-watch). Mixed by design.
 - (b) Skill: the judgment layer. Runs its script or web tools, checks gates, writes pools or emits a result.
 - (c) Scheduler: the backend's NATIVE cron fires the agent (§3). Heartbeat is NOT the scheduler — it only nudges a stuck/overdue task.
 - (d) Notify: agent-native delivery on the job's configured target; non-`SILENT` output → owner channel. DM = something real fired.
@@ -87,7 +87,7 @@ Four layers. Data flows up, decision down, alert out.
 ### 1a. Complete wiring — DAILY (every skill, where it plugs in)
 
 The backend's NATIVE CRON fires the agent on each slot. The agent runs the skill (a `.py` script for
-the scanners, OR pure `web_fetch`/agent tools for fomc-monitor / trend-stock-research / 13f-watch — not
+the scanners, OR pure `web_fetch`/agent tools for feed-fomc / trend-stock-research / 13f-watch — not
 all skills are python), applies the gate, then either DMs the owner or writes a pool row. Cron state
 persists in the backend's own store (openclaw SQLite / hermes `jobs.json`) — no separate state file.
 
@@ -101,7 +101,7 @@ persists in the backend's own store (openclaw SQLite / hermes `jobs.json`) — n
         ▼
  ┌──07:45────────┐ ┌──07:50──────────┐ ┌──08:00──────────┐ ┌──08:15──────────┐ ┌──08:30──────────────┐
  │ dip-screener  │ │ crypto-dip-     │ │ regime-detection│ │ trend-stock-    │ │ signal-convergence- │
- │ dip_screener  │ │ scanner         │ │  + fomc-monitor │ │ research(broad) │ │ alert  convergence  │
+ │ dip_screener  │ │ scanner         │ │  + feed-fomc │ │ research(broad) │ │ alert  convergence  │
  │ .py           │ │ crypto_dip_     │ │ regime_monitor  │ │ web/browser     │ │ .py                 │
  │               │ │ scanner.py      │ │ .py + web_fetch │ │ tools           │ │                     │
  │ yfinance      │ │ yfinance +      │ │ yfinance SPY/   │ │ FT/WSJ/SA       │ │ reads pools+ledgers │
@@ -138,7 +138,7 @@ same pipeline serially in-agent). Parallelism is the design: independent lenses 
  09:30 Mon  ──►  hedge-fund-committee.workflow.js   (3 phases, fan-out/fan-in)
  ───────────────────────────────────────────────────────────────────────────────────────
  PHASE 1  COLLECT          parallel() × 6 agents — one skill each
-   regime-detection ┐ fomc-monitor ┐ 13f-watch ┐ congressman-stock-watch ┐ trend(narrative) ┐ dips ┐
+   regime-detection ┐ feed-fomc ┐ 13f-watch ┐ congressman-stock-watch ┐ trend(narrative) ┐ dips ┐
         each → CAND_SCHEMA {candidates[], summary}                                                  │
         cross-ref:  bySources[ticker] → Set(source)   ──►  rank by n_sources  ──►  TOP 5            │
                     (ticker in ≥2 sources = elevated conviction)                                    ▼
@@ -160,7 +160,7 @@ same pipeline serially in-agent). Parallelism is the design: independent lenses 
 | `dip-screener` | daily 07:45 | stock dip alert + MED→pool |
 | `crypto-dip-scanner` | daily 07:50 | crypto dip alert |
 | `regime-detection` | daily 08:00 + weekly P1 | RISK_ON/OFF gate (gates every buy) |
-| `fomc-monitor` | daily 08:00 + weekly P1 | Fed tone delta |
+| `feed-fomc` | daily 08:00 + weekly P1 | Fed tone delta |
 | `trend-stock-research` | daily 08:15 + weekly P1 | narrative pool (catches SanDisk buildup) |
 | `signal-convergence-alert` | daily 08:30 | ≥2-source DM (the SanDisk pattern) |
 | `13f-watch` | weekly P1 | new institutional buys → ledger → convergence |
@@ -306,7 +306,7 @@ manager), FinRobot (Director-over-specialists), Anthropic orchestrator-workers, 
 ### The org chart (existing skills = employees)
 | Desk | Employees (skills) | Owns | Decides? |
 |------|--------------------|------|:--------:|
-| Research analysts | 13f-watch, congressman-stock-watch, trend-stock-research, regime-detection, fomc-monitor, prediction-market-odds, dip-screener, crypto-dip-scanner, fundamental-analysis | gather a structured report | NO |
+| Research analysts | 13f-watch, congressman-stock-watch, trend-stock-research, regime-detection, feed-fomc, prediction-market-odds, dip-screener, crypto-dip-scanner, fundamental-analysis | gather a structured report | NO |
 | Chief of staff | signal-convergence-alert + the workflow aggregator | cluster by ticker, build ONE briefing packet | NO |
 | Investment committee | multi-lens-quorum lenses (Buffett/Graham/Druckenmiller/Lyn-Alden/**Lacy-Hunt dissent seat**), macro-panel, superforecasting | debate the packet, vote independently | advise |
 | CRO | risk-management | binding VETO + sizing | gate |

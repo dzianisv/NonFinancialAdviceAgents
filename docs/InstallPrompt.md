@@ -85,7 +85,7 @@ Weekly Monday 09:30 UTC — full brief, always DM:
 • multi-lens-quorum on each (analytics-lyn-alden, analytics-ray-dalio,
   analytics-warren-buffett, analytics-stanley-druckenmiller, fundamental-analysis)
 • risk-management VETO
-• fomc-monitor → Fed tone
+• feed-fomc → Fed tone
 
 Brief format:
 ══════════════════════════════════════
@@ -131,7 +131,7 @@ Start now: verify skills are loaded, list missing, run the setup command above, 
 |-------|-------------|--------|
 | dip-screener / crypto-dip-scanner | `yfinance` Python | Pre-installed in pod |
 | congressman-stock-watch | none — scrapes Capitol Trades | Works out of the box |
-| fomc-monitor | `web_fetch` federalreserve.gov | Reliable |
+| feed-fomc | `web_fetch` federalreserve.gov | Reliable |
 | prediction-market-odds | `web_fetch` gamma-api.polymarket.com | Reliable |
 | trend-stock-research | `web_fetch` FT/WSJ RSS | Reliable |
 | 13f-watch / hedge-fund-13f-analysis | `web_fetch` sec.gov EDGAR | Reliable |

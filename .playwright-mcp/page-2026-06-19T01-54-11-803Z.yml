@@ -1,0 +1,348 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "Logo" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img "Logo" [ref=e6]
+        - generic [ref=e7]:
+          - list [ref=e8]:
+            - listitem [ref=e9]:
+              - link "Home" [ref=e10] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e11]:
+              - button "Charts" [expanded] [ref=e12] [cursor=pointer]
+            - listitem [ref=e13]:
+              - link "Alerts" [ref=e14] [cursor=pointer]:
+                - /url: /bitcoin-alerts/
+            - listitem [ref=e15]:
+              - button "Research" [expanded] [ref=e16] [cursor=pointer]
+            - listitem [ref=e17]:
+              - link "Treasury Data" [ref=e18] [cursor=pointer]:
+                - /url: /charts/bitcoin-treasury-tracker/
+          - list [ref=e20]:
+            - listitem [ref=e21]:
+              - link "Private Indicators" [ref=e22] [cursor=pointer]:
+                - /url: /bitcoin-indicators/
+            - listitem [ref=e23]:
+              - link "API" [ref=e24] [cursor=pointer]:
+                - /url: /api/
+            - listitem [ref=e25]:
+              - link "Pricing" [ref=e26] [cursor=pointer]:
+                - /url: /subscribe/
+            - listitem [ref=e27]:
+              - link "Upgrade" [ref=e28] [cursor=pointer]:
+                - /url: /subscribe/
+            - listitem [ref=e29]:
+              - link "Log in" [ref=e30] [cursor=pointer]:
+                - /url: /accounts/login/?next=/welcome/
+  - generic [ref=e31]:
+    - generic [ref=e32]:
+      - generic:
+        - button "" [ref=e33] [cursor=pointer]:
+          - generic [ref=e34]: 
+        - generic [ref=e35]:
+          - generic [ref=e37]:
+            - generic [ref=e40]: 
+            - textbox "Search Metrics" [ref=e41]
+          - navigation [ref=e43]:
+            - generic [ref=e44]:
+              - link " Price" [ref=e45] [cursor=pointer]:
+                - /url: "#live-price-mobile"
+                - text: 
+                - generic [ref=e46]: 
+                - text: Price
+                - img [ref=e47]
+              - link " Moving Averages" [ref=e48] [cursor=pointer]:
+                - /url: "#moving-averages-mobile"
+                - text: 
+                - generic [ref=e49]: 
+                - text: Moving Averages
+                - img [ref=e50]
+              - link " Market Cycle" [ref=e51] [cursor=pointer]:
+                - /url: "#market-cycle-mobile"
+                - text: 
+                - generic [ref=e52]: 
+                - text: Market Cycle
+                - img [ref=e53]
+              - link " Addresses" [ref=e54] [cursor=pointer]:
+                - /url: "#addresses-mobile"
+                - text: 
+                - generic [ref=e55]: 
+                - text: Addresses
+                - img [ref=e56]
+              - link " Onchain Introduction" [expanded] [ref=e57] [cursor=pointer]:
+                - /url: "#onchain-introduction-mobile"
+                - generic [ref=e58]: 
+                - text:  Onchain Introduction
+                - img [ref=e59]
+              - generic [ref=e60]:
+                - link "MVRV Z-Score" [ref=e62] [cursor=pointer]:
+                  - /url: /charts/mvrv-zscore/
+                - link "Realized Price" [ref=e64] [cursor=pointer]:
+                  - /url: /charts/realized-price/
+                - link "Addresses Holding > X BTC by Year" [ref=e66] [cursor=pointer]:
+                  - /url: /charts/addresses-holding-x-btc-by-year/
+                - link "Addresses with Balance > 1 BTC" [ref=e68] [cursor=pointer]:
+                  - /url: /charts/addresses-greater-than-1-btc/
+                - link "HODL Waves" [ref=e70] [cursor=pointer]:
+                  - /url: /charts/hodl-waves/
+                - link "1+ Year HODL Wave" [ref=e72] [cursor=pointer]:
+                  - /url: /charts/1-year-hodl-wave/
+                - link "Supply Adjusted Coin Days Destroyed" [ref=e74] [cursor=pointer]:
+                  - /url: /charts/supply-adjusted-coin-days-destroyed-cdd/
+                - link "Short-Term Holder Realized Price" [ref=e76] [cursor=pointer]:
+                  - /url: /charts/short-term-holder-realized-price/
+                - link "Spent Output Profit Ratio (SOPR)" [ref=e78] [cursor=pointer]:
+                  - /url: /charts/sopr-spent-output-profit-ratio/
+              - link " Onchain Indicators" [ref=e79] [cursor=pointer]:
+                - /url: "#onchain-indicators-mobile"
+                - text: 
+                - generic [ref=e80]: 
+                - text: Onchain Indicators
+                - img [ref=e81]
+              - link " Onchain Movement" [ref=e82] [cursor=pointer]:
+                - /url: "#onchain-movement-mobile"
+                - text: 
+                - generic [ref=e83]: 
+                - text: Onchain Movement
+                - img [ref=e84]
+              - link " Miners" [ref=e85] [cursor=pointer]:
+                - /url: "#miners-mobile"
+                - text: 
+                - generic [ref=e86]: 
+                - text: Miners
+                - img [ref=e87]
+              - link " Derivatives" [ref=e88] [cursor=pointer]:
+                - /url: "#derivatives-mobile"
+                - text: 
+                - generic [ref=e89]: 
+                - text: Derivatives
+                - img [ref=e90]
+              - link " Lightning" [ref=e91] [cursor=pointer]:
+                - /url: "#lightning-mobile"
+                - text: 
+                - generic [ref=e92]: 
+                - text: Lightning
+                - img [ref=e93]
+              - link " Adoption" [ref=e94] [cursor=pointer]:
+                - /url: "#adoption-mobile"
+                - text: 
+                - generic [ref=e95]: 
+                - text: Adoption
+                - img [ref=e96]
+              - link " Near Term" [ref=e97] [cursor=pointer]:
+                - /url: "#near-term-mobile"
+                - text: 
+                - generic [ref=e98]: 
+                - text: Near Term
+                - img [ref=e99]
+              - link " Network Info" [ref=e100] [cursor=pointer]:
+                - /url: "#network-info-mobile"
+                - text: 
+                - generic [ref=e101]: 
+                - text: Network Info
+                - img [ref=e102]
+              - link " Top Bottom" [ref=e103] [cursor=pointer]:
+                - /url: "#top-bottom-mobile"
+                - text: 
+                - generic [ref=e104]: 
+                - text: Top Bottom
+                - img [ref=e105]
+              - link " Ratio Indicators" [ref=e106] [cursor=pointer]:
+                - /url: "#ratio-indicators-mobile"
+                - text: 
+                - generic [ref=e107]: 
+                - text: Ratio Indicators
+                - img [ref=e108]
+              - link " Coin Lifetime" [ref=e109] [cursor=pointer]:
+                - /url: "#coin-lifetime-mobile"
+                - text: 
+                - generic [ref=e110]: 
+                - text: Coin Lifetime
+                - img [ref=e111]
+      - text:                                  
+      - generic [ref=e114]:
+        - generic [ref=e116]:
+          - text:  
+          - 'heading "Bitcoin: MVRV Z-Score" [level=1] [ref=e117]':
+            - img [ref=e119]
+            - text: "Bitcoin: MVRV Z-Score"
+          - generic [ref=e120]:
+            - generic [ref=e123]: Loading...
+            - paragraph [ref=e124]: © 2026 Bitcoin Magazine Pro.
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - paragraph [ref=e127]: "Zoom in with touchscreen: Touch and hold with ONE finger then drag."
+            - paragraph [ref=e128]: "Zoom in on desktop: Left click and drag."
+            - paragraph [ref=e129]: "Reset: Double click."
+          - generic [ref=e130]:
+            - link "Access Chart Alerts" [ref=e131] [cursor=pointer]:
+              - /url: /subscribe/
+            - link "Faster Updating Charts" [ref=e132] [cursor=pointer]:
+              - /url: /subscribe/
+            - link "Tradingview Indicators" [ref=e133] [cursor=pointer]:
+              - /url: /subscribe/
+        - generic [ref=e135]:
+          - paragraph [ref=e136]: This chart is part of the On-Chain Introduction Collection, tailored for those new to Bitcoin on-chain analytics who want to learn about key metrics.
+          - paragraph [ref=e137]:
+            - text: You can explore and learn about the next chart in the On-Chain Introduction Collection by clicking
+            - link "here" [ref=e138] [cursor=pointer]:
+              - /url: ../realized-price/
+            - text: .
+          - heading "Indicator Overview" [level=6] [ref=e139]
+          - paragraph [ref=e140]: MVRV Z-Score is a bitcoin chart that uses blockchain analysis to identify periods where Bitcoin is extremely over or undervalued relative to its 'fair value'.
+          - paragraph [ref=e141]: "It uses three metrics:"
+          - paragraph [ref=e142]: "1. Market Value (black line): The current price of Bitcoin multiplied by the number of coins in circulation. This is like market cap in traditional markets i.e. share price multiplied by number of shares."
+          - paragraph [ref=e143]: "2. Realised Value (blue line): Rather than taking the current price of Bitcoin, Realised Value takes the price of each Bitcoin when it was last moved i.e. the last time it was sent from one wallet to another wallet. It then adds up all those individual prices and takes an average of them. It then multiplies that average price by the total number of coins in circulation."
+          - paragraph [ref=e144]: In doing so, it strips out the short term market sentiment that we have within the Market Value metric. It can therefore be seen as a more 'true' long term measure of Bitcoin value which Market Value moves above and below depending on the market sentiment at the time.
+          - paragraph [ref=e145]: "3. Z-score (orange line): A standard deviation test that pulls out the extremes in the data between market value and realised value."
+          - heading "How It Can Be Used" [level=6] [ref=e146]
+          - paragraph [ref=e147]: The MVRV Z-score has historically been very effective in identifying periods where market value is moving unusually high above realised value. These periods are highlighted by the z-score (orange line) entering the pink box and indicates the top of market cycles. It has been able to pick the market high of each cycle to within two weeks.
+          - paragraph [ref=e148]: It also shows when market value is far below realised value, highlighted by z-score entering the green box. Buying Bitcoin during these periods has historically produced outsized returns.
+          - heading "Bitcoin Price Prediction Using This Tool" [level=6] [ref=e149]
+          - paragraph [ref=e150]:
+            - text: MVRV Z-Score bitcoin chart is useful for predicting Bitcoin price at the extremes of market conditions. It is able to forecast where
+            - link "Bitcoin price" [ref=e151] [cursor=pointer]:
+              - /url: https://www.bitcoinmagazinepro.com/bitcoin-price-live/
+            - text: may need to pull back when MVRV Z-score enters the upper red band, and also when $BTC price may rally after spending time in the lower green band.
+          - paragraph [ref=e152]: Historically it has picked major Bitcoin price highs to within 2 weeks.
+          - heading "Created By" [level=6] [ref=e153]
+          - paragraph [ref=e154]: "@aweandwonder who has unfortunately since deleted the original article and his online profile."
+          - paragraph [ref=e155]:
+            - text: He built on the initial work to create MVRV by
+            - link "Murad Mahmudov" [ref=e156] [cursor=pointer]:
+              - /url: https://twitter.com/MustStopMurad
+            - text: and
+            - link "David Puell" [ref=e157] [cursor=pointer]:
+              - /url: https://twitter.com/kenoshaking
+          - heading "MVRV (Market Value to Realised Value Ratio)" [level=6] [ref=e158]
+          - paragraph [ref=e159]: The MVRV ratio bitcoin tool is also shown on the chart above. See the chart key to select MVRV scores which are represented by the black line on the chart.
+          - paragraph [ref=e160]: This metric takes the ratio between market value and realized value and plots that ratio over time. MVRV was created to show periods of market euphoria when the market value was considerably higher than realized value (the cost basis level for bitcoin purchases). While MVRV does show broad trends of where the price is overbought or oversold, it is less effective than MVRV Z-score for specifically identifying market cycle tops and bottoms.
+          - paragraph [ref=e161]: You can view the MVRV metric on the chart above by selecting ‘MVRV’ on the chart key and de-selecting MVRV Z-Score.
+          - heading "Date Created" [level=6] [ref=e162]
+          - paragraph [ref=e163]: November 2018
+          - heading "Fall Further Down The Rabbit Hole" [level=6] [ref=e164]
+          - paragraph [ref=e165]:
+            - link "MVRV Medium article" [ref=e166] [cursor=pointer]:
+              - /url: https://medium.com/adaptivecapital/bitcoin-market-value-to-realized-value-mvrv-ratio-3ebc914dbaee
+          - heading "Similar Live Charts That You May Find Useful" [level=6] [ref=e167]
+          - paragraph [ref=e168]:
+            - text: The MVRV Z-Score live chart is able to identify when the price of Bitcoin is unsustainably high or low by using the upper red band and the lower green band. Charts on this site that use a similar approach include
+            - link "Puell Multiple" [ref=e169] [cursor=pointer]:
+              - /url: https://www.bitcoinmagazinepro.com/charts/puell-multiple/
+            - text: ","
+            - link "RHODL Ratio" [ref=e170] [cursor=pointer]:
+              - /url: https://www.bitcoinmagazinepro.com/charts/rhodl-ratio/
+            - text: and
+            - link "Reserve Risk" [ref=e171] [cursor=pointer]:
+              - /url: https://www.bitcoinmagazinepro.com/charts/reserve-risk/
+            - text: .
+          - heading "Video Explainer" [level=6] [ref=e172]
+          - generic [ref=e174]:
+            - link "" [ref=e175] [cursor=pointer]:
+              - /url: https://www.youtube.com/watch?v=fs60lyYSHg4
+              - generic [ref=e176]: 
+            - generic [ref=e177]: Click me to watch video!
+        - generic [ref=e178]:
+          - heading "You May Also Be Interested In" [level=4] [ref=e179]:
+            - generic [ref=e180]: You May Also Be Interested In
+          - generic [ref=e181]:
+            - generic [ref=e183]:
+              - link "Value Days Destroyed (VDD) Multiple screenshot" [ref=e184] [cursor=pointer]:
+                - /url: /charts/value-days-destroyed-multiple/
+                - img "Value Days Destroyed (VDD) Multiple screenshot" [ref=e185]
+              - generic [ref=e186]:
+                - heading "Value Days Destroyed (VDD) Multiple" [level=5] [ref=e187]:
+                  - link "Value Days Destroyed (VDD) Multiple" [ref=e188] [cursor=pointer]:
+                    - /url: /charts/value-days-destroyed-multiple/
+                - paragraph [ref=e189]: Identifies Bitcoin cycle highs by comparing near-term spending velocity with yearly average of spending velocity.
+            - generic [ref=e191]:
+              - link "Realized Price screenshot" [ref=e192] [cursor=pointer]:
+                - /url: /charts/realized-price/
+                - img "Realized Price screenshot" [ref=e193]
+              - generic [ref=e194]:
+                - heading "Realized Price" [level=5] [ref=e195]:
+                  - link "Realized Price" [ref=e196] [cursor=pointer]:
+                    - /url: /charts/realized-price/
+                - paragraph [ref=e197]: The aggregate cost-basis of all bitcoin.
+            - generic [ref=e199]:
+              - link "Percent Addresses in Loss screenshot" [ref=e200] [cursor=pointer]:
+                - /url: /charts/percent-addresses-in-loss/
+                - img "Percent Addresses in Loss screenshot" [ref=e201]
+              - generic [ref=e202]:
+                - heading "Percent Addresses in Loss" [level=5] [ref=e203]:
+                  - link "Percent Addresses in Loss" [ref=e204] [cursor=pointer]:
+                    - /url: /charts/percent-addresses-in-loss/
+                - paragraph [ref=e205]: The Percentage of Bitcoin Addresses in Loss
+          - generic [ref=e208]:
+            - heading "Make smarter decisions about Bitcoin. Instantly." [level=3] [ref=e209]
+            - generic [ref=e210]:
+              - paragraph [ref=e211]:
+                - generic [ref=e212]: 
+                - text: Access the Bitcoin and Global Macro Charts that really drive Bitcoin’s price.
+              - paragraph [ref=e213]:
+                - generic [ref=e214]: 
+                - text: +40 chart alerts. Never miss critical levels on charts again.
+              - paragraph [ref=e215]:
+                - generic [ref=e216]: 
+                - text: Analysis newsletter. Manage your emotions at market extremes.
+              - paragraph [ref=e217]:
+                - generic [ref=e218]: 
+                - text: Private Tradingview indicators. See Bitcoin chart levels in real time!
+              - paragraph [ref=e219]:
+                - generic [ref=e220]: 
+                - text: Cancel anytime.
+            - link "Learn More" [ref=e221] [cursor=pointer]:
+              - /url: /subscribe/
+        - paragraph [ref=e223]:
+          - text: Any information on this site is not to be considered as financial advice. Please review the
+          - link "Disclaimer section" [ref=e225] [cursor=pointer]:
+            - /url: /disclaimer/
+          - text: for more information.
+    - text:    
+  - contentinfo [ref=e226]:
+    - generic [ref=e227]:
+      - generic [ref=e228]:
+        - list [ref=e230]:
+          - listitem [ref=e231]:
+            - link "" [ref=e232] [cursor=pointer]:
+              - /url: https://x.com/BitcoinMagPro
+              - generic [ref=e233]: 
+          - listitem [ref=e234]:
+            - link "" [ref=e235] [cursor=pointer]:
+              - /url: https://www.youtube.com/channel/UCWdRpsNKyoFeMROPT3KXygA
+              - generic [ref=e236]: 
+          - listitem [ref=e237]:
+            - link "" [ref=e238] [cursor=pointer]:
+              - /url: https://www.linkedin.com/showcase/bitcoin-magazine-pro/
+              - generic [ref=e239]: 
+        - list [ref=e241]:
+          - listitem [ref=e242]:
+            - link "About Us" [ref=e243] [cursor=pointer]:
+              - /url: /about/
+          - listitem [ref=e244]:
+            - link "Learning" [ref=e245] [cursor=pointer]:
+              - /url: /learning/
+          - listitem [ref=e246]:
+            - link "Contact" [ref=e247] [cursor=pointer]:
+              - /url: /contact-us/
+          - listitem [ref=e248]:
+            - link "Advertise" [ref=e249] [cursor=pointer]:
+              - /url: /advertise/
+          - listitem [ref=e250]:
+            - link "Disclaimer" [ref=e251] [cursor=pointer]:
+              - /url: /disclaimer/
+          - listitem [ref=e252]:
+            - link "Terms of Use" [ref=e253] [cursor=pointer]:
+              - /url: /terms-of-use/
+          - listitem [ref=e254]:
+            - link "Privacy Policy" [ref=e255] [cursor=pointer]:
+              - /url: /privacy-policy/
+          - listitem [ref=e256]:
+            - link "Cookie Policy" [ref=e257] [cursor=pointer]:
+              - /url: /cookie-policy/
+      - paragraph [ref=e260]: Bitcoin Magazine Pro © All rights reserved
+  - link "" [ref=e261] [cursor=pointer]:
+    - /url: "#"
+    - generic [ref=e262]: 

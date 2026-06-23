@@ -1,0 +1,182 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - img [ref=e6] [cursor=pointer]
+      - link "Legend NEW" [ref=e9] [cursor=pointer]:
+        - /url: https://legend.coinglass.com
+        - generic [ref=e10]:
+          - generic [ref=e11]: Legend
+          - generic [ref=e12]: NEW
+    - generic [ref=e13]:
+      - banner [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e18]:
+            - link "24h Volume $184,861,394,176 -10.83%" [ref=e19] [cursor=pointer]:
+              - /url: /pro/futures/FuturesVolume
+              - generic [ref=e20]:
+                - text: 24h Volume
+                - generic [ref=e21]: $184,861,394,176
+                - generic [ref=e22]: "-10.83%"
+            - link "Open Interest $106,144,597,418 -2.11%" [ref=e23] [cursor=pointer]:
+              - /url: /pro/futures/Cryptofutures
+              - generic [ref=e24]:
+                - text: Open Interest
+                - generic [ref=e25]: $106,144,597,418
+                - generic [ref=e26]: "-2.11%"
+            - link "24h Liquidation $467,250,914 +6.87%" [ref=e27] [cursor=pointer]:
+              - /url: /liquidations
+              - generic [ref=e28]:
+                - text: 24h Liquidation
+                - generic [ref=e29]: $467,250,914
+                - generic [ref=e30]: +6.87%
+            - link "24h Long/Short 49.26%/50.74%" [ref=e31] [cursor=pointer]:
+              - /url: /LongShortRatio
+              - generic [ref=e32]:
+                - text: 24h Long/Short
+                - generic [ref=e33]: 49.26%/50.74%
+          - generic [ref=e35]:
+            - link "API" [ref=e37] [cursor=pointer]:
+              - /url: /CryptoApi
+            - link "Download APP" [ref=e39] [cursor=pointer]:
+              - /url: /download
+            - generic [ref=e41] [cursor=pointer]:
+              - combobox [ref=e42]: English
+              - img [ref=e44]
+              - textbox [ref=e46]: en
+            - img [ref=e48] [cursor=pointer]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - link [ref=e53] [cursor=pointer]:
+              - /url: /
+              - img [ref=e54]
+            - link "Market" [ref=e56] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e57]: Market
+            - link "Stock" [ref=e58] [cursor=pointer]:
+              - /url: /stock
+            - link "Exchanges" [ref=e59] [cursor=pointer]:
+              - /url: /exchanges
+              - generic [ref=e60]: Exchanges
+            - link "Open Interest" [ref=e61] [cursor=pointer]:
+              - /url: /open-interest/BTC
+            - link "Funding Rate" [ref=e62] [cursor=pointer]:
+              - /url: /FundingRate
+              - generic [ref=e63]: Funding Rate
+            - link "Liquidation" [ref=e64] [cursor=pointer]:
+              - /url: /liquidations
+              - generic [ref=e65]: Liquidation
+            - generic [ref=e66] [cursor=pointer]: Data
+            - link "Supercharts" [ref=e67] [cursor=pointer]:
+              - /url: https://www.coinglass.com/tv
+              - generic [ref=e68]: Supercharts
+            - link "Legend" [ref=e69] [cursor=pointer]:
+              - /url: https://legend.coinglass.com
+            - generic [ref=e70]: More
+          - generic [ref=e72]:
+            - generic [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]:
+                - img [ref=e77]
+                - generic [ref=e79]: Search
+              - generic [ref=e80]: /
+            - link "Login" [ref=e81] [cursor=pointer]:
+              - /url: /login
+              - button "Login" [ref=e82]
+      - generic [ref=e84] [cursor=pointer]:
+        - img "bitunix" [ref=e86]
+        - img [ref=e88]
+      - generic [ref=e93]:
+        - img [ref=e94]
+        - generic [ref=e98]: Oops! We couldn't find the page you're looking for. Please try again later.
+        - link "Back to Homepage" [ref=e99] [cursor=pointer]:
+          - /url: /
+          - button "Back to Homepage" [ref=e100]
+      - insertion [ref=e102]:
+        - iframe [ref=e104]:
+          - iframe [ref=f515e1]:
+            - generic [active] [ref=f520e1]:
+              - generic [ref=f520e5]:
+                - insertion [ref=f520e7]:
+                  - iframe [ref=f520e8]:
+                    - link "Advertisement" [ref=f521e4] [cursor=pointer]:
+                      - /url: https://adclick.g.doubleclick.net/pcs/click?xai=AKAOjsvXzfwcqQkRGYLWhOtA9HuGFhWnioJ84KIOR9-cNKr0BUimG5IsZqR2jHGTz_KmLXMqrbms4JTD_nGvVBqmWkVDYJCb9B_8Dlm33WBcXQVzVjBS5AbLyZYp4AA-GJCDOgo5fptTsH8l3KuXCYTHdlI78vr_B6Nb3oZnZIne3Qk9UayU4VmF2TN20q7rusjvGGLzMjpe325pbEptCrw9Ct4Dk3gUIji7gxiVAqdGWZodX9CfJp0Q1m69Y677vA8GDfLVwQqpDa4p80wguia4OEqNXtoLOJ5pqGdZ7qwNmZJwd2vGo_5nobZm2v4Juc98EE2GiQZIJgm8trTyzM2X0DtxF07wB2RLwo84kYlMUNVBn8Mi9dVqIeJFy7hV5YkPOsfKfGweVzOcb29EV9msCETELDlmkMP7B09bamz1XUrfwDO3NxaEePJ0Gf-fUSaoD3vP_uhmgBiZPhN98nhRbS7bRzNDaNcpT0qRwPkKBBCil_AJ2ZXf7Kx1stWGsp8DqBjrs_sCs-dO4pL88Ysh2urCyLOXR9vpKK5r5G3MV5VmNEzK0DH4Eb7xdVQUT6dV0EIkNiI&sai=AMfl-YRUk0UlpGkck7b0D7aCdJx5NKwI3gWgeZM4Leut8AhjAi3Fovv4q4fgLYizy2EKIuJx0sNDYW1_MvDnhmkKbGDqylxI-XzvvYHWxfDC60XPvPPGmb-FFgGsov84SEDuXYEzcd21HOK_oB6ZRijqknE39ZHtdlXBxYBMbZ3r6581m7nj0U3Gz2u0chT1dFgClh6Iw3fy1cwpi9p4mUaxdKYU-6BWcFDjKMXZ5Q5IGuZXikv0XMNaEncSZcre2gNYEf4ZOa2vKyyykz8KD24C5ogZFa_e4_GZgFhDutQ7H1r-W64wOLZocLjTY-k3J_fYNGqQWI9koRDNpRJzHeGqSUk2MNnoSA&sig=Cg0ArKJSzG05HOqiMz-5&cry=1&fbs_aeid=%5Bgw_fbsaeid%5D&urlfix=1&adurl=https://adclick.g.doubleclick.net/aclk%3Fsa%3DL%26ai%3DCyGKanaE0aqeFJ8yvodAPxvKjqAeI76j0XN69t5avAcCNtwEQASCC7rQTYMnW64aAgKAZyAEJqAMByAMCqgSEAk_QlhKx6bhslLQbY_9_E8HCbHvnfHt4zvAVXjMYj7Fv35i1BrYIy8A7qWMLWiE4xOoYyFzqhEkdXOLK0smAsLFiQ-_m5Odqjx-PF31hmUpcJgv3aGbiZcfbDZVTMIjebYdxX47HrX7XRokAsbW9HvVwxWC0xvsK6EgnHOHEQthVP6K3uaEufH3Jp7XeQyPZUZI1R8MwFKyNwp-0s-RQjywtSCwxKHWSAMZaRLL63HbKNkbmmRtztzCzJGPyMyJE1Zxf04DlvI2mARfgLibUCBqGnKZTSilSeNvZWQfRIELwFuf__WJg9-BWIp9IGACYmpHlSaUnJyQdzmV9F0TMwyfQQuwGgAaq-5O_2tj65pABoAYhqAeT2LECqAeU2LECqAeV2LECqAemvhuoB5bYG6gHqpuxAqgH_56xAqgH35-xAqgHrb6xAqgHv9OxAtgHANIIMAiAYRABMgiKgoCAgICACDoPgECAwICAgICogAKog5AQSL39wTpYuKa-uJmSlQNgAPoLAggBgAwBqg0CVVPqDRMIuc2-uJmSlQMVzFcIBB1G-Qh1iA4J0BUBgBcBshcQGAwqCjMxNTYwNDE4MzBQAaoYFwk2XrpJBpYZQRIKMzE1NjA0MTgzMBgB%26num%3D1%26sig%3DAOD64_1c3Yh4VGhugNOiPuwRumkg0lt7pg%26client%3Dca-pub-7208892162400154%26adurl%3Dhttps://exch.quantserve.com/r%3Fus_privacy%3D%26a%3Dp-e9KDqb0WIZVj6%26labels%3D_qc.clk,_click.adserver.rtb,_click.rand.1152980875%26rtbip%3D192.184.70.189%26rtbdata2%3DEAA6GWh0dHBzOi8vd3d3LmNvaW5nbGFzcy5jb21aKGVUN0lzeTV2ekxGaWJNcm1mVHZXNWl4cHd1UmlQY3ZsZTJoMlU3MGSAAYuv5KUEugEAwAHg_R_IAYmg3eztM9oBFlA5TXlaemYtaWFOanp5Y0U2d292WlGwAgjIAgDQAs7hhvv4n_fMqQHoAlfyAg8IpdMDEIbG7pSMxbTykQHyAg0IVxDFwoWG0L27268B-AIAigMWMC5wdWItNzIwODg5MjE2MjQwMDE1NJgDAKgDALIDBBgE3AC6AxIJXkmWl4T9Wr4RKcB8mbBjK77CAxIJiEnlSPFtVmoR_hFN8X8f5pnIA5qBgBDYA4uv5KUE4gMPcC1lOUtEcWIwV0laVmo26gMFCNgFEFryAwU5NDk1MvgDAIAE7QOKBAI3N5IEEjU0OTY0NDM5Mzg0ODk4OTY3OZoEEgnAR-TR9AwtVhGUI9yRUwb3laIEEgleSZaXhP1avhEpwHyZsGMrvqoEEgleSZaXhP1avhEpwHyZsGMrvrgE0AXQBAnyBAJVU4AFAZAFAbAFArgFAMAFi6_kpQTIBeGgqgTSBQYIAxABGBToBQaaBhQKEgnAR-TR9AwtVhGUI9yRUwb3laAGALUGC4i3OLoGXAoCVVMSAkNBGKcGIghwZXRhbHVtYSoFOTQ5NTI6J2NvbWNhc3QlMjBjYWJsZSUyMGNvbW11bmljYXRpb25zJTIwaW5jLloVY29tY2FzdCUyMGNvcnBvcmF0aW9uyQaxmDAJ6LENE_EGAIgwCeixDRP4BgGABwCKBxIJiEnlSPFtVmoR_hFN8X8f5pmwB4nJswS4B8PvmAXYBwQ%26rtb_id%3DCbGYMAnosQ0TEQCIMAnosQ0TGDxC5WqkcJ5IztAFb94%26redirecturl3%3Dhttps://squareup.com/t/tid_8581/team_performance_mktg/onbd_self/funnel_lower/cmtp_performance/pr_cross_product/d_display/tar_prospect/p_quantcast/cn_evergreen/l_us%253Froute%253D/us/en/campaigns/pos-restaurants-li%2526dclid%253D%2525edclid!%2526gad_source%253D7%2526gad_campaignid%253D23514801823
+                      - img "Advertisement" [ref=f521e5]
+                - link [ref=f520e9] [cursor=pointer]:
+                  - /url: https://pixel.quantcount.com/r?a=p-9fYuixa7g_Hm2;rand=1152980875;labels=_click.creative.iab,_qc.iab.clk.p-e9KDqb0WIZVj6.0.10893251;redirecturl2=http://www.quantcast.com/adchoices
+                  - img [ref=f520e11]
+              - iframe
+      - generic [ref=e106]:
+        - generic [ref=e107]:
+          - img [ref=e110]
+          - generic [ref=e123]:
+            - generic [ref=e124]: About
+            - link "About Us" [ref=e125] [cursor=pointer]:
+              - /url: /aboutus
+              - generic [ref=e126]: About Us
+            - link "Contact Us" [ref=e127] [cursor=pointer]:
+              - /url: mailto:contact@coinglass.com
+              - generic [ref=e128]: Contact Us
+            - link "Disclaimer" [ref=e129] [cursor=pointer]:
+              - /url: /Disclaimer
+              - generic [ref=e130]: Disclaimer
+            - link "Terms of Use" [ref=e131] [cursor=pointer]:
+              - /url: /terms
+              - generic [ref=e132]: Terms of Use
+            - link "Privacy Policy" [ref=e133] [cursor=pointer]:
+              - /url: /privacy-policy
+              - generic [ref=e134]: Privacy Policy
+          - generic [ref=e136]:
+            - generic [ref=e137]: Products
+            - link "Legend" [ref=e138] [cursor=pointer]:
+              - /url: https://legend.coinglass.com
+              - generic [ref=e139]: Legend
+            - link "Crypto APP" [ref=e140] [cursor=pointer]:
+              - /url: /download
+              - generic [ref=e141]: Crypto APP
+            - link "Crypto API" [ref=e142] [cursor=pointer]:
+              - /url: /CryptoApi
+              - generic [ref=e143]: Crypto API
+            - link "Pricing" [ref=e144] [cursor=pointer]:
+              - /url: /pricing
+              - generic [ref=e145]: Pricing
+            - link "Crypto Chart" [ref=e146] [cursor=pointer]:
+              - /url: /pro
+              - generic [ref=e147]: Crypto Chart
+          - generic [ref=e149]:
+            - generic [ref=e150]: More
+            - link "Learning Center" [ref=e151] [cursor=pointer]:
+              - /url: /learn
+              - generic [ref=e152]: Learning Center
+            - link "Alerts" [ref=e153] [cursor=pointer]:
+              - /url: /alert
+              - generic [ref=e154]: Alerts
+          - generic [ref=e156]:
+            - link "Donations" [ref=e157] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e158]: Donations
+            - link "BTC" [ref=e159] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e160]: BTC
+            - link "ETH" [ref=e161] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e162]: ETH
+            - link "USDT" [ref=e163] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e164]: USDT
+          - generic [ref=e166]:
+            - generic [ref=e167]: Community
+            - link "X(Twitter)" [ref=e168] [cursor=pointer]:
+              - /url: https://twitter.com/coinglass_com
+              - generic [ref=e169]: X(Twitter)
+            - link "Telegram" [ref=e170] [cursor=pointer]:
+              - /url: https://t.me/Coinglass
+              - generic [ref=e171]: Telegram
+        - generic [ref=e172]:
+          - generic [ref=e173]: © 2026 CoinGlass, all rights reserved
+          - generic [ref=e174]:
+            - link "app-store" [ref=e175] [cursor=pointer]:
+              - /url: /download
+              - img "app-store" [ref=e176]
+            - link "google-play" [ref=e177] [cursor=pointer]:
+              - /url: /download
+              - img "google-play" [ref=e178]
+  - alert [ref=e179]
