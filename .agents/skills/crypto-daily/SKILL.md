@@ -175,7 +175,7 @@ Template:
 🔮 Crypto {DATE} | F&G {value} Extreme Fear
 BUY(small): {top 2-3 tokens} {price + 1-word catalyst each}
 {dominant macro driver in 1 line}
-DYOR. Not advice. #Bitcoin #DeFi #Crypto
+DYOR. Not advice. #Bitcoin #DeFi #Crypto #quantarena.xyz
 ```
 
 Example:
@@ -183,7 +183,7 @@ Example:
 🔮 Crypto 2026-06-23 | F&G 23 Extreme Fear
 BUY(small): AAVE $71 (RWA catalyst), LINK $7.6 (RSI 23), BTC $62k
 AI/tech selloff = dip. Trend bearish — tranches only.
-DYOR. Not advice. #Bitcoin #DeFi
+DYOR. Not advice. #Bitcoin #DeFi #quantarena.xyz
 ```
 
 **Always verify ≤ 280 chars before proceeding:**

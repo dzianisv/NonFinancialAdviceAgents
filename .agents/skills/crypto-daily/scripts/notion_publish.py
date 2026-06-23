@@ -16,33 +16,43 @@ import argparse
 import json
 import re
 import sys
-import urllib.request
-import urllib.error
 
 NOTION_VERSION = "2022-06-28"
 API_BASE = "https://api.notion.com/v1"
 
-
-def api_post(endpoint: str, token: str, body: dict) -> dict:
-    url = f"{API_BASE}{endpoint}"
-    data = json.dumps(body).encode()
-    req = urllib.request.Request(
-        url,
-        data=data,
-        headers={
+try:
+    import requests
+    def _notion_request(method: str, endpoint: str, token: str, body: dict) -> dict:
+        url = f"{API_BASE}{endpoint}"
+        fn = requests.post if method == "POST" else requests.patch
+        r = fn(url, json=body, headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "Notion-Version": NOTION_VERSION,
-        },
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read())
-    except urllib.error.HTTPError as e:
-        body_text = e.read().decode()
-        print(f"❌ Notion API error {e.code}: {body_text}", file=sys.stderr)
-        sys.exit(1)
+        })
+        if not r.ok:
+            print(f"❌ Notion API error {r.status_code}: {r.text}", file=sys.stderr)
+            sys.exit(1)
+        return r.json()
+    def api_post(endpoint, token, body): return _notion_request("POST",  endpoint, token, body)
+    def api_patch(endpoint, token, body): return _notion_request("PATCH", endpoint, token, body)
+except ImportError:
+    import urllib.request, urllib.error
+    def _notion_request(method, endpoint, token, body):
+        url = f"{API_BASE}{endpoint}"
+        data = json.dumps(body, ensure_ascii=False).encode("utf-8")
+        req = urllib.request.Request(url, data=data, method=method)
+        req.add_header("Authorization", f"Bearer {token}")
+        req.add_header("Content-Type", "application/json; charset=utf-8")
+        req.add_header("Notion-Version", NOTION_VERSION)
+        try:
+            with urllib.request.urlopen(req) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            print(f"❌ Notion API error {e.code}: {e.read().decode()}", file=sys.stderr)
+            sys.exit(1)
+    def api_post(endpoint, token, body): return _notion_request("POST",  endpoint, token, body)
+    def api_patch(endpoint, token, body): return _notion_request("PATCH", endpoint, token, body)
 
 
 def md_to_notion_blocks(md: str) -> list:
@@ -178,18 +188,17 @@ def main():
                 "title": [{"type": "text", "text": {"content": args.title}}]
             }
         },
-        "children": first_batch,
+        "children": [],  # create empty; append blocks via PATCH
     }
 
     result = api_post("/pages", args.token, payload)
     page_id = result["id"]
-    page_url = result.get("url", f"https://notion.so/{page_id.replace('-', '')}")
+    page_url = result.get("url", f"https://app.notion.com/p/{page_id.replace('-', '')}")
 
-    # Append remaining blocks in batches of 100
-    remaining = all_blocks[100:]
-    while remaining:
-        batch, remaining = remaining[:100], remaining[100:]
-        api_post(f"/blocks/{page_id}/children", args.token, {"children": batch})
+    # Append all blocks in batches of 50 via PATCH
+    for i in range(0, len(all_blocks), 50):
+        batch = all_blocks[i:i+50]
+        api_patch(f"/blocks/{page_id}/children", args.token, {"children": batch})
 
     print(f"✅ Notion page created: {page_url}")
     return page_url
