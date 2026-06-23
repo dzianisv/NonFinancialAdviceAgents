@@ -1,6 +1,6 @@
 ---
 name: crypto-portfolio-manager
-description: "Manages the crypto portfolio — runs analysis on every token in the universe (BTC/ETH/SOL/TON/HYPE/AAVE/JUP/LINK) and outputs a BUY/SELL/HOLD decision per token. Run on demand or via /loop. Educational, not advice."
+description: "Manages the crypto portfolio — runs analysis on every token in the universe (BTC/ETH/SOL/TON/HYPE/AAVE/JUP/AERO/PUMP/LINK) and outputs a BUY/SELL/HOLD decision per token. Run on demand or via /loop. Educational, not advice."
 license: MIT
 compatibility: opencode
 metadata:
@@ -53,18 +53,16 @@ Educational, not financial advice.
 
 | Token | Rationale | TradingView symbol |
 |-------|-----------|-------------------|
-| BTC | Foundational monetary layer; largest market cap | `BINANCE:BTCUSDT` |
-| ETH | Smart-contract platform; stablecoin infra (53% of $300B market) | `BINANCE:ETHUSDT` |
-| SOL | High-performance L1; Solana DeFi base layer | `BINANCE:SOLUSDT` |
-| TON | Telegram L1; 900M-user payment infra (Wallet + USDT); watch Durov legal status | `BINANCE:TONUSDT` |
-| HYPE | Hyperliquid perp DEX; 97% revenue auto-buyback hardcoded; real cashflow token | `OKX:HYPEUSDT` |
-| AAVE | Leading DeFi lending protocol; real yield from spreads + GHO fees; >$1T cumulative loans | `BINANCE:AAVEUSDT` |
-| JUP | Jupiter — Solana DeFi super-app (perps, lending, launchpad, DCA, staking); 15+ fee streams | `BINANCE:JUPUSDT` |
-| LINK | Oracle network; backbone of RWA tokenization (Swift, Euroclear, JPMorgan, UBS) | `BINANCE:LINKUSDT` |
-
-**Dropped from prior universe:**
-- ~~UNI~~ — governance token with NO fee-to-holder mechanism; fee switch failed governance for 2+ years; structural value trap, not infrastructure
-- ~~PUMP~~ — reflexive memecoin (fees = zero in bear markets); not infrastructure; skip until Solana meme volume revives
+| BTC   | Foundational monetary layer; largest market cap | `BINANCE:BTCUSDT` |
+| ETH   | Smart-contract platform; stablecoin infra (53% of $300B market) | `BINANCE:ETHUSDT` |
+| SOL   | High-performance L1; Solana DeFi base layer | `BINANCE:SOLUSDT` |
+| TON   | Telegram L1; 900M-user payment infra (Wallet + USDT); watch Durov legal status | `BINANCE:TONUSDT` |
+| HYPE  | Hyperliquid perp DEX; 97% revenue auto-buyback hardcoded; real cashflow token | `OKX:HYPEUSDT` |
+| AAVE  | Leading DeFi lending protocol; real yield from spreads + GHO fees; >$1T cumulative loans | `BINANCE:AAVEUSDT` |
+| JUP   | Jupiter — Solana DeFi super-app (perps, lending, launchpad, DCA, staking); 15+ fee streams | `BINANCE:JUPUSDT` |
+| AERO  | Aerodrome Finance — Base chain DEX; real trading fees; ve(3,3) tokenomics with revenue accrual | `BINANCE:AEROUSDT` |
+| PUMP  | Pump.fun — Solana meme launchpad; reflexive fees; track for cycle timing signal | `OKX:PUMPUSDT` |
+| LINK  | Oracle network; backbone of RWA tokenization (Swift, Euroclear, JPMorgan, UBS) | `BINANCE:LINKUSDT` |
 
 ---
 
@@ -89,6 +87,8 @@ INSERT INTO todos (id, title, description) VALUES
  ('tok-HYPE','Analyzing HYPE', 'idem — use OKX:HYPEUSDT'),
  ('tok-AAVE','Analyzing AAVE', 'idem'),
  ('tok-JUP', 'Analyzing JUP',  'idem — Jupiter Solana DeFi super-app'),
+ ('tok-AERO','Analyzing AERO', 'idem — Aerodrome Finance Base DEX, try BINANCE:AEROUSDT'),
+ ('tok-PUMP','Analyzing PUMP', 'idem — pump.fun token, try OKX:PUMPUSDT'),
  ('tok-LINK','Analyzing LINK', 'idem');
 ```
 
