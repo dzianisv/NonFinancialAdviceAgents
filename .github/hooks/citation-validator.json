@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "matcher": "web.?fetch|webfetch",
+        "type": "command",
+        "bash": "bun /Users/engineer/workspace/backtest/.claude/hooks/log-web-fetch.ts",
+        "timeoutSec": 10
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "bun /Users/engineer/workspace/backtest/.claude/hooks/validate-citations.ts",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

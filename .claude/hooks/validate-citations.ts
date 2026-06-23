@@ -1,9 +1,13 @@
 #!/usr/bin/env bun
 /**
- * validate-citations.ts — Claude Code Stop hook
- * Fires when Claude finishes a turn. Parses transcript for [T1]/[T2]/[T3] URLs,
- * diffs against the real fetch log from log-web-fetch.ts, flags hallucinations.
- * Input (stdin): { session_id, transcript_path, ... }
+ * agentStop / Stop hook — citation validator
+ * Works across Claude Code AND Copilot CLI (payload formats differ — both handled).
+ *
+ * Claude Code input:  { session_id, transcript_path }
+ * Copilot CLI input:  { sessionId?, agentResponse?, cwd, timestamp }
+ *
+ * Parses last agent response for [T1]/[T2]/[T3] URLs, diffs against the real
+ * fetch log written by log-web-fetch.ts, flags hallucinated citations.
  */
 
 import { join } from "path"
@@ -14,27 +18,36 @@ const CITATION_RX = /\[T[123]\]\s+(https?:\/\/\S+)/g
 const input = await Bun.stdin.text()
 const event = JSON.parse(input)
 
-const sessionId: string = event.session_id ?? "unknown"
+const sessionId: string = event.session_id ?? event.sessionId ?? "unknown"
 const transcriptPath: string = event.transcript_path ?? ""
+// Copilot CLI may pass the agent response text directly
+const directResponse: string = event.agentResponse ?? event.response ?? ""
 const fetchLog = `/tmp/cc-fetches-${sessionId}.jsonl`
 const errorLog = join(REPO, "logs/citation-errors.log")
 
-// ── 1. Extract cited URLs from transcript ──────────────────────────────────
+// ── 1. Extract cited URLs — try transcript first, then direct response ────
 const cited: string[] = []
+
+const extractFromText = (text: string) => {
+  for (const match of text.matchAll(CITATION_RX)) {
+    cited.push(match[1].replace(/[.,;)]+$/, ""))
+  }
+}
+
 if (transcriptPath) {
   try {
     const transcript = await Bun.file(transcriptPath).text()
-    // Transcript is JSONL — find last assistant message
     const lines = transcript.split("\n").filter(Boolean)
     const assistantLines = lines
       .map(l => { try { return JSON.parse(l) } catch { return null } })
       .filter(m => m?.role === "assistant")
-
-    const text = assistantLines.map(m => m?.content ?? "").join("\n")
-    for (const match of text.matchAll(CITATION_RX)) {
-      cited.push(match[1].replace(/[.,;)]+$/, ""))
-    }
+    extractFromText(assistantLines.map(m => m?.content ?? "").join("\n"))
   } catch {}
+}
+
+// Copilot CLI: agentResponse is the text payload
+if (cited.length === 0 && directResponse) {
+  extractFromText(directResponse)
 }
 
 if (cited.length === 0) process.exit(0)
