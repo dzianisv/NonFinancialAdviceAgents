@@ -195,29 +195,37 @@ CHROME=~/.agents/skills/chrome-use/scripts/chrome-use
 
 # 1. Open the X.com compose URL (requires Chrome to be running + logged in)
 $CHROME open "https://x.com/compose/tweet"
-sleep 3
+sleep 4
 
 # 2. Snapshot interactive elements to get @eN refs
 $CHROME snapshot -i
-# Look for: [textbox] "What is happening?!" or similar compose input → assign it @e_compose
+# Look for: [textbox] "Post text" → assign it @e_compose
 
-# 3. Type the tweet (use `type` not `fill` — X.com watches keystrokes)
-$CHROME type @e_compose "$TWEET"
+# 3. Use `fill` (NOT `type`, NOT `eval execCommand`) — fill clears first, then types once
+#    ⛔ NEVER use execCommand('insertText') — it appends on every call and causes hashtag spam
+#    ⛔ NEVER call type/fill/eval more than ONCE on the textbox
+$CHROME fill @e_compose "$TWEET"
 sleep 1
 
-# 4. Re-snapshot to get fresh refs after typing
+# 4. Verify the content is correct (must match TWEET, not contain repeats)
+$CHROME eval "document.querySelectorAll('[contenteditable]')[0]?.innerText?.slice(0,100)"
+# If output doesn't match the start of $TWEET → STOP, do not click Post
+
+# 5. Re-snapshot to get fresh refs after typing
 $CHROME snapshot -i
-# Look for: [button] "Post" or [button] "Tweet" → assign it @e_post
+# Look for: [button] "Post" → assign it @e_post
 
-# 5. Click Post
+# 6. Click Post ONCE
 $CHROME click @e_post
-sleep 2
+sleep 3
 
-# 6. Screenshot proof of the posted tweet
+# 7. Screenshot proof of the posted tweet
 $CHROME screenshot /tmp/tweet_proof_$(date +%F).png
 ```
 
-> **@eN refs are dynamic** — the actual ref numbers from `snapshot -i` will differ each run. Read the snapshot output, find the compose textbox and Post button by their label, and use those refs. Never hardcode `@e1` or `@e_compose` — those are placeholders showing the pattern.
+> **@eN refs are dynamic** — read from `snapshot -i` output each run. Never hardcode.
+
+> **⛔ Anti-spam rule:** Call `fill` or `type` **exactly once** on the textbox. If you see the textbox already contains text (from a draft), clear it first: `$CHROME eval "document.execCommand('selectAll');document.execCommand('delete')"` — then `fill` once.
 
 > **If x.com redirects to login:** open `https://x.com` in Chrome manually, log in, then retry.
 
