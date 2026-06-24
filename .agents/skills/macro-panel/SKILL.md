@@ -43,7 +43,7 @@ which hold the actual frameworks and primary sources.
    gradable outcome (Fed cut, CPI bucket, recession-by-date), pull **`prediction-market-odds`**
    (Polymarket/Kalshi/FedWatch) before opining — seven economists debating with no market check is the
    naive-analyst failure. Report where the panel deviates from the market and why.
-   **For Fed/rates questions specifically:** load **`fomc-monitor`** FIRST to get the primary-source
+   **For Fed/rates questions specifically:** load **`feed-fomc`** FIRST to get the primary-source
    Fed statement + hawkish/dovish tone delta before pulling FedWatch odds. The statement text is the
    ground truth; FedWatch is how the market interpreted it. Both are required inputs.
 5a. **Routing note — behavioral and value seats are excluded from this panel by design.**

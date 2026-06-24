@@ -169,7 +169,7 @@ USER QUESTION + PORTFOLIO + DATE
      │  ├── crypto-onchain-data   ├── fundamental-analysis│
      │  ├── crypto-liquidity-data ├── trend-following     │
      │  ├── narrative-news        ├── dip-screener       │
-     │  │   └── feed-coindesk     ├── fomc-monitor       │
+     │  │   └── feed-coindesk     ├── feed-fomc       │
      │  │   └── feed-cointelegraph└── portfolio-monitor   │
      │  │   └── feed-theblock                            │
      │  │   └── feed-decrypt                             │
@@ -220,7 +220,7 @@ USER → crypto-advisor (classifier + invariant enforcer)
        │
        ├── risk-management (veto — leverage/sizing guardrails)
        │
-       └── [optional] fomc-monitor, analyst-derivatives-positioning,
+       └── [optional] feed-fomc, analyst-derivatives-positioning,
                       crypto-token-screener
        │
        → packaged actionable answer (notification-first; human executes)
@@ -303,7 +303,7 @@ hedge-fund-committee.workflow.js
 │
 ├── 1. COLLECT (x6 parallel fan-out)
 │      ├── regime-detection
-│      ├── fomc-monitor
+│      ├── feed-fomc
 │      ├── 13f-watch + 13d-watch
 │      ├── congressman-stock-watch
 │      ├── narrative-news (via feed-* adapters)
@@ -621,7 +621,7 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 |-------|------|---------|
 | [dip-screener](dip-screener/SKILL.md) | S&P 100 stocks ≥20/25/30% below 52w high; RISK_ON gate | daily |
 | [crypto-dip-scanner](crypto-dip-scanner/SKILL.md) | BTC/ETH/SOL/BNB/AVAX dip + Fear&Greed + funding | daily |
-| [fomc-monitor](fomc-monitor/SKILL.md) | Fed calendar, statement tone shift, hawkish/dovish delta | daily |
+| [feed-fomc](feed-fomc/SKILL.md) | Fed calendar, statement tone shift, hawkish/dovish delta | daily |
 
 ### Macro analyst panel (thinker lenses)
 

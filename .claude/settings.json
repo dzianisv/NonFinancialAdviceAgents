@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun /Users/engineer/workspace/backtest/.claude/hooks/citation-validator.ts",
+            "statusMessage": "Validating citations..."
+          }
+        ]
+      }
+    ]
+  }
+}

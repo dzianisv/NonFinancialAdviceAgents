@@ -39,7 +39,7 @@ Read ALL ~68 SKILL.md files in `.agents/skills/`, classify each by category, ext
    - `crypto-chair`, `crypto-dip-scanner`, `crypto-liquidity-data`, `crypto-news-store`, `crypto-onchain-data`, `crypto-research-desk`, `crypto-token-screener`, `crypto-workflow-eval`
    - `defi-portfolio-manager`, `dip-screener`, `dip-tranches-strategy`
    - `feed-bitcoinmagazine`, `feed-bloomberg`, `feed-coindesk`, `feed-cointelegraph`, `feed-decrypt`, `feed-ft`, `feed-theblock`, `feed-wsj`
-   - `fomc-monitor`, `forecast-ledger`, `fundamental-analysis`
+   - `feed-fomc`, `forecast-ledger`, `fundamental-analysis`
    - `hedge-fund-13f-analysis`, `hedge-fund-committee-eval`
    - `liveness-monitor`
    - `portfolio-construction`, `portfolio-monitor`, `prediction-market-odds`

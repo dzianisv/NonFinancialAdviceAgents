@@ -1,0 +1,290 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#content"
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img "US Flag" [ref=e7]
+        - paragraph [ref=e8]: An official website of the United States Government
+      - button "Here's how you know Expand More" [ref=e9] [cursor=pointer]:
+        - generic [ref=e10]: Here's how you know
+        - img "Expand More" [ref=e11]
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - img ".gov icon" [ref=e14]
+        - paragraph [ref=e15]:
+          - strong [ref=e16]: Official websites use .gov
+          - text: A
+          - strong [ref=e17]: .gov
+          - text: website belongs to an official government organization in the United States.
+      - generic [ref=e18]:
+        - img "HTTPS icon" [ref=e19]
+        - paragraph [ref=e20]:
+          - strong [ref=e21]: Secure .gov websites use HTTPS
+          - text: A
+          - strong [ref=e22]: lock
+          - text: (
+          - img "Locked padlock icon" [ref=e24]
+          - text: ) or
+          - strong [ref=e26]: https://
+          - text: means you've safely connected to the .gov website. Share sensitive information only on official, secure websites.
+  - navigation [ref=e27]:
+    - generic [ref=e28]:
+      - list [ref=e29]:
+        - listitem [ref=e30]: Stay Connected ·
+        - listitem [ref=e31]:
+          - link "Recent Postings" [ref=e32] [cursor=pointer]:
+            - /url: /recentpostings.htm
+          - text: ·
+        - listitem [ref=e33]:
+          - link "Calendar" [ref=e34] [cursor=pointer]:
+            - /url: /newsevents/calendar.htm
+          - text: ·
+        - listitem [ref=e35]:
+          - link "Publications" [ref=e36] [cursor=pointer]:
+            - /url: /publications.htm
+          - text: ·
+        - listitem [ref=e37]:
+          - link "Site Map" [ref=e38] [cursor=pointer]:
+            - /url: /sitemap.htm
+          - text: ·
+        - listitem [ref=e39]:
+          - link "A-Z index" [ref=e40] [cursor=pointer]:
+            - /url: /azindex.htm
+          - text: ·
+        - listitem [ref=e41]:
+          - link "Careers" [ref=e42] [cursor=pointer]:
+            - /url: /careers.htm
+          - text: ·
+        - listitem [ref=e43]:
+          - link "FAQs" [ref=e44] [cursor=pointer]:
+            - /url: /faqs.htm
+          - text: ·
+        - listitem [ref=e45]:
+          - link "Videos" [ref=e46] [cursor=pointer]:
+            - /url: /videos.htm
+          - text: ·
+        - listitem [ref=e47]:
+          - link "Contact" [ref=e48] [cursor=pointer]:
+            - /url: /aboutthefed/contact-us-topics.htm
+      - search [ref=e49]:
+        - generic [ref=e50]:
+          - generic [ref=e51]: Search
+          - textbox "Search" [ref=e52]
+          - button "Submit Search Button" [ref=e54] [cursor=pointer]:
+            - generic [ref=e55]: Submit Search Button
+        - link "Advanced" [ref=e58] [cursor=pointer]:
+          - /url: //www.fedsearch.org/board_public/
+  - banner [ref=e59]:
+    - link "Board of Governors of the Federal Reserve System The Federal Reserve, the central bank of the United States, provides the nation with a safe, flexible, and stable monetary and financial system." [ref=e60] [cursor=pointer]:
+      - /url: /default.htm
+      - generic [ref=e61]:
+        - heading "Board of Governors of the Federal Reserve System" [level=1] [ref=e62]
+        - paragraph [ref=e63]:
+          - emphasis [ref=e64]: The Federal Reserve, the central bank of the United States, provides the nation with a safe, flexible, and stable monetary and financial system.
+  - navigation [ref=e65]:
+    - menubar [ref=e66]:
+      - menuitem "About the Fed" [ref=e67]:
+        - link "About the Fed" [ref=e68] [cursor=pointer]:
+          - /url: /aboutthefed.htm
+          - text: About
+          - text: the Fed
+      - menuitem "News & Events" [ref=e69]:
+        - link "News & Events" [ref=e70] [cursor=pointer]:
+          - /url: /newsevents.htm
+          - text: News
+          - text: "& Events"
+      - menuitem "Monetary Policy" [ref=e71]:
+        - link "Monetary Policy" [ref=e72] [cursor=pointer]:
+          - /url: /monetarypolicy.htm
+          - text: Monetary
+          - text: Policy
+      - menuitem "Supervision & Regulation" [ref=e73]:
+        - link "Supervision & Regulation" [ref=e74] [cursor=pointer]:
+          - /url: /supervisionreg.htm
+          - text: Supervision
+          - text: "& Regulation"
+      - menuitem "Financial Stability" [ref=e75]:
+        - link "Financial Stability" [ref=e76] [cursor=pointer]:
+          - /url: /financial-stability.htm
+          - text: Financial
+          - text: Stability
+      - menuitem "Payment Systems" [ref=e77]:
+        - link "Payment Systems" [ref=e78] [cursor=pointer]:
+          - /url: /paymentsystems.htm
+          - text: Payment
+          - text: Systems
+      - menuitem "Economic Research" [ref=e79]:
+        - link "Economic Research" [ref=e80] [cursor=pointer]:
+          - /url: /econres.htm
+          - text: Economic
+          - text: Research
+      - menuitem "Data" [ref=e81]:
+        - link "Data" [ref=e82] [cursor=pointer]:
+          - /url: /data.htm
+      - menuitem "Consumers & Communities" [ref=e83]:
+        - link "Consumers & Communities" [ref=e84] [cursor=pointer]:
+          - /url: /consumerscommunities.htm
+          - text: Consumers
+          - text: "& Communities"
+  - main [ref=e85]:
+    - generic [ref=e87]:
+      - list [ref=e88]:
+        - listitem [ref=e89]:
+          - link "Home" [ref=e90] [cursor=pointer]:
+            - /url: /default.htm
+        - listitem [ref=e91]:
+          - text: ">"
+          - link "News & Events" [ref=e92] [cursor=pointer]:
+            - /url: /newsevents.htm
+        - listitem [ref=e93]:
+          - text: ">"
+          - link "Press Releases" [ref=e94] [cursor=pointer]:
+            - /url: /newsevents/pressreleases.htm
+      - generic [ref=e95]:
+        - heading "Press Release" [level=2] [ref=e97]
+        - link "PDF" [ref=e99] [cursor=pointer]:
+          - /url: /monetarypolicy/files/monetary20260617a1.pdf
+          - generic [ref=e101]: PDF
+    - generic [ref=e102]:
+      - generic:
+        - generic [ref=e103]:
+          - paragraph [ref=e104]: June 17, 2026
+          - heading "Federal Reserve issues FOMC statement" [level=3] [ref=e105]
+          - paragraph [ref=e106]: For release at 2:00 p.m. EDT
+          - list [ref=e107]:
+            - listitem [ref=e108]:
+              - button "Share" [ref=e109] [cursor=pointer]: Share
+        - generic [ref=e112]:
+          - paragraph [ref=e113]: "The Federal Open Market Committee approved the following statement for release by a 12 – 0 vote:"
+          - paragraph [ref=e114]: The Committee decided to maintain the target range for the federal funds rate at 3-1/2 to 3-3/4 percent, in support of the Federal Reserve's dual mandate. The Committee reaffirmed its policy of maintaining ample reserves in the banking system.
+          - paragraph [ref=e115]: Economic activity is expanding at a solid pace despite elevated uncertainty that owes, in part, to the conflict in the Middle East. Productivity growth and capital investment are strong. Job gains have kept pace with the workforce, and the unemployment rate has changed little.
+          - paragraph [ref=e116]: Inflation remains elevated relative to the Committee's 2 percent goal, in part reflecting supply shocks that have driven price increases in certain sectors, including energy. The Committee will deliver price stability.
+          - paragraph [ref=e117]:
+            - text: For media inquiries, please email
+            - link "media@frb.gov" [ref=e118] [cursor=pointer]:
+              - /url: mailto:media@frb.gov
+            - text: or call 202-452-2955.
+          - paragraph [ref=e119]:
+            - link "Implementation Note issued June 17, 2026" [ref=e120] [cursor=pointer]:
+              - /url: /newsevents/pressreleases/monetary20260617a1.htm
+    - generic [ref=e123]: "Last Update: June 17, 2026"
+  - contentinfo [ref=e124]:
+    - generic [ref=e125]:
+      - generic [ref=e126]:
+        - heading "Board of Governors of the Federal Reserve System" [level=6] [ref=e127]:
+          - text: Board of Governors
+          - emphasis [ref=e128]: of the
+          - text: Federal Reserve System
+        - list [ref=e129]:
+          - listitem [ref=e130]:
+            - link "About the Fed" [ref=e131] [cursor=pointer]:
+              - /url: /aboutthefed.htm
+          - listitem [ref=e132]:
+            - link "News & Events" [ref=e133] [cursor=pointer]:
+              - /url: /newsevents.htm
+          - listitem [ref=e134]:
+            - link "Monetary Policy" [ref=e135] [cursor=pointer]:
+              - /url: /monetarypolicy.htm
+          - listitem [ref=e136]:
+            - link "Supervision & Regulation" [ref=e137] [cursor=pointer]:
+              - /url: /supervisionreg.htm
+          - listitem [ref=e138]:
+            - link "Financial Stability" [ref=e139] [cursor=pointer]:
+              - /url: /financial-stability.htm
+          - listitem [ref=e140]:
+            - link "Payment Systems" [ref=e141] [cursor=pointer]:
+              - /url: /paymentsystems.htm
+          - listitem [ref=e142]:
+            - link "Economic Research" [ref=e143] [cursor=pointer]:
+              - /url: /econres.htm
+          - listitem [ref=e144]:
+            - link "Data" [ref=e145] [cursor=pointer]:
+              - /url: /data.htm
+          - listitem [ref=e146]:
+            - link "Consumers & Communities" [ref=e147] [cursor=pointer]:
+              - /url: /consumerscommunities.htm
+          - listitem [ref=e148]:
+            - link "Connect with the Board" [ref=e149] [cursor=pointer]:
+              - /url: /aboutthefed/aroundtheboard/stayconnected-qr-code-2.htm
+      - generic [ref=e150]:
+        - heading "Tools and Information" [level=6] [ref=e151]
+        - list [ref=e152]:
+          - listitem [ref=e153]:
+            - link "Contact" [ref=e154] [cursor=pointer]:
+              - /url: /aboutthefed/contact-us-topics.htm
+          - listitem [ref=e155]:
+            - link "Publications" [ref=e156] [cursor=pointer]:
+              - /url: /publications.htm
+          - listitem [ref=e157]:
+            - link "Freedom of Information (FOIA)" [ref=e158] [cursor=pointer]:
+              - /url: /foia/about_foia.htm
+          - listitem [ref=e159]:
+            - link "Office of Inspector General" [ref=e160] [cursor=pointer]:
+              - /url: https://oig.federalreserve.gov/
+          - listitem [ref=e161]:
+            - link "Budget & Performance" [ref=e162] [cursor=pointer]:
+              - /url: /publications/annual-report.htm
+            - text: "|"
+            - link "Audit" [ref=e163] [cursor=pointer]:
+              - /url: /regreform/audit.htm
+          - listitem [ref=e164]:
+            - link "No FEAR Act" [ref=e165] [cursor=pointer]:
+              - /url: /eeo.htm
+          - listitem [ref=e166]:
+            - link "Español" [ref=e167] [cursor=pointer]:
+              - /url: /espanol.htm
+          - listitem [ref=e168]:
+            - link "Website Policies" [ref=e169] [cursor=pointer]:
+              - /url: /website-linking-policies.htm
+            - text: "|"
+            - link "Privacy Program" [ref=e170] [cursor=pointer]:
+              - /url: /privacy.htm
+          - listitem [ref=e171]:
+            - link "Accessibility" [ref=e172] [cursor=pointer]:
+              - /url: /accessibility.htm
+      - generic [ref=e173]:
+        - generic [ref=e174]:
+          - heading "Stay Connected" [level=6] [ref=e175]
+          - link "Federal Reserve Facebook Page" [ref=e176] [cursor=pointer]:
+            - /url: https://www.facebook.com/federalreserve
+            - generic [ref=e177]: Federal Reserve Facebook Page
+          - link "Federal Reserve Instagram Page" [ref=e178] [cursor=pointer]:
+            - /url: https://www.instagram.com/federalreserveboard/
+            - generic [ref=e179]: Federal Reserve Instagram Page
+          - link "Federal Reserve YouTube Page" [ref=e180] [cursor=pointer]:
+            - /url: https://www.youtube.com/federalreserve
+            - generic [ref=e181]: Federal Reserve YouTube Page
+          - link "Federal Reserve Flickr Page" [ref=e182] [cursor=pointer]:
+            - /url: https://www.flickr.com/photos/federalreserve/
+            - generic [ref=e183]: Federal Reserve Flickr Page
+          - link "Federal Reserve LinkedIn Page" [ref=e184] [cursor=pointer]:
+            - /url: https://www.linkedin.com/company/federal-reserve-board
+            - generic [ref=e185]: Federal Reserve LinkedIn Page
+          - link "Federal Reserve Threads Page" [ref=e186] [cursor=pointer]:
+            - /url: https://www.threads.net/@federalreserveboard
+            - generic [ref=e187]: Federal Reserve Threads Page
+          - link "Link to Federal Reserve X Page" [ref=e188] [cursor=pointer]:
+            - /url: https://x.com/federalreserve
+            - generic [ref=e189]: Link to Federal Reserve X Page
+          - link "Link to Federal Reserve Bluesky Page" [ref=e190] [cursor=pointer]:
+            - /url: https://bsky.app/profile/federalreserve.gov
+            - generic [ref=e191]: Link to Federal Reserve Bluesky Page
+          - link "Subscribe to RSS" [ref=e192] [cursor=pointer]:
+            - /url: /feeds/feeds.htm
+            - generic [ref=e193]: Subscribe to RSS
+          - link "Subscribe to Email" [ref=e194] [cursor=pointer]:
+            - /url: /subscribe.htm
+            - generic [ref=e195]: Subscribe to Email
+        - link "Link to USA.gov" [ref=e196] [cursor=pointer]:
+          - /url: https://www.usa.gov/
+          - img "Link to USA.gov" [ref=e197]
+        - link "Link to Open.gov" [ref=e198] [cursor=pointer]:
+          - /url: /open/open.htm
+          - img "Link to Open.gov" [ref=e199]
+    - generic [ref=e201]:
+      - paragraph [ref=e202]:
+        - text: Board of Governors
+        - emphasis [ref=e203]: of the
+        - text: Federal Reserve System
+      - paragraph [ref=e204]: ●20th Street and Constitution Avenue N.W., Washington, DC 20551

@@ -25,7 +25,7 @@ Run the `research-market` workflow for AAPL (Apple Inc) end-to-end: Intake → G
   - **regime-detection**: RISK_ON — SPY +8.9% above 200d MA, VIX 16.83 in contango (0.85 ratio), yield curve positive +79bp, breadth marginally improving, composite score +0.75 → 1.0x exposure
   - **trend-following**: AAPL $297.76, +11.19% above 200d MA ($267.79), bullish MA alignment (50d>200d), but near-term softening: RSI 38.83, MACD bearish crossover (histogram -2.06), -5.53% from 52w high ($315.20), 12m return +52.07%
   - **hedge-fund-13f-analysis**: 65.83% institutional ownership, Berkshire flat at 227.9M shares (21.99% of BRK portfolio) after ~65% trim through 2024, Morgan Stanley added 6.07%, superinvestor weighted avg hold price $253.79
-  - **fomc-monitor**: Fed funds 3.50-3.75% (held 12-0), 10Y yield 4.451%, 2Y 3.856%, 10Y-2Y spread +0.595%, CPI +4.2% YoY (headline), core CPI +2.9%, DXY 100.88 (6mo high), next FOMC July 28-29
+  - **feed-fomc**: Fed funds 3.50-3.75% (held 12-0), 10Y yield 4.451%, 2Y 3.856%, 10Y-2Y spread +0.595%, CPI +4.2% YoY (headline), core CPI +2.9%, DXY 100.88 (6mo high), next FOMC July 28-29
   - **dip-screener**: NOT in dip territory — only -6.2% from 52w high/ATH ($317.40), +11.2% above 200d MA; had -22.7% drawdown 3 months ago but largely recovered
 
 ### In Progress

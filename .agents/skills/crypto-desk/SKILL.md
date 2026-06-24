@@ -30,13 +30,49 @@ and the risk veto into one calibrated, actionable answer — and is graded by `e
 5. **No fabrication.** Never invent prices, on-chain metrics, or a specific news catalyst. If you don't
    have live data, say so and name what you'd verify.
 
+## Execution model — ALWAYS use subagents, never inline
+
+**This desk is an orchestrator, not a worker.** Never do analysis inline in your main context.
+Spawn subagents for every data-fetch and every analysis workflow — in parallel wherever possible.
+The main context only: routes the question, assembles verdicts, produces the final brief.
+
+**Why:** analysis tasks (on-chain fetch, news scan, liquidity pull, quorum synthesis) each take
+5–15 tool calls. Running them serially in one context blows the window and loses signal. Subagents
+run in parallel, return compact verdicts, and keep the main context clean.
+
+### Subagent dispatch rules
+
+| Task type | Dispatch as subagent using |
+|---|---|
+| Full market state ("is now good?", "comprehensive read") | **`analysis-comprehensive-crypto`** — spawns TradingView MCP data pull + all 5 analysis seats in parallel. This is the default for any timing or deploy question. |
+| On-chain only | **`analysis-onchain`** subagent |
+| Sentiment only | **`analysis-sentiment`** subagent |
+| Macro/liquidity only | **`analysis-macro`** subagent |
+| Order flow / liquidations | **`analysis-orderflow`** subagent |
+| News / narrative | **`analysis-narrative`** subagent |
+| FOMC / Fed / rates | **`feed-fomc`** + **`prediction-market-odds`** subagents (parallel) |
+| Alt selection | **`crypto-token-screener`** subagent |
+| Regime classification | **`regime-detection`** subagent |
+| Sizing veto | **`risk-management`** subagent |
+
+**Parallel dispatch template** — spawn these simultaneously, do not await one before launching the next:
+```
+subagent-1: analysis-comprehensive-crypto  ← market state (5 seats + TradingView data)
+subagent-2: feed-fomc                   ← if macro/Fed is relevant
+subagent-3: narrative-news                 ← latest catalysts
+```
+Collect all verdicts, then synthesize the answer in main context.
+
+**Sequential only when** the next subagent genuinely needs the previous output (e.g. sizing subagent
+needs the zone verdict from the analysis subagent first). Even then, batch what you can.
+
 ## Required sub-skills (load before answering)
 
-| When | Load |
+| When | Load (as subagent) |
 |------|------|
-| Any timing / deploy / "is now good?" question | **`analyst-crypto`** — four-pillar liquidity→on-chain→sentiment→DCA lens. The global liquidity pillar (Howell) is the governor over all timing decisions. Load it first; do not answer timing without the liquidity phase read. |
-| Any FOMC / Fed / rates mention | **`fomc-monitor`** → tone + language delta. Then **`prediction-market-odds`** → CME FedWatch rate path. Hawkish Fed = liquidity headwind for BTC. |
-| Any "is the derivatives positioning bullish/bearish?" | **`derivatives-positioning-data`** — funding rates, OI, options skew, max-pain. Harder sentiment than Fear & Greed. |
+| Any timing / deploy / "is now good?" question | **`analysis-comprehensive-crypto`** — full panel: TradingView MCP data + on-chain + sentiment + macro + orderflow + narrative. Do NOT just load `analyst-crypto` inline — spawn the full panel. |
+| Any FOMC / Fed / rates mention | **`feed-fomc`** → tone + language delta. Then **`prediction-market-odds`** → CME FedWatch rate path. Spawn both in parallel. |
+| Any "is the derivatives positioning bullish/bearish?" | **`analysis-orderflow`** — funding rates, OI, liquidation clusters, CVD, CME gap. |
 | Any alt selection | **`crypto-token-screener`** — 6-point BTC-hurdle filter before any tilt on an alt. |
 
 ## How to answer (route by question type)
@@ -74,6 +110,8 @@ trigger on **weekly closes**, not intraday wicks):
 Deploy the deep tiers into BTC/ETH only (not SOL/alts) — in a real crash, concentrate in what recovers.
 
 ## Wiring
+Market analysis: `analysis-comprehensive-crypto` (orchestrates all 5 seats + TradingView MCP).
+Individual seats: `analysis-onchain`, `analysis-sentiment`, `analysis-macro`, `analysis-orderflow`, `analysis-narrative`.
 Regime: `regime-detection`. Dip ladder: `dip-tranches-strategy`. Binding size veto: `risk-management`.
 Backtest gate for any active strategy: `strategy-discovery-backtest`. Execution: `coinbase-cdp-connector`
 (notification-first). The long-term book lives at `crypto/GOAL.md` (a SEPARATE ledger from the $1M tradfi

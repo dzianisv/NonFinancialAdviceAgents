@@ -35,7 +35,7 @@ The `portfolio-monitor` script reads this file and fires alerts when your writte
 |-------|-------------|--------|
 | regime-detection | `yfinance` Python package | Pre-installed in pod (Dockerfile ships it) |
 | congressman-stock-watch | none — scrapes Capitol Trades | Works out of the box; no signup |
-| fomc-monitor | `web_fetch` (federalreserve.gov) | Works reliably |
+| feed-fomc | `web_fetch` (federalreserve.gov) | Works reliably |
 | prediction-market-odds | `web_fetch` (gamma-api.polymarket.com) | Works reliably |
 | trend-stock-research | `web_fetch` (FT/WSJ RSS) | Works reliably |
 | 13f-watch | `web_fetch` (sec.gov EDGAR) | Works reliably |
@@ -65,7 +65,7 @@ Confirm these skills are loaded and tell me which are missing:
 SIGNAL SKILLS:
   prediction-market-odds       (Polymarket + Kalshi + CME FedWatch — required by superforecasting)
   analyst-derivatives-positioning  (futures funding/OI, options skew/IV — required by superforecasting)
-  fomc-monitor                 (Fed statements + hawkish/dovish delta — required by macro-panel)
+  feed-fomc                 (Fed statements + hawkish/dovish delta — required by macro-panel)
   trend-stock-research         (FT / WSJ / Seeking Alpha journalism — paywall bypass built-in)
   13f-watch                    (institutional 13F buys, deduped — requires hedge-fund-13f-analysis)
   hedge-fund-13f-analysis      (EDGAR filing reader — required sub-skill of 13f-watch)
@@ -99,7 +99,7 @@ A) REGIME CHECK (regime-detection):
    - Output: RISK_ON / RISK_NEUTRAL / RISK_OFF + recommended gross exposure %.
    - If RISK_OFF: no new buys. Recommend reducing gross exposure to target.
 
-B) FED / FOMC (fomc-monitor):
+B) FED / FOMC (feed-fomc):
    - Fetch latest FOMC statement from federalreserve.gov.
    - Fetch CME FedWatch probabilities for next 2 meetings (via prediction-market-odds).
    - Output: next meeting date, current rate, tone (HAWKISH/NEUTRAL/DOVISH), key language quote,
@@ -213,7 +213,7 @@ openclaw: write to ~/.openclaw/cron/jobs.json (in-pod, no external secrets).
 hermes-ai: use hermes scheduler or add to system crontab.
 
 JOB 1 — Daily 08:00 UTC (Mon–Fri):
-  "Run regime-detection and fomc-monitor. If regime changed from yesterday OR Fed issued a new
+  "Run regime-detection and feed-fomc. If regime changed from yesterday OR Fed issued a new
   statement, DM me immediately with the update and what it means for the portfolio. Otherwise,
   silent unless something important changed. One paragraph max."
 

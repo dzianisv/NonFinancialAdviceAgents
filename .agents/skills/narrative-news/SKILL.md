@@ -79,7 +79,11 @@ When the price/odds context is unavailable, tag `PRICED_IN=unknown` rather than 
     {
       "event": "Strategy raises reserves to $11B, buys more BTC",
       "event_cluster_id": 1,
-      "sources": ["decrypt", "coindesk"],
+      "sources": [
+        {"outlet": "decrypt", "url": "https://decrypt.co/...", "published_at": "2026-06-15T08:00:00Z"},
+        {"outlet": "coindesk", "url": "https://www.coindesk.com/...", "published_at": "2026-06-15T09:10:00Z"}
+      ],
+      "url": "https://decrypt.co/...",
       "source_count": 2,
       "first_seen": "2026-06-15T08:00:00Z",
       "last_updated": "2026-06-15T09:10:00Z",
@@ -101,6 +105,24 @@ list it in `feeds_unavailable` (loud, per NFR6) — never silently drop.
 For narrative *velocity* only (rate of mention growth), `mention_velocity.py` exists under
 `trend-stock-research/` but is a **stock tool** — it needs a crypto-universe adaptation (BTC/ETH/MSTR/ETF
 tickers, crypto outlets) before use here. Do not run it on the crypto universe as-is.
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 ## Fit
 

@@ -1,0 +1,36 @@
+Goal reached: @AflredAiBot now runs real crypto skills and returns a BUY/HOLD/AVOID call without asking for risk tolerance, using the persistent gpt-5.4 default. Next: verify daily/weekly cron alert jobs are registered in the bot.
+
+tldr what were changed in order gpt-5.4 started to work?
+
+Ran skill
+/tldr
+
+Authentication failed
+/login
+
+Login successful
+tldr what were changed in order gpt-5.4 started to work?
+
+
+Authentication failed
+/tldr
+
+Task — make @AflredAiBot permanently run crypto skills + give BUY/HOLD/AVOID without asking risk tolerance.
+
+Why — feared gpt-5.4 (persistent default in openclaw.json) would hit Azure content filtering like gpt-5.1 did.
+
+How — nothing changed. gpt-5.4 was already default (agents.defaults.model.primary = "litellm/gpt-5.4" in /home/node/.openclaw/openclaw.json). Investor Playbook already in /home/node/.openclaw/workspace/investor/AGENTS.md. Tested "should I buy BTC?" → bot ran crypto-dip-scanner + regime-detection, returned real data, no filter block.
+
+Gap — gpt-5.1 vs gpt-5.4 Azure filtering policy difference not formally documented; assumed gpt-5.4 is less restrictive based on test result.
+
+Next — verify daily (08:00 UTC Mon–Fri) + weekly (Mon 09:30 UTC) cron alert jobs are registered in bot.
+
+why it used gpt-5.1 and then started to use gpt-5.4?
+
+Don't have a clear answer from context. The summary says gpt-5.1 was observed hitting Azure content filtering at some earlier point, but all sessions.json entries in tenant-oc-5e6c87 already showed litellm/gpt-5.4 as the stored model, and openclaw.json default was always gpt-5.4.
+
+Two likely explanations:
+
+gpt-5.1 was manually /model-switched in an earlier session (session-scoped, reverted on restart back to gpt-5.4 default)
+The openclaw.json default was changed at some point between an earlier session and this one
+To know for sure: check the full transcript at /Users/engineer/.claude/projects/-Users-engineer-workspace-backtest/6e2f5082-f48d-4f2a-a570-0ad2c1785db3.jsonl for when gpt-5.1 was first mentioned and what triggered the switch.

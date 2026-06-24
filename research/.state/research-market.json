@@ -1,0 +1,57 @@
+{
+  "date": "2026-06-15",
+  "query": "(no question provided)",
+  "screened": [
+    "CLFD",
+    "ICHR",
+    "ROG",
+    "MEI",
+    "PLPC",
+    "BHE",
+    "POET"
+  ],
+  "per_asset": [
+    {
+      "asset": "CLFD",
+      "action": "BUY_ON_TOUCH",
+      "conviction": "low",
+      "prob": 0.32
+    },
+    {
+      "asset": "ICHR",
+      "action": "BUY_ON_TOUCH",
+      "conviction": "low",
+      "prob": 0.38
+    },
+    {
+      "asset": "ROG",
+      "action": "BUY_ON_TOUCH",
+      "conviction": "low",
+      "prob": 0.3
+    },
+    {
+      "asset": "MEI",
+      "action": "BUY_ON_TOUCH",
+      "conviction": "medium",
+      "prob": 0.42
+    },
+    {
+      "asset": "PLPC",
+      "action": "BUY_ON_TOUCH",
+      "conviction": "low",
+      "prob": 0.27
+    },
+    {
+      "asset": "BHE",
+      "action": "BUY_ON_TOUCH",
+      "conviction": "medium",
+      "prob": 0.52
+    },
+    {
+      "asset": "POET",
+      "action": "AVOID",
+      "conviction": "low",
+      "prob": 0.12
+    }
+  ]
+}

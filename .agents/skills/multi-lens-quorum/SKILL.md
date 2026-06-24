@@ -94,7 +94,9 @@ THE ONE QUESTION:
 Return ONLY this shape, terse, in your final message (nothing else):
   VERDICT: <one clear call>
   CONVICTION: low | med | high
-  REASONING: 3-5 lines, grounded in THIS lens (cite its framework/numbers)
+  REASONING: 3-5 lines, grounded in THIS lens (cite its framework/numbers). Any external data point
+             or news claim must include (url, YYYY-MM-DD) inline — e.g.
+             'F&G=23 (https://api.alternative.me/fng/?limit=1, 2026-06-22)'. Claims with no URL are not grounded.
   WHAT WOULD CHANGE MY MIND: <the specific trigger/observation that flips you>
   THIS LENS'S BLIND SPOT: <one line — what this lens structurally cannot see>
 
@@ -177,6 +179,24 @@ before week 6, switch the remaining tranches to confirmation-paced. Carver's fee
 weekly-not-daily; revisit clip size if venue fees bite. **Re-run if** BTC reclaims the 200d, liquidity
 turns, or the facts above stop holding.
 </example>
+
+## Citation rule — no URL = not a source
+
+Every external claim (news event, data point, quote, analysis) MUST include ALL THREE:
+1. **Full URL** fetched: `https://exact-page-url` (specific article, not homepage or search page)
+2. **Date** (ISO): `YYYY-MM-DD` (publication or as-of date)
+3. **Verbatim quote**: exact words from the page, copied not paraphrased
+
+Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
+
+**Never write:**
+- Source name alone (`CoinDesk`, `Bloomberg`) — without URL it is hallucination bait
+- A quote without its URL
+- A URL without a date
+- Anything paraphrased from memory without a prior web_fetch call
+
+**If fetch failed:** `[FETCH FAILED: https://...] — not counted toward minimum`
+**If < 2 real sources:** output `INSUFFICIENT_DATA — do not guess`
 
 ## Output format (required — no prose, no hedging paragraphs)
 

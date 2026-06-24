@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "bun /Users/engineer/workspace/backtest/.claude/hooks/citation-validator.ts",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

@@ -35,7 +35,7 @@ Two tiers run on any backend. FAST catches same-day setups; SLOW produces a week
   dip-screener                   1. COLLECT  (x6 parallel)
   crypto-dip-scanner                regime, fomc, 13f,
   regime-detection                  congress, news, dips
-  fomc-monitor                           |
+  feed-fomc                           |
   trend-stock-research           2. PANEL  (multi-lens-quorum)
           |                         4+ analyst lenses
   signal-convergence-alert               |
@@ -110,7 +110,7 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
 <text x="417" y="178" text-anchor="middle" fill="#888" font-size="9">trades disclosures</text>
 
 <rect x="504" y="146" width="112" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="560" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">fomc-monitor</text>
+<text x="560" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">feed-fomc</text>
 <text x="560" y="178" text-anchor="middle" fill="#888" font-size="9">Fed rates / statements</text>
 
 <rect x="626" y="146" width="144" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
@@ -564,7 +564,7 @@ Full spec: [`crypto/`](crypto/) — `crypto.goal.md` · `crypto.prd.md` · `cryp
 | `crypto-dip-scanner` | Daily BTC/ETH/SOL/BNB/AVAX dip scanner; alerts on -30%+ from 52w high + extreme fear |
 | `dip-screener` | Equity dip screener |
 | `dip-tranches-strategy` | Staged entry / tranche sizing for dip entries |
-| `fomc-monitor` | Fed FOMC calendar, statement, and dot-plot monitor |
+| `feed-fomc` | Fed FOMC calendar, statement, and dot-plot monitor |
 | `liveness-monitor` | Monitors that scheduled jobs are running; DMs on stale job |
 | `portfolio-monitor` | Portfolio state monitor |
 | `prediction-market-odds` | Polymarket / Kalshi odds for macro/market events |
@@ -650,6 +650,56 @@ Full spec: [`crypto/`](crypto/) — `crypto.goal.md` · `crypto.prd.md` · `cryp
 | `forecast-ledger` | Dated forecast log with Brier-score tracking |
 | `hedge-fund-committee-eval` | Blind LLM judge for committee run quality |
 | `skill-supervisor` | Skill quality supervision |
+
+---
+
+## Citation Validation Harness
+
+Every `web_fetch` call during narrative analysis is logged and verified after each agent turn. Hallucinated sources (cited but never fetched) are caught **outside the LLM loop** — the agent cannot self-validate past this gate.
+
+### How it works
+
+```
+Agent turn
+  └─ postToolUse(web_fetch) ──► log-web-fetch.ts
+                                  writes {url, success, ts} to /tmp/cc-fetches-{session}.jsonl
+
+Agent finishes turn
+  └─ agentStop / Stop ──────► validate-citations.ts
+                                  regex-scans last response for [T1]/[T2]/[T3] https:// URLs
+                                  diffs against fetch log
+                                  cited but not fetched → HALLUCINATED_CITATION
+                                  appends to logs/citation-errors.log
+                                  warns in UI if failures found
+```
+
+### Runtime coverage
+
+| Runtime | Hook config | Events |
+|---|---|---|
+| **Claude Code** | `.claude/settings.json` | `PostToolUse(web_fetch)` + `Stop` |
+| **Copilot CLI** | `.github/hooks/citation-validator.json` | `postToolUse(matcher=web.?fetch)` + `agentStop` |
+| **OpenCode** | `.opencode/plugins/citation-validator.ts` | `tool.execute.after` + `session.idle` |
+
+All three runtimes share the same TypeScript scripts in `.claude/hooks/` — payload format is normalized across runtimes (`tool_input.url` for Claude Code, `toolArgs` JSON for Copilot CLI).
+
+### Audit log
+
+Failures append to `logs/citation-errors.log`:
+```
+2026-06-22T17:30:00Z   session-abc   HALLUCINATED_CITATION   https://coindesk.com/fake-article
+```
+
+### Testing
+
+```bash
+# Verify hooks are wired (Claude Code)
+# Open Claude Code in this repo → /hooks → should show PostToolUse + Stop entries
+
+# Trigger a test turn with a bad citation
+# Ask the agent to cite a URL, then check:
+tail -f logs/citation-errors.log
+```
 
 ---
 

@@ -1,0 +1,1306 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4]:
+      - img [ref=e6] [cursor=pointer]
+      - link "Legend NEW" [ref=e9] [cursor=pointer]:
+        - /url: https://legend.coinglass.com
+        - generic [ref=e10]:
+          - generic [ref=e11]: Legend
+          - generic [ref=e12]: NEW
+    - generic [ref=e13]:
+      - banner [ref=e14]:
+        - generic [ref=e16]:
+          - generic [ref=e18]:
+            - link "24h Volume $184,788,904,175 -10.89%" [ref=e19] [cursor=pointer]:
+              - /url: /pro/futures/FuturesVolume
+              - generic [ref=e20]:
+                - text: 24h Volume
+                - generic [ref=e21]: $184,788,904,175
+                - generic [ref=e22]: "-10.89%"
+            - link "Open Interest $106,097,614,681 -2.16%" [ref=e23] [cursor=pointer]:
+              - /url: /pro/futures/Cryptofutures
+              - generic [ref=e24]:
+                - text: Open Interest
+                - generic [ref=e25]: $106,097,614,681
+                - generic [ref=e26]: "-2.16%"
+            - link "24h Liquidation $467,227,561 +6.83%" [ref=e27] [cursor=pointer]:
+              - /url: /liquidations
+              - generic [ref=e28]:
+                - text: 24h Liquidation
+                - generic [ref=e29]: $467,227,561
+                - generic [ref=e30]: +6.83%
+            - link "24h Long/Short 49.25%/50.75%" [ref=e31] [cursor=pointer]:
+              - /url: /LongShortRatio
+              - generic [ref=e32]:
+                - text: 24h Long/Short
+                - generic [ref=e33]: 49.25%/50.75%
+          - generic [ref=e35]:
+            - link "API" [ref=e37] [cursor=pointer]:
+              - /url: /CryptoApi
+            - link "Download APP" [ref=e39] [cursor=pointer]:
+              - /url: /download
+            - generic [ref=e41] [cursor=pointer]:
+              - combobox [ref=e42]: English
+              - img [ref=e44]
+              - textbox [ref=e46]: en
+            - img [ref=e48] [cursor=pointer]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - link [ref=e53] [cursor=pointer]:
+              - /url: /
+              - img [ref=e54]
+            - link "Market" [ref=e56] [cursor=pointer]:
+              - /url: /
+              - generic [ref=e57]: Market
+            - link "Stock" [ref=e58] [cursor=pointer]:
+              - /url: /stock
+            - link "Exchanges" [ref=e59] [cursor=pointer]:
+              - /url: /exchanges
+              - generic [ref=e60]: Exchanges
+            - link "Open Interest" [ref=e61] [cursor=pointer]:
+              - /url: /open-interest/BTC
+            - link "Funding Rate" [ref=e62] [cursor=pointer]:
+              - /url: /FundingRate
+              - generic [ref=e63]: Funding Rate
+            - link "Liquidation" [ref=e64] [cursor=pointer]:
+              - /url: /liquidations
+              - generic [ref=e65]: Liquidation
+            - generic [ref=e66] [cursor=pointer]: Data
+            - link "Supercharts" [ref=e67] [cursor=pointer]:
+              - /url: https://www.coinglass.com/tv
+              - generic [ref=e68]: Supercharts
+            - link "Legend" [ref=e69] [cursor=pointer]:
+              - /url: https://legend.coinglass.com
+            - generic [ref=e70]: More
+          - generic [ref=e72]:
+            - generic [ref=e74] [cursor=pointer]:
+              - generic [ref=e75]:
+                - img [ref=e77]
+                - generic [ref=e79]: Search
+              - generic [ref=e80]: /
+            - link "Login" [ref=e81] [cursor=pointer]:
+              - /url: /login
+              - button "Login" [ref=e82]
+      - generic [ref=e84] [cursor=pointer]:
+        - img "bitunix" [ref=e86]
+        - img [ref=e88]
+      - generic [ref=e91]:
+        - generic [ref=e92]:
+          - navigation "breadcrumbs" [ref=e94]:
+            - list [ref=e95]:
+              - listitem [ref=e96]:
+                - link "CoinGlass" [ref=e97] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e98]: /
+              - listitem [ref=e99]:
+                - link "ETFs" [ref=e100] [cursor=pointer]:
+                  - /url: /etf
+              - listitem [ref=e101]: /
+              - listitem [ref=e102]:
+                - link "Bitcoin ETFs" [ref=e103] [cursor=pointer]:
+                  - /url: /etf/ethereum
+          - tablist [ref=e106]:
+            - link "All Crypto ETFs" [ref=e107] [cursor=pointer]:
+              - /url: /etf
+              - tab "All Crypto ETFs" [ref=e108]
+            - link "Bitcoin ETFs" [ref=e109] [cursor=pointer]:
+              - /url: /etf/bitcoin
+              - tab "Bitcoin ETFs" [selected] [ref=e110]
+            - link "Ethereum ETFs" [ref=e111] [cursor=pointer]:
+              - /url: /etf/ethereum
+              - tab "Ethereum ETFs" [ref=e112]
+            - link "Solana ETFs" [ref=e113] [cursor=pointer]:
+              - /url: /etf/solana
+              - tab "Solana ETFs" [ref=e114]
+            - link "XRP ETFs" [ref=e115] [cursor=pointer]:
+              - /url: /etf/xrp
+              - tab "XRP ETFs" [ref=e116]
+            - link "HYPE ETFs" [ref=e117] [cursor=pointer]:
+              - /url: /etf/hype
+              - tab "HYPE ETFs" [ref=e118]
+          - heading "Bitcoin Spot ETF" [level=2] [ref=e120]
+        - generic [ref=e121]:
+          - generic [ref=e124]:
+            - generic [ref=e125]: Total Net Inflow
+            - separator [ref=e126]
+            - generic [ref=e128]:
+              - generic "53,929,800,000" [ref=e129]: +$53.93B
+              - generic "676,400.45" [ref=e131]: +676.40K BTC
+            - generic [ref=e132]: "Last update : Jun 18, 6:50 PM"
+          - generic [ref=e135]:
+            - generic [ref=e136]: Daily Total Net Inflow
+            - separator [ref=e137]
+            - generic [ref=e139]:
+              - generic "6,000,000" [ref=e140]: +$6.00M
+              - generic "93.06" [ref=e142]: +93.06 BTC
+            - generic [ref=e143]: "Last update : Jun 18, 6:50 PM"
+          - generic [ref=e146]:
+            - generic [ref=e147]: Daily Trading Volume
+            - separator [ref=e148]
+            - generic "5,166,212,055.383" [ref=e150]: $5.17B
+            - generic [ref=e151]: "Last update : Jun 18, 6:50 PM"
+          - generic [ref=e154]:
+            - generic [ref=e155]: Total Net Assets
+            - separator [ref=e156]
+            - generic "82,937,821,190.42" [ref=e158]: $82.94B
+            - generic [ref=e159]: "Last update : Jun 18, 6:50 PM"
+        - generic [ref=e161]:
+          - generic [ref=e162]:
+            - heading "Total Bitcoin Spot ETF Net Inflow (BTC)" [level=2] [ref=e163]
+            - tablist [ref=e165]:
+              - tab "BTC" [selected] [ref=e166] [cursor=pointer]
+              - tab "USD" [ref=e167] [cursor=pointer]
+          - generic [ref=e168]: "Update Time : Jun 18, 2026 - 6:50 PM"
+          - generic [ref=e173]:
+            - table [ref=e175]:
+              - rowgroup [ref=e191]:
+                - row "Time(UTC) GBTC IBIT FBTC ARKB BITB BTCO HODL BRRR EZBC BTCW BTC MSBT Total" [ref=e192]:
+                  - columnheader "Time(UTC)" [ref=e193]
+                  - columnheader "GBTC" [ref=e194]
+                  - columnheader "IBIT" [ref=e195]
+                  - columnheader "FBTC" [ref=e196]
+                  - columnheader "ARKB" [ref=e197]
+                  - columnheader "BITB" [ref=e198]
+                  - columnheader "BTCO" [ref=e199]
+                  - columnheader "HODL" [ref=e200]
+                  - columnheader "BRRR" [ref=e201]
+                  - columnheader "EZBC" [ref=e202]
+                  - columnheader "BTCW" [ref=e203]
+                  - columnheader "BTC" [ref=e204]
+                  - columnheader "MSBT" [ref=e205]
+                  - columnheader "Total" [ref=e206]
+            - table [ref=e208]:
+              - rowgroup [ref=e224]:
+                - row "2026-06-18 0 - 0 0 0 0 -68.25 0 0 0 0 +161.31 +93.06" [ref=e225]:
+                  - cell "2026-06-18" [ref=e226]
+                  - cell "0" [ref=e227]:
+                    - generic [ref=e228]: "0"
+                  - cell "-" [ref=e229]
+                  - cell "0" [ref=e230]:
+                    - generic [ref=e231]: "0"
+                  - cell "0" [ref=e232]:
+                    - generic [ref=e233]: "0"
+                  - cell "0" [ref=e234]:
+                    - generic [ref=e235]: "0"
+                  - cell "0" [ref=e236]:
+                    - generic [ref=e237]: "0"
+                  - cell "-68.25" [ref=e238]:
+                    - generic [ref=e239]: "-68.25"
+                  - cell "0" [ref=e240]:
+                    - generic [ref=e241]: "0"
+                  - cell "0" [ref=e242]:
+                    - generic [ref=e243]: "0"
+                  - cell "0" [ref=e244]:
+                    - generic [ref=e245]: "0"
+                  - cell "0" [ref=e246]:
+                    - generic [ref=e247]: "0"
+                  - cell "+161.31" [ref=e248]:
+                    - generic [ref=e249]: "+161.31"
+                  - cell "+93.06" [ref=e250]:
+                    - generic [ref=e251]: "+93.06"
+                - row "2026-06-17 -236.12 -469.19 +213.27 -662.66 0 -97.49 -62.46 0 0 0 0 +62.46 -1.25K" [ref=e252]:
+                  - cell "2026-06-17" [ref=e253]
+                  - cell "-236.12" [ref=e254]:
+                    - generic [ref=e255]: "-236.12"
+                  - cell "-469.19" [ref=e256]:
+                    - generic [ref=e257]: "-469.19"
+                  - cell "+213.27" [ref=e258]:
+                    - generic [ref=e259]: "+213.27"
+                  - cell "-662.66" [ref=e260]:
+                    - generic [ref=e261]: "-662.66"
+                  - cell "0" [ref=e262]:
+                    - generic [ref=e263]: "0"
+                  - cell "-97.49" [ref=e264]:
+                    - generic [ref=e265]: "-97.49"
+                  - cell "-62.46" [ref=e266]:
+                    - generic [ref=e267]: "-62.46"
+                  - cell "0" [ref=e268]:
+                    - generic [ref=e269]: "0"
+                  - cell "0" [ref=e270]:
+                    - generic [ref=e271]: "0"
+                  - cell "0" [ref=e272]:
+                    - generic [ref=e273]: "0"
+                  - cell "0" [ref=e274]:
+                    - generic [ref=e275]: "0"
+                  - cell "+62.46" [ref=e276]:
+                    - generic [ref=e277]: "+62.46"
+                  - cell "-1.25K" [ref=e278]:
+                    - generic [ref=e279]: "-1.25K"
+                - row "2026-06-16 -253.45 +247.41 +64.87 0 0 0 0 0 0 0 +66.38 +28.66 +153.87" [ref=e280]:
+                  - cell "2026-06-16" [ref=e281]
+                  - cell "-253.45" [ref=e282]:
+                    - generic [ref=e283]: "-253.45"
+                  - cell "+247.41" [ref=e284]:
+                    - generic [ref=e285]: "+247.41"
+                  - cell "+64.87" [ref=e286]:
+                    - generic [ref=e287]: "+64.87"
+                  - cell "0" [ref=e288]:
+                    - generic [ref=e289]: "0"
+                  - cell "0" [ref=e290]:
+                    - generic [ref=e291]: "0"
+                  - cell "0" [ref=e292]:
+                    - generic [ref=e293]: "0"
+                  - cell "0" [ref=e294]:
+                    - generic [ref=e295]: "0"
+                  - cell "0" [ref=e296]:
+                    - generic [ref=e297]: "0"
+                  - cell "0" [ref=e298]:
+                    - generic [ref=e299]: "0"
+                  - cell "0" [ref=e300]:
+                    - generic [ref=e301]: "0"
+                  - cell "+66.38" [ref=e302]:
+                    - generic [ref=e303]: "+66.38"
+                  - cell "+28.66" [ref=e304]:
+                    - generic [ref=e305]: "+28.66"
+                  - cell "+153.87" [ref=e306]:
+                    - generic [ref=e307]: "+153.87"
+                - row "2026-06-15 -1.89K +1.01K -132.42 -100.45 0 0 -92.84 0 -88.28 0 +161.33 +143.07 -986.28" [ref=e308]:
+                  - cell "2026-06-15" [ref=e309]
+                  - cell "-1.89K" [ref=e310]:
+                    - generic [ref=e311]: "-1.89K"
+                  - cell "+1.01K" [ref=e312]:
+                    - generic [ref=e313]: +1.01K
+                  - cell "-132.42" [ref=e314]:
+                    - generic [ref=e315]: "-132.42"
+                  - cell "-100.45" [ref=e316]:
+                    - generic [ref=e317]: "-100.45"
+                  - cell "0" [ref=e318]:
+                    - generic [ref=e319]: "0"
+                  - cell "0" [ref=e320]:
+                    - generic [ref=e321]: "0"
+                  - cell "-92.84" [ref=e322]:
+                    - generic [ref=e323]: "-92.84"
+                  - cell "0" [ref=e324]:
+                    - generic [ref=e325]: "0"
+                  - cell "-88.28" [ref=e326]:
+                    - generic [ref=e327]: "-88.28"
+                  - cell "0" [ref=e328]:
+                    - generic [ref=e329]: "0"
+                  - cell "+161.33" [ref=e330]:
+                    - generic [ref=e331]: "+161.33"
+                  - cell "+143.07" [ref=e332]:
+                    - generic [ref=e333]: "+143.07"
+                  - cell "-986.28" [ref=e334]:
+                    - generic [ref=e335]: "-986.28"
+                - row "2026-06-12 0 +907.26 +283.03 +50.32 +81.76 0 +28.30 0 0 0 0 0 +1.35K" [ref=e336]:
+                  - cell "2026-06-12" [ref=e337]
+                  - cell "0" [ref=e338]:
+                    - generic [ref=e339]: "0"
+                  - cell "+907.26" [ref=e340]:
+                    - generic [ref=e341]: "+907.26"
+                  - cell "+283.03" [ref=e342]:
+                    - generic [ref=e343]: "+283.03"
+                  - cell "+50.32" [ref=e344]:
+                    - generic [ref=e345]: "+50.32"
+                  - cell "+81.76" [ref=e346]:
+                    - generic [ref=e347]: "+81.76"
+                  - cell "0" [ref=e348]:
+                    - generic [ref=e349]: "0"
+                  - cell "+28.30" [ref=e350]:
+                    - generic [ref=e351]: "+28.30"
+                  - cell "0" [ref=e352]:
+                    - generic [ref=e353]: "0"
+                  - cell "0" [ref=e354]:
+                    - generic [ref=e355]: "0"
+                  - cell "0" [ref=e356]:
+                    - generic [ref=e357]: "0"
+                  - cell "0" [ref=e358]:
+                    - generic [ref=e359]: "0"
+                  - cell "0" [ref=e360]:
+                    - generic [ref=e361]: "0"
+                  - cell "+1.35K" [ref=e362]:
+                    - generic [ref=e363]: +1.35K
+                - row "2026-06-11 0 +492.81 -89.45 -442.39 -213.06 0 -240.71 0 0 0 +91.08 +35.78 -365.94" [ref=e364]:
+                  - cell "2026-06-11" [ref=e365]
+                  - cell "0" [ref=e366]:
+                    - generic [ref=e367]: "0"
+                  - cell "+492.81" [ref=e368]:
+                    - generic [ref=e369]: "+492.81"
+                  - cell "-89.45" [ref=e370]:
+                    - generic [ref=e371]: "-89.45"
+                  - cell "-442.39" [ref=e372]:
+                    - generic [ref=e373]: "-442.39"
+                  - cell "-213.06" [ref=e374]:
+                    - generic [ref=e375]: "-213.06"
+                  - cell "0" [ref=e376]:
+                    - generic [ref=e377]: "0"
+                  - cell "-240.71" [ref=e378]:
+                    - generic [ref=e379]: "-240.71"
+                  - cell "0" [ref=e380]:
+                    - generic [ref=e381]: "0"
+                  - cell "0" [ref=e382]:
+                    - generic [ref=e383]: "0"
+                  - cell "0" [ref=e384]:
+                    - generic [ref=e385]: "0"
+                  - cell "+91.08" [ref=e386]:
+                    - generic [ref=e387]: "+91.08"
+                  - cell "+35.78" [ref=e388]:
+                    - generic [ref=e389]: "+35.78"
+                  - cell "-365.94" [ref=e390]:
+                    - generic [ref=e391]: "-365.94"
+                - row "2026-06-10 -1.42K -2.41K +64.84 0 0 0 0 0 0 +16.21 +283.65 0 -3.47K" [ref=e392]:
+                  - cell "2026-06-10" [ref=e393]
+                  - cell "-1.42K" [ref=e394]:
+                    - generic [ref=e395]: "-1.42K"
+                  - cell "-2.41K" [ref=e396]:
+                    - generic [ref=e397]: "-2.41K"
+                  - cell "+64.84" [ref=e398]:
+                    - generic [ref=e399]: "+64.84"
+                  - cell "0" [ref=e400]:
+                    - generic [ref=e401]: "0"
+                  - cell "0" [ref=e402]:
+                    - generic [ref=e403]: "0"
+                  - cell "0" [ref=e404]:
+                    - generic [ref=e405]: "0"
+                  - cell "0" [ref=e406]:
+                    - generic [ref=e407]: "0"
+                  - cell "0" [ref=e408]:
+                    - generic [ref=e409]: "0"
+                  - cell "0" [ref=e410]:
+                    - generic [ref=e411]: "0"
+                  - cell "+16.21" [ref=e412]:
+                    - generic [ref=e413]: "+16.21"
+                  - cell "+283.65" [ref=e414]:
+                    - generic [ref=e415]: "+283.65"
+                  - cell "0" [ref=e416]:
+                    - generic [ref=e417]: "0"
+                  - cell "-3.47K" [ref=e418]:
+                    - generic [ref=e419]: "-3.47K"
+                - row "2026-06-09 0 -976.88 -320.34 0 0 0 0 0 0 0 +69.78 0 -1.23K" [ref=e420]:
+                  - cell "2026-06-09" [ref=e421]
+                  - cell "0" [ref=e422]:
+                    - generic [ref=e423]: "0"
+                  - cell "-976.88" [ref=e424]:
+                    - generic [ref=e425]: "-976.88"
+                  - cell "-320.34" [ref=e426]:
+                    - generic [ref=e427]: "-320.34"
+                  - cell "0" [ref=e428]:
+                    - generic [ref=e429]: "0"
+                  - cell "0" [ref=e430]:
+                    - generic [ref=e431]: "0"
+                  - cell "0" [ref=e432]:
+                    - generic [ref=e433]: "0"
+                  - cell "0" [ref=e434]:
+                    - generic [ref=e435]: "0"
+                  - cell "0" [ref=e436]:
+                    - generic [ref=e437]: "0"
+                  - cell "0" [ref=e438]:
+                    - generic [ref=e439]: "0"
+                  - cell "0" [ref=e440]:
+                    - generic [ref=e441]: "0"
+                  - cell "+69.78" [ref=e442]:
+                    - generic [ref=e443]: "+69.78"
+                  - cell "0" [ref=e444]:
+                    - generic [ref=e445]: "0"
+                  - cell "-1.23K" [ref=e446]:
+                    - generic [ref=e447]: "-1.23K"
+                - row "2026-06-08 0 -3.68K +938.40 +996.86 +222.75 0 0 0 0 0 0 +77.41 -1.44K" [ref=e448]:
+                  - cell "2026-06-08" [ref=e449]
+                  - cell "0" [ref=e450]:
+                    - generic [ref=e451]: "0"
+                  - cell "-3.68K" [ref=e452]:
+                    - generic [ref=e453]: "-3.68K"
+                  - cell "+938.40" [ref=e454]:
+                    - generic [ref=e455]: "+938.40"
+                  - cell "+996.86" [ref=e456]:
+                    - generic [ref=e457]: "+996.86"
+                  - cell "+222.75" [ref=e458]:
+                    - generic [ref=e459]: "+222.75"
+                  - cell "0" [ref=e460]:
+                    - generic [ref=e461]: "0"
+                  - cell "0" [ref=e462]:
+                    - generic [ref=e463]: "0"
+                  - cell "0" [ref=e464]:
+                    - generic [ref=e465]: "0"
+                  - cell "0" [ref=e466]:
+                    - generic [ref=e467]: "0"
+                  - cell "0" [ref=e468]:
+                    - generic [ref=e469]: "0"
+                  - cell "0" [ref=e470]:
+                    - generic [ref=e471]: "0"
+                  - cell "+77.41" [ref=e472]:
+                    - generic [ref=e473]: "+77.41"
+                  - cell "-1.44K" [ref=e474]:
+                    - generic [ref=e475]: "-1.44K"
+                - row "2026-06-05 -952.18 -3.35K -934.95 0 0 0 +65.78 0 0 0 0 +67.34 -5.10K" [ref=e476]:
+                  - cell "2026-06-05" [ref=e477]
+                  - cell "-952.18" [ref=e478]:
+                    - generic [ref=e479]: "-952.18"
+                  - cell "-3.35K" [ref=e480]:
+                    - generic [ref=e481]: "-3.35K"
+                  - cell "-934.95" [ref=e482]:
+                    - generic [ref=e483]: "-934.95"
+                  - cell "0" [ref=e484]:
+                    - generic [ref=e485]: "0"
+                  - cell "0" [ref=e486]:
+                    - generic [ref=e487]: "0"
+                  - cell "0" [ref=e488]:
+                    - generic [ref=e489]: "0"
+                  - cell "+65.78" [ref=e490]:
+                    - generic [ref=e491]: "+65.78"
+                  - cell "0" [ref=e492]:
+                    - generic [ref=e493]: "0"
+                  - cell "0" [ref=e494]:
+                    - generic [ref=e495]: "0"
+                  - cell "0" [ref=e496]:
+                    - generic [ref=e497]: "0"
+                  - cell "0" [ref=e498]:
+                    - generic [ref=e499]: "0"
+                  - cell "+67.34" [ref=e500]:
+                    - generic [ref=e501]: "+67.34"
+                  - cell "-5.10K" [ref=e502]:
+                    - generic [ref=e503]: "-5.10K"
+                - row "2026-06-04 2024-01-11 -434.34K +786.32K +188.90K +37.09K +40.17K +6.35K +15.59K +9.57K +6.02K +2.39K +26.66K +3.92K +688.65K" [ref=e504]:
+                  - cell "2026-06-04 2024-01-11" [ref=e505]
+                  - cell "-434.34K" [ref=e506]:
+                    - generic [ref=e507]: "-434.34K"
+                  - cell "+786.32K" [ref=e508]:
+                    - generic [ref=e509]: +786.32K
+                  - cell "+188.90K" [ref=e510]:
+                    - generic [ref=e511]: +188.90K
+                  - cell "+37.09K" [ref=e512]:
+                    - generic [ref=e513]: +37.09K
+                  - cell "+40.17K" [ref=e514]:
+                    - generic [ref=e515]: +40.17K
+                  - cell "+6.35K" [ref=e516]:
+                    - generic [ref=e517]: +6.35K
+                  - cell "+15.59K" [ref=e518]:
+                    - generic [ref=e519]: +15.59K
+                  - cell "+9.57K" [ref=e520]:
+                    - generic [ref=e521]: +9.57K
+                  - cell "+6.02K" [ref=e522]:
+                    - generic [ref=e523]: +6.02K
+                  - cell "+2.39K" [ref=e524]:
+                    - generic [ref=e525]: +2.39K
+                  - cell "+26.66K" [ref=e526]:
+                    - generic [ref=e527]: +26.66K
+                  - cell "+3.92K" [ref=e528]:
+                    - generic [ref=e529]: +3.92K
+                  - cell "+688.65K" [ref=e530]:
+                    - generic [ref=e531]: +688.65K
+                - row "Total -439.09K +778.10K +188.99K +36.93K +40.26K +6.25K +15.22K +9.57K +5.93K +2.41K +27.33K +4.50K +676.40K" [ref=e532]:
+                  - cell "Total" [ref=e533]
+                  - cell "-439.09K" [ref=e534]:
+                    - generic [ref=e535]: "-439.09K"
+                  - cell "+778.10K" [ref=e536]:
+                    - generic [ref=e537]: +778.10K
+                  - cell "+188.99K" [ref=e538]:
+                    - generic [ref=e539]: +188.99K
+                  - cell "+36.93K" [ref=e540]:
+                    - generic [ref=e541]: +36.93K
+                  - cell "+40.26K" [ref=e542]:
+                    - generic [ref=e543]: +40.26K
+                  - cell "+6.25K" [ref=e544]:
+                    - generic [ref=e545]: +6.25K
+                  - cell "+15.22K" [ref=e546]:
+                    - generic [ref=e547]: +15.22K
+                  - cell "+9.57K" [ref=e548]:
+                    - generic [ref=e549]: +9.57K
+                  - cell "+5.93K" [ref=e550]:
+                    - generic [ref=e551]: +5.93K
+                  - cell "+2.41K" [ref=e552]:
+                    - generic [ref=e553]: +2.41K
+                  - cell "+27.33K" [ref=e554]:
+                    - generic [ref=e555]: +27.33K
+                  - cell "+4.50K" [ref=e556]:
+                    - generic [ref=e557]: +4.50K
+                  - cell "+676.40K" [ref=e558]:
+                    - generic [ref=e559]: +676.40K
+          - generic:
+            - img
+        - generic [ref=e562]:
+          - generic [ref=e565]:
+            - generic [ref=e566]:
+              - heading "Total Bitcoin Spot ETF Net Inflow (USD)" [level=2] [ref=e567]
+              - generic [ref=e568]:
+                - tablist [ref=e570]:
+                  - tab "Flows (USD)" [selected] [ref=e571] [cursor=pointer]
+                  - tab "AUM" [ref=e572] [cursor=pointer]
+                  - tab "Market Cap" [ref=e573] [cursor=pointer]
+                  - tab "Volume" [ref=e574] [cursor=pointer]
+                - generic [ref=e576] [cursor=pointer]:
+                  - combobox [ref=e577]: All
+                  - img [ref=e579]
+                  - textbox [ref=e581]: all
+            - generic [ref=e583]:
+              - progressbar [ref=e586]:
+                - img [ref=e587]
+                - img [ref=e590]
+              - generic [ref=e593]:
+                - generic:
+                  - generic:
+                    - img
+          - generic [ref=e598]:
+            - generic [ref=e599]:
+              - heading "Heatmap" [level=2] [ref=e600]
+              - tablist [ref=e603]:
+                - tab "Holding" [selected] [ref=e604] [cursor=pointer]
+                - tab "Price" [ref=e605] [cursor=pointer]
+                - tab "Volume" [ref=e606] [cursor=pointer]
+                - tab "Turnover" [ref=e607] [cursor=pointer]
+                - tab "Shares" [ref=e608] [cursor=pointer]
+                - tab "AUM" [ref=e609] [cursor=pointer]
+                - tab "Market Cap" [ref=e610] [cursor=pointer]
+            - generic [ref=e612]:
+              - generic [ref=e1587]:
+                - generic [ref=e1588]: IBIT
+                - generic [ref=e1590]: 768.31K
+              - generic [ref=e1595]:
+                - generic [ref=e1596]: FBTC
+                - generic [ref=e1598]: 180.02K
+              - generic [ref=e1603]:
+                - generic [ref=e1604]: GBTC
+                - generic [ref=e1606]: 140.16K
+              - generic [ref=e1611]:
+                - generic [ref=e1612]: BTC
+                - generic [ref=e1614]: 53.52K
+              - generic [ref=e1619]:
+                - generic [ref=e1620]: BITB
+                - generic [ref=e1622]: 36.79K
+              - generic [ref=e1627]:
+                - generic [ref=e1628]: ARKB
+                - generic [ref=e1630]: 32.19K
+              - generic [ref=e1636]: BITO
+              - generic [ref=e1642]: HODL
+              - generic [ref=e1648]: BTCO
+              - generic [ref=e1654]: BRRR
+              - generic [ref=e1660]: EZBC
+              - generic [ref=e1666]: BTCW
+              - generic [ref=e1672]: BITS
+              - generic [ref=e1678]: BITC
+              - generic [ref=e1684]: BTF
+              - generic [ref=e1690]: DEFI
+              - generic [ref=e1696]: BETH
+              - generic [ref=e1702]: BETE
+        - generic [ref=e737]:
+          - generic [ref=e738]:
+            - heading "Bitcoin ETF Overview" [level=2] [ref=e739]
+            - generic [ref=e740]:
+              - generic [ref=e742]:
+                - text: Total Volume
+                - generic "5,166,212,055.383" [ref=e743]: $5.17B
+              - generic [ref=e745]:
+                - text: Total cap
+                - generic "80,461,474,818.683" [ref=e746]: $80.46B
+              - generic [ref=e748]:
+                - text: Total AUM
+                - generic "82,867,292,342.42" [ref=e749]: $82.87B
+          - generic [ref=e750]:
+            - generic [ref=e751]:
+              - generic [ref=e753]: Closed
+              - generic [ref=e755]: "Last update : Jun 18, 2026 - 6:54 PM"
+            - generic [ref=e756]:
+              - generic [ref=e758]:
+                - img [ref=e760]
+                - textbox [ref=e763]
+              - generic [ref=e765] [cursor=pointer]:
+                - combobox [ref=e766]: All
+                - img [ref=e768]
+                - textbox [ref=e770]: all
+        - tablist [ref=e773]:
+          - tab "Overview" [selected] [ref=e774] [cursor=pointer]
+          - tab "Assets Inflows/Outflows" [ref=e775] [cursor=pointer]
+          - tab "Bitcoin ETFs vs Top ETFs" [ref=e776] [cursor=pointer]
+        - generic [ref=e781]:
+          - table [ref=e783]:
+            - rowgroup [ref=e797]:
+              - row "# Ticker ETF Name Price Price Change Volume Volume Turnover Rate Shares Outstanding AUM Market Cap Expense Ratio" [ref=e798]:
+                - columnheader "#" [ref=e799]
+                - columnheader "Ticker" [ref=e800]
+                - columnheader "ETF Name" [ref=e801]
+                - columnheader "Price" [ref=e802] [cursor=pointer]:
+                  - generic [ref=e804]: Price
+                - columnheader "Price Change" [ref=e805] [cursor=pointer]:
+                  - generic [ref=e807]: Price Change
+                - columnheader "Volume" [ref=e808] [cursor=pointer]:
+                  - generic [ref=e810]: Volume
+                - columnheader "Volume" [ref=e811] [cursor=pointer]:
+                  - generic [ref=e813]: Volume
+                - columnheader "Turnover Rate" [ref=e814] [cursor=pointer]:
+                  - generic [ref=e816]: Turnover Rate
+                - columnheader "Shares Outstanding" [ref=e817] [cursor=pointer]:
+                  - generic [ref=e819]: Shares Outstanding
+                - columnheader "AUM" [ref=e820]
+                - columnheader "Market Cap" [ref=e821]
+                - columnheader "Expense Ratio" [ref=e822]
+          - table [ref=e824]:
+            - rowgroup [ref=e829]:
+              - row "1 IBIT BTC iShares Bitcoin Trust $35.62 -0.74 -2.04% 1,713,976,098.6 47,932,125 3.557% 1,352,800,000 $50.46B 48,186,736,000 0.25%" [ref=e830]:
+                - cell "1" [ref=e831]
+                - cell "IBIT BTC" [ref=e832]:
+                  - link "IBIT" [ref=e834] [cursor=pointer]:
+                    - /url: /etf/IBIT
+                  - generic [ref=e835]: BTC
+                - cell "iShares Bitcoin Trust" [ref=e836]:
+                  - link "iShares Bitcoin Trust" [ref=e838] [cursor=pointer]:
+                    - /url: /etf/IBIT
+                - cell "$35.62" [ref=e839]:
+                  - generic [ref=e841]: $35.62
+                - cell "-0.74 -2.04%" [ref=e842]:
+                  - generic [ref=e843]: "-0.74"
+                  - generic [ref=e844]: "-2.04%"
+                - cell "1,713,976,098.6" [ref=e845]:
+                  - generic "1,713,976,098.6" [ref=e846]: $1.71B
+                - cell "47,932,125" [ref=e847]:
+                  - generic "47,932,125" [ref=e848]: 47.93M
+                - cell "3.557%" [ref=e849]:
+                  - generic [ref=e850]: 3.557%
+                - cell "1,352,800,000" [ref=e851]:
+                  - generic "1,352,800,000" [ref=e852]: 1.35B
+                - cell "$50.46B" [ref=e853]:
+                  - generic [ref=e854]: $50.46B
+                - cell "48,186,736,000" [ref=e855]:
+                  - generic "48,186,736,000" [ref=e856]: $48.19B
+                - cell "0.25%" [ref=e857]:
+                  - generic [ref=e858]: 0.25%
+              - row "2 FBTC BTC Fidelity Wise Origin Bitcoin Fund $54.77 -1.12 -2.00% 252,791,588.949 4,601,515 2.235% 206,500,000 $11.82B 11,310,005,000 0.25%" [ref=e859]:
+                - cell "2" [ref=e860]
+                - cell "FBTC BTC" [ref=e861]:
+                  - link "FBTC" [ref=e863] [cursor=pointer]:
+                    - /url: /etf/FBTC
+                  - generic [ref=e864]: BTC
+                - cell "Fidelity Wise Origin Bitcoin Fund" [ref=e865]:
+                  - link "Fidelity Wise Origin Bitcoin Fund" [ref=e867] [cursor=pointer]:
+                    - /url: /etf/FBTC
+                - cell "$54.77" [ref=e868]:
+                  - generic [ref=e870]: $54.77
+                - cell "-1.12 -2.00%" [ref=e871]:
+                  - generic [ref=e872]: "-1.12"
+                  - generic [ref=e873]: "-2.00%"
+                - cell "252,791,588.949" [ref=e874]:
+                  - generic "252,791,588.949" [ref=e875]: $252.79M
+                - cell "4,601,515" [ref=e876]:
+                  - generic "4,601,515" [ref=e877]: 4.60M
+                - cell "2.235%" [ref=e878]:
+                  - generic [ref=e879]: 2.235%
+                - cell "206,500,000" [ref=e880]:
+                  - generic "206,500,000" [ref=e881]: 206.50M
+                - cell "$11.82B" [ref=e882]:
+                  - generic [ref=e883]: $11.82B
+                - cell "11,310,005,000" [ref=e884]:
+                  - generic "11,310,005,000" [ref=e885]: $11.31B
+                - cell "0.25%" [ref=e886]:
+                  - generic [ref=e887]: 0.25%
+              - row "3 GBTC BTC Grayscale Bitcoin Trust ETF $48.8 -1.05 -2.11% 106,056,043.475 2,167,727 1.203% 180,620,100 $8.81B 8,814,260,880 1.50%" [ref=e888]:
+                - cell "3" [ref=e889]
+                - cell "GBTC BTC" [ref=e890]:
+                  - link "GBTC" [ref=e892] [cursor=pointer]:
+                    - /url: /etf/GBTC
+                  - generic [ref=e893]: BTC
+                - cell "Grayscale Bitcoin Trust ETF" [ref=e894]:
+                  - link "Grayscale Bitcoin Trust ETF" [ref=e896] [cursor=pointer]:
+                    - /url: /etf/GBTC
+                - cell "$48.8" [ref=e897]:
+                  - generic [ref=e899]: $48.8
+                - cell "-1.05 -2.11%" [ref=e900]:
+                  - generic [ref=e901]: "-1.05"
+                  - generic [ref=e902]: "-2.11%"
+                - cell "106,056,043.475" [ref=e903]:
+                  - generic "106,056,043.475" [ref=e904]: $106.06M
+                - cell "2,167,727" [ref=e905]:
+                  - generic "2,167,727" [ref=e906]: 2.17M
+                - cell "1.203%" [ref=e907]:
+                  - generic [ref=e908]: 1.203%
+                - cell "180,620,100" [ref=e909]:
+                  - generic "180,620,100" [ref=e910]: 180.62M
+                - cell "$8.81B" [ref=e911]:
+                  - generic [ref=e912]: $8.81B
+                - cell "8,814,260,880" [ref=e913]:
+                  - generic "8,814,260,880" [ref=e914]: $8.81B
+                - cell "1.50%" [ref=e915]:
+                  - generic [ref=e916]: 1.50%
+              - row "4 BTC Grayscale Bitcoin Mini Trust ETF $27.84 -0.55 -1.94% 60,966,981.101 2,186,270 1.809% 121,029,963 $3.44B 3,369,474,169.92 0.15%" [ref=e917]:
+                - cell "4" [ref=e918]
+                - cell "BTC" [ref=e919]:
+                  - link "BTC" [ref=e921] [cursor=pointer]:
+                    - /url: /etf/BTC
+                - cell "Grayscale Bitcoin Mini Trust ETF" [ref=e922]:
+                  - link "Grayscale Bitcoin Mini Trust ETF" [ref=e924] [cursor=pointer]:
+                    - /url: /etf/BTC
+                - cell "$27.84" [ref=e925]:
+                  - generic [ref=e927]: $27.84
+                - cell "-0.55 -1.94%" [ref=e928]:
+                  - generic [ref=e929]: "-0.55"
+                  - generic [ref=e930]: "-1.94%"
+                - cell "60,966,981.101" [ref=e931]:
+                  - generic "60,966,981.101" [ref=e932]: $60.97M
+                - cell "2,186,270" [ref=e933]:
+                  - generic "2,186,270" [ref=e934]: 2.19M
+                - cell "1.809%" [ref=e935]:
+                  - generic [ref=e936]: 1.809%
+                - cell "121,029,963" [ref=e937]:
+                  - generic "121,029,963" [ref=e938]: 121.03M
+                - cell "$3.44B" [ref=e939]:
+                  - generic [ref=e940]: $3.44B
+                - cell "3,369,474,169.92" [ref=e941]:
+                  - generic "3,369,474,169.92" [ref=e942]: $3.37B
+                - cell "0.15%" [ref=e943]:
+                  - generic [ref=e944]: 0.15%
+              - row "5 BITB BTC Bitwise Bitcoin ETF $34.13 -0.73 -2.09% 69,884,149.593 2,040,717 3.022% 67,760,000 $2.31B 2,312,648,800 0.20%" [ref=e945]:
+                - cell "5" [ref=e946]
+                - cell "BITB BTC" [ref=e947]:
+                  - link "BITB" [ref=e949] [cursor=pointer]:
+                    - /url: /etf/BITB
+                  - generic [ref=e950]: BTC
+                - cell "Bitwise Bitcoin ETF" [ref=e951]:
+                  - link "Bitwise Bitcoin ETF" [ref=e953] [cursor=pointer]:
+                    - /url: /etf/BITB
+                - cell "$34.13" [ref=e954]:
+                  - generic [ref=e956]: $34.13
+                - cell "-0.73 -2.09%" [ref=e957]:
+                  - generic [ref=e958]: "-0.73"
+                  - generic [ref=e959]: "-2.09%"
+                - cell "69,884,149.593" [ref=e960]:
+                  - generic "69,884,149.593" [ref=e961]: $69.88M
+                - cell "2,040,717" [ref=e962]:
+                  - generic "2,040,717" [ref=e963]: 2.04M
+                - cell "3.022%" [ref=e964]:
+                  - generic [ref=e965]: 3.022%
+                - cell "67,760,000" [ref=e966]:
+                  - generic "67,760,000" [ref=e967]: 67.76M
+                - cell "$2.31B" [ref=e968]:
+                  - generic [ref=e969]: $2.31B
+                - cell "2,312,648,800" [ref=e970]:
+                  - generic "2,312,648,800" [ref=e971]: $2.31B
+                - cell "0.20%" [ref=e972]:
+                  - generic [ref=e973]: 0.20%
+              - row "6 ARKB BTC ARK 21Shares Bitcoin ETF $20.88 -0.42 -1.97% 57,313,304.628 2,741,201 2.818% 97,421,850 $2.08B 2,034,168,228 0.21%" [ref=e974]:
+                - cell "6" [ref=e975]
+                - cell "ARKB BTC" [ref=e976]:
+                  - link "ARKB" [ref=e978] [cursor=pointer]:
+                    - /url: /etf/ARKB
+                  - generic [ref=e979]: BTC
+                - cell "ARK 21Shares Bitcoin ETF" [ref=e980]:
+                  - link "ARK 21Shares Bitcoin ETF" [ref=e982] [cursor=pointer]:
+                    - /url: /etf/ARKB
+                - cell "$20.88" [ref=e983]:
+                  - generic [ref=e985]: $20.88
+                - cell "-0.42 -1.97%" [ref=e986]:
+                  - generic [ref=e987]: "-0.42"
+                  - generic [ref=e988]: "-1.97%"
+                - cell "57,313,304.628" [ref=e989]:
+                  - generic "57,313,304.628" [ref=e990]: $57.31M
+                - cell "2,741,201" [ref=e991]:
+                  - generic "2,741,201" [ref=e992]: 2.74M
+                - cell "2.818%" [ref=e993]:
+                  - generic [ref=e994]: 2.818%
+                - cell "97,421,850" [ref=e995]:
+                  - generic "97,421,850" [ref=e996]: 97.42M
+                - cell "$2.08B" [ref=e997]:
+                  - generic [ref=e998]: $2.08B
+                - cell "2,034,168,228" [ref=e999]:
+                  - generic "2,034,168,228" [ref=e1000]: $2.03B
+                - cell "0.21%" [ref=e1001]:
+                  - generic [ref=e1002]: 0.21%
+              - row "7 BITO BTC ProShares Bitcoin ETF $8.56 -0.17 -1.95% 2,765,283,938.652 322,557,324 195.469% 165,268,014 $1.44B 1,414,694,199.84" [ref=e1003]:
+                - cell "7" [ref=e1004]
+                - cell "BITO BTC" [ref=e1005]:
+                  - link "BITO" [ref=e1007] [cursor=pointer]:
+                    - /url: /etf/BITO
+                  - generic [ref=e1008]: BTC
+                - cell "ProShares Bitcoin ETF" [ref=e1009]:
+                  - link "ProShares Bitcoin ETF" [ref=e1011] [cursor=pointer]:
+                    - /url: /etf/BITO
+                - cell "$8.56" [ref=e1012]:
+                  - generic [ref=e1014]: $8.56
+                - cell "-0.17 -1.95%" [ref=e1015]:
+                  - generic [ref=e1016]: "-0.17"
+                  - generic [ref=e1017]: "-1.95%"
+                - cell "2,765,283,938.652" [ref=e1018]:
+                  - generic "2,765,283,938.652" [ref=e1019]: $2.77B
+                - cell "322,557,324" [ref=e1020]:
+                  - generic "322,557,324" [ref=e1021]: 322.56M
+                - cell "195.469%" [ref=e1022]:
+                  - generic [ref=e1023]: 195.469%
+                - cell "165,268,014" [ref=e1024]:
+                  - generic "165,268,014" [ref=e1025]: 165.27M
+                - cell "$1.44B" [ref=e1026]:
+                  - generic [ref=e1027]: $1.44B
+                - cell "1,414,694,199.84" [ref=e1028]:
+                  - generic "1,414,694,199.84" [ref=e1029]: $1.41B
+                - cell [ref=e1030]
+              - row "8 HODL BTC VanEck Bitcoin ETF $17.8 -0.35 -1.93% 44,952,558.122 2,522,477 4.219% 59,854,531 $1.06B 1,065,410,651.8 0.00%" [ref=e1031]:
+                - cell "8" [ref=e1032]
+                - cell "HODL BTC" [ref=e1033]:
+                  - link "HODL" [ref=e1035] [cursor=pointer]:
+                    - /url: /etf/HODL
+                  - generic [ref=e1036]: BTC
+                - cell "VanEck Bitcoin ETF" [ref=e1037]:
+                  - link "VanEck Bitcoin ETF" [ref=e1039] [cursor=pointer]:
+                    - /url: /etf/HODL
+                - cell "$17.8" [ref=e1040]:
+                  - generic [ref=e1042]: $17.8
+                - cell "-0.35 -1.93%" [ref=e1043]:
+                  - generic [ref=e1044]: "-0.35"
+                  - generic [ref=e1045]: "-1.93%"
+                - cell "44,952,558.122" [ref=e1046]:
+                  - generic "44,952,558.122" [ref=e1047]: $44.95M
+                - cell "2,522,477" [ref=e1048]:
+                  - generic "2,522,477" [ref=e1049]: 2.52M
+                - cell "4.219%" [ref=e1050]:
+                  - generic [ref=e1051]: 4.219%
+                - cell "59,854,531" [ref=e1052]:
+                  - generic "59,854,531" [ref=e1053]: 59.85M
+                - cell "$1.06B" [ref=e1054]:
+                  - generic [ref=e1055]: $1.06B
+                - cell "1,065,410,651.8" [ref=e1056]:
+                  - generic "1,065,410,651.8" [ref=e1057]: $1.07B
+                - cell "0.00%" [ref=e1058]:
+                  - generic [ref=e1059]: 0.00%
+              - row "9 BTCO BTC Invesco Galaxy Bitcoin ETF $62.64 -1.25 -1.96% 27,774,589.502 443,522 6.961% 6,370,000 $407.22M 399,016,800 0.39%" [ref=e1060]:
+                - cell "9" [ref=e1061]
+                - cell "BTCO BTC" [ref=e1062]:
+                  - link "BTCO" [ref=e1064] [cursor=pointer]:
+                    - /url: /etf/BTCO
+                  - generic [ref=e1065]: BTC
+                - cell "Invesco Galaxy Bitcoin ETF" [ref=e1066]:
+                  - link "Invesco Galaxy Bitcoin ETF" [ref=e1068] [cursor=pointer]:
+                    - /url: /etf/BTCO
+                - cell "$62.64" [ref=e1069]:
+                  - generic [ref=e1071]: $62.64
+                - cell "-1.25 -1.96%" [ref=e1072]:
+                  - generic [ref=e1073]: "-1.25"
+                  - generic [ref=e1074]: "-1.96%"
+                - cell "27,774,589.502" [ref=e1075]:
+                  - generic "27,774,589.502" [ref=e1076]: $27.77M
+                - cell "443,522" [ref=e1077]:
+                  - generic "443,522" [ref=e1078]: 443.52K
+                - cell "6.961%" [ref=e1079]:
+                  - generic [ref=e1080]: 6.961%
+                - cell "6,370,000" [ref=e1081]:
+                  - generic "6,370,000" [ref=e1082]: 6.37M
+                - cell "$407.22M" [ref=e1083]:
+                  - generic [ref=e1084]: $407.22M
+                - cell "399,016,800" [ref=e1085]:
+                  - generic "399,016,800" [ref=e1086]: $399.02M
+                - cell "0.39%" [ref=e1087]:
+                  - generic [ref=e1088]: 0.39%
+              - row "10 BRRR BTC Coinshares Bitcoin ETF Common Shares of Beneficial Interest $17.73 -0.38 -2.10% 18,683,216.233 1,052,131 5.002% 21,064,767 $389.70M 373,478,318.91 0.25%" [ref=e1089]:
+                - cell "10" [ref=e1090]
+                - cell "BRRR BTC" [ref=e1091]:
+                  - link "BRRR" [ref=e1093] [cursor=pointer]:
+                    - /url: /etf/BRRR
+                  - generic [ref=e1094]: BTC
+                - cell "Coinshares Bitcoin ETF Common Shares of Beneficial Interest" [ref=e1095]:
+                  - link "Coinshares Bitcoin ETF Common Shares of Beneficial Interest" [ref=e1097] [cursor=pointer]:
+                    - /url: /etf/BRRR
+                - cell "$17.73" [ref=e1098]:
+                  - generic [ref=e1100]: $17.73
+                - cell "-0.38 -2.10%" [ref=e1101]:
+                  - generic [ref=e1102]: "-0.38"
+                  - generic [ref=e1103]: "-2.10%"
+                - cell "18,683,216.233" [ref=e1104]:
+                  - generic "18,683,216.233" [ref=e1105]: $18.68M
+                - cell "1,052,131" [ref=e1106]:
+                  - generic "1,052,131" [ref=e1107]: 1.05M
+                - cell "5.002%" [ref=e1108]:
+                  - generic [ref=e1109]: 5.002%
+                - cell "21,064,767" [ref=e1110]:
+                  - generic "21,064,767" [ref=e1111]: 21.06M
+                - cell "$389.70M" [ref=e1112]:
+                  - generic [ref=e1113]: $389.70M
+                - cell "373,478,318.91" [ref=e1114]:
+                  - generic "373,478,318.91" [ref=e1115]: $373.48M
+                - cell "0.25%" [ref=e1116]:
+                  - generic [ref=e1117]: 0.25%
+              - row "11 EZBC BTC Franklin Bitcoin ETF $36.38 -0.73 -1.97% 23,601,797.854 648,663 6.553% 9,900,161 $369.87M 360,167,857.18 0.19%" [ref=e1118]:
+                - cell "11" [ref=e1119]
+                - cell "EZBC BTC" [ref=e1120]:
+                  - link "EZBC" [ref=e1122] [cursor=pointer]:
+                    - /url: /etf/EZBC
+                  - generic [ref=e1123]: BTC
+                - cell "Franklin Bitcoin ETF" [ref=e1124]:
+                  - link "Franklin Bitcoin ETF" [ref=e1126] [cursor=pointer]:
+                    - /url: /etf/EZBC
+                - cell "$36.38" [ref=e1127]:
+                  - generic [ref=e1129]: $36.38
+                - cell "-0.73 -1.97%" [ref=e1130]:
+                  - generic [ref=e1131]: "-0.73"
+                  - generic [ref=e1132]: "-1.97%"
+                - cell "23,601,797.854" [ref=e1133]:
+                  - generic "23,601,797.854" [ref=e1134]: $23.60M
+                - cell "648,663" [ref=e1135]:
+                  - generic "648,663" [ref=e1136]: 648.66K
+                - cell "6.553%" [ref=e1137]:
+                  - generic [ref=e1138]: 6.553%
+                - cell "9,900,161" [ref=e1139]:
+                  - generic "9,900,161" [ref=e1140]: 9.90M
+                - cell "$369.87M" [ref=e1141]:
+                  - generic [ref=e1142]: $369.87M
+                - cell "360,167,857.18" [ref=e1143]:
+                  - generic "360,167,857.18" [ref=e1144]: $360.17M
+                - cell "0.19%" [ref=e1145]:
+                  - generic [ref=e1146]: 0.19%
+              - row "12 BTCW BTC WisdomTree Bitcoin Fund $66.55 -1.38 -2.03% 9,208,984.663 138,299 6.527% 2,119,997 $177.28M 141,085,800.35 0.30%" [ref=e1147]:
+                - cell "12" [ref=e1148]
+                - cell "BTCW BTC" [ref=e1149]:
+                  - link "BTCW" [ref=e1151] [cursor=pointer]:
+                    - /url: /etf/BTCW
+                  - generic [ref=e1152]: BTC
+                - cell "WisdomTree Bitcoin Fund" [ref=e1153]:
+                  - link "WisdomTree Bitcoin Fund" [ref=e1155] [cursor=pointer]:
+                    - /url: /etf/BTCW
+                - cell "$66.55" [ref=e1156]:
+                  - generic [ref=e1158]: $66.55
+                - cell "-1.38 -2.03%" [ref=e1159]:
+                  - generic [ref=e1160]: "-1.38"
+                  - generic [ref=e1161]: "-2.03%"
+                - cell "9,208,984.663" [ref=e1162]:
+                  - generic "9,208,984.663" [ref=e1163]: $9.21M
+                - cell "138,299" [ref=e1164]:
+                  - generic "138,299" [ref=e1165]: 138.30K
+                - cell "6.527%" [ref=e1166]:
+                  - generic [ref=e1167]: 6.527%
+                - cell "2,119,997" [ref=e1168]:
+                  - generic "2,119,997" [ref=e1169]: 2.12M
+                - cell "$177.28M" [ref=e1170]:
+                  - generic [ref=e1171]: $177.28M
+                - cell "141,085,800.35" [ref=e1172]:
+                  - generic "141,085,800.35" [ref=e1173]: $141.09M
+                - cell "0.30%" [ref=e1174]:
+                  - generic [ref=e1175]: 0.30%
+              - row "13 BITS BTC Global X Blockchain & Bitcoin Strategy ETF $63.7037 +0.3174 +0.50% 84,079.669 1,321 0.255% 517,123 $55.09M 32,942,648.455" [ref=e1176]:
+                - cell "13" [ref=e1177]
+                - cell "BITS BTC" [ref=e1178]:
+                  - link "BITS" [ref=e1180] [cursor=pointer]:
+                    - /url: /etf/BITS
+                  - generic [ref=e1181]: BTC
+                - cell "Global X Blockchain & Bitcoin Strategy ETF" [ref=e1182]:
+                  - link "Global X Blockchain & Bitcoin Strategy ETF" [ref=e1184] [cursor=pointer]:
+                    - /url: /etf/BITS
+                - cell "$63.7037" [ref=e1185]:
+                  - generic [ref=e1187]: $63.7037
+                - cell "+0.3174 +0.50%" [ref=e1188]:
+                  - generic [ref=e1189]: "+0.3174"
+                  - generic [ref=e1190]: +0.50%
+                - cell "84,079.669" [ref=e1191]:
+                  - generic "84,079.669" [ref=e1192]: $84.08K
+                - cell "1,321" [ref=e1193]:
+                  - generic "1,321" [ref=e1194]: 1.32K
+                - cell "0.255%" [ref=e1195]:
+                  - generic [ref=e1196]: 0.255%
+                - cell "517,123" [ref=e1197]:
+                  - generic "517,123" [ref=e1198]: 517.12K
+                - cell "$55.09M" [ref=e1199]:
+                  - generic [ref=e1200]: $55.09M
+                - cell "32,942,648.455" [ref=e1201]:
+                  - generic "32,942,648.455" [ref=e1202]: $32.94M
+                - cell [ref=e1203]
+              - row "14 BITC BTC Bitwise Trendwise Bitcoin and Treasuries Rotation Strategy ETF $39.045 +0.0001 +0.00% 21,008.201 538 0.168% 319,357 $4.55M 12,469,294.065" [ref=e1204]:
+                - cell "14" [ref=e1205]
+                - cell "BITC BTC" [ref=e1206]:
+                  - link "BITC" [ref=e1208] [cursor=pointer]:
+                    - /url: /etf/BITC
+                  - generic [ref=e1209]: BTC
+                - cell "Bitwise Trendwise Bitcoin and Treasuries Rotation Strategy ETF" [ref=e1210]:
+                  - link "Bitwise Trendwise Bitcoin and Treasuries Rotation Strategy ETF" [ref=e1212] [cursor=pointer]:
+                    - /url: /etf/BITC
+                - cell "$39.045" [ref=e1213]:
+                  - generic [ref=e1215]: $39.045
+                - cell "+0.0001 +0.00%" [ref=e1216]:
+                  - generic [ref=e1217]: "+0.0001"
+                  - generic [ref=e1218]: +0.00%
+                - cell "21,008.201" [ref=e1219]:
+                  - generic "21,008.201" [ref=e1220]: $21.01K
+                - cell "538" [ref=e1221]:
+                  - generic "538" [ref=e1222]: "538.00"
+                - cell "0.168%" [ref=e1223]:
+                  - generic [ref=e1224]: 0.168%
+                - cell "319,357" [ref=e1225]:
+                  - generic "319,357" [ref=e1226]: 319.36K
+                - cell "$4.55M" [ref=e1227]:
+                  - generic [ref=e1228]: $4.55M
+                - cell "12,469,294.065" [ref=e1229]:
+                  - generic "12,469,294.065" [ref=e1230]: $12.47M
+                - cell [ref=e1231]
+              - row "15 BTF BTC,ETH Valkyrie ETF Trust II CoinShares Bitcoin and Ether ETF $16.4556 -0.299 -1.78% 77,352.265 4,711 0.631% 745,173 $12.89M 12,262,268.819" [ref=e1232]:
+                - cell "15" [ref=e1233]
+                - cell "BTF BTC,ETH" [ref=e1234]:
+                  - link "BTF" [ref=e1236] [cursor=pointer]:
+                    - /url: /etf/BTF
+                  - generic [ref=e1237]: BTC,ETH
+                - cell "Valkyrie ETF Trust II CoinShares Bitcoin and Ether ETF" [ref=e1238]:
+                  - link "Valkyrie ETF Trust II CoinShares Bitcoin and Ether ETF" [ref=e1240] [cursor=pointer]:
+                    - /url: /etf/BTF
+                - cell "$16.4556" [ref=e1241]:
+                  - generic [ref=e1243]: $16.4556
+                - cell "-0.299 -1.78%" [ref=e1244]:
+                  - generic [ref=e1245]: "-0.299"
+                  - generic [ref=e1246]: "-1.78%"
+                - cell "77,352.265" [ref=e1247]:
+                  - generic "77,352.265" [ref=e1248]: $77.35K
+                - cell "4,711" [ref=e1249]:
+                  - generic "4,711" [ref=e1250]: 4.71K
+                - cell "0.631%" [ref=e1251]:
+                  - generic [ref=e1252]: 0.631%
+                - cell "745,173" [ref=e1253]:
+                  - generic "745,173" [ref=e1254]: 745.17K
+                - cell "$12.89M" [ref=e1255]:
+                  - generic [ref=e1256]: $12.89M
+                - cell "12,262,268.819" [ref=e1257]:
+                  - generic "12,262,268.819" [ref=e1258]: $12.26M
+                - cell [ref=e1259]
+              - row "16 DEFI BTC Hashdex Commodities Trust $71.1959 -1.4179 -1.95% 12,539.877 176 0.126% 140,000 $5.00M 9,967,426" [ref=e1260]:
+                - cell "16" [ref=e1261]
+                - cell "DEFI BTC" [ref=e1262]:
+                  - link "DEFI" [ref=e1264] [cursor=pointer]:
+                    - /url: /etf/DEFI
+                  - generic [ref=e1265]: BTC
+                - cell "Hashdex Commodities Trust" [ref=e1266]:
+                  - link "Hashdex Commodities Trust" [ref=e1268] [cursor=pointer]:
+                    - /url: /etf/DEFI
+                - cell "$71.1959" [ref=e1269]:
+                  - generic [ref=e1271]: $71.1959
+                - cell "-1.4179 -1.95%" [ref=e1272]:
+                  - generic [ref=e1273]: "-1.4179"
+                  - generic [ref=e1274]: "-1.95%"
+                - cell "12,539.877" [ref=e1275]:
+                  - generic "12,539.877" [ref=e1276]: $12.54K
+                - cell "176" [ref=e1277]:
+                  - generic "176" [ref=e1278]: "176.00"
+                - cell "0.126%" [ref=e1279]:
+                  - generic [ref=e1280]: 0.126%
+                - cell "140,000" [ref=e1281]:
+                  - generic "140,000" [ref=e1282]: 140.00K
+                - cell "$5.00M" [ref=e1283]:
+                  - generic [ref=e1284]: $5.00M
+                - cell "9,967,426" [ref=e1285]:
+                  - generic "9,967,426" [ref=e1286]: $9.97M
+                - cell [ref=e1287]
+              - row "17 BETH BTC,ETH ProShares Bitcoin & Ether Market Cap Weight ETF $34.6342 -0.6649 -1.88% 57,008.13 1,655 0.784% 210,012 $16.35M 7,273,597.61" [ref=e1288]:
+                - cell "17" [ref=e1289]
+                - cell "BETH BTC,ETH" [ref=e1290]:
+                  - link "BETH" [ref=e1292] [cursor=pointer]:
+                    - /url: /etf/BETH
+                  - generic [ref=e1293]: BTC,ETH
+                - cell "ProShares Bitcoin & Ether Market Cap Weight ETF" [ref=e1294]:
+                  - link "ProShares Bitcoin & Ether Market Cap Weight ETF" [ref=e1296] [cursor=pointer]:
+                    - /url: /etf/BETH
+                - cell "$34.6342" [ref=e1297]:
+                  - generic [ref=e1299]: $34.6342
+                - cell "-0.6649 -1.88%" [ref=e1300]:
+                  - generic [ref=e1301]: "-0.6649"
+                  - generic [ref=e1302]: "-1.88%"
+                - cell "57,008.13" [ref=e1303]:
+                  - generic "57,008.13" [ref=e1304]: $57.01K
+                - cell "1,655" [ref=e1305]:
+                  - generic "1,655" [ref=e1306]: 1.66K
+                - cell "0.784%" [ref=e1307]:
+                  - generic [ref=e1308]: 0.784%
+                - cell "210,012" [ref=e1309]:
+                  - generic "210,012" [ref=e1310]: 210.01K
+                - cell "$16.35M" [ref=e1311]:
+                  - generic [ref=e1312]: $16.35M
+                - cell "7,273,597.61" [ref=e1313]:
+                  - generic "7,273,597.61" [ref=e1314]: $7.27M
+                - cell [ref=e1315]
+              - row "18 BETE BTC,ETH ProShares Bitcoin & Ether Equal Weight ETF $28.8442 -0.5114 -1.74% 285,657.077 9,946 8.252% 120,008 $7.78M 3,461,534.754" [ref=e1316]:
+                - cell "18" [ref=e1317]
+                - cell "BETE BTC,ETH" [ref=e1318]:
+                  - link "BETE" [ref=e1320] [cursor=pointer]:
+                    - /url: /etf/BETE
+                  - generic [ref=e1321]: BTC,ETH
+                - cell "ProShares Bitcoin & Ether Equal Weight ETF" [ref=e1322]:
+                  - link "ProShares Bitcoin & Ether Equal Weight ETF" [ref=e1324] [cursor=pointer]:
+                    - /url: /etf/BETE
+                - cell "$28.8442" [ref=e1325]:
+                  - generic [ref=e1327]: $28.8442
+                - cell "-0.5114 -1.74%" [ref=e1328]:
+                  - generic [ref=e1329]: "-0.5114"
+                  - generic [ref=e1330]: "-1.74%"
+                - cell "285,657.077" [ref=e1331]:
+                  - generic "285,657.077" [ref=e1332]: $285.66K
+                - cell "9,946" [ref=e1333]:
+                  - generic "9,946" [ref=e1334]: 9.95K
+                - cell "8.252%" [ref=e1335]:
+                  - generic [ref=e1336]: 8.252%
+                - cell "120,008" [ref=e1337]:
+                  - generic "120,008" [ref=e1338]: 120.01K
+                - cell "$7.78M" [ref=e1339]:
+                  - generic [ref=e1340]: $7.78M
+                - cell "3,461,534.754" [ref=e1341]:
+                  - generic "3,461,534.754" [ref=e1342]: $3.46M
+                - cell [ref=e1343]
+              - row "19 BITW BTC Bitwise 10 Crypto Index ETF $40.34 -0.7587 -1.85% 791,145.363 19,601 0.131% 14,921,947 601,951,341.98" [ref=e1344]:
+                - cell "19" [ref=e1345]
+                - cell "BITW BTC" [ref=e1346]:
+                  - link "BITW" [ref=e1348] [cursor=pointer]:
+                    - /url: /etf/BITW
+                  - generic [ref=e1349]: BTC
+                - cell "Bitwise 10 Crypto Index ETF" [ref=e1350]:
+                  - link "Bitwise 10 Crypto Index ETF" [ref=e1352] [cursor=pointer]:
+                    - /url: /etf/BITW
+                - cell "$40.34" [ref=e1353]:
+                  - generic [ref=e1355]: $40.34
+                - cell "-0.7587 -1.85%" [ref=e1356]:
+                  - generic [ref=e1357]: "-0.7587"
+                  - generic [ref=e1358]: "-1.85%"
+                - cell "791,145.363" [ref=e1359]:
+                  - generic "791,145.363" [ref=e1360]: $791.15K
+                - cell "19,601" [ref=e1361]:
+                  - generic "19,601" [ref=e1362]: 19.60K
+                - cell "0.131%" [ref=e1363]:
+                  - generic [ref=e1364]: 0.131%
+                - cell "14,921,947" [ref=e1365]:
+                  - generic "14,921,947" [ref=e1366]: 14.92M
+                - cell [ref=e1367]
+                - cell "601,951,341.98" [ref=e1368]:
+                  - generic "601,951,341.98" [ref=e1369]: $601.95M
+                - cell [ref=e1370]
+              - row "20 MSBT Morgan Stanley Bitcoin Trust $18.04 -0.4 -2.17% 14,390,013.433 800,330 - - -" [ref=e1371]:
+                - cell "20" [ref=e1372]
+                - cell "MSBT" [ref=e1373]:
+                  - link "MSBT" [ref=e1375] [cursor=pointer]:
+                    - /url: /etf/MSBT
+                - cell "Morgan Stanley Bitcoin Trust" [ref=e1376]:
+                  - link "Morgan Stanley Bitcoin Trust" [ref=e1378] [cursor=pointer]:
+                    - /url: /etf/MSBT
+                - cell "$18.04" [ref=e1379]:
+                  - generic [ref=e1381]: $18.04
+                - cell "-0.4 -2.17%" [ref=e1382]:
+                  - generic [ref=e1383]: "-0.4"
+                  - generic [ref=e1384]: "-2.17%"
+                - cell "14,390,013.433" [ref=e1385]:
+                  - generic "14,390,013.433" [ref=e1386]: $14.39M
+                - cell "800,330" [ref=e1387]:
+                  - generic "800,330" [ref=e1388]: 800.33K
+                - cell "-" [ref=e1389]
+                - cell "-" [ref=e1390]
+                - cell [ref=e1391]
+                - cell "-" [ref=e1392]:
+                  - generic [ref=e1393]: "-"
+                - cell [ref=e1394]
+        - button "Show All" [ref=e1396] [cursor=pointer]
+        - generic [ref=e1398]:
+          - generic [ref=e1399]:
+            - heading "Bitcoin ETF Premium/Discount to NAV History" [level=2] [ref=e1400]
+            - generic [ref=e1402] [cursor=pointer]:
+              - combobox [ref=e1403]: Premium/Discount to NAV
+              - img [ref=e1405]
+              - textbox [ref=e1407]: premiumDiscountPercent
+          - generic [ref=e1409]:
+            - progressbar [ref=e1412]:
+              - img [ref=e1413]
+              - img [ref=e1416]
+            - generic [ref=e1419]:
+              - generic:
+                - generic:
+                  - img
+        - generic [ref=e1424]:
+          - heading "Bitcoin ETF FAQ (Cryptocurrency ETF FAQ)" [level=3] [ref=e1425]
+          - generic [ref=e1426]:
+            - generic [ref=e1427]:
+              - button "1. What is a Bitcoin ETF, and how does it track the price of Bitcoin?" [expanded] [ref=e1428] [cursor=pointer]:
+                - img [ref=e1430]
+                - generic [ref=e1432]: 1. What is a Bitcoin ETF, and how does it track the price of Bitcoin?
+              - generic [ref=e1434]: A Bitcoin ETF (Exchange-Traded Fund) is a financial product that is listed and traded on a securities exchange, designed to track the market price of Bitcoin by holding underlying assets such as spot Bitcoin or related futures contracts. This type of ETF allows investors to gain exposure to the price of Bitcoin through traditional brokerage accounts, without the need to directly manage digital wallets or private keys.
+            - button "2. What is the difference between a Bitcoin spot ETF and a futures ETF?" [ref=e1436] [cursor=pointer]:
+              - img [ref=e1438]
+              - generic [ref=e1440]: 2. What is the difference between a Bitcoin spot ETF and a futures ETF?
+            - button "3. How can I use the Bitcoin ETF list to compare different funds?" [ref=e1442] [cursor=pointer]:
+              - img [ref=e1444]
+              - generic [ref=e1446]: 3. How can I use the Bitcoin ETF list to compare different funds?
+            - button "4. What do inflows and outflows of a Bitcoin ETF indicate?" [ref=e1448] [cursor=pointer]:
+              - img [ref=e1450]
+              - generic [ref=e1452]: 4. What do inflows and outflows of a Bitcoin ETF indicate?
+            - button "5. What do an ETF’s assets under management (AUM) and net asset value (NAV) represent?" [ref=e1454] [cursor=pointer]:
+              - img [ref=e1456]
+              - generic [ref=e1458]: 5. What do an ETF’s assets under management (AUM) and net asset value (NAV) represent?
+            - button "6. What is the difference between investing in a Bitcoin ETF and directly holding Bitcoin?" [ref=e1460] [cursor=pointer]:
+              - img [ref=e1462]
+              - generic [ref=e1464]: 6. What is the difference between investing in a Bitcoin ETF and directly holding Bitcoin?
+            - button "7. How do institutional investors view Bitcoin ETFs?" [ref=e1466] [cursor=pointer]:
+              - img [ref=e1468]
+              - generic [ref=e1470]: 7. How do institutional investors view Bitcoin ETFs?
+            - button "8. What risks are involved in ETF investing, especially for Bitcoin ETFs?" [ref=e1472] [cursor=pointer]:
+              - img [ref=e1474]
+              - generic [ref=e1476]: 8. What risks are involved in ETF investing, especially for Bitcoin ETFs?
+            - button "9. How can Bitcoin ETF data be analyzed together with crypto derivatives indicators?" [ref=e1478] [cursor=pointer]:
+              - img [ref=e1480]
+              - generic [ref=e1482]: 9. How can Bitcoin ETF data be analyzed together with crypto derivatives indicators?
+            - button "10. Does CoinGlass provide ETF data APIs?" [ref=e1484] [cursor=pointer]:
+              - img [ref=e1486]
+              - generic [ref=e1488]: 10. Does CoinGlass provide ETF data APIs?
+            - button "11. What ETF APIs are available for Bitcoin ETFs?" [ref=e1490] [cursor=pointer]:
+              - img [ref=e1492]
+              - generic [ref=e1494]: 11. What ETF APIs are available for Bitcoin ETFs?
+            - button "12. Does CoinGlass support accessing Ethereum ETF data via API?" [ref=e1496] [cursor=pointer]:
+              - img [ref=e1498]
+              - generic [ref=e1500]: 12. Does CoinGlass support accessing Ethereum ETF data via API?
+      - insertion [ref=e1502]
+      - generic [ref=e1505]:
+        - generic [ref=e1506]:
+          - img [ref=e1509]
+          - generic [ref=e1522]:
+            - generic [ref=e1523]: About
+            - link "About Us" [ref=e1524] [cursor=pointer]:
+              - /url: /aboutus
+              - generic [ref=e1525]: About Us
+            - link "Contact Us" [ref=e1526] [cursor=pointer]:
+              - /url: mailto:contact@coinglass.com
+              - generic [ref=e1527]: Contact Us
+            - link "Disclaimer" [ref=e1528] [cursor=pointer]:
+              - /url: /Disclaimer
+              - generic [ref=e1529]: Disclaimer
+            - link "Terms of Use" [ref=e1530] [cursor=pointer]:
+              - /url: /terms
+              - generic [ref=e1531]: Terms of Use
+            - link "Privacy Policy" [ref=e1532] [cursor=pointer]:
+              - /url: /privacy-policy
+              - generic [ref=e1533]: Privacy Policy
+          - generic [ref=e1535]:
+            - generic [ref=e1536]: Products
+            - link "Legend" [ref=e1537] [cursor=pointer]:
+              - /url: https://legend.coinglass.com
+              - generic [ref=e1538]: Legend
+            - link "Crypto APP" [ref=e1539] [cursor=pointer]:
+              - /url: /download
+              - generic [ref=e1540]: Crypto APP
+            - link "Crypto API" [ref=e1541] [cursor=pointer]:
+              - /url: /CryptoApi
+              - generic [ref=e1542]: Crypto API
+            - link "Pricing" [ref=e1543] [cursor=pointer]:
+              - /url: /pricing
+              - generic [ref=e1544]: Pricing
+            - link "Crypto Chart" [ref=e1545] [cursor=pointer]:
+              - /url: /pro
+              - generic [ref=e1546]: Crypto Chart
+          - generic [ref=e1548]:
+            - generic [ref=e1549]: More
+            - link "Learning Center" [ref=e1550] [cursor=pointer]:
+              - /url: /learn
+              - generic [ref=e1551]: Learning Center
+            - link "Alerts" [ref=e1552] [cursor=pointer]:
+              - /url: /alert
+              - generic [ref=e1553]: Alerts
+          - generic [ref=e1555]:
+            - link "Donations" [ref=e1556] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e1557]: Donations
+            - link "BTC" [ref=e1558] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e1559]: BTC
+            - link "ETH" [ref=e1560] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e1561]: ETH
+            - link "USDT" [ref=e1562] [cursor=pointer]:
+              - /url: /donations
+              - generic [ref=e1563]: USDT
+          - generic [ref=e1565]:
+            - generic [ref=e1566]: Community
+            - link "X(Twitter)" [ref=e1567] [cursor=pointer]:
+              - /url: https://twitter.com/coinglass_com
+              - generic [ref=e1568]: X(Twitter)
+            - link "Telegram" [ref=e1569] [cursor=pointer]:
+              - /url: https://t.me/Coinglass
+              - generic [ref=e1570]: Telegram
+        - generic [ref=e1571]:
+          - generic [ref=e1572]: © 2026 CoinGlass, all rights reserved
+          - generic [ref=e1573]:
+            - link "app-store" [ref=e1574] [cursor=pointer]:
+              - /url: /download
+              - img "app-store" [ref=e1575]
+            - link "google-play" [ref=e1576] [cursor=pointer]:
+              - /url: /download
+              - img "google-play" [ref=e1577]
+  - alert [ref=e1578]

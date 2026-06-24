@@ -60,7 +60,7 @@ For alts, the worldview is harsher still: price everything **in BTC** and demand
    Rising & below-trend (Rebound/Calm) → green light to deploy faster. High & falling (Turbulence) → throttle
    to defensive tranches and raise cash. Remember the lead is *months*, so act ahead of the economy. (`01`)
    **REQUIRED INPUTS for liquidity pillar:**
-   - `fomc-monitor` → Fed tone (HAWKISH/DOVISH), actual statement language, next meeting date.
+   - `feed-fomc` → Fed tone (HAWKISH/DOVISH), actual statement language, next meeting date.
      A hawkish Fed = liquidity headwind; dovish = tailwind. Read the primary source, not just FedWatch odds.
    - `prediction-market-odds` → CME FedWatch rate-path probabilities (market-implied, anchors your base case).
    - CPI/PCE: fetch latest from https://www.bls.gov/cpi/ (headline + core). Above-trend inflation →

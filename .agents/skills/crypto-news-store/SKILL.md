@@ -51,6 +51,59 @@ back to Jaccard. (True `sqlite-vec` ANN storage is the documented next hook; thi
 BM25 (FTS5) **fused with** near-dup-cluster Jaccard rank via **RRF** (reciprocal-rank fusion, k=60).
 Returns **events, not raw rows**.
 
+## News sources & fetch commands
+
+`news_fetch.py` is the canonical fetcher. Run it once to ingest all feeds below in one shot:
+
+```bash
+python3 .agents/skills/crypto-news-store/news_fetch.py \
+  --db .db/news.db --days 5 \
+  --query "bitcoin BTC ETF regulation treasury strategy"
+```
+
+**Feeds already wired inside `news_fetch.py` (keyless, verified 2026-06):**
+
+| Source | Signal | Notes |
+|---|---|---|
+| CoinDesk | ETF approvals, institutional, macro | Full RSS content |
+| Decrypt | DeFi, retail narrative, culture | Full RSS content |
+| CoinTelegraph | Broad crypto news, regulatory | Full RSS content |
+| The Block | Institutional, data-driven | Full RSS content |
+| Bitcoin Magazine | BTC-native, halving, protocol | Full RSS content |
+| Coinbase blog | Institutional research, policy | Via Google News proxy (direct 403) |
+| FT | Macro, rates, global risk-off | RSS teaser (paywall — headline only) |
+| WSJ | US regulatory, Fed, institutional | Via Google News proxy |
+| Bloomberg | Rates, macro, ETF (podcast feed) | Best-effort — often 403 |
+
+**Supplementary keyless sources (call directly when targeted fetch needed):**
+
+```bash
+# Google News RSS — on-demand entity search; also captures Reuters, AP
+curl -sL "https://news.google.com/rss/search?q=bitcoin+ETF+regulation+when:2d&hl=en-US&gl=US&ceid=US:en"
+
+# SEC EDGAR — hard primary-source 8-K filings (treasury buys, ETF S-1s, enforcement)
+curl -sL -A "research@example.invalid" \
+  "https://efts.sec.gov/LATEST/search-index?q=%22bitcoin%22&forms=8-K&dateRange=custom&startdt=$(date -v-7d +%Y-%m-%d)"
+
+# CoinGecko trending — retail attention / narrative-rotation proxy (replaces LunarCrush/Santiment)
+curl -sL "https://api.coingecko.com/api/v3/search/trending"
+
+# Fear & Greed Index — crowd sentiment cross-check
+curl -s "https://api.alternative.me/fng/?limit=7"
+
+# ETF flows — farside.co.uk is Cloudflare-gated (403 to curl).
+# Use one of:
+#   (a) news events from news_fetch.py already contain ETF flow headlines
+#   (b) WebFetch/Chrome-CDP: https://farside.co.uk/btc/  (JS render required)
+```
+
+**Source priority for narrative analysis:**
+1. `news_fetch.py` — primary; run first, covers 9 feeds
+2. Google News RSS — for targeted entity search and Reuters/AP coverage
+3. SEC EDGAR — for hard, timestamped primary-source regulatory/treasury events
+4. CoinGecko trending — retail attention signal
+5. farside.co.uk — ETF flows; WebFetch/CDP path only (not curl-able)
+
 ## Commands
 
 ```bash
