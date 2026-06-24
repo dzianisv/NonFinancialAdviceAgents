@@ -21,15 +21,14 @@ Publish today's crypto portfolio analysis to Notion, Telegram, and X.com.
 
 | Credential / Skill | Where it lives | Used for |
 |---|---|---|
-| `NOTION_TOKEN` | `~/.env.d/notion.env` | Creating Notion pages |
-| `NOTION_PARENT_PAGE_ID` | `~/.env.d/notion.env` (or prompt user) | Where to create the page |
+| **Notion MCP** | Built-in session tools (`notion-API-*`) | Creating Notion pages — no token needed |
 | **telegram-cli skill** | `~/.agents/skills/telegram-cli/` | Posting to Telegram channel |
 | **chrome-use skill** | `~/.agents/skills/chrome-use/` | Tweeting on X.com |
 | Chrome running + logged into X.com | Real Chrome with DevTools allowed | chrome-use requires live Chrome session |
 
-Load Notion creds: `source ~/.env.d/notion.env`  
 Telegram-cli script: `~/.agents/skills/telegram-cli/telegram-cli.py`  
-Chrome-use binary: `~/.agents/skills/chrome-use/scripts/chrome-use`
+Chrome-use binary: `~/.agents/skills/chrome-use/scripts/chrome-use`  
+Notion parent page ID (hardcoded): `15dac25eb49f8048b97ec7f1cffc5d6b` (the `crypto` page)
 
 ---
 
@@ -62,9 +61,7 @@ fi
 ## Step 1 — Extract content from today's report
 
 Read the report file and extract:
-
 ```bash
-source ~/.env.d/notion.env   # loads NOTION_TOKEN and NOTION_PARENT_PAGE_ID
 REPORT_CONTENT=$(cat "$REPORT")
 ```
 
@@ -73,48 +70,48 @@ Pull the three payload sections from the report:
 2. **Telegram recap** — the block starting with `📊 Daily Crypto Brief`
 3. **Key facts for tweet** — top signal + top catalyst from Block 2
 
-If the Telegram recap section is missing from the report, construct it per the `crypto-portfolio-manager` Step 5 format using the signal table and Block 2 verdicts already in the report.
+If the Telegram recap section is missing from the report, construct it per the `crypto-portfolio-manager` Step 6 format using the signal table and Block 2 verdicts already in the report.
 
 ---
 
-## Step 2 — Create Notion page
+## Step 2 — Create Notion page via Notion MCP
 
-Use the Notion API to create a new page under the parent page.
+**Use the Notion MCP tools directly** — no script needed, no NOTION_TOKEN env var.
 
-```bash
-source ~/.env.d/notion.env
+**2a. Create the page** (empty, under the `crypto` parent):
+```
+notion-API-post-page
+  parent: {"page_id": "15dac25eb49f8048b97ec7f1cffc5d6b"}
+  properties: {"title": {"title": [{"type":"text","text":{"content":"📊 Crypto Daily — {TODAY}"}}]}}
+  children: []
+```
+Save the returned `id` as `PAGE_ID`.
 
-# Build the page title
-TITLE="📊 Crypto Daily — ${TODAY}"
+**2b. Convert the report to Notion blocks** — parse the Markdown line by line:
+- `# heading` → `heading_1` block
+- `## heading` → `heading_2` block  
+- `### heading` → `heading_3` block
+- `- bullet` → `bulleted_list_item` block
+- ` ``` ` fence → `code` block (language from fence tag)
+- `---` → `divider` block
+- everything else → `paragraph` block
+- Strip Markdown bold/links from paragraph text (Notion rich_text doesn't parse inline Markdown)
+- Chunk text to ≤ 2000 chars per `rich_text` object (Notion API hard limit)
 
-# Run the Notion publisher script
-python3 .agents/skills/crypto-daily/scripts/notion_publish.py \
-  --token    "$NOTION_TOKEN" \
-  --parent   "$NOTION_PARENT_PAGE_ID" \
-  --title    "$TITLE" \
-  --report   "$REPORT"
+**2c. Append blocks in batches of 50** using `notion-API-patch-block-children`:
+```
+notion-API-patch-block-children
+  block_id: {PAGE_ID}
+  children: [{batch of ≤50 block objects}]
+```
+Repeat until all blocks are appended.
+
+**2d. Print the page URL:**
+```
+✅ Notion page: https://app.notion.com/p/Crypto-Daily-{TODAY}-{PAGE_ID_no_hyphens}
 ```
 
-The script (`scripts/notion_publish.py`) converts the Markdown report to Notion blocks and POSTs to the Notion API. It prints the URL of the created page on success:
-
-```
-✅ Notion page created: https://www.notion.so/Crypto-Daily-2026-06-23-<id>
-```
-
-**If `NOTION_PARENT_PAGE_ID` is not set**, prompt the user:
-```
-⚠️  NOTION_PARENT_PAGE_ID not set. Open Notion, navigate to the target page,
-    copy its ID from the URL (the 32-char hex after the last dash), and set:
-    export NOTION_PARENT_PAGE_ID=<id>
-```
-
-**Fallback** if the API fails: open `https://notion.so` in Chrome-use and create the page manually:
-```bash
-CHROME=~/.agents/skills/chrome-use/scripts/chrome-use
-$CHROME open "https://notion.so"
-$CHROME snapshot -i
-# Find the "New page" or "+" button, click it, type the title, paste content
-```
+> **Why MCP, not a script:** `notion-API-post-page` and `notion-API-patch-block-children` are available as native tools in this session. No subprocess, no token management, no dependency on Python or the `requests` library. The MCP handles auth transparently.
 
 ---
 
