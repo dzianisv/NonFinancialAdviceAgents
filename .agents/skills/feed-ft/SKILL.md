@@ -1,6 +1,6 @@
 ---
 name: feed-ft
-description: Source adapter for the Financial Times (FT) — PAYWALLED, RSS descriptions/teasers available as summary. Fetch + normalize the FT RSS into the common article record (headline + url + published_at) with body from RSS teaser (or [UNAVAILABLE - paywall] if empty). Use when gathering the crypto/macro news feed, when narrative-news needs FT coverage, or when asked for "FT headlines" / "Financial Times news". Fetch + normalize ONLY — no dedup/store/judge. NEVER fabricates a body.
+description: Source adapter for the Financial Times (FT) — PAYWALLED, RSS descriptions/teasers available as summary. Fetch + normalize the FT RSS into the common article record (headline + url + published_at) with body from RSS teaser (or [UNAVAILABLE - paywall] if empty). When an agent needs FT news on demand, run `scripts/fetch_ft.ts` to print live FT headlines + real URLs + teasers to stdout (no DB, no deps). Use when gathering the crypto/macro news feed, when narrative-news needs FT coverage, or when asked for "FT headlines" / "Financial Times news" / "what is the FT saying about X". Fetch + normalize ONLY — no dedup/store/judge. NEVER fabricates a body.
 license: MIT
 compatibility: opencode
 metadata:
@@ -16,6 +16,38 @@ Pure **fetch + normalize** adapter for a **paywalled** outlet. FT bodies are beh
 adapter emits **headline + url + published_at + RSS teaser** (the publisher's own `description`) and marks
 the body `[UNAVAILABLE - paywall]` only when the RSS teaser is absent. Dedup/store/judge live downstream in
 [[crypto-news-store]] + [[narrative-news]].
+
+## On-demand fetch (agent) — START HERE
+
+When you (an agent) need FT news **right now**, run the self-contained fetcher. It pulls FT's native
+section RSS, normalizes + dedups, and prints to **stdout** — no database, no npm deps (Bun built-ins):
+
+```bash
+bun /Users/engineer/workspace/backtest/.agents/skills/feed-ft/scripts/fetch_ft.ts [flags]
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--section a,b,c` | `markets,companies,global-economy,world` | FT sections; any `ft.com/<section>` works (technology, lex, unhedged, alphaville, …) |
+| `--query "terms"` | — | Case-insensitive filter over title+teaser; multiple words = AND |
+| `--days N` | `7` | Keep only items published within N days |
+| `--limit N` | `50` | Cap the number of records |
+| `--text` | off | Human-readable lines instead of JSON |
+
+```bash
+# Latest markets + companies headlines as JSON
+bun .../scripts/fetch_ft.ts --section markets,companies --limit 20
+
+# What is the FT saying about AI chips this week, human-readable?
+bun .../scripts/fetch_ft.ts --query "AI chips" --days 7 --text
+```
+
+**Output:** JSON array of `{source,url,title,published_at,summary,tags}` (newest first). Each `summary` is
+FT's own teaser, or `"[UNAVAILABLE - paywall]"` if FT shipped none — **never a fabricated body**. If every
+section fails the script prints a single `{"status":"[UNAVAILABLE]","reason":...}` record and exits non-zero.
+For full article text use the logged-in-Chrome reader in **Reading the BODY** below.
+
+Tests (deterministic, no network): `bun test ./.agents/skills/feed-ft/scripts/fetch_ft.test.ts`.
 
 ## Hard rule (paywall)
 
