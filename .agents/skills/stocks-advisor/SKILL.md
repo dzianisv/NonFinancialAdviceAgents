@@ -137,15 +137,16 @@ with a theme in the output).
 Before seeding the todo list, pull prior verdicts and user preferences for this run's tickers:
 
 ```bash
-python3 .agents/skills/portfolio-memory/scripts/inject_context.py \
-  --db .db/portfolio_memory.db --desk stocks \
-  --tickers AVGO MRVL COIN PYPL
+bun .agents/skills/portfolio-memory/recall.ts --desk stocks \
+  --tickers "AVGO MRVL COIN PYPL"
 ```
 
-Inject the printed `<prior_context>` block into EVERY seat's data package. This is how the agent
-remembers: COIN=HOLD (crypto bullish), prior entry zones, previous theme classifications, user
-preferences like "RSP over VOO". If the DB does not exist yet, the script prints
-`[no prior memory for this run]` — continue normally.
+Inject the printed `<prior_context>` block into EVERY seat's data package. It has two parts: the
+**canonical** current stance per ticker (evergreen — the latest verdict, which physically overwrote
+any older one, so you can never follow a stale call), and **episodic** dated history newest-first.
+This is how the agent remembers: COIN=HOLD (crypto bullish), prior entry zones, previous theme
+classifications, user preferences like "RSP over VOO". If there is no prior memory the script prints
+`[no prior memory for this run]` — continue normally. See `portfolio-memory` skill for the model.
 
 ---
 
@@ -360,16 +361,15 @@ UPDATE todos SET status='done' WHERE id='stk-{TICKER}';
 
 **1g. Write verdict to memory:**
 
-After each ticker completes, append to the cross-run memory store:
+After each ticker completes, persist the verdict. This upserts the canonical one-line stance (the
+new verdict overwrites any prior one for this ticker — supersede is enforced here, not left to the
+agent) and appends to the dated episodic log:
 
 ```bash
-python3 .agents/skills/portfolio-memory/memory.py remember \
-  --desk stocks \
-  --ticker {TICKER} \
-  --verdict {BUY|WATCH|SKIP|HOLD} \
-  --body "{TICKER} stocks {VERDICT} — fundamental {RATING}: {KEY_METRIC}; technical {STATE}: {SETUP}; narrative {PHASE}: {WHY}; sentiment {READ}: {KEY}. Entry {entry_low}-{entry_high}, trigger {trigger}, stop {stop}, conviction {conv}/5. Theme {theme}." \
-  --meta '{"entry_low": X, "entry_high": Y, "stop": Z, "conviction": N, "theme": "...", "seats": {...}}' \
-  --run-id {DATE}
+bun .agents/skills/portfolio-memory/remember.ts \
+  --desk stocks --ticker {TICKER} --verdict {BUY|ADD|WATCH|HOLD|TRIM|EXIT|SKIP} \
+  --date {YYYY-MM-DD} --conviction {N} \
+  --body "{cause-first thesis ≤200 chars}: fundamental {RATING} {KEY_METRIC}; technical {STATE}; narrative {PHASE}; entry {entry_low}-{entry_high}, stop {stop}. Theme {theme}."
 ```
 
 ---
