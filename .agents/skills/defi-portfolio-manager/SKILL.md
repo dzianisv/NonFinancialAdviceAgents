@@ -54,12 +54,12 @@ if the Researcher loves a vault the Auditor flagged, it's out), and present. For
 
 ## Workflow — the weekly cycle (default)
 
-1. **Intake** — confirm the weekly review (or the specific ask) and the book's risk profile (default MODERATE).
+1. **Intake** — confirm the weekly review (or the specific ask) and the book's risk profile (default MODERATE). **Load the investor's known wallets first** from the dated cache (Data §): `bun .agents/skills/defi-portfolio-manager/scripts/portfolio_cache.ts wallets`. If it lists wallet(s) you already know where to read; if the investor names a new `0x…`, use that and add it to the cache after reading. Treat any cached positions as a *prior snapshot to diff*, never as current truth — re-pull live before acting.
 2. **Delegate (parallel)** — spawn Portfolio Analyst + Yield Researcher + Risk/Incident Auditor concurrently.
 3. **Synthesize** — reconcile their outputs; apply vetoes; rank the eligible moves.
 4. **Construct** — Strategy Constructor builds the moderate target; crash-test (−60% crypto within the drawdown budget).
 5. **Ticket** — Execution Planner emits concrete from→to tickets, even when the verdict is "hold/don't."
-6. **Deliver** — the Deliverable format. The investor executes (read-only).
+6. **Deliver** — the Deliverable format. The investor executes (read-only). **Then append today's live snapshot to `.crypto-portfolio.csv`** (Data §) so the next run already knows the wallets and can diff against this read.
 
 ## Risk profile — MODERATE (default; tune per investor)
 
@@ -109,6 +109,10 @@ wrapped assets with custody or bridge risk, and **anything whose yield source yo
 - **Holdings — pick the source by what the investor gives you:**
   - **On-chain wallet (a `0x…` address / ENS):** read it from the **DeBank web UI via the `chrome-use` skill — NEVER the DeBank API (`api.debank.com` / `pro-openapi.debank.com`).** The web UI needs no API key and shows full multi-chain DeFi/LP positions. Delegate to a `chrome-use` subagent: connect to the existing Chrome session, open `https://debank.com/profile/<address>`, wait for the portfolio to load, then read per-protocol DeFi positions (LP legs, supplied/borrowed, rewards), idle token balances, and the per-chain/total USD. Capture each LP/position's protocol, chain, pool/pair, USD value, and any APY shown. If a position is an LP, note both legs and whether it's in-range (concentrated-liquidity) — out-of-range LPs earn no fees and are a prime inefficiency. The `api.debank.com` HTTP endpoint is rate-limited/keyed and **must not** be used.
   - **Off-chain / manual book (a Google Sheet):** `gws sheets +read --spreadsheet "$CRYPTO_SHEET_ID" --range "$CRYPTO_SHEET_RANGE" --format csv`. Interpret any layout yourself.
+- **Wallet registry & dated position cache — `.crypto-portfolio.csv` (repo root, gitignored):** the durable list of the investor's wallet addresses + a dated snapshot of their positions, so a portfolio question never has to start by asking "what's your address?". It is a CACHE, not truth — addresses are stable, balances/APYs are not, so always re-pull live before acting. Manage it with the zero-key Bun helper:
+  - `bun .agents/skills/defi-portfolio-manager/scripts/portfolio_cache.ts wallets` — list known addresses (label · last snapshot date · USD total). **Run this at Intake** to learn where to read.
+  - `… latest [address]` — most-recent snapshot rows, to diff against today's live read; `… dates` — snapshot history.
+  - `… append -` — after every fresh live read, pipe a JSON array of position rows to record a new dated snapshot (columns: `snapshot_date,address,wallet_label,chain,protocol,position_type,symbol,amount,usd_value,apy_pct,in_range,source,notes`; `snapshot_date`+`address` required). Each call appends a new date — never overwrite history.
 - **Live APY + collateral:** DefiLlama `curl -s https://yields.llama.fi/pools` (+ `/chart/{poolId}` for 30-day history); Morpho `https://api.morpho.org/graphql` for vault collateral (chainId 1=Ethereum, 8453=Base).
 - **Incidents/news:** WebSearch (Risk Auditor's job) — include **time-sensitive deadlines** (bridge shutdowns, migration windows) that should re-order exits.
 - **Pin the exact pool id / vault address for each leg, and state its execution venue (spot vs lent).** Beware **name-collision** venues — e.g. a Morpho "SYRUPUSDC" *collateral* market at 0% vs Maple's native syrupUSDC *yield* pool; route to the yield-bearing pool, not a same-named market. A "buy/hold" leg counts toward whatever protocol it actually lands in (spot BTC bought through a Morpho market counts toward the Morpho cap) — say "held spot / self-custody" when you mean it.
@@ -136,4 +140,5 @@ tail risk that didn't trigger in-sample and by churning.
 - The target fits the MODERATE bands and holds zero shitty assets; the caps checklist is compliant by construction.
 - Every APY/collateral/address is live-pulled, tagged with source + re-pull; nothing from memory.
 - You delivered concrete from→to tickets — even for "hold."
+- You recorded today's read to `.crypto-portfolio.csv` (dated `append`) so the wallet registry + last snapshot stay current for the next run.
 - You did not sign or move any funds.

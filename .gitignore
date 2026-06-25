@@ -17,6 +17,9 @@ stocks/portfolio-review.csv
 stocks/monitor-report-*.md
 .agents/skills/portfolio-monitor/scripts/__pycache__/
 
+# defi-portfolio-manager: investor wallet addresses + dated position cache (public repo — never commit)
+.crypto-portfolio.csv
+
 # local-only copyrighted source books; keep the catalog README tracked
 books/*
 !books/README.md
