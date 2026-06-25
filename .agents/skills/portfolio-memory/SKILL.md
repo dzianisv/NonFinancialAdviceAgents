@@ -1,6 +1,6 @@
 ---
 name: portfolio-memory
-description: "Cross-run BM25 memory store for stocks-portfolio-manager and crypto-portfolio-manager. Stores per-ticker verdicts and durable user preferences in SQLite FTS5. On each run: (1) inject_context.py recalls relevant prior verdicts ranked by BM25 × exponential recency decay (half-life 45 days); (2) after analysis, memory.py remember appends the new verdict. Prevents agents forgetting prior calls (COIN=HOLD, PYPL=EXIT, crypto-bullish pref). SQLite FTS5 stdlib only — no embeddings, no numpy, no external APIs. Triggers: used internally by stocks/crypto-portfolio-manager Step -1 (load) and Step 1g (write)."
+description: "Cross-run BM25 memory store for stocks-advisor and crypto-advisor. Stores per-ticker verdicts and durable user preferences in SQLite FTS5. On each run: (1) inject_context.py recalls relevant prior verdicts ranked by BM25 × exponential recency decay (half-life 45 days); (2) after analysis, memory.py remember appends the new verdict. Prevents agents forgetting prior calls (COIN=HOLD, PYPL=EXIT, crypto-bullish pref). SQLite FTS5 stdlib only — no embeddings, no numpy, no external APIs. Triggers: used internally by stocks/crypto-advisor Step -1 (load) and Step 1g (write)."
 license: MIT
 compatibility: opencode
 metadata:
