@@ -26,7 +26,7 @@
  * Exit:   0 if >=1 article; 1 (and a [{status:"[UNAVAILABLE]"}] record) if every section failed.
  */
 
-const DEFAULT_SECTIONS = ["markets", "companies", "global-economy", "world"];
+export const DEFAULT_SECTIONS = ["markets", "companies", "global-economy", "world"];
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 
@@ -162,7 +162,7 @@ export function filterAndRank(
 
 // ── network ──────────────────────────────────────────────────────────────────
 
-async function fetchSection(
+export async function fetchSection(
   section: string,
 ): Promise<{ articles: FtArticle[]; error?: string }> {
   const url = `https://www.ft.com/${encodeURIComponent(section)}?format=rss`;
@@ -185,6 +185,26 @@ async function fetchSection(
 }
 
 // ── CLI ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetch every section sequentially and return the combined (un-ranked) records plus any
+ * per-section errors. Reused by the trend-stock-research ingest pipeline (feed_ft.ts) so FT
+ * endpoints + parsing live in exactly ONE place. Callers apply their own filter/dedup
+ * (e.g. filterAndRank, or DB upsert).
+ */
+export async function fetchAllSections(
+  sections: string[] = DEFAULT_SECTIONS,
+): Promise<{ articles: FtArticle[]; errors: string[] }> {
+  const articles: FtArticle[] = [];
+  const errors: string[] = [];
+  for (const section of sections) {
+    const r = await fetchSection(section);
+    articles.push(...r.articles);
+    if (r.error) errors.push(r.error);
+    await new Promise((res) => setTimeout(res, 300)); // polite, sequential
+  }
+  return { articles, errors };
+}
 
 function parseCliArgs(argv: string[]) {
   let sections = DEFAULT_SECTIONS;

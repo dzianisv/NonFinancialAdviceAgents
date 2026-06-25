@@ -42,6 +42,10 @@ CRYPTO_FEEDS = {
 #    2025-01-27). The new feeds carry real www.wsj.com URLs + a 1-sentence publisher teaser — far better
 #    than the previous Google News proxy, whose links were opaque redirects with no body.
 MACRO_FEEDS = {
+    # FT/WSJ endpoint source of truth is the TS fetchers (feed-ft/scripts/fetch_ft.ts,
+    # feed-wsj/scripts/fetch_wsj.ts). This stdlib-only Python ingest keeps its own copy of the same
+    # URLs on purpose (no bun runtime dependency); html.unescape() below decodes hex entities correctly.
+    # If an endpoint changes, update it in those TS files AND here.
     "ft-markets": "https://www.ft.com/markets?format=rss",
     "ft-companies": "https://www.ft.com/companies?format=rss",
     "ft-global-economy": "https://www.ft.com/global-economy?format=rss",

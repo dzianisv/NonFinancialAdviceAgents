@@ -71,7 +71,11 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
   **verbatim**, never scrape or fabricate the body). If a teaser is absent → `summary = "[UNAVAILABLE - paywall]"`.
   `lang: en`, `source: ft`.
 - **Pipeline:** the automated ingest is `crypto-news-store/news_fetch.py` (Python, drives narrative-news)
-  and `trend-stock-research/scripts/feeds/feed_ft.ts` (TS) — both already point at these endpoints.
+  and `trend-stock-research/scripts/feeds/feed_ft.ts` (TS). The TS pipeline feed is a thin adapter that
+  **imports `fetchAllSections()` from this skill's `scripts/fetch_ft.ts`** — so FT endpoints + RSS parsing
+  (incl. hex-entity decoding) live in exactly ONE place here; the adapter adds only date-filter, DB dedup,
+  Wayback enrich and upsert. `news_fetch.py` (stdlib-only, `html.unescape` decodes hex correctly) keeps its
+  own copy of the same endpoint list by design.
 
 ## Reading the BODY
 

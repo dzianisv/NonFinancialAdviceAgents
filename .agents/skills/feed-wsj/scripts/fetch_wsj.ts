@@ -27,7 +27,7 @@
  */
 
 // Friendly name -> Dow Jones public RSS feed code (feeds.content.dowjones.io/public/rss/<CODE>).
-const FEED_CODES: Record<string, string> = {
+export const FEED_CODES: Record<string, string> = {
   markets: "RSSMarketsMain",
   world: "RSSWorldNews",
   business: "WSJcomUSBusiness",
@@ -35,7 +35,7 @@ const FEED_CODES: Record<string, string> = {
   opinion: "RSSOpinion",
   lifestyle: "RSSLifestyle",
 };
-const DEFAULT_FEEDS = ["markets", "world", "business", "tech"];
+export const DEFAULT_FEEDS = ["markets", "world", "business", "tech"];
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 
@@ -179,7 +179,7 @@ export function filterAndRank(
 
 // ── network ──────────────────────────────────────────────────────────────────
 
-async function fetchFeed(name: string): Promise<{ articles: WsjArticle[]; error?: string }> {
+export async function fetchFeed(name: string): Promise<{ articles: WsjArticle[]; error?: string }> {
   const code = FEED_CODES[name] ?? name; // allow raw DJ codes too
   const url = `https://feeds.content.dowjones.io/public/rss/${encodeURIComponent(code)}`;
   try {
@@ -201,6 +201,25 @@ async function fetchFeed(name: string): Promise<{ articles: WsjArticle[]; error?
 }
 
 // ── CLI ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetch every feed sequentially and return the combined (un-ranked) records plus any per-feed
+ * errors. Reused by the trend-stock-research ingest pipeline (feed_wsj.ts) so WSJ endpoints +
+ * parsing live in exactly ONE place. Callers apply their own filter/dedup.
+ */
+export async function fetchAllFeeds(
+  feeds: string[] = DEFAULT_FEEDS,
+): Promise<{ articles: WsjArticle[]; errors: string[] }> {
+  const articles: WsjArticle[] = [];
+  const errors: string[] = [];
+  for (const name of feeds) {
+    const r = await fetchFeed(name);
+    articles.push(...r.articles);
+    if (r.error) errors.push(r.error);
+    await new Promise((res) => setTimeout(res, 300)); // polite, sequential
+  }
+  return { articles, errors };
+}
 
 function parseCliArgs(argv: string[]) {
   let feeds = DEFAULT_FEEDS;

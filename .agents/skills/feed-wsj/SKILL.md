@@ -71,7 +71,11 @@ failure → `[UNAVAILABLE]`. Return **≥1 headline record or a clean `[UNAVAILA
   `published_at` (ISO-8601 UTC), `description`→`summary` (WSJ's own teaser — keep **verbatim**, never scrape
   the body). If a teaser is absent → `summary = "[UNAVAILABLE - paywall]"`. `category`→`tags`, `lang: en`, `source: wsj`.
 - **Pipeline:** the automated ingest is `crypto-news-store/news_fetch.py` (Python, drives narrative-news)
-  and `trend-stock-research/scripts/feeds/feed_wsj.ts` (TS) — both already point at these endpoints.
+  and `trend-stock-research/scripts/feeds/feed_wsj.ts` (TS). The TS pipeline feed is a thin adapter that
+  **imports `fetchAllFeeds()` from this skill's `scripts/fetch_wsj.ts`** — so WSJ endpoints + RSS parsing
+  (incl. hex-entity decoding + title-suffix cleanup) live in exactly ONE place here; the adapter adds only
+  date-filter, DB dedup and upsert. `news_fetch.py` (stdlib-only, `html.unescape` decodes hex correctly)
+  keeps its own copy of the same endpoint list by design.
 
 ## Reading the BODY (verified method, June 2026)
 

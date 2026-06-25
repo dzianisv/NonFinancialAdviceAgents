@@ -1,34 +1,21 @@
 /**
- * Feed: Financial Times (FT)
- * PAYWALLED — native section RSS gives headline + REAL ft.com/content URL + a 1-sentence teaser
- * (CDATA <description>); bodies stay paywalled. Endpoints: `ft.com/<section>?format=rss` (verified
- * 2026-06-25). The old ft.com/rss/home is dead (301 → stale stub). When a teaser is absent the summary
- * falls back to [UNAVAILABLE - paywall] (never fabricated).
- * Optional Wayback enrichment for body (usually blocked by FT's subscribe-wall — best-effort only).
- * Usage: bun .agents/scripts/feeds/feed_ft.ts [--db path] [--days n] [--no-enrich]
+ * Feed: Financial Times (FT) — trend-stock-research ingest ADAPTER.
+ *
+ * Single source of truth for FT endpoints + RSS parsing is the feed-ft skill's on-demand fetcher
+ * (../../../feed-ft/scripts/fetch_ft.ts). This adapter calls its `fetchAllSections()` — which returns
+ * normalized ft.com/content URLs, decoded 1-sentence teasers (incl. WSJ/FT hex HTML entities), cleaned
+ * titles and ISO dates — then adds only the pipeline glue: date-window filter, DB dedup, optional
+ * Wayback body enrichment (best-effort; usually blocked by FT's subscribe-wall) and SQLite upsert.
+ * Bodies stay paywalled; absent teaser already arrives as "[UNAVAILABLE - paywall]" (never fabricated).
+ *
+ * Usage: bun .agents/skills/trend-stock-research/scripts/feeds/feed_ft.ts [--db path] [--days n] [--no-enrich]
  */
 
 import { Database } from "bun:sqlite";
 import type { Article, FeedResult } from "./types";
-import {
-  parseRSS,
-  stripHtml,
-  toISO,
-  isWithinDays,
-  parseArgs,
-  sleep,
-  fetchWaybackBody,
-  normalizeUrl,
-} from "./types";
+import { isWithinDays, parseArgs, sleep, fetchWaybackBody } from "./types";
 import { openDb, upsertArticle, hasArticle } from "./news_db";
-
-// FT native section RSS — real ft.com/content/<uuid> URLs + a 1-sentence publisher teaser.
-const FEED_URLS = [
-  "https://www.ft.com/markets?format=rss",
-  "https://www.ft.com/companies?format=rss",
-  "https://www.ft.com/global-economy?format=rss",
-  "https://www.ft.com/world?format=rss",
-];
+import { fetchAllSections } from "../../../feed-ft/scripts/fetch_ft";
 
 export async function fetchFT(
   db: Database,
@@ -37,57 +24,38 @@ export async function fetchFT(
 ): Promise<FeedResult> {
   const result: FeedResult = { source: "ft", fetched: 0, inserted: 0, enriched: 0, withinWindow: 0, errors: [] };
 
-  for (const feedUrl of FEED_URLS) {
-    try {
-      const resp = await fetch(feedUrl, {
-        headers: { "User-Agent": "FeedBot/1.0 (news aggregator)" },
-      });
-      if (!resp.ok) {
-        result.errors.push(`HTTP ${resp.status} from ${feedUrl}`);
-        continue;
-      }
+  const { articles, errors } = await fetchAllSections();
+  result.errors.push(...errors);
+  result.fetched = articles.length;
 
-      const xml = await resp.text();
-      const items = parseRSS(xml);
-      result.fetched += items.length;
+  for (const a of articles) {
+    if (!isWithinDays(a.published_at, days)) continue;
+    result.withinWindow++;
 
-      for (const item of items) {
-        if (!item.link) continue;
-        const publishedAt = toISO(item.pubDate);
-        if (!isWithinDays(publishedAt, days)) continue;
-        result.withinWindow++;
+    // Canonical fetcher already normalized the URL; dedup against DB (also dedups across sections
+    // within this run, since the first upsert makes hasArticle() true for the rest).
+    if (hasArticle(db, a.url)) continue;
 
-        // Real ft.com/content URL; normalize to dedup across sections (drops tracking params).
-        const url = normalizeUrl(item.link);
-        // Skip enrichment + insert for articles already in DB
-        if (hasArticle(db, url)) continue;
+    let body: string | null = null;
+    if (!noEnrich) {
+      body = await fetchWaybackBody(a.url);
+      await sleep(1000); // polite delay between Wayback requests
+    }
 
-        let body: string | null = null;
-        if (!noEnrich) {
-          body = await fetchWaybackBody(url);
-          await sleep(1000); // polite delay between Wayback requests
-        }
+    const article: Article = {
+      source: "ft",
+      url: a.url,
+      title: a.title,
+      summary: a.summary,
+      body,
+      published_at: a.published_at,
+      lang: "en",
+      tags: a.tags,
+    };
 
-        // FT ships a CDATA teaser; fall back to paywall marker only if it's ever absent.
-        const teaser = stripHtml(item.description);
-        const article: Article = {
-          source: "ft",
-          url,
-          title: item.title,
-          summary: teaser || "[UNAVAILABLE - paywall]",
-          body,
-          published_at: publishedAt,
-          lang: "en",
-          tags: item.categories,
-        };
-
-        if (upsertArticle(db, article)) {
-          result.inserted++;
-          if (body) result.enriched++;
-        }
-      }
-    } catch (e: unknown) {
-      result.errors.push(e instanceof Error ? e.message : String(e));
+    if (upsertArticle(db, article)) {
+      result.inserted++;
+      if (body) result.enriched++;
     }
   }
 
