@@ -73,6 +73,13 @@ The grep fallback works with zero setup. To upgrade recall to OpenClaw's full ra
 
 Never hard-depend on the CLI — recall.ts always degrades to grep.
 
+## Tests
+
+`bun test ./.agents/skills/portfolio-memory/memory.test.ts` — 10 end-to-end tests over the real
+CLIs: supersede-by-overwrite, dated-history preservation, desk isolation, recall ordering
+(canonical-first then dated newest-first), preferences, empty-memory sentinel, word-boundary ticker
+matching, arg validation. Re-run after any edit to recall.ts/remember.ts.
+
 ## Done when
 
 - `remember.ts` for an existing ticker prints `[superseded]` and `positions.md` still has exactly ONE line for that `<desk>:<TICKER>`.
