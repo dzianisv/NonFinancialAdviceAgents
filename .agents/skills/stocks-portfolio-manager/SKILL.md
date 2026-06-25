@@ -121,6 +121,23 @@ with a theme in the output).
 
 ---
 
+## Step -1 — Load prior memory (before anything else)
+
+Before seeding the todo list, pull prior verdicts and user preferences for this run's tickers:
+
+```bash
+python3 .agents/skills/portfolio-memory/scripts/inject_context.py \
+  --db .db/portfolio_memory.db --desk stocks \
+  --tickers AVGO MRVL COIN PYPL
+```
+
+Inject the printed `<prior_context>` block into EVERY seat's data package. This is how the agent
+remembers: COIN=HOLD (crypto bullish), prior entry zones, previous theme classifications, user
+preferences like "RSP over VOO". If the DB does not exist yet, the script prints
+`[no prior memory for this run]` — continue normally.
+
+---
+
 ## Step 0 — Seed the todo list (one row per ticker)
 
 ```sql
@@ -303,6 +320,20 @@ UPDATE todos SET status='done' WHERE id='stk-{TICKER}';
 ```
 
 **1f. Repeat** for the next `pending` todo until none remain.
+
+**1g. Write verdict to memory:**
+
+After each ticker completes, append to the cross-run memory store:
+
+```bash
+python3 .agents/skills/portfolio-memory/memory.py remember \
+  --desk stocks \
+  --ticker {TICKER} \
+  --verdict {BUY|WATCH|SKIP|HOLD} \
+  --body "{TICKER} stocks {VERDICT} — fundamental {RATING}: {KEY_METRIC}; technical {STATE}: {SETUP}; narrative {PHASE}: {WHY}; sentiment {READ}: {KEY}. Entry {entry_low}-{entry_high}, trigger {trigger}, stop {stop}, conviction {conv}/5. Theme {theme}." \
+  --meta '{"entry_low": X, "entry_high": Y, "stop": Z, "conviction": N, "theme": "...", "seats": {...}}' \
+  --run-id {DATE}
+```
 
 ---
 
