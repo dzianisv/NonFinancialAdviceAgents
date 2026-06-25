@@ -19,7 +19,7 @@ compatibility: >
   account (for a manual Google-Sheet book).
 metadata:
   author: engineer
-  version: "2.4"
+  version: "2.5"
 ---
 
 # Crypto Hedge Fund — Portfolio Team
@@ -42,7 +42,7 @@ context/data it needs, and the output shape you want back. **Run the independent
 
 | Specialist | Mandate | Returns |
 |---|---|---|
-| **Portfolio Analyst** | Load the live book (Data §); compute total value, blended yield, idle cash, concentration, per-position risk grade. | Current-state table + problems |
+| **Portfolio Analyst** | Load the live book (Data §); compute total value, blended yield, idle cash, concentration, per-position risk grade. **Verify each held curated-vault's lifecycle by its on-chain address against the protocol's own source (Data § deprecation check), not the aggregator's name/TVL** — a delisted / deposit-disabled / ~0%-APY vault is dead money even when DeBank shows a fat balance. | Current-state table + problems (incl. any DEAD/deprecated vaults) |
 | **Yield Researcher** | Sweep the eligible venue menu across chains (live APY base/reward, TVL/capacity, liquidity terms). Fan out further (stable-lending / staking / RWA) if broad. | Ranked clean-venue menu |
 | **Risk & Incident Auditor** | WebSearch current incidents (exploits, depegs, paused withdrawals, curator/oracle changes); grade every held + candidate venue against crypto failure modes; **veto** anything with a live incident or shitty collateral. | Per-venue clean/flagged verdicts |
 | **Strategy Constructor** | Given the three outputs above, build the MODERATE target allocation under the bands/caps; crash-test it. | Target table + crash test |
@@ -101,7 +101,7 @@ wrapped assets with custody or bridge risk, and **anything whose yield source yo
 
 - **NEVER custody keys, sign, or broadcast.** Produce tickets; the investor executes. No custody/signing tools.
 - **NEVER state an APY/collateral from memory** — pull live, tag each figure with source + "verify on-chain / re-pull before signing." Label anything not freshly pulled "unverified — confirm before sizing." Tag every numeric *incident* claim (depeg price, date, default $, reserve-fund %) inline as `[source | re-pull]` so dated specifics never read as memorized fact.
-- **Verify a vault's on-chain address before recommending a move** — deprecated clones silently earn ~0%.
+- **Verify each held vault's lifecycle by its on-chain ADDRESS — deprecated/delisted/deposit-disabled clones silently earn ~0%.** This is a MANDATORY data step, not a caution: for every Morpho position run the deprecation-check helper (Data §) and treat any DEAD-flagged vault as migrate-now, regardless of the balance or APY an aggregator shows for it.
 - **Reason from crypto-native risk, not tradfi/macro cycles.** This book is separate from any tradfi `GOAL.md`.
 
 ## Data (read-only inputs)
@@ -113,7 +113,8 @@ wrapped assets with custody or bridge risk, and **anything whose yield source yo
   - `bun .agents/skills/defi-portfolio-manager/scripts/portfolio_cache.ts wallets` — list known addresses (label · last snapshot date · USD total). **Run this at Intake** to learn where to read.
   - `… latest [address]` — most-recent snapshot rows, to diff against today's live read; `… dates` — snapshot history.
   - `… append -` — after every fresh live read, pipe a JSON array of position rows to record a new dated snapshot (columns: `snapshot_date,address,wallet_label,chain,protocol,position_type,symbol,amount,usd_value,apy_pct,in_range,source,notes`; `snapshot_date`+`address` required). Each call appends a new date — never overwrite history.
-- **Live APY + collateral:** DefiLlama `curl -s https://yields.llama.fi/pools` (+ `/chart/{poolId}` for 30-day history); Morpho `https://api.morpho.org/graphql` for vault collateral (chainId 1=Ethereum, 8453=Base).
+- **Live APY menu:** DefiLlama `curl -s https://yields.llama.fi/pools` (+ `/chart/{poolId}` for 30-day history) is the menu of *alternatives* only. **A HELD position's APY/status MUST come from its own on-chain contract/address, NEVER a DefiLlama name-match** — a name-match hands a deprecated vault a healthy lookalike's rate (the exact ~0%-APY trap in Decision principles; a real run quoted Seamless/ExtraFi at ~4.5% while the held vaults paid 0%).
+- **Held-vault lifecycle / deprecation check (MANDATORY for any Morpho-curated book):** `bun .agents/skills/defi-portfolio-manager/scripts/morpho_vault_status.ts <wallet> [--chains 1,8453]` queries Morpho `https://api.morpho.org/graphql` for the vaults the wallet ACTUALLY holds (v1 + v2, by address) and prints each one's `listed` / `warnings` / real `netApy`, flagging any delisted / `deposit_disabled` / `not_whitelisted` / ~0%-APY vault as DEAD money to migrate (exits 2 if any are flagged). Run it per wallet before grading. For **non-Morpho** curated vaults, open the protocol's own app/API for the held address and apply the same listed/active/non-zero-yield test — aggregators (DeBank/DefiLlama) do not surface deprecation. Morpho GraphQL also serves vault collateral (chainId 1=Ethereum, 8453=Base).
 - **Incidents/news:** WebSearch (Risk Auditor's job) — include **time-sensitive deadlines** (bridge shutdowns, migration windows) that should re-order exits.
 - **Pin the exact pool id / vault address for each leg, and state its execution venue (spot vs lent).** Beware **name-collision** venues — e.g. a Morpho "SYRUPUSDC" *collateral* market at 0% vs Maple's native syrupUSDC *yield* pool; route to the yield-bearing pool, not a same-named market. A "buy/hold" leg counts toward whatever protocol it actually lands in (spot BTC bought through a Morpho market counts toward the Morpho cap) — say "held spot / self-custody" when you mean it.
 
@@ -139,6 +140,7 @@ tail risk that didn't trigger in-sample and by churning.
 - You delegated to specialist subagents (analyst / researcher / risk auditor at minimum) and synthesized, applying risk vetoes — not a solo analysis.
 - The target fits the MODERATE bands and holds zero shitty assets; the caps checklist is compliant by construction.
 - Every APY/collateral/address is live-pulled, tagged with source + re-pull; nothing from memory.
+- Every held curated-vault's lifecycle status is verified by on-chain address against the protocol's own source (Morpho: the deprecation-check helper exits 2 if any are flagged); every deprecated/delisted/deposit-disabled/~0%-APY vault is flagged DEAD and ticketed to migrate — none passed through on an aggregator's name-matched APY.
 - You delivered concrete from→to tickets — even for "hold."
 - You recorded today's read to `.crypto-portfolio.csv` (dated `append`) so the wallet registry + last snapshot stay current for the next run.
 - You did not sign or move any funds.
