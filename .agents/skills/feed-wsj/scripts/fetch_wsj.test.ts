@@ -78,6 +78,17 @@ test("stripHtml unwraps CDATA and strips tags", () => {
   expect(stripHtml("<![CDATA[<b>Hi</b> there]]>")).toBe("Hi there");
 });
 
+test("stripHtml decodes hexadecimal numeric entities (WSJ emits &#x....;)", () => {
+  // Real WSJ teasers seen live: curly apostrophe, non-breaking space, em dash, curly quotes.
+  expect(stripHtml("JD Vance&#x2019;s Appeals to&#xa0;Arab Authority")).toBe(
+    "JD Vance\u2019s Appeals to Arab Authority",
+  );
+  expect(stripHtml("rates&#x2014;but not the Israelis")).toBe("rates\u2014but not the Israelis");
+  expect(stripHtml("&#x201c;The View&#x201d;")).toBe("\u201cThe View\u201d");
+  // Decimal entities still work; &amp; still decodes.
+  expect(stripHtml("Tom &amp; Jerry say it&#039;s 5 &#8211; 6")).toBe("Tom & Jerry say it's 5 \u2013 6");
+});
+
 const NOW = Date.parse("2026-06-25T12:00:00Z");
 const sample: ReturnType<typeof parseWsjRss> = [
   { source: "wsj", url: "https://www.wsj.com/a", title: "Fed holds rates", published_at: "2026-06-25T06:00:00.000Z", summary: "FOMC keeps policy steady", tags: [] },

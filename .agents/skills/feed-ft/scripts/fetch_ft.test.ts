@@ -61,6 +61,12 @@ test("stripHtml unwraps CDATA and strips tags", () => {
   expect(stripHtml("<![CDATA[<b>Hi</b> there]]>")).toBe("Hi there");
 });
 
+test("stripHtml decodes hexadecimal AND decimal numeric entities", () => {
+  expect(stripHtml("BMW&#x2019;s shares rose to&#xa0;record")).toBe("BMW\u2019s shares rose to record");
+  expect(stripHtml("oil&#x2014;and gas")).toBe("oil\u2014and gas");
+  expect(stripHtml("it&#039;s 5 &#8211; 6 &amp; rising")).toBe("it's 5 \u2013 6 & rising");
+});
+
 const NOW = Date.parse("2026-06-25T12:00:00Z");
 const sample: ReturnType<typeof parseFtRss> = [
   { source: "ft", url: "https://www.ft.com/content/a", title: "AI chips rally", published_at: "2026-06-25T06:00:00.000Z", summary: "semiconductors surge", tags: [] },

@@ -55,16 +55,29 @@ function unwrapCDATA(text: string): string {
   return m ? m[1] : text;
 }
 
+function decodeCodePoint(cp: number): string {
+  // Guard invalid/out-of-range code points — String.fromCodePoint throws RangeError on those.
+  if (!Number.isFinite(cp) || cp < 0 || cp > 0x10ffff) return "";
+  try {
+    return String.fromCodePoint(cp);
+  } catch {
+    return "";
+  }
+}
+
 export function stripHtml(html: string): string {
   return unwrapCDATA(html)
     .replace(/<[^>]+>/g, "")
-    .replace(/&amp;/g, "&")
+    // Numeric entities first — decimal (&#8217;) AND hexadecimal (&#x2019;); WSJ uses hex heavily.
+    .replace(/&#x([0-9a-fA-F]+);/g, (_m, h) => decodeCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_m, n) => decodeCodePoint(parseInt(n, 10)))
+    // Then named entities; decode &amp; LAST so "&amp;lt;" stays literal rather than becoming "<".
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&nbsp;/g, " ")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#0?39;|&apos;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#(\d+);/g, (_m, n) => String.fromCharCode(Number(n)))
+    .replace(/&amp;/g, "&")
     .replace(/\s+/g, " ")
     .trim();
 }
