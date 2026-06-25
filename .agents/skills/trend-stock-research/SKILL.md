@@ -123,8 +123,8 @@ advantage of an agent team reading financial journalism.
 **Delegate to the feed + paywall skills.** Do NOT duplicate their logic here.
 
 1. **Headlines + teasers (automated, daily):** The `feed-*` skills + TS pipeline at
-   `.agents/scripts/feeds/` handle RSS ingestion for FT, WSJ, CoinDesk, Decrypt, etc.
-   Run `bun .agents/scripts/feeds/fetch_all.ts --db .db/news.db --days 7` for all feeds.
+   `.agents/skills/trend-stock-research/scripts/feeds/` handle RSS ingestion for FT, WSJ, CoinDesk, Decrypt, etc.
+   Run `bun .agents/skills/trend-stock-research/scripts/feeds/fetch_all.ts --db .db/news.db --days 7` for all feeds.
 
 2. **Full article bodies (interactive):** Use the `bypass-paywalls` skill
    (`.agents/skills/bypass-paywalls/SKILL.md`) which drives the user's Chrome with the
