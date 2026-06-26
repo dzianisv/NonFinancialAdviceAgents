@@ -258,6 +258,10 @@ UPDATE todos SET status='done' WHERE id='tok-{TOKEN}';
 | **SELL** | `quorum_verdict = BEARISH`, seats_bear ≥ 4 |
 | **HOLD** | everything else |
 
+**WAIT / HOLD with a named buy-zone** (e.g. "not now, but buy AAVE near $73") → register a
+notify-me job carrying your thesis via the **`mkt`** skill, so the user is pinged when the
+price/RSI/MACD level hits. See *Set a buy-alert* below.
+
 ## Step 3 — Print the full run report
 
 Print **three blocks** in this exact order:

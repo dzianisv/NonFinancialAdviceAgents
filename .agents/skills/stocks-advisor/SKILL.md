@@ -405,6 +405,10 @@ bar-close trigger is always a WATCH, never a BUY.
 **Conviction (1–5):** start at 3. +1 if ≥3 seats align; +1 if EARLY_CYCLE with QUIET_ACCUM positioning;
 −1 if Sentiment CROWDED; −1 if PEG > 2 or negative FCF yield; −1 if LATE_CYCLE. Clamp to 1–5.
 
+**A WATCH verdict is an alert trigger** — "good company, wrong price; buy near $X / when RSI < V"
+is exactly when to register a notify-me job carrying the entry thesis via the **`mkt`** skill, so
+the user is pinged when the zone/indicator fires. See *Set a buy-alert* below.
+
 ---
 
 ## Output format per stock
