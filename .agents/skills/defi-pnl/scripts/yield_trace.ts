@@ -534,6 +534,13 @@ export const DIRECTIONAL_POSITION_TOKENS = new Set([
   "seam", "extra", "grail", "xgrail", "cake", "zik", "aicc",
   // Misc volatile mentioned in scope doc
   "larry",
+  // Layer-2 governance tokens
+  "strk", "linea",
+  // Commodity-backed
+  "paxg", "xaut",
+  // Additional known directional (memecoins, L1s, perp/infra tokens)
+  "ton", "hype", "jup", "pump", "trump", "pepe", "shib", "doge",
+  "mochi", "stacy", "goat", "pengu", "brett", "toshi",
 ]);
 
 const SPAM_RE = /https?:|www\.|\.net\b|\.com\b|\.finance\b|\.cc\b|\.io\b|\.xyz\b|t\.me|claim|visit\b|airdrop|points\b|get reward|🎁/i;
@@ -991,6 +998,8 @@ async function main() {
     console.log(`    Benchmark APY  = ${(rec.benchmarkApy * 100).toFixed(1)}% → $${rec.benchmark.toFixed(0)}`);
     console.log(`    Bottom-up      = $${rec.bottomUp.toFixed(0)}`);
     console.log(`    Ratio          = ${rec.ratio.toFixed(2)}${rec.underCountFlag ? " ⚠️ UNDER-COUNT (ratio < 0.8)" : " ✓"}`);
+    const yieldApy = rec.twabUsd > 0 ? (netWindowed / rec.twabUsd * 100) : 0;
+    console.log(`    Yield APY (NET/TWAB)  = ${yieldApy.toFixed(1)}%`);
     console.log(`${"─".repeat(78)}`);
   }
 }
