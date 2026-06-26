@@ -82,7 +82,7 @@ python3 .agents/skills/analyst-smartmoney-ptr/watch.py list --since 2026-01-01
 python3 .agents/skills/analyst-smartmoney-ptr/watch.py seen NVDA          # exit 0=seen, 1=new
 ```
 
-Ledger path: `$CONGRESS_LEDGER` or `.cache/PTR/recommended.jsonl`
+Ledger path: `$CONGRESS_LEDGER` or `.ledgers/PTR/recommended.jsonl`
 
 ## Success criteria
 
