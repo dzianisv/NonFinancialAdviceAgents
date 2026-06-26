@@ -91,7 +91,7 @@ starting cold — the *change* in who-owns-what is itself the signal.
 ## Scripts
 
 ```bash
-W="python3 .agents/skills/analyst-smartmoney-13f/watch.py"   # ledger at $THIRTEENF_LEDGER or .cache/13F/recommended.jsonl
+W="python3 .agents/skills/analyst-smartmoney-13f/watch.py"   # ledger at $THIRTEENF_LEDGER or .ledgers/13F/recommended.jsonl
 
 $W roster                       # show tracked managers
 $W seen <TICKER> --quarter Q    # exit 0 = SKIP (already recommended); exit 1 = NEW
@@ -99,10 +99,10 @@ $W record --ticker X --manager M --quarter Q --action new|add [--reason "..."] [
 $W list [--since YYYY-MM-DD]    # show recommendations
 ```
 
-**Ledger:** `.cache/13F/recommended.jsonl` — dedup scope is **ticker + quarter**. Same ticker can
+**Ledger:** `.ledgers/13F/recommended.jsonl` — dedup scope is **ticker + quarter**. Same ticker can
 resurface in a new quarter if managers show fresh action.
 
-**Roster:** `.cache/13F/roster.json` — default: Burry, Buffett, Ackman, Klarman, Li Lu (with CIKs).
+**Roster:** `.ledgers/13F/roster.json` — default: Burry, Buffett, Ackman, Klarman, Li Lu (with CIKs).
 
 ## Workflow
 
@@ -111,7 +111,7 @@ resurface in a new quarter if managers show fresh action.
 <constraints>
 - For each roster manager: pull the LATEST quarterly 13F from EDGAR (CIK → infotable.xml).
 - Compare to prior quarter for deltas: new initiations, adds, trims, exits.
-- Resolve missing CIKs via EDGAR company search; add to `.cache/13F/roster.json`.
+- Resolve missing CIKs via EDGAR company search; add to `.ledgers/13F/roster.json`.
 - KEEP ONLY BUYS: new initiations (`new`) and meaningful adds (`add` — increased ≥20%).
 - DROP: puts (bearish, esp. Burry), trims, exits, unchanged positions.
 - DO NOT fabricate. If a filing is not found or data is ambiguous, mark `[UNAVAILABLE]`.
@@ -152,8 +152,8 @@ Score each dimension 0-100 independently, then compute:
 ### 5. CONVERGENCE — Cross-feed check
 
 For each T1/T2 candidate, check other signal feeds:
-- `.cache/13D/recommended.jsonl` — same ticker in 13D activist filings?
-- `.cache/PTR/recommended.jsonl` — same ticker in congressional disclosures?
+- `.ledgers/13D/recommended.jsonl` — same ticker in 13D activist filings?
+- `.ledgers/PTR/recommended.jsonl` — same ticker in congressional disclosures?
 - Dip-screener pools — is this name also trading ≥20% below 52w high?
 - `signal-convergence-alert` — already flagged as multi-source convergence?
 

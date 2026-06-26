@@ -49,10 +49,10 @@ def _resolve_path(env_var: str, openclaw_default: str, repo_fallback: str) -> st
 POOLS = [
     ("dip", _resolve_path("DIP_POOL", os.path.join(_POOLS_DIR, "dip_candidates.jsonl"), "pools/dip_candidates.jsonl"), 5),
     ("journalism", _resolve_path("NARRATIVE_POOL", os.path.join(_POOLS_DIR, "narrative.jsonl"), "pools/narrative.jsonl"), 5),
-    ("13f", _resolve_path("THIRTEENF_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/13f/recommended.jsonl"), ".cache/13F/recommended.jsonl"), 14),
-    ("congress", _resolve_path("CONGRESS_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/congress/recommended.jsonl"), ".cache/PTR/recommended.jsonl"), 14),
-    ("13d", _resolve_path("THIRTEEND_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/13d/recommended.jsonl"), ".cache/13D/recommended.jsonl"), 14),
-    ("form4", _resolve_path("FORM4_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/form4/recommended.jsonl"), ".cache/Form4/recommended.jsonl"), 14),
+    ("13f", _resolve_path("THIRTEENF_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/13f/recommended.jsonl"), ".ledgers/13F/recommended.jsonl"), 14),
+    ("congress", _resolve_path("CONGRESS_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/congress/recommended.jsonl"), ".ledgers/PTR/recommended.jsonl"), 14),
+    ("13d", _resolve_path("THIRTEEND_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/13d/recommended.jsonl"), ".ledgers/13D/recommended.jsonl"), 14),
+    ("form4", _resolve_path("FORM4_LEDGER", os.path.expanduser("~/.openclaw/workspace/investor/form4/recommended.jsonl"), ".ledgers/Form4/recommended.jsonl"), 14),
 ]
 
 

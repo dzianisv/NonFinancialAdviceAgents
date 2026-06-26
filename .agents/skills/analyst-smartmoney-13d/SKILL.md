@@ -63,9 +63,9 @@ echo '{"ticker":"X",...}' | $D/score.ts    # score a candidate (stdin JSON → s
 echo '[{scored1}]' | $D/tier.ts --portfolio-value 1000000   # tier + size
 ```
 
-**Ledger:** `.cache/13D/recommended.jsonl` — dedup scope is **ticker + filing_type + filer**.
+**Ledger:** `.ledgers/13D/recommended.jsonl` — dedup scope is **ticker + filing_type + filer**.
 
-**Roster:** `.cache/13D/roster.json` — known activist investors with track records.
+**Roster:** `.ledgers/13D/roster.json` — known activist investors with track records.
 
 ## Workflow
 
@@ -133,8 +133,8 @@ Pipe scored candidates through: `echo '[...]' | $D/tier.ts --portfolio-value 100
 ### 5. CONVERGENCE — Cross-feed check
 
 For each T1/T2 candidate, check other signal feeds:
-- `.cache/13F/recommended.jsonl` — same ticker in 13F institutional filings?
-- `.cache/PTR/recommended.jsonl` — same ticker in congressional disclosures?
+- `.ledgers/13F/recommended.jsonl` — same ticker in 13F institutional filings?
+- `.ledgers/PTR/recommended.jsonl` — same ticker in congressional disclosures?
 - Dip-screener pools — is this name trading ≥20% below 52w high?
 - `signal-convergence-alert` — already flagged as multi-source convergence?
 

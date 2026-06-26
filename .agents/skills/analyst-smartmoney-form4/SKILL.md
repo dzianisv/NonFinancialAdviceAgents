@@ -124,7 +124,7 @@ TICKER: ACCUMULATING | NEUTRAL | DISTRIBUTING (rare)
 
 ## Ledger Contract
 
-- **Path:** `.cache/Form4/recommended.jsonl`
+- **Path:** `.ledgers/Form4/recommended.jsonl`
 - **Env override:** `FORM4_LEDGER`
 - **Record fields:** `ticker`, `insider`, `role`, `company`, `transaction_date` (YYYY-MM-DD), `amount`, `cluster_size`, `action` (purchase only), `reason`, `recommended_on`
 - **Dedup scope:** ticker + transaction month (`--window YYYY-MM`)
