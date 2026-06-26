@@ -49,8 +49,8 @@ must end by logging a heartbeat so a silent outage is detectable:
       Run python3 $S/liveness-monitor/liveness.py check --expect dip-screener,crypto-dip-scanner,signal-convergence,narrative-velocity --max-age-hours 26.
       If STALE, DM me "⚠️ advisor jobs stale:" + the list. If ALL_FRESH, NO_REPLY.
   • "Weekly hedge-fund committee"  30 9 * * 1 :  (the main decision engine — find next buys)
-      Run the WEEKLY HEDGE-FUND COMMITTEE: (1) ANALYSTS gather (regime+fomc, 13f-watch new buys,
-      congressman-stock-watch 90d, trend-stock-research themes, dip_screener.py --json, crypto-dip-scanner
+      Run the WEEKLY HEDGE-FUND COMMITTEE: (1) ANALYSTS gather (regime+fomc, analyst-smartmoney-13f new buys,
+      analyst-smartmoney-ptr 90d, trend-stock-research themes, dip_screener.py --json, crypto-dip-scanner
       --json) — real evidence, mark [unverified], never fabricate. (2) AGGREGATE by ticker; n_sources =
       crowdedness NOT independence; flag flow_only (13F/congress-only = 30-45d lagged, down-weight); top 5.
       (3) PANEL: each top-5 gets an INDEPENDENT verdict from analytics-warren-buffett, analytics-stanley-

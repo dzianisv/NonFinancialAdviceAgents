@@ -109,7 +109,7 @@ keeps running, so cash-as-option is insurance, not a free lunch."
   Greg Abel is now CEO, Jan 2026) before quoting "what Berkshire is doing."
 - **Ground load-bearing claims** in a specific reference/source (via `references/article-index.md`).
 - This skill is the **bottom-up valuation discipline** that complements the macro panel and pairs with
-  `fundamental-analysis` + `13f-watch`; it does not replace the backtest/valuation gate.
+  `fundamental-analysis` + `analyst-smartmoney-13f`; it does not replace the backtest/valuation gate.
 
 ## Done when
 

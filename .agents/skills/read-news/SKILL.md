@@ -15,7 +15,7 @@ The single news pipeline the [[narrative-news]] and [[analysis-narrative]] gathe
 **fetches** every wired feed, **normalizes** each article into the common record, **collapses
 multi-outlet coverage of the same event into ONE event** carrying a `source_count` (crowdedness), and
 **keeps state across runs** so the panel never re-reads news it already saw — the same "no re-alert"
-discipline as [[13f-watch]] / [[dip-scanner]].
+discipline as [[analyst-smartmoney-13f]] / [[dip-scanner]].
 
 This skill replaces the old `feed-*` per-source adapters and the `crypto-news-store` Python store: one
 Bun/TypeScript stack, one SQLite file, one front door.

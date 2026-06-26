@@ -1,5 +1,5 @@
 ---
-name: prediction-market-odds
+name: analyst-smartmoney-polymarket
 description: "Use when a forecast or analysis needs the crowd's PRICED probability of a dated, observable outcome — Fed/FOMC rate decisions, CPI/inflation prints, elections, token unlocks, ETF rulings, \"will BTC hold $X by [date]\", \"what are the odds of Y\". Reference skill: how to pull live odds from Polymarket (Gamma API), Kalshi, and CME FedWatch, weight them by liquidity, and avoid the standard traps (slug-guessing, frozen/settled markets, thin or non-monotonic legs). Consumed by superforecasting and macro-panel as their market-anchor input. Educational, not advice; odds drift — re-pull before acting."
 license: MIT
 compatibility: opencode
@@ -11,6 +11,8 @@ metadata:
 ---
 
 # Prediction-Market Odds (the crowd's priced probability)
+
+This skill is part of the `analyst-smartmoney` family; the parent `analyst-smartmoney` skill synthesizes its output with the other spokes.
 
 ## HARD TRIGGER — read this first (added after a real miss)
 

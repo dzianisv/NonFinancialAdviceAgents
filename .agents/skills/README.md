@@ -28,8 +28,10 @@ npx --yes skills add dzianisv/backtest \
 
 Or install individual skills by adding `--skill <name>`:
 ```bash
-npx -y skills add dzianisv/backtest --skill 13f-watch --agent claude-code
-npx -y skills add dzianisv/backtest --skill congressman-stock-watch --agent opencode
+npx -y skills add dzianisv/backtest --skill analyst-smartmoney-13f --agent claude-code
+npx -y skills add dzianisv/backtest --skill analyst-smartmoney-13d --agent claude-code
+npx -y skills add dzianisv/backtest --skill analyst-smartmoney-ptr --agent opencode
+npx -y skills add dzianisv/backtest --skill analyst-smartmoney-form4 --agent claude-code
 ```
 
 > The `skills` npm package (v1.5+) supports all agents above. If `npx` isn't available, install once:
@@ -39,8 +41,8 @@ npx -y skills add dzianisv/backtest --skill congressman-stock-watch --agent open
 
 ```bash
 # Install individual skills by raw URL
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/13f-watch/SKILL.md
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/congressman-stock-watch/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyst-smartmoney-13f/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyst-smartmoney-ptr/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/stocks-trend-screener/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/hedge-fund-manager/SKILL.md
 ```
@@ -172,7 +174,7 @@ USER QUESTION + PORTFOLIO + DATE
      │  │   └── read-news         ├── feed-fomc          │
      │  │       (9 feeds)         └── portfolio-monitor   │
      │  ├── analyst-derivatives-positioning              │
-     │  ├── prediction-market-odds                       │
+     │  ├── analyst-smartmoney-polymarket                       │
      │  └── regime-detection                             │
      └────┬──────────────────────────────────────────────┘
           │
@@ -301,8 +303,8 @@ hedge-fund-committee.workflow.js
 ├── 1. COLLECT (x6 parallel fan-out)
 │      ├── regime-detection
 │      ├── feed-fomc
-│      ├── 13f-watch + 13d-watch
-│      ├── congressman-stock-watch
+│      ├── analyst-smartmoney-13f + analyst-smartmoney-13d
+│      ├── analyst-smartmoney-ptr
 │      ├── narrative-news (via feed-* adapters)
 │      └── dip-screener + crypto-dip-scanner
 │
@@ -332,9 +334,9 @@ Silent unless something fires. Each scanner runs independently; convergence cros
                     │
     ┌───────────────┼───────────────┬──────────────────┐
     │               │               │                  │
-dip-screener   crypto-dip-     13f-watch          trend-stock-
+dip-screener   crypto-dip-     analyst-smartmoney-13f          trend-stock-
 (S&P 100,      scanner         (weekly 13F)       research
-≥-20% from     (BTC/ETH/SOL    13d-watch          (journalism →
+≥-20% from     (BTC/ETH/SOL    analyst-smartmoney-13d          (journalism →
 52w high)      /BNB/AVAX,      (real-time          mention velocity)
                F&G < 25)       activist >5%)
     │               │               │                  │
@@ -395,7 +397,7 @@ and keeps cross-run state. The narrative-news skill reads those events and tags 
 ```
 superforecasting (Tetlock methodology)
 ├── constructs reference class
-├── anchors to prediction-market-odds
+├── anchors to analyst-smartmoney-polymarket
 │   ├── Polymarket (Gamma API)
 │   ├── Kalshi
 │   └── CME FedWatch / ZQ-futures-implied
@@ -575,9 +577,11 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 
 | Skill | Role | Cadence |
 |-------|------|---------|
-| [13f-watch](13f-watch/SKILL.md) | Pull new institutional 13F buys; dedupe ledger | weekly |
-| [13d-watch](13d-watch/SKILL.md) | Real-time SEC 13D/13G activist filings (>5% stake) | weekly |
-| [congressman-stock-watch](congressman-stock-watch/SKILL.md) | Pull STOCK Act purchase disclosures; dedupe ledger | weekly |
+| [analyst-smartmoney](analyst-smartmoney/SKILL.md) | Smart-money family orchestrator — runs all spokes and consolidates signals | on-demand |
+| [analyst-smartmoney-13f](analyst-smartmoney-13f/SKILL.md) | Pull new institutional 13F buys; dedupe ledger | weekly |
+| [analyst-smartmoney-13d](analyst-smartmoney-13d/SKILL.md) | Real-time SEC 13D/13G activist filings (>5% stake) | weekly |
+| [analyst-smartmoney-ptr](analyst-smartmoney-ptr/SKILL.md) | Pull STOCK Act purchase disclosures; dedupe ledger | weekly |
+| [analyst-smartmoney-form4](analyst-smartmoney-form4/SKILL.md) | Pull insider Form 4 buy disclosures; dedupe ledger | weekly |
 | [stocks-trend-screener](stocks-trend-screener/SKILL.md) | Read financial journalism; surface emerging tickers | weekly |
 | [hedge-fund-13f-analysis](hedge-fund-13f-analysis/SKILL.md) | Deep-read a single 13F filing (EDGAR) | on-demand |
 | [signal-convergence-alert](signal-convergence-alert/SKILL.md) | Cross-reference ≥2 source pools → elevated conviction | daily |
@@ -588,7 +592,10 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 |-------|------|
 | [multi-lens-quorum](multi-lens-quorum/SKILL.md) | Convene 4-7 lenses → verdict without averaging away dissent |
 | [superforecasting](superforecasting/SKILL.md) | Dated market-outcome → scored probability + falsifiable triggers |
-| [prediction-market-odds](prediction-market-odds/SKILL.md) | Polymarket / Kalshi / FedWatch crowd odds |
+| [analyst-smartmoney-polymarket](analyst-smartmoney-polymarket/SKILL.md) | Polymarket / Kalshi / FedWatch crowd odds |
+| [analyst-smartmoney-positioning](analyst-smartmoney-positioning/SKILL.md) | Futures + options positioning, OI, skew, funding, COT |
+| [analyst-smartmoney-options](analyst-smartmoney-options/SKILL.md) | Options flow, unusual activity, dark-pool prints, GEX |
+| [analyst-smartmoney-darkpool](analyst-smartmoney-darkpool/SKILL.md) | Dark-pool / block-print analysis; institutional accumulation |
 | [analyst-derivatives-positioning](analyst-derivatives-positioning/SKILL.md) | Futures + options positioning, OI, skew |
 | [forecast-ledger](forecast-ledger/SKILL.md) | Brier + calibration scoring loop (ledger.py) |
 
@@ -696,8 +703,8 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 
 ## Runnable helpers
 
-- `13f-watch/watch.py` — dedup ledger + roster for institutional filings.
-- `congressman-stock-watch/watch.py` — STOCK Act fetch + dedup ledger.
+- `analyst-smartmoney-13f/watch.py` — dedup ledger + roster for institutional filings.
+- `analyst-smartmoney-ptr/watch.py` — STOCK Act fetch + dedup ledger.
 - `forecast-ledger/ledger.py` — Brier/calibration scoring for dated forecasts.
 - `regime-detection/regime_monitor.py` — daily regime score → exposure multiplier.
 - `dip-tranches-strategy/check_drawdown.py` — drawdown-from-52w-high → which tranche fires.

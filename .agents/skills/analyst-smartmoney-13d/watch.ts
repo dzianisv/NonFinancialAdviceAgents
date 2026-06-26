@@ -8,8 +8,8 @@
  *   record                   Record a new recommendation (reads JSON from stdin)
  *   list [--json]            List all recorded recommendations
  *
- * Storage: JSONL at $THIRTEEND_LEDGER or ./13d/recommended.jsonl
- * Roster:  JSON  at $THIRTEEND_ROSTER or ./13d/roster.json
+ * Storage: JSONL at $THIRTEEND_LEDGER or .cache/13D/recommended.jsonl
+ * Roster:  JSON  at $THIRTEEND_ROSTER or .cache/13D/roster.json
  *
  * Exit codes: 0=seen/success, 1=new/not-found, 2=error, 3=dup-on-record
  */
@@ -32,6 +32,7 @@ interface LedgerRecord {
   ticker: string;
   filing_type: "13D" | "13G" | "13F" | "STOCK_ACT";
   filer: string;
+  filing_date?: string;  // YYYY-MM-DD — part of dedup key so a new filing on the same ticker+filer re-alerts
   stake_pct?: number;
   intent?: string;
   score?: number;
@@ -46,10 +47,11 @@ interface LedgerRecord {
 // --- Paths ---
 
 const SCRIPT_DIR = dirname(new URL(import.meta.url).pathname);
+const REPO_ROOT = join(SCRIPT_DIR, "..", "..", "..");
 const LEDGER_PATH =
-  process.env.THIRTEEND_LEDGER || join(SCRIPT_DIR, "13d", "recommended.jsonl");
+  process.env.THIRTEEND_LEDGER || join(REPO_ROOT, ".cache", "13D", "recommended.jsonl");
 const ROSTER_PATH =
-  process.env.THIRTEEND_ROSTER || join(SCRIPT_DIR, "13d", "roster.json");
+  process.env.THIRTEEND_ROSTER || join(REPO_ROOT, ".cache", "13D", "roster.json");
 
 // --- Helpers ---
 
@@ -91,9 +93,9 @@ function cmdRoster(): void {
   }
 }
 
-function cmdSeen(ticker: string, filingType?: string): void {
+function cmdSeen(ticker: string, filingType?: string, filingDate?: string): void {
   if (!ticker) {
-    console.error("Usage: watch.ts seen <TICKER> [filing_type]");
+    console.error("Usage: watch.ts seen <TICKER> [filing_type] [filing_date]");
     process.exit(2);
   }
   const records = loadLedger();
@@ -101,17 +103,18 @@ function cmdSeen(ticker: string, filingType?: string): void {
   const match = records.find(
     (r: LedgerRecord) =>
       r.ticker.toUpperCase() === upperTicker &&
-      (!filingType || r.filing_type === filingType.toUpperCase())
+      (!filingType || r.filing_type === filingType.toUpperCase()) &&
+      (!filingDate || (r.filing_date ?? "") === filingDate)
   );
 
   if (match) {
     console.log(
-      `SEEN: ${upperTicker} (${match.filing_type}) — recorded ${match.recommended_on} by ${match.filer}`
+      `SEEN: ${upperTicker} (${match.filing_type}) filed ${match.filing_date ?? "?"} — recorded ${match.recommended_on} by ${match.filer}`
     );
     process.exit(0);
   } else {
     console.log(
-      `NEW: ${upperTicker}${filingType ? ` (${filingType})` : ""} not in ledger`
+      `NEW: ${upperTicker}${filingType ? ` (${filingType})` : ""}${filingDate ? ` filed ${filingDate}` : ""} not in ledger`
     );
     process.exit(1);
   }
@@ -148,17 +151,20 @@ function cmdRecord(): void {
     record.recommended_on = new Date().toISOString().split("T")[0]!;
   }
 
-  // Dedup check: ticker + filing_type + filer
+  // Dedup check: ticker + filing_type + filer + filing_date
+  // filing_date is the identity of the specific filing event; missing field ("") matches "" only,
+  // so a new filing date on the same ticker+filer re-alerts rather than being permanently suppressed.
   const existing = loadLedger();
   const dup = existing.find(
     (r: LedgerRecord) =>
       r.ticker.toUpperCase() === record.ticker.toUpperCase() &&
       r.filing_type === record.filing_type &&
-      r.filer.toLowerCase() === record.filer.toLowerCase()
+      r.filer.toLowerCase() === record.filer.toLowerCase() &&
+      (r.filing_date ?? "") === (record.filing_date ?? "")
   );
   if (dup) {
     console.log(
-      `DUP: ${record.ticker} (${record.filing_type}) by ${record.filer} already recorded ${dup.recommended_on}`
+      `DUP: ${record.ticker} (${record.filing_type}) by ${record.filer} filed ${record.filing_date ?? "?"} already recorded ${dup.recommended_on}`
     );
     process.exit(3);
   }
@@ -219,7 +225,7 @@ switch (command) {
     cmdRoster();
     break;
   case "seen":
-    cmdSeen(args[0]!, args[1]);
+    cmdSeen(args[0]!, args[1], args[2]);
     break;
   case "record":
     cmdRecord();

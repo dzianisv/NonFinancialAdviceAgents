@@ -40,7 +40,7 @@ which hold the actual frameworks and primary sources.
    confidence), and where do they SPLIT — and *why* (which assumption differs). Name the load-bearing
    disagreement.
 4. **Anchor any dated/observable claim to the crowd's priced odds.** When the question touches a
-   gradable outcome (Fed cut, CPI bucket, recession-by-date), pull **`prediction-market-odds`**
+   gradable outcome (Fed cut, CPI bucket, recession-by-date), pull **`analyst-smartmoney-polymarket`**
    (Polymarket/Kalshi/FedWatch) before opining — seven economists debating with no market check is the
    naive-analyst failure. Report where the panel deviates from the market and why.
    **For Fed/rates questions specifically:** load **`feed-fomc`** FIRST to get the primary-source
@@ -102,7 +102,7 @@ seat's current view.)
 - **Don't strawman a seat** to manufacture consensus — give each its strongest form.
 - **Ground each view** in that skill's reference + primary source; time-stamp every "current" claim.
 - This skill **composes** the `analytics-*` skills and complements `fundamental-analysis` /
-  `13f-watch`; it informs `regime-detection` / `portfolio-construction`. It does not
+  `analyst-smartmoney-13f`; it informs `regime-detection` / `portfolio-construction`. It does not
   replace the backtest/valuation gate or your own judgment.
 
 ## Done when

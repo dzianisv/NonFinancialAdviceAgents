@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""13f-watch — dedup ledger + manager roster for the 13F buy-watcher.
+"""analyst-smartmoney-13f — dedup ledger + manager roster for the 13F buy-watcher.
 
 The script owns the DETERMINISTIC parts: who we track, and what we've ALREADY recommended
 (so the same ticker is never recommended twice per quarter). The judgment parts — pulling
-filings, reading puts-vs-longs, interpreting WHY — are the agent's job via the 13f-watch
+filings, reading puts-vs-longs, interpreting WHY — are the agent's job via the analyst-smartmoney-13f
 SKILL.md (which leans on hedge-fund-13f-analysis).
 
 Dedup scope: ticker + quarter. Same name can surface again in a new quarter if managers
 show fresh action — each quarterly filing cycle is independent.
 
-Storage: JSONL at $THIRTEENF_LEDGER or ./13f/recommended.jsonl
-Roster:  JSON  at ./13f/roster.json (falls back to the verified default below)
+Storage: JSONL at $THIRTEENF_LEDGER or .cache/13F/recommended.jsonl
+Roster:  JSON  at .cache/13F/roster.json (falls back to the verified default below)
 
 Usage:
   watch.py roster
@@ -22,8 +22,10 @@ Usage:
 import argparse, json, os, sys
 from datetime import date
 
-LEDGER = os.environ.get("THIRTEENF_LEDGER", os.path.join("13f", "recommended.jsonl"))
-ROSTER = os.path.join(os.path.dirname(LEDGER) or ".", "roster.json")
+_SKILL_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.abspath(os.path.join(_SKILL_DIR, "..", "..", ".."))
+LEDGER = os.environ.get("THIRTEENF_LEDGER", os.path.join(_REPO_ROOT, ".cache", "13F", "recommended.jsonl"))
+ROSTER = os.path.join(os.path.dirname(LEDGER), "roster.json")
 
 # Verified CIKs only (SEC EDGAR). Honesty rule: never fabricate a CIK — unknowns are resolved
 # at runtime by the agent via EDGAR company search, then added to 13f/roster.json.
@@ -104,7 +106,7 @@ def list_(a):
 
 
 def main():
-    p = argparse.ArgumentParser(description="13f-watch dedup ledger + roster")
+    p = argparse.ArgumentParser(description="analyst-smartmoney-13f dedup ledger + roster")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("roster").set_defaults(fn=roster)
     s = sub.add_parser("seen")

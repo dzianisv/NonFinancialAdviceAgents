@@ -1,6 +1,6 @@
 ---
 name: analysis-sentiment
-description: "Analyst lens for reading crypto market sentiment — Fear & Greed index, funding rates, long/short ratio, social volume, Google Trends, options skew, retail vs institutional divergence. Interprets crowd psychology signals as contrarian indicators. Use when asked \"what is market sentiment right now\", \"is crypto overheated\", \"fear and greed\", \"funding rates analysis\", \"is retail FOMO or panic\", \"sentiment-based entry\", \"is the crowd too bullish/bearish\". Depends on [[derivatives-positioning-data]] for funding/skew. Contrarian lens: extreme fear = accumulate; extreme greed = trim. Educational, not advice."
+description: "Analyst lens for reading crypto market sentiment — Fear & Greed index, funding rates, long/short ratio, social volume, Google Trends, options skew, retail vs institutional divergence. Interprets crowd psychology signals as contrarian indicators. Use when asked \"what is market sentiment right now\", \"is crypto overheated\", \"fear and greed\", \"funding rates analysis\", \"is retail FOMO or panic\", \"sentiment-based entry\", \"is the crowd too bullish/bearish\". Depends on [[analyst-smartmoney-positioning]] for funding/skew. Contrarian lens: extreme fear = accumulate; extreme greed = trim. Educational, not advice."
 license: MIT
 compatibility: opencode
 metadata:
@@ -15,7 +15,7 @@ metadata:
 Apply this **sentiment-as-contrarian-modulator** lens to *how market psychology is read and how it biases
 the deployment decision*. This skill is a **focused specialist**; it sits inside the four-pillar stack
 managed by `analyst-crypto` and extends the sentiment pillar with full metric resolution.
-Load `[[derivatives-positioning-data]]` for live funding rates, OI, and options skew before any load-bearing
+Load `[[analyst-smartmoney-positioning]]` for live funding rates, OI, and options skew before any load-bearing
 claim. All outputs are educational — a lens, not financial advice.
 
 ## The unifying worldview
@@ -45,7 +45,7 @@ cheap zone, and raises caution in a rich one.
 4. **Social volume and Google Trends as lagging retail FOMO indicator.** A spike in both = late-cycle retail
    entry; absence/flat = early-cycle or sustained bear. Never use as a leading signal alone.
 5. **Options 25-delta skew.** Positive skew (puts expensive) = fear and hedging demand; negative skew (calls
-   expensive) = euphoria and upside-chase. Source via Deribit or `[[derivatives-positioning-data]]`.
+   expensive) = euphoria and upside-chase. Source via Deribit or `[[analyst-smartmoney-positioning]]`.
 6. **Sentiment is a modulator, not a timer.** Extreme readings can persist for weeks without resolving.
    Combine with on-chain zone (`analyst-crypto` pillar 2) for higher-confidence signals.
 7. **Divergence is the most powerful signal.** Price falling + Fear & Greed turning up from extreme-fear =
@@ -60,7 +60,7 @@ cheap zone, and raises caution in a rich one.
    perpetual API — record 8h rate for BTC and ETH, note persistence (days positive/negative).
 3. **Fetch long/short ratio** via WebFetch CoinGlass cross-exchange aggregate — note the exact ratio and which
    direction it has trended over the past 24–48h.
-4. **Check options skew and OI** via `[[derivatives-positioning-data]]` — pull 25-delta put/call skew and
+4. **Check options skew and OI** via `[[analyst-smartmoney-positioning]]` — pull 25-delta put/call skew and
    open interest for BTC options to confirm or refute the perp-funding signal.
 5. **Score each metric** on a five-point scale: `FEAR_EXTREME` / `FEAR` / `NEUTRAL` / `GREED` / `GREED_EXTREME`.
 6. **State composite sentiment posture** — the plurality or consensus reading across all metrics — and derive
@@ -74,9 +74,9 @@ cheap zone, and raises caution in a rich one.
 | Question is about… | Load |
 |---|---|
 | Fear & Greed raw value, historical trend, composite index methodology | WebFetch `https://api.alternative.me/fng/?limit=30` |
-| Funding rates, open interest, perpetuals market structure, squeeze risk | `[[derivatives-positioning-data]]` + CoinGlass |
+| Funding rates, open interest, perpetuals market structure, squeeze risk | `[[analyst-smartmoney-positioning]]` + CoinGlass |
 | Long/short ratio, retail over-leverage, cross-exchange aggregate | CoinGlass long/short endpoint |
-| Options skew, put/call ratio, gamma exposure, max pain | `[[derivatives-positioning-data]]` (Deribit/Laevitas) |
+| Options skew, put/call ratio, gamma exposure, max pain | `[[analyst-smartmoney-positioning]]` (Deribit/Laevitas) |
 | Social volume, Google Trends, retail attention spikes | LunarCrush social volume, Google Trends (manual fetch) |
 | How sentiment integrates into the full four-pillar deploy decision | `analyst-crypto` (the synthesis lens) |
 | On-chain valuation zone, MVRV-Z, realized price | `analyst-crypto` → `references/02-onchain-valuation.md` |

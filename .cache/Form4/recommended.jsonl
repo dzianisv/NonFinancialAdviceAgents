@@ -1,0 +1,2 @@
+{"ticker": "TEST", "insider": "John Doe", "role": "CEO", "company": "Test Corp", "transaction_date": "2026-06-20", "amount": 500000, "cluster_size": 3, "action": "purchase", "reason": "cluster buy", "window": "2026-06", "recommended_on": "2026-06-26"}
+{"ticker": "TESTX", "insider": "Jane CEO", "role": "CEO", "company": "TestCo", "transaction_date": "2026-06-20", "amount": 1000000, "cluster_size": 4, "action": "purchase", "reason": "opportunistic cluster buy", "window": "2026-06", "recommended_on": "2026-06-26"}

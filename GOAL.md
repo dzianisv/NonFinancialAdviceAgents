@@ -97,7 +97,7 @@ Interim target: reallocate ~$113k idle stables → ~4.5% clean frontier = **$7,0
 
 ## Installed (~60 skills + 1 workflow)
 
-**Signals** — regime-detection, feed-fomc, dip-scanner, trend-stock-research, signal-convergence-alert, 13f-watch, congressman-stock-watch, feed-{bloomberg,ft,wsj,coindesk,…}
+**Signals** — regime-detection, feed-fomc, dip-scanner, trend-stock-research, signal-convergence-alert, analyst-smartmoney-13f, analyst-smartmoney-ptr, feed-{bloomberg,ft,wsj,coindesk,…}
 
 **Analysis** — macro-panel (7 thinker lenses), multi-lens-quorum (buy/sell/hold verdict), superforecasting, fundamental-analysis, analyst-{technical,systematic,crypto,derivatives}
 

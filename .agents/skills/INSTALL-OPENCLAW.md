@@ -2,8 +2,8 @@
 
 How to install the full skill set from `dzianisv/backtest` onto any supported AI agent platform.
 
-Skills: `13f-watch`, `congressman-stock-watch`, `trend-stock-research`, `superforecasting`,
-`multi-lens-quorum`, `prediction-market-odds`, `forecast-ledger`, `hedge-fund-13f-analysis`,
+Skills: `analyst-smartmoney-13f`, `analyst-smartmoney-ptr`, `trend-stock-research`, `superforecasting`,
+`multi-lens-quorum`, `analyst-smartmoney-polymarket`, `forecast-ledger`, `hedge-fund-13f-analysis`,
 `macro-panel`, `analytics-*`, `regime-detection`, `portfolio-construction`, `risk-management`,
 and the rest. See `README.md` for the full index.
 
@@ -32,8 +32,8 @@ npx --yes skills add dzianisv/backtest \
 
 **Individual skill install** (add `--skill <name>`):
 ```bash
-npx -y skills add dzianisv/backtest --skill 13f-watch --agent claude-code
-npx -y skills add dzianisv/backtest --skill congressman-stock-watch --agent opencode
+npx -y skills add dzianisv/backtest --skill analyst-smartmoney-13f --agent claude-code
+npx -y skills add dzianisv/backtest --skill analyst-smartmoney-ptr --agent opencode
 npx -y skills add dzianisv/backtest --skill trend-stock-research --agent hermes-agent
 ```
 
@@ -42,8 +42,8 @@ npx -y skills add dzianisv/backtest --skill trend-stock-research --agent hermes-
 ## hermes-agent (alternative: URL install)
 
 ```bash
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/13f-watch/SKILL.md
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/congressman-stock-watch/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyst-smartmoney-13f/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyst-smartmoney-ptr/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/trend-stock-research/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/hedge-fund-manager/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/multi-lens-quorum/SKILL.md
@@ -57,7 +57,7 @@ hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.
 hermes skills list
 
 # Launch with skills preloaded
-hermes -s 13f-watch,congressman-stock-watch,trend-stock-research,hedge-fund-manager
+hermes -s analyst-smartmoney-13f,analyst-smartmoney-ptr,trend-stock-research,hedge-fund-manager
 ```
 
 ---
@@ -134,8 +134,8 @@ The `openclaw-investor-setup-prompt.md` asks the agent to self-register 4 jobs:
 | Job | Schedule | What it does |
 |-----|----------|--------------|
 | A: Daily regime check | Weekdays 08:30 UTC | regime-detection → RISK_ON/OFF + exposure dial |
-| B: 13F watch | Monday 09:00 UTC | 13f-watch → new institutional buys (deduped) |
-| C: Congressional watch | Monday 09:05 UTC | congressman-stock-watch → STOCK Act new buys (deduped) |
+| B: 13F watch | Monday 09:00 UTC | analyst-smartmoney-13f → new institutional buys (deduped) |
+| C: Congressional watch | Monday 09:05 UTC | analyst-smartmoney-ptr → STOCK Act new buys (deduped) |
 | D: Trend research | Monday 09:15 UTC | trend-stock-research → 3-5 emerging thesis candidates |
 
 If the agent can't self-register (OpenClaw incident #1787 noted agent-side cron tools as flagged),
