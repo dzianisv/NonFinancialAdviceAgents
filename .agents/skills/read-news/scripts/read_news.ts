@@ -1,12 +1,14 @@
 #!/usr/bin/env bun
 /**
- * read_news.ts — unified news-fetch orchestrator (TypeScript port of news_fetch.py).
+ * read_news.ts — unified news-fetch orchestrator.
  *
  * Flow: fetchAllNews → ingest (in-process) → query or newSince → print JSON.
- * Output keys match news_fetch.py: {fetched, feeds_ok, unavailable, events}.
+ * Output keys: {fetched, feeds_ok, unavailable, events}.
+ *
+ * --asset <SYM>  also fetches TradingView + CMC for that asset and queries by asset.
  */
 
-import { connect, ingest, query, newSince } from "./news_store";
+import { connect, ingest, query, newSince, queryByAsset } from "./news_store";
 import { fetchAllNews, NEWS_FEEDS } from "./feeds/index";
 import type { Article } from "./types";
 
@@ -18,6 +20,7 @@ interface ReadNewsOpts {
   k?: number;
   query?: string;
   sources?: string[];
+  asset?: string;
 }
 
 interface ReadNewsResult {
@@ -43,6 +46,8 @@ function parseCliArgs(): ReadNewsOpts {
       opts.query = args[++i];
     } else if (args[i] === "--source" && args[i + 1]) {
       opts.sources = args[++i].split(",").map((s) => s.trim()).filter(Boolean);
+    } else if (args[i] === "--asset" && args[i + 1]) {
+      opts.asset = args[++i];
     }
   }
 
@@ -56,12 +61,19 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
   const days = opts.days ?? 3;
   const k = opts.k ?? 15;
   const queryStr = opts.query ?? "";
-  const sources = opts.sources; // undefined → fetch all NEWS_FEEDS
+  const sources = opts.sources;
 
-  // 1. Fetch all requested feeds
-  const { records, unavailable } = await fetchAllNews({ sources });
+  let fetchSources = sources;
+  let fetchAssets: string[] | undefined;
 
-  // 2. All feeds failed
+  // When --asset is set, also pull market sources for that specific asset
+  if (opts.asset) {
+    fetchAssets = [opts.asset];
+    fetchSources = [...(sources ?? NEWS_FEEDS), "tradingview", "coinmarketcap"];
+  }
+
+  const { records, unavailable } = await fetchAllNews({ sources: fetchSources, assets: fetchAssets });
+
   if (records.length === 0) {
     return {
       fetched: 0,
@@ -72,13 +84,13 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
     };
   }
 
-  // 3. Open store and ingest (idempotent)
   const db = connect(dbPath);
   ingest(db, records as unknown as Record<string, unknown>[]);
 
-  // 4. Query or new-since
   let events: unknown[];
-  if (queryStr) {
+  if (opts.asset) {
+    events = queryByAsset(db, opts.asset, { days, k });
+  } else if (queryStr) {
     events = query(db, queryStr, { days, k });
   } else {
     events = newSince(db, days);
@@ -86,13 +98,13 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
 
   db.close();
 
-  // 5. feeds_ok = requested feed count - number of unavailable entries
-  const requestedCount = sources ? sources.length : NEWS_FEEDS.length;
+  const allSources = fetchSources ?? NEWS_FEEDS;
+  const requestedCount = allSources.length;
   const feedsOk = requestedCount - unavailable.length;
 
   return {
     fetched: records.length,
-    feeds_ok: feedsOk,
+    feeds_ok: Math.max(0, feedsOk),
     unavailable,
     events,
   };

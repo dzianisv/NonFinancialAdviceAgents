@@ -165,3 +165,26 @@ bun test ./.agents/skills/read-news/scripts/
 priced-in judgment. This skill owns fetch + dedup + recency + cross-run state; it does not judge.
 
 > Educational, not advice. Events are context + disconfirmation, never a trigger.
+
+## Per-Asset Market News Sources (2026-06)
+
+Three new keyless per-asset market news fetchers were added in `scripts/feeds/markets.ts`.
+
+| Source | Method | Keyless? | Per-asset tag | AI summary |
+|---|---|---|---|---|
+| TradingView | JSON API (v2 headlines + v3 story AST) | ✅ Yes | `relatedSymbols` mapped via `tvSymbolToAsset` | v3 story AST flattened to text |
+| CoinMarketCap | JSON API (resolve slug→id, then /content/v3/news) | ✅ Yes | Set to queried asset (CMC NER is noisy) | `meta.subtitle` teaser only |
+| Google Finance | HTML scrape (regex external news URLs) | ✅ Yes | Ticker from query symbol | ❌ Client-rendered, blank |
+
+**Findings:**
+- TradingView and CoinMarketCap: keyless JSON, no browser required, full AI digest available.
+- Google Finance: keyless HTML scrape, headlines only, AI summary is client-rendered (unavailable to curl).
+
+**Usage:**
+```bash
+# Fetch news for a specific asset (TV + CMC + all RSS feeds), query by asset
+bun .agents/skills/read-news/scripts/read_news.ts --asset AAVE --days 7
+
+# Query the store directly by asset after ingestion
+bun .agents/skills/read-news/scripts/news_store.ts by-asset --asset AAVE
+```
