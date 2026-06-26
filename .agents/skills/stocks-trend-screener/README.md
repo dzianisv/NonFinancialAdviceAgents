@@ -1,10 +1,105 @@
-# trend-stock-research
+# stocks-trend-screener
 
 A research-first skill that helps an AI agent **find trendy stocks before they become obvious** —
 the way the people who caught NVDA (2021) or SanDisk (2025) did: by *reading* quality financial
 journalism and reasoning about it, not by running a price scanner.
 
 > Hypothesis generation, not a buy signal. Never auto-trades. Educational, not financial advice.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    USER(["User prompt"])
+    S0["Step 0 · Mode detect"]
+    USER --> S0
+
+    S0 -->|"best picks / no noise / high confidence"| CM["CONVICTION_MODE"]
+    S0 -->|"find trends / weekly scan / default"| RM["RESEARCH_MODE"]
+
+    subgraph CONV ["CONVICTION_MODE — fast, max 3 picks, no noise"]
+        direction TB
+        CS1["Step 1 · emerging_scan.py
+reject LAGGING / below-200d sectors"]
+        CS2["Step 2 · Model knowledge
+draft 3-5 thesis candidates"]
+
+        subgraph CFEEDS ["Feed verify — parallel web_fetch"]
+            direction LR
+            DB2["research_db.py search"]
+            FT["Google News
+site:ft.com"]
+            WSJ["Google News
+site:wsj.com"]
+            BL["Google News
+site:bloomberg.com"]
+            GN["Google News
+broad search
+Reuters / CNBC / BI"]
+        end
+
+        CDROP{"Result within 30 days?"}
+        CS3["Step 3 · 4-question skeptic filter
+Q1 Already priced?  12m greater than 150 percent = KILL
+Q2 Concrete catalyst + date?
+Q3 What kills it?
+Q4 Revenue accelerating?  NO = KILL"]
+        COUT["Step 5 · Output MAX 3
+2-sentence thesis, source, risk"]
+
+        CS1 --> CS2 --> CFEEDS
+        DB2 & FT & WSJ & BL & GN --> CDROP
+        CDROP -->|NO| TRASH1["dropped"]
+        CDROP -->|YES| CS3
+        CS3 -->|HIGH confidence| COUT
+        CS3 -->|MEDIUM| WL["Watchlist only"]
+        CS3 -->|KILL| TRASH2["dropped"]
+    end
+
+    subgraph RES ["RESEARCH_MODE — thorough, verbose, weekly scan"]
+        direction TB
+        RS1["Step 1 · emerging_scan.py
+sector ETFs vs SPY
+3-5 hot themes"]
+
+        subgraph RSUBS ["Step 2 · Parallel subagents — 1 per source x theme"]
+            direction LR
+            SA["Seeking Alpha
+supply constrained
+bottleneck, monopoly"]
+            WSJ2["WSJ
+shortage, backlog
+capacity, tariff"]
+            FT2["FT
+market share
+sole supplier"]
+            EDGAR["SEC EDGAR
+10-Q / 10-K
+full-text search"]
+            F4["Form 4
+Insider buying
+clusters"]
+        end
+
+        RS3["Step 3 · Non-obvious beneficiary map
+Obvious leader, scarce input, who controls it, hides as different sector?"]
+        RS4["Step 4 · Skeptic filter Q1-Q4
+all candidates, mandatory format, SKIP dominates"]
+        RS5["Step 5 · Full output
+table, killed list, all sources"]
+
+        RS1 --> RSUBS
+        SA & WSJ2 & FT2 & EDGAR & F4 --> RS3
+        RS3 --> RS4 --> RS5
+    end
+
+    CM --> CS1
+    RM --> RS1
+
+    COUT --> MLQ[["multi-lens-quorum
+buy / wait / late-chase"]]
+    RS5 --> MLQ
+```
 
 ## What it does for the agent
 

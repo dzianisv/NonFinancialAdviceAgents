@@ -1,0 +1,59 @@
+📊 Daily Crypto Brief — 2026-06-24
+
+🌡️ Mood: 17 — Extreme Fear
+
+⚠️ BREAKING: BTC broke below 200-week MA ($62,442) for first time since 2022. K33: BTC ETP 1-yr flows negative for first time since Nov 2023 — largest ETP drawdown ever. Could be final capitulation.
+[source: https://www.theblock.co/post/405989/bitcoin-etp-outflows-push-rolling-one-year-flows-negative-first-time-since-2023-k33]
+
+📅 Standard Chartered initiated AAVE today: $3,500 target by 2030 (50x). Also covers UNI ($100 target). DeFi structural recovery thesis.
+[source: https://www.theblock.co/post/405996/standard-chartered-generational-wealth-potential-aave-recovery-predicts-50x-upside-2030]
+
+─────────────────────────────
+💼 PORTFOLIO SIGNALS
+
+🌟 AAVE $73.64 | HIGH conviction
+🟢 BUY ★ • StanChart $3,500 target today. Above EMA20. 46% below 200wMA.
+📌 Best risk/reward in portfolio right now.
+
+⟠ ETH $1,569 | −36.5% vs 200wMA
+🟡 BUY (small) • $340B TVL, $1.38M/day app revenue [source: https://defillama.com/chain/ethereum]
+📌 Deep value; watch 200wMA ($2,472) for trend confirmation.
+
+🔗 LINK $7.11 | −43.3% vs 200wMA
+🟡 BUY (small) • Oracle backbone for $4T RWA wave. RSI approaching oversold.
+📌 Ladder: $7.00, $6.50.
+
+◎ SOL $65.53 | −38.7% vs 200wMA
+🟡 BUY (small) • Chain revenue $2.82M/day [source: https://defillama.com/chain/solana]
+📌 Healthy chain, weak price. Small tranche.
+
+🦄 UNI $2.75 | −59.9% vs 200wMA
+🟡 BUY (small) • StanChart $100 target. Fee switch live.
+📌 High upside, needs trend change.
+
+₿ BTC $59,570 | BROKE 200wMA ⚠️
+⏸️ HOLD • Wait for weekly reclaim of $62,442. ETP capitulation signal historically precedes bottom.
+📌 Do NOT add until 200wMA reclaimed.
+
+💙 HYPE $60.18 | Golden cross. Add at $64.29 EMA20 reclaim.
+🟣 JUP $0.199 | Risk-off market. Wait.
+🔵 TON $1.544 | Durov risk. Hold.
+🟣 AERO $0.498 | Golden cross. Add at SMA50 $0.428.
+🎲 PUMP $0.00125 | Cycle signal. Not a buy.
+
+─────────────────────────────
+⚠️ BTC below 200wMA = highest caution level. Keep 70%+ dry powder. ONLY deploy to DEEP_VALUE tokens with institutional catalysts (AAVE > LINK > ETH > SOL > UNI). Size small.
+
+📅 Watch: BTC weekly close vs $62,442 (200wMA). July FOMC next macro catalyst.
+
+📎 Sources:
+• https://api.alternative.me/fng/?limit=1 — F&G 17 Extreme Fear
+• https://www.theblock.co/post/405989/bitcoin-etp-outflows-push-rolling-one-year-flows-negative-first-time-since-2023-k33 — BTC ETP 1yr flows negative, largest drawdown ever
+• https://www.theblock.co/post/405996/standard-chartered-generational-wealth-potential-aave-recovery-predicts-50x-upside-2030 — StanChart AAVE $3,500 + UNI $100 targets
+• https://defillama.com/chain/ethereum — ETH on-chain metrics
+• https://defillama.com/chain/solana — SOL on-chain metrics
+• https://defillama.com/chain/hyperliquid-l1 — HYPE revenue metrics
+• https://defillama.com/protocol/chainlink — LINK institutional reach
+• https://www.coindesk.com/markets/2026/06/24/bitcoin-drops-toward-usd62-000-as-the-chip-selloff-deepens-for-a-second-day — ETF outflows $6B+
+
+Educational only. Not financial advice. DYOR.

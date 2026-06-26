@@ -1,13 +1,13 @@
 ---
-name: trend-stock-research
-description: Research-first method to pick trendy stocks by reading quality financial journalism (Seeking Alpha, WSJ, Financial Times) — the only approach that has worked to find the next NVDA/SanDisk BEFORE the move. Static scanners can only pre-screen; the real insights come from reading analysts who understand the demand inflection, supply-chain bottleneck, and catalyst. Integrates a quantitative pre-screen (emerging_scan.py, 180-name universe) with deep journalism reading. Use when asked "find trendy stocks", "what companies are trending", "analyze the market for opportunities", "what should I buy", "find the next NVDA/SanDisk", "what's the next big trend", "scan for emerging stocks", "research a sector for winners", "what's waking up", "am I missing a trend", or to build a weekly trend-stock watchlist. Hypothesis generation, not a buy signal; never auto-trades. Educational, not advice.
+name: stocks-trend-screener
+description: Screens for high-conviction growth stocks using price momentum pre-screen + financial journalism + model reasoning. Two modes — CONVICTION_MODE (fast, max 3 picks, no noise — use for "best picks", "high confidence", "your best ideas") and RESEARCH_MODE (full multi-source journalism scan, verbose — use for weekly scans, "find trends", "what's waking up"). Feed stack: FT + WSJ via Google News RSS proxy (web_fetch, verified working), Bloomberg via Google News proxy, Reuters/BI via broad Google News search. Never auto-trades. Educational, not advice.
 license: MIT
 compatibility: opencode
 metadata:
   audience: trend-and-growth-investors
   domain: equity-trend-analysis-and-stock-selection
   role: research-first-stock-picking-playbook
-  source: "Built 2026-06-08; research-reading method proven by experience (NVDA 2021, SanDisk 2025)"
+  source: "Built 2026-06-08; renamed stocks-trend-screener 2026-06-25"
 ---
 
 <role>
@@ -55,13 +55,93 @@ Single signal = noise. Convergence = signal:
 </context>
 
 <orchestration>
-## How to execute this skill: PARALLEL SUBAGENTS
+## Two execution modes — pick based on user intent
+
+### CONVICTION_MODE (fast, high-signal — use when user wants "best picks", "no noise", "high confidence")
+
+```
+ORCHESTRATOR (you)
+  │
+  ├─ Step 0: Detect mode → CONVICTION_MODE
+  │
+  ├─ Step 1: run emerging_scan.py (30s) — confirms which sectors have price momentum
+  │           → rejects any candidate in a LAGGING/BROKEN sector (below 200d, no momentum)
+  │
+  ├─ Step 2-CONVICTION: Draft 3-5 thesis candidates from MODEL KNOWLEDGE
+  │   - State explicitly: what you know about this business, why revenue is accelerating,
+  │     what the concrete upcoming catalyst is, and why the stock is NOT already extended
+  │
+  │   VERIFY each candidate using the feed stack. Run all in parallel (each is a single web_fetch call):
+  │
+  │   a) Research DB — check already-ingested articles (instant):
+  │      python3 .agents/skills/stocks-trend-screener/scripts/db/research_db.py search "<ticker>"
+  │
+  │   b) FT headlines (verified working — Google News RSS proxy for ft.com):
+  │      web_fetch "https://news.google.com/rss/search?q=site:ft.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
+  │      → returns ~100 FT headlines with RSS teasers (~100-200 char publisher descriptions)
+  │      → direct ft.com RSS is bot-blocked from agent IPs — do NOT use ft.com/rss directly
+  │
+  │   c) WSJ headlines (verified working — Google News RSS proxy for wsj.com):
+  │      web_fetch "https://news.google.com/rss/search?q=site:wsj.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
+  │      → DJ feeds (feeds.a.dj.com) are DEAD since Jan 2025 — do NOT use
+  │      → for full WSJ bodies: read_article.ts via Wayback (works for WSJ, not FT)
+  │
+  │   d) Bloomberg (no public RSS, bot-blocked) — Google News proxy is the only free path:
+  │      web_fetch "https://news.google.com/rss/search?q=site:bloomberg.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
+  │      → returns ~450-char snippets; full bodies need Chrome + bypass-paywalls skill
+  │
+  │   e) Reuters / Business Insider / CNBC / IBD — broad Google News search:
+  │      web_fetch "https://news.google.com/rss/search?q=<ticker>+<theme>+2026&hl=en-US&gl=US&ceid=US:en"
+  │
+  │   DROP the candidate if: no result from any source dated within 30 days.
+  │   No parallel subagents. No multi-theme fan-out. Feed stack replaces subagents here.
+  │
+  ├─ Step 3-CONVICTION: Apply the TIGHTER skeptic filter (4 questions, not 3)
+  │   Q1: Already priced? (same kill thresholds as standard mode)
+  │   Q2: Concrete catalyst in next 1-2 quarters? (must name a specific date/event)
+  │   Q3: What kills it? (must name a specific risk, not a generic one)
+  │   Q4: Is revenue CURRENTLY accelerating? (most recent quarter growth > prior quarter — YES/NO/UNKNOWN)
+  │       → UNKNOWN = downgrade to MEDIUM. NO = KILLED unless the catalyst is a clear inflection point.
+  │   All 4 must return PASS for HIGH confidence. Any UNKNOWN → MEDIUM. Any NO → KILLED.
+  │
+  └─ Step 5-CONVICTION: Output MAX 3 names, ranked by conviction.
+     No intermediate steps shown. No killed list. No process narrative.
+     Print ONLY the final table + 2-sentence thesis per survivor + "Routing to multi-lens-quorum."
+```
+
+**Feed stack — verified status (2026-06-25):**
+| Source | How to fetch | What you get | Body? |
+|---|---|---|---|
+| **FT** | `web_fetch` Google News `site:ft.com` RSS | ~100 headlines + RSS teasers (~100-200 chars) | Chrome only (ft.com direct = 403 blocked) |
+| **WSJ** | `web_fetch` Google News `site:wsj.com` RSS | ~100 headlines + RSS teasers | Wayback via `read_article.ts` (works) |
+| **Bloomberg** | `web_fetch` Google News `site:bloomberg.com` RSS | ~100 headlines + ~450-char snippets | Chrome only (no public RSS, bot-blocked) |
+| **Reuters / BI / CNBC** | `web_fetch` Google News broad search | ~100 headlines + ~450-char snippets | Usually freely available via direct fetch |
+| **Research DB** | `research_db.py search "<query>"` | Full stored articles from prior ingestion | Full body if previously ingested |
+| **CoinDesk / Decrypt** | `web_fetch` their RSS directly | Full articles | Yes — no paywall |
+
+**DO NOT use:**
+- `bun fetch_all.ts` — hangs (uses deprecated `feeds.a.dj.com` and blocked `ft.com/rss` endpoints)
+- `ft.com/rss` directly — bot-blocked, returns 403 from agent IPs
+- `feeds.a.dj.com` (WSJ/DJ) — dead since January 2025, returns stale data
+
+**Model knowledge is valid in CONVICTION_MODE IF:**
+- You explicitly state the basis ("I know X because [earnings call / business model / market structure]")
+- At least one feed source above confirms the catalyst is still live within the last 30 days
+- You do NOT claim specific numbers (prices, growth rates, margins) from memory — fetch those via `fundamentals.py`
+
+**Model knowledge is NOT valid as a substitute for:**
+- Checking that the stock is not already extended (always run `fundamentals.py` or yfinance check)
+- Confirming a catalyst date/event (always do the verify pass above)
+
+---
+
+### RESEARCH_MODE (thorough, verbose — use for weekly scans and when user wants the full read)
 
 This skill is designed for parallel execution. Steps 1 and 2 should be fanned out across multiple
 subagents reading different sources simultaneously. This is the agent superpower — breadth of
 reading that a human cannot match in one sitting.
 
-### Execution architecture
+### Execution architecture (RESEARCH_MODE)
 
 ```
 ORCHESTRATOR (you)
@@ -120,28 +200,34 @@ advantage of an agent team reading financial journalism.
 
 ### How to read articles (including paywalled sources)
 
-**Delegate to the feed + paywall skills.** Do NOT duplicate their logic here.
+**Use `web_fetch` directly — do NOT use local Bun feed scripts (`fetch_all.ts` hangs on deprecated endpoints).**
 
-1. **Headlines + teasers (automated, daily):** The `feed-*` skills + TS pipeline at
-   `.agents/skills/trend-stock-research/scripts/feeds/` handle RSS ingestion for FT, WSJ, CoinDesk, Decrypt, etc.
-   Run `bun .agents/skills/trend-stock-research/scripts/feeds/fetch_all.ts --db .db/news.db --days 7` for all feeds.
+1. **FT headlines:** `web_fetch "https://news.google.com/rss/search?q=site:ft.com+<topic>+when:7d&hl=en-US&gl=US&ceid=US:en"`
+2. **WSJ headlines:** `web_fetch "https://news.google.com/rss/search?q=site:wsj.com+<topic>+when:7d&hl=en-US&gl=US&ceid=US:en"`
+3. **Bloomberg:** `web_fetch "https://news.google.com/rss/search?q=site:bloomberg.com+<topic>+when:7d&hl=en-US&gl=US&ceid=US:en"`
+4. **Broad (Reuters/CNBC/IBD/BI):** `web_fetch "https://news.google.com/rss/search?q=<topic>+2026&hl=en-US&gl=US&ceid=US:en"`
+5. **Full article bodies:** Use `bypass-paywalls` skill (Chrome required) for FT/Bloomberg full text.
+6. **WSJ bodies (no Chrome):** `read_article.ts "<wsj-url>"` via Wayback — works for WSJ, blocked for FT.
+7. **Free sources:** SEC EDGAR, press releases, IR pages — `web_fetch` directly.
 
-2. **Full article bodies (interactive):** Use the `bypass-paywalls` skill
-   (`.agents/skills/bypass-paywalls/SKILL.md`) which drives the user's Chrome with the
-   bypass-paywalls-clean extension. Works for FT, WSJ, SA, Bloomberg, NYT, Barron's, 100+ more.
-
-3. **Headless body fallback:** `web.archive.org` works for WSJ bodies; FT usually blocked.
-   See `feed-wsj/SKILL.md` and `feed-ft/SKILL.md` for the tested ladder.
-
-4. **Free sources (no browser needed):** SEC EDGAR, press releases, IR pages — use `web_fetch`.
-
-If NO browser tool is available, state clearly: "No browser tool — cannot read paywalled sources.
-Gap: [what's missing]." Never hallucinate content you couldn't read.
+If NO browser: state "No browser — FT/Bloomberg bodies unavailable. Headlines + teasers only."
 </orchestration>
 
 <instructions>
-Execute these 5 steps in order. Each step has explicit actions. Do not skip steps. Do not speculate
-about information you have not read — investigate first, then reason.
+## Step 0 — Mode detection (MANDATORY FIRST STEP)
+
+Read the user's trigger phrase:
+- "high confidence", "no noise", "best picks", "just give me names", "your best ideas", "only strong ones" → **CONVICTION_MODE**
+- "find trends", "weekly scan", "full research", "what's waking up", "scan for emerging" → **RESEARCH_MODE**
+- Default if ambiguous → **RESEARCH_MODE**
+
+In CONVICTION_MODE: skip the subagent fan-out in Step 2, use the CONVICTION_MODE path in orchestration, and apply the 4-question skeptic filter. Show only the final 3-name table. No intermediate process output.
+
+In RESEARCH_MODE: execute all 5 steps as described below in full.
+
+---
+
+Execute these steps in order. Each step has explicit actions. Do not skip steps.
 
 ## Step 1 — Pre-screen: identify hot sectors (MANDATORY — do not skip)
 
@@ -150,7 +236,7 @@ Run the static scanner FIRST. Show its output before proceeding to Step 2. This 
 you read — without it you're guessing which sectors to research.
 
 ```bash
-/Users/engineer/.venv/bin/python3 .agents/skills/trend-stock-research/scripts/emerging_scan.py --top 25
+/Users/engineer/.venv/bin/python3 .agents/skills/stocks-trend-screener/scripts/emerging_scan.py --top 25
 ```
 
 Also check sector ETFs vs SPY (XLK, SMH, XLE, XLV, ITA, XLF, XLU, ARKK, ICLN, TAN, HACK, ROBO)
@@ -250,7 +336,7 @@ has one. Record it as "obvious plays only" and move on.
 ## Step 4 — Skeptic filter (mandatory — most candidates die here)
 
 <step_4_actions>
-For EVERY candidate, answer ALL THREE questions IN THIS EXACT FORMAT. Drop or downgrade any that fail:
+For EVERY candidate, answer ALL FOUR questions IN THIS EXACT FORMAT. Drop or downgrade any that fail:
 
 1. ALREADY PRICED? Apply these hard thresholds:
    - Up >150% in 12 months → KILLED. No exceptions. It's late.
@@ -266,16 +352,28 @@ For EVERY candidate, answer ALL THREE questions IN THIS EXACT FORMAT. Drop or do
 3. WHAT KILLS IT? State the single biggest risk that would invalidate the thesis.
    If you cannot name a specific risk, you do not understand the position yet — research more or drop.
 
+4. IS REVENUE CURRENTLY ACCELERATING? (CONVICTION_MODE: mandatory. RESEARCH_MODE: recommended.)
+   Compare most recent reported quarter revenue growth vs the prior quarter.
+   - YES (growth accelerating) → no penalty
+   - UNKNOWN (cannot verify from available data) → downgrade confidence to MEDIUM
+   - NO (growth decelerating) → KILLED unless the thesis is specifically about a future inflection
+     point with a named catalyst in Q1-Q2 (if so: note "DECELERATION — catalyst must inflect this")
+   This question catches value traps: great stories on slowing businesses are the most dangerous.
+
 **MANDATORY FORMAT — show this for EVERY candidate (survivors AND kills):**
 ```
 ### <TICKER>
 1. Already priced? [YES/NO/BORDERLINE] — [12m return], [6m return], [% vs 200d]. [Verdict].
 2. Catalyst? [specific event] — [quarter/date]. [Verdict].
 3. Kills it? [specific risk]. [Verdict].
+4. Revenue accelerating? [YES/NO/UNKNOWN] — [most recent qtr growth vs prior qtr]. [Verdict].
 → KILLED / SURVIVED (confidence: HIGH/MED/LOW)
 ```
 
-Do NOT batch-kill candidates with one-liners. Each gets the explicit 3-question treatment even
+In CONVICTION_MODE: only SURVIVED + HIGH confidence advances to output. MEDIUM stays on watchlist.
+In RESEARCH_MODE: SURVIVED at any confidence level advances.
+
+Do NOT batch-kill candidates with one-liners. Each gets the explicit 4-question treatment even
 if the answer to Q1 is an obvious kill. This prevents false survivors and forces you to name the
 risk even on easy kills.
 
@@ -294,16 +392,39 @@ Rank surviving candidates by:
   (strength of demand inflection) × (non-obviousness) × (concrete catalyst proximity)
   minus (how-already-priced)
 
-Produce the output table (format below). Then route top 2-3 finalists to `multi-lens-quorum` for
-the buy / wait / late-chase call. This skill only NOMINATES — the quorum DECIDES. Never auto-trade.
+### CONVICTION_MODE output (max 3 — no noise):
+Print ONLY the final table. No killed list. No intermediate process. No "we also looked at..."
+Cap at 3 names. If fewer than 3 pass all 4 questions at HIGH confidence, output fewer — do not
+fill slots with MEDIUM candidates to hit 3. An honest 1-name output is better than 3 padded ones.
 
+### RESEARCH_MODE output:
+Produce the full table for every survivor. Show the killed list. Show the source citations.
+
+Route top names to `multi-lens-quorum` in both modes. This skill only NOMINATES — the quorum DECIDES.
 **IMPORTANT: Do NOT execute the quorum yourself.** Your job ends at nomination. State:
-"Routing [tickers] to multi-lens-quorum with [confidence] flags." Do not say what the quorum
-would decide, do not apply analyst lenses, do not give buy/wait/pass verdicts. Hand off and stop.
+"Routing [tickers] to multi-lens-quorum with [confidence] flags."
 </step_5_actions>
 </instructions>
 
 <output_format>
+### CONVICTION_MODE output (print ONLY this — nothing else):
+
+```
+HIGH-CONVICTION PICKS — [DATE] — [N names]
+
+[TICKER] | [Company] | [Theme]
+  Why now: [2 sentences — the specific demand inflection and why revenue is accelerating]
+  Catalyst: [specific event] — [quarter/date]
+  Risk: [the one thing that kills it]
+  Source: [outlet] [url] [date] — "[verbatim quote confirming catalyst is live]"
+
+[repeat for each survivor, max 3]
+
+Routing [tickers] to multi-lens-quorum.
+```
+
+### RESEARCH_MODE output:
+
 Produce this table for every candidate that survived the skeptic filter:
 
 | Ticker | Demand Inflection | Catalyst + When | Non-obvious Why | Already Priced? | Kills It | Confidence | Source (outlet https://url YYYY-MM-DD) |
@@ -558,7 +679,7 @@ Triggered by: "daily ingest", "read today's news", "ingest articles"
 
 ```python
 import sys
-sys.path.insert(0, '.agents/skills/trend-stock-research/scripts/db')
+sys.path.insert(0, '.agents/skills/stocks-trend-screener/scripts/db')
 from research_db import ingest_article
 
 ingest_article(
@@ -618,7 +739,7 @@ SYNTHESIZE above is prose/theme-based. `mention_velocity.py` is the hard, testab
 RECENT-DATED Google News RSS headlines per watchlist ticker, compares to that ticker's OWN trailing
 baseline (persisted ledger), and FLAGS a spike — appending it to `~/.openclaw/workspace/investor/pools/narrative.jsonl` automatically.
 ```bash
-python3 .agents/skills/trend-stock-research/mention_velocity.py --tickers NVDA,WDC,STX,MU --days 7 --json
+python3 .agents/skills/stocks-trend-screener/mention_velocity.py --tickers NVDA,WDC,STX,MU --days 7 --json
 ```
 - Spike rule: `mentions_now >= --min-spike (3)` AND `>= --ratio (2.0) × trailing_avg` (or no baseline yet).
 - **Cold-start caveat:** Google serves a fixed ~100-item feed and re-stamps mega-cap pubDates as recent,
@@ -652,16 +773,16 @@ FTS5 query syntax:
 
 ```bash
 # Check stats
-python3 .agents/skills/trend-stock-research/scripts/db/research_db.py stats
+python3 .agents/skills/stocks-trend-screener/scripts/db/research_db.py stats
 
 # Search
-python3 .agents/skills/trend-stock-research/scripts/db/research_db.py search "transformer shortage"
+python3 .agents/skills/stocks-trend-screener/scripts/db/research_db.py search "transformer shortage"
 
 # List converging themes
-python3 .agents/skills/trend-stock-research/scripts/db/research_db.py themes
+python3 .agents/skills/stocks-trend-screener/scripts/db/research_db.py themes
 
 # List active theses
-python3 .agents/skills/trend-stock-research/scripts/db/research_db.py theses
+python3 .agents/skills/stocks-trend-screener/scripts/db/research_db.py theses
 ```
 
 DB file: `~/.local/share/trend-research/articles.db` (persists across sessions, zero cost)

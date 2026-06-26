@@ -103,7 +103,7 @@ list it in `feeds_unavailable` (loud, per NFR6) — never silently drop.
 ## Velocity (optional)
 
 For narrative *velocity* only (rate of mention growth), `mention_velocity.py` exists under
-`trend-stock-research/` but is a **stock tool** — it needs a crypto-universe adaptation (BTC/ETH/MSTR/ETF
+`stocks-trend-screener/` but is a **stock tool** — it needs a crypto-universe adaptation (BTC/ETH/MSTR/ETF
 tickers, crypto outlets) before use here. Do not run it on the crypto universe as-is.
 
 ## Citation rule — no URL = not a source
