@@ -515,6 +515,12 @@ Indicator and compound buy-zones map to mkt conditions (`rsi_below`, `macd_cross
 fires the Telegram/ntfy notification with the reasoning. See `.agents/skills/mkt/SKILL.md`
 for the three trigger patterns and the per-runtime scheduler cookbook. Recommend-only.
 
+**Crypto is mkt's strong path** — quotes stream live from **Coinbase WS** (real-time, no
+geo-block), ideal for our 24/7 book. Use Coinbase symbol format: `BTC-USD`, `ETH-USD`,
+`AAVE-USD`, `SOL-USD` (dashes, **not** `BTCUSDT`). A very thin/new alt with no Coinbase feed
+returns no quote — that one job logs an error and is skipped; every other job still runs. So
+keep alerts to tokens in our universe (all of which have Coinbase feeds).
+
 ## Running continuously
 
 ```
