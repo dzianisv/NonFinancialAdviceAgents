@@ -50,7 +50,7 @@ run in parallel, return compact verdicts, and keep the main context clean.
 | Macro/liquidity only | **`analysis-macro`** subagent |
 | Order flow / liquidations | **`analysis-orderflow`** subagent |
 | News / narrative | **`analysis-narrative`** subagent |
-| FOMC / Fed / rates | **`feed-fomc`** + **`prediction-market-odds`** subagents (parallel) |
+| FOMC / Fed / rates | **`feed-fomc`** + **`analyst-smartmoney-polymarket`** subagents (parallel) |
 | Alt selection | **`crypto-token-screener`** subagent |
 | Regime classification | **`regime-detection`** subagent |
 | Sizing veto | **`risk-management`** subagent |
@@ -71,7 +71,7 @@ needs the zone verdict from the analysis subagent first). Even then, batch what 
 | When | Load (as subagent) |
 |------|------|
 | Any timing / deploy / "is now good?" question | **`analysis-comprehensive-crypto`** — full panel: TradingView MCP data + on-chain + sentiment + macro + orderflow + narrative. Do NOT just load `analyst-crypto` inline — spawn the full panel. |
-| Any FOMC / Fed / rates mention | **`feed-fomc`** → tone + language delta. Then **`prediction-market-odds`** → CME FedWatch rate path. Spawn both in parallel. |
+| Any FOMC / Fed / rates mention | **`feed-fomc`** → tone + language delta. Then **`analyst-smartmoney-polymarket`** → CME FedWatch rate path. Spawn both in parallel. |
 | Any "is the derivatives positioning bullish/bearish?" | **`analysis-orderflow`** — funding rates, OI, liquidation clusters, CVD, CME gap. |
 | Any alt selection | **`crypto-token-screener`** — 6-point BTC-hurdle filter before any tilt on an alt. |
 

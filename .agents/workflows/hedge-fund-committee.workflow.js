@@ -93,15 +93,15 @@ const NEWS_SEATS = [
 ]
 const DESKS = [
   { desk: 'macro-regime',        prompt: 'You are the macro/regime analyst. Run /regime-detection AND /feed-fomc. Summary = regime (RISK_ON/NEUTRAL/RISK_OFF) + exposure dial + Fed tone/next-meeting. candidates: [] unless a regime/Fed shift implies a specific tilt.' },
-  { desk: 'institutional-flows', prompt: 'You are the institutional-flows analyst. Run /13f-watch (Burry/Buffett/Ackman/Klarman/Li Lu). Return ONLY new, deduped institutional BUYS as candidates (source=13F, evidence=fund+filing). Drop puts/trims/exits. State the 45-day lag.' },
-  { desk: 'political-flows',     prompt: 'You are the political-flows analyst. Run /congressman-stock-watch (last 90d). Return only NEW deduped congressional PURCHASES as candidates (evidence=member+date+amount). State the 30-45d disclosure lag. If the source is rate-limited, say so and return [].' },
+  { desk: 'institutional-flows', prompt: 'You are the institutional-flows analyst. Run /analyst-smartmoney-13f (Burry/Buffett/Ackman/Klarman/Li Lu). Return ONLY new, deduped institutional BUYS as candidates (source=13F, evidence=fund+filing). Drop puts/trims/exits. State the 45-day lag.' },
+  { desk: 'political-flows',     prompt: 'You are the political-flows analyst. Run /analyst-smartmoney-ptr (last 90d). Return only NEW deduped congressional PURCHASES as candidates (evidence=member+date+amount). State the 30-45d disclosure lag. If the source is rate-limited, say so and return [].' },
   ...NEWS_SEATS,
   { desk: 'equity-dips',         prompt: 'You are the equity dip analyst. Run /dip-scanner with --universe equity. Return HIGH/MEDIUM dips (>=25% below 52w high) as candidates (evidence=pct_from_high + 200dMA). Quality names only; a dip is a candidate, not a buy.' },
   { desk: 'crypto',              prompt: 'You are the crypto desk analyst. Run /dip-scanner with --universe crypto. Return coins >=30% below 52w high as candidates with Fear&Greed in evidence. Note BTC-as-hurdle. Funding may be [unverified] (geo-block).' },
-  { desk: 'crowd-odds',          prompt: 'You are the crowd-odds analyst. Run /prediction-market-odds for the macro/Fed/index markets that matter this week. Summary = what the crowd is pricing + implication for equities. candidates only if a market implies a specific name.' },
+  { desk: 'crowd-odds',          prompt: 'You are the crowd-odds analyst. Run /analyst-smartmoney-polymarket for the macro/Fed/index markets that matter this week. Summary = what the crowd is pricing + implication for equities. candidates only if a market implies a specific name.' },
 ]
 const desks = FOCUS
-  ? [{ desk: 'focus-research', prompt: `Deep-research ${FOCUS}: run /fundamental-analysis + /trend-stock-research + check /13f-watch and /congressman-stock-watch for ${FOCUS}. Return ${FOCUS} as a candidate with the strongest REAL evidence (valuation, FCF, who owns it, live catalyst).` }]
+  ? [{ desk: 'focus-research', prompt: `Deep-research ${FOCUS}: run /fundamental-analysis + /trend-stock-research + check /analyst-smartmoney-13f and /analyst-smartmoney-ptr for ${FOCUS}. Return ${FOCUS} as a candidate with the strongest REAL evidence (valuation, FCF, who owns it, live catalyst).` }]
   : DESKS
 // DESK-HEALTH ACCOUNTING: every desk is ALWAYS represented in `reports`, even on death/error.
 // A desk that returns [] (ran, found nothing) MUST be distinguishable from one that errored — otherwise

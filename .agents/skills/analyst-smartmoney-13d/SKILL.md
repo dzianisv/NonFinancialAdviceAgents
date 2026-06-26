@@ -1,5 +1,5 @@
 ---
-name: 13d-watch
+name: analyst-smartmoney-13d
 description: >-
   Watch real-time SEC 13D/13G activist filings to surface smart-money buy
   candidates with scoring and tiering. Use when asked "activist filings",
@@ -20,6 +20,8 @@ metadata:
 ---
 
 # 13D Watch — Activist Filing Tracker
+
+This skill is part of the `analyst-smartmoney` family; the parent `analyst-smartmoney` skill synthesizes its output with the other spokes.
 
 <role>
 You are the 13D watch desk — a smart-money tracking agent that scans real-time SEC 13D/13G
@@ -43,14 +45,14 @@ every candidate in the dedup ledger. Output a structured research report.
 | STOCK Act | Congressional disclosures | 30-45 day lag | Convergence confirmation only |
 
 A 13D filing alone can trigger a candidate. 13F and STOCK Act alone cannot — they have
-their own standalone skills (`13f-watch`, `congressman-stock-watch`).
+their own standalone skills (`analyst-smartmoney-13f`, `analyst-smartmoney-ptr`).
 
 ## Scripts
 
 All TypeScript. Run with `node --experimental-strip-types`:
 
 ```bash
-D="node --experimental-strip-types .agents/skills/13d-watch"
+D="node --experimental-strip-types .agents/skills/analyst-smartmoney-13d"
 
 $D/watch.ts roster          # show tracked activists
 $D/watch.ts seen <TICKER> <FILING_TYPE>   # exit 0 = SKIP; exit 1 = NEW
@@ -138,8 +140,8 @@ For each T1/T2 candidate, check other signal feeds:
 
 Flag convergence count: `n_sources` ≥ 2 = elevated, ≥ 3 = route to quorum immediately.
 
-**Sub-skill dependencies for convergence are OPTIONAL.** If `13f-watch` or
-`congressman-stock-watch` are unavailable, skip that convergence check and note
+**Sub-skill dependencies for convergence are OPTIONAL.** If `analyst-smartmoney-13f` or
+`analyst-smartmoney-ptr` are unavailable, skip that convergence check and note
 `[convergence: 13F unavailable]`. The 13D signal alone is sufficient to recommend.
 
 ### 6. RECORD — Log to dedup ledger
@@ -167,7 +169,7 @@ echo '{"ticker":"XYZ","filing_type":"13D","filer":"Carl Icahn","stake_pct":9.8,"
 
 ## Output Contract
 
-Save the final report to: **`research/13d-watch-{YYYY-MM-DD}.md`**
+Save the final report to: **`research/analyst-smartmoney-13d-{YYYY-MM-DD}.md`**
 
 <output_format>
 The report MUST contain these sections in order:
@@ -200,14 +202,14 @@ The report MUST contain these sections in order:
 
 ## Fit
 
-A **WHICH-finder** (sibling to `13f-watch`, `stocks-trend-screener`, `congressman-stock-watch`)
+A **WHICH-finder** (sibling to `analyst-smartmoney-13f`, `stocks-trend-screener`, `analyst-smartmoney-ptr`)
 feeding the pipeline:
 
 ```
-13d-watch finds → multi-lens-quorum judges → superforecasting times
+analyst-smartmoney-13d finds → multi-lens-quorum judges → superforecasting times
 ```
 
-**Distinct from 13f-watch:** 13D is real-time, event-catalyst, activist-driven (micro/small-cap).
+**Distinct from analyst-smartmoney-13f:** 13D is real-time, event-catalyst, activist-driven (micro/small-cap).
 13F is quarterly, conviction-sizing, long-only (large-cap). They are complementary with typically
 zero ticker overlap (validated 2026-06-18: 0% overlap on first concurrent run).
 

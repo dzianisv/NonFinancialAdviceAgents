@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""congressman-stock-watch — STOCK Act dedup ledger manager.
+"""analyst-smartmoney-ptr — STOCK Act dedup ledger manager.
 
 The HTTP fetching is done by the LLM agent (via WebFetch on capitoltrades.com).
 This script only manages the dedup ledger so tickers are never proposed twice.
@@ -79,7 +79,7 @@ def cmd_list(a):
 
 
 def main():
-    p = argparse.ArgumentParser(description="congressman-stock-watch dedup ledger")
+    p = argparse.ArgumentParser(description="analyst-smartmoney-ptr dedup ledger")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("seen", help="check if ticker already recommended")

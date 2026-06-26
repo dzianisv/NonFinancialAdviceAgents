@@ -52,7 +52,7 @@ Ranked by impact.
 
 ## Reused Signal Skills
 
-Already shipped: regime-detection (RISK_ON/OFF from SPY 200dMA+VIX+HY spread), feed-fomc, prediction-market-odds, trend-stock-research, 13f-watch, congressman-stock-watch, macro-panel, multi-lens-quorum (buy/sell/hold verdict engine), superforecasting, risk-management (VETO authority), portfolio-monitor.
+Already shipped: regime-detection (RISK_ON/OFF from SPY 200dMA+VIX+HY spread), feed-fomc, analyst-smartmoney-polymarket, trend-stock-research, analyst-smartmoney-13f, analyst-smartmoney-ptr, macro-panel, multi-lens-quorum (buy/sell/hold verdict engine), superforecasting, risk-management (VETO authority), portfolio-monitor.
 
 ## Cadence — Proactive Layer
 

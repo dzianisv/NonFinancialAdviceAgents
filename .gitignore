@@ -72,3 +72,4 @@ logs/
 !.claude/settings.json
 !.opencode/
 !.opencode/plugins/
+form4/

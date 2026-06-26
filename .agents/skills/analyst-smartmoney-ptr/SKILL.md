@@ -1,5 +1,5 @@
 ---
-name: congressman-stock-watch
+name: analyst-smartmoney-ptr
 description: "Watch recent congressional stock disclosures (STOCK Act — House + Senate) and propose NEW buy-candidates from what members of Congress just purchased. Use when asked \"what stocks are congressmen buying\", \"track congressional trades\", \"what did Pelosi/McCaul buy\", \"run the congressional watcher\", \"congressman stock picks\", \"STOCK Act tracker\", or on a schedule. Fetches Capitol Trades via WebFetch (free, no API key), filters for PURCHASES only, deduplicates against a ledger so the same ticker is never proposed twice. Recommend-only — never trades. Educational, not advice. Note: disclosures lag 30-45 days; congress-members are long-only (personal accounts), not macro smart-money."
 license: MIT
 compatibility: opencode
@@ -11,6 +11,8 @@ metadata:
 ---
 
 # Congressional Stock Watch (propose new buys from STOCK Act filings)
+
+This skill is part of the `analyst-smartmoney` family; the parent `analyst-smartmoney` skill synthesizes its output with the other spokes.
 
 Scan recent House + Senate STOCK Act disclosures, surface what members of Congress newly **purchased**, and propose the un-proposed ones as buy-candidates. The point is a *standing watchlist that never repeats itself* — every ticker is deduped against the ledger before it's proposed.
 
@@ -50,7 +52,7 @@ If Capitol Trades returns a 429 or is blocked: emit `[SIGNAL UNAVAILABLE — Cap
 After fetching and parsing trades from WebFetch above:
 
 ```bash
-W="python3 .agents/skills/congressman-stock-watch/watch.py"
+W="python3 .agents/skills/analyst-smartmoney-ptr/watch.py"
 ```
 
 1. **Keep only PURCHASES** in last 90 days. Drop: Sales, Exchanges, Partial Sales, options.
@@ -69,15 +71,15 @@ W="python3 .agents/skills/congressman-stock-watch/watch.py"
              --date 2026-01-15 --amount "$1,000,001+" --action purchase \
              --reason "Bought ahead of CHIPS Act procurement cycle"
    ```
-5. **Cross-check with 13f-watch:** ticker in a recent super-investor 13F buy → note overlap (upgrades conviction).
+5. **Cross-check with analyst-smartmoney-13f:** ticker in a recent super-investor 13F buy → note overlap (upgrades conviction).
 6. **DM the NEW proposals** only. Include: ticker, member(s), transaction date, disclosure date, dollar range, cluster size.
 
 ## Ledger management
 
 ```bash
-python3 .agents/skills/congressman-stock-watch/watch.py list               # all recommended so far
-python3 .agents/skills/congressman-stock-watch/watch.py list --since 2026-01-01
-python3 .agents/skills/congressman-stock-watch/watch.py seen NVDA          # exit 0=seen, 1=new
+python3 .agents/skills/analyst-smartmoney-ptr/watch.py list               # all recommended so far
+python3 .agents/skills/analyst-smartmoney-ptr/watch.py list --since 2026-01-01
+python3 .agents/skills/analyst-smartmoney-ptr/watch.py seen NVDA          # exit 0=seen, 1=new
 ```
 
 Ledger path: `$CONGRESS_LEDGER` or `./congress/recommended.jsonl`

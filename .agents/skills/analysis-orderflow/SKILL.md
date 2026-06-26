@@ -1,6 +1,6 @@
 ---
 name: analysis-orderflow
-description: "Analyst lens for BTC market microstructure and order flow — bid/ask depth, open interest, liquidation levels, spot vs perp divergence, CVD (cumulative volume delta), bid-ask imbalance, whale order clusters, CME gap. Reads who is actually buying/selling at the margin. Use when asked \"where are the liquidations\", \"is there buying or selling pressure\", \"order flow analysis\", \"CME gap\", \"open interest and liquidations\", \"where will price be forced to go\", \"microstructure read\", \"is this a real move or a fakeout\". Depends on [[derivatives-positioning-data]]. Educational, not advice."
+description: "Analyst lens for BTC market microstructure and order flow — bid/ask depth, open interest, liquidation levels, spot vs perp divergence, CVD (cumulative volume delta), bid-ask imbalance, whale order clusters, CME gap. Reads who is actually buying/selling at the margin. Use when asked \"where are the liquidations\", \"is there buying or selling pressure\", \"order flow analysis\", \"CME gap\", \"open interest and liquidations\", \"where will price be forced to go\", \"microstructure read\", \"is this a real move or a fakeout\". Depends on [[analyst-smartmoney-positioning]]. Educational, not advice."
 license: MIT
 compatibility: opencode
 metadata:
@@ -15,7 +15,7 @@ metadata:
 Apply this lens to read **who is actually buying and selling at the margin** — not where price has been,
 but what the order book, open interest, liquidation clusters, and CVD are *forcing* it to do next.
 This is the **microstructure layer** beneath the on-chain and liquidity lenses; it answers short-horizon
-questions the valuation lens cannot. Depends on **[[derivatives-positioning-data]]** for live Coinglass data.
+questions the valuation lens cannot. Depends on **[[analyst-smartmoney-positioning]]** for live Coinglass data.
 Educational, not advice; a lens, not gospel.
 
 ## The unifying worldview
@@ -73,7 +73,7 @@ regime — they route *within* it. A liquidation hunt does not reverse a bear ma
 
 ## How to apply the lens (decision procedure)
 
-1. **Fetch funding rate + OI via [[derivatives-positioning-data]]** (Coinglass). Classify the OI regime
+1. **Fetch funding rate + OI via [[analyst-smartmoney-positioning]]** (Coinglass). Classify the OI regime
    (see mental model 2). Note whether funding is neutral, persistently positive (crowded longs), or
    negative (crowded shorts).
 
@@ -108,7 +108,7 @@ regime — they route *within* it. A liquidation hunt does not reverse a bear ma
 
 | Question is about… | Load |
 |---|---|
-| Live funding rate, OI, options gamma/skew, perpetual premium | `[[derivatives-positioning-data]]` |
+| Live funding rate, OI, options gamma/skew, perpetual premium | `[[analyst-smartmoney-positioning]]` |
 | Liquidation heatmap, where the stop clusters are | WebFetch `coinglass.com/LiquidationMap` |
 | CME gap level and fill status | WebFetch CME BTC futures chart |
 | On-chain valuation zone, MVRV-Z, realized price, NUPL | `analyst-crypto` → `references/02-onchain-valuation.md` |

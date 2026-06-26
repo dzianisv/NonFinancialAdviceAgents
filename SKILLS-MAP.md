@@ -57,9 +57,10 @@ QUESTION TYPE
 | signal-convergence-alert | daily | silent-unless-≥2-pool-hits |
 | feed-fomc | daily | silent-unless-fed-event |
 | trend-stock-research (mention_velocity.py) | daily | feeds convergence pool |
-| 13f-watch | weekly | silent-unless-new-filing |
-| 13d-watch | weekly | silent-unless-activist->5% |
-| congressman-stock-watch | weekly | silent-unless-new-disclosure |
+| analyst-smartmoney-13f | weekly | silent-unless-new-filing |
+| analyst-smartmoney-13d | weekly | silent-unless-activist->5% |
+| analyst-smartmoney-ptr | weekly | silent-unless-new-disclosure |
+| analyst-smartmoney-form4 | weekly | silent-unless-new-filing |
 | portfolio-monitor | weekly | silent-unless-discipline-breach |
 
 ### On-demand (user or orchestrator triggers)
@@ -92,7 +93,9 @@ These are sub-skills. Call them via their orchestrator, not directly:
 `research-manager`, `portfolio-construction`, `risk-management`, `rebalancing`,
 `dip-tranches-strategy`, `tax-loss-harvesting`, `trend-following`, all `feed-*` adapters,
 all `analytics-*` lenses (consumed by macro-panel or multi-lens-quorum),
-all `analyst-*` lenses (consumed by multi-lens-quorum).
+all `analyst-*` lenses (consumed by multi-lens-quorum),
+`analyst-smartmoney` (family orchestrator — runs spokes; use directly or via hedge-fund-committee),
+`analyst-smartmoney-options`, `analyst-smartmoney-darkpool` (analytical — consumed by multi-lens-quorum or analyst-smartmoney).
 
 ### Evaluation / quality (meta — not part of the fund loop)
 

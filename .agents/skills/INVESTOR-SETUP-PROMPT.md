@@ -34,11 +34,11 @@ The `portfolio-monitor` script reads this file and fires alerts when your writte
 | Skill | Requirement | Status |
 |-------|-------------|--------|
 | regime-detection | `yfinance` Python package | Pre-installed in pod (Dockerfile ships it) |
-| congressman-stock-watch | none — scrapes Capitol Trades | Works out of the box; no signup |
+| analyst-smartmoney-ptr | none — scrapes Capitol Trades | Works out of the box; no signup |
 | feed-fomc | `web_fetch` (federalreserve.gov) | Works reliably |
-| prediction-market-odds | `web_fetch` (gamma-api.polymarket.com) | Works reliably |
+| analyst-smartmoney-polymarket | `web_fetch` (gamma-api.polymarket.com) | Works reliably |
 | trend-stock-research | `web_fetch` (FT/WSJ RSS) | Works reliably |
-| 13f-watch | `web_fetch` (sec.gov EDGAR) | Works reliably |
+| analyst-smartmoney-13f | `web_fetch` (sec.gov EDGAR) | Works reliably |
 
 **Notes:**
 - Yahoo Finance requires session cookies — raw `web_fetch` gets 429. Use `regime_monitor.py` (yfinance) only.
@@ -63,19 +63,19 @@ STEP 1 — VERIFY SKILLS
 Confirm these skills are loaded and tell me which are missing:
 
 SIGNAL SKILLS:
-  prediction-market-odds       (Polymarket + Kalshi + CME FedWatch — required by superforecasting)
+  analyst-smartmoney-polymarket       (Polymarket + Kalshi + CME FedWatch — required by superforecasting)
   analyst-derivatives-positioning  (futures funding/OI, options skew/IV — required by superforecasting)
   feed-fomc                 (Fed statements + hawkish/dovish delta — required by macro-panel)
   trend-stock-research         (FT / WSJ / Seeking Alpha journalism — paywall bypass built-in)
-  13f-watch                    (institutional 13F buys, deduped — requires hedge-fund-13f-analysis)
-  hedge-fund-13f-analysis      (EDGAR filing reader — required sub-skill of 13f-watch)
-  congressman-stock-watch      (STOCK Act purchases, deduped)
+  analyst-smartmoney-13f                    (institutional 13F buys, deduped — requires hedge-fund-13f-analysis)
+  hedge-fund-13f-analysis      (EDGAR filing reader — required sub-skill of analyst-smartmoney-13f)
+  analyst-smartmoney-ptr      (STOCK Act purchases, deduped)
   regime-detection             (risk-on/off from 200dMA, VIX, credit spreads)
 
 ANALYSIS SKILLS:
   macro-panel              (7 macro-thinker lenses: Dalio / Druckenmiller / Lyn Alden / Hunt / Pettis / Napier / Buffett)
   multi-lens-quorum        (buy/sell/hold verdict engine — also add Graham/Housel for deep-value/behavioral seat)
-  superforecasting         (dated probability + invalidation triggers — requires prediction-market-odds + analyst-derivatives-positioning)
+  superforecasting         (dated probability + invalidation triggers — requires analyst-smartmoney-polymarket + analyst-derivatives-positioning)
   fundamental-analysis     (valuation, FCF, quality screen — cross-checks with hedge-fund-13f-analysis)
 
 PORTFOLIO SKILLS:
@@ -101,11 +101,11 @@ A) REGIME CHECK (regime-detection):
 
 B) FED / FOMC (feed-fomc):
    - Fetch latest FOMC statement from federalreserve.gov.
-   - Fetch CME FedWatch probabilities for next 2 meetings (via prediction-market-odds).
+   - Fetch CME FedWatch probabilities for next 2 meetings (via analyst-smartmoney-polymarket).
    - Output: next meeting date, current rate, tone (HAWKISH/NEUTRAL/DOVISH), key language quote,
      tone delta vs prior statement, rate path the market is pricing.
 
-C) POLYMARKET / PREDICTION MARKETS (prediction-market-odds):
+C) POLYMARKET / PREDICTION MARKETS (analyst-smartmoney-polymarket):
    - Pull live Polymarket markets relevant to markets: S&P levels, Fed decisions, macro outcomes.
    - Pull Kalshi economic event markets.
    - Output: top 5 markets by liquidity with crowd probability + what it means for equities.
@@ -116,16 +116,16 @@ D) JOURNALISM SCAN (trend-stock-research — broad mandate):
      are converging on RIGHT NOW. What sectors are getting attention? What catalysts are live?
    - Output: theme list, specific companies mentioned, any tickers worth routing to quorum.
 
-E) 13F INSTITUTIONAL FILINGS (13f-watch):
+E) 13F INSTITUTIONAL FILINGS (analyst-smartmoney-13f):
    - Pull most recent 13F for: Burry/Scion (CIK 0001649339), Buffett/Berkshire (CIK 0001067983),
      Ackman/Pershing Square (CIK 0001336528), Klarman/Baupost (CIK 0001061768),
      Li Lu/Himalaya (CIK 0001709323).
    - New initiations + adds only. Drop puts, trims, exits.
-   - DEDUPE against ledger: python3 <skills>/13f-watch/watch.py seen <TICKER>
+   - DEDUPE against ledger: python3 <skills>/analyst-smartmoney-13f/watch.py seen <TICKER>
    - Output: new candidates only (not previously recommended).
 
-F) CONGRESSIONAL PURCHASES (congressman-stock-watch):
-   - Pull last 90 days: python3 <skills>/congressman-stock-watch/watch.py recent --days 90
+F) CONGRESSIONAL PURCHASES (analyst-smartmoney-ptr):
+   - Pull last 90 days: python3 <skills>/analyst-smartmoney-ptr/watch.py recent --days 90
    - Keep purchases only. Rank by cross-member cluster (≥3 members same ticker = strong signal).
    - DEDUPE against ledger.
    - Output: new candidates only.
@@ -150,8 +150,8 @@ After collecting all signals above, do the following synthesis:
 
 2. CROSS-REFERENCE SIGNALS:
    Build a candidate list by merging:
-   - Tickers from 13f-watch (new institutional buys)
-   - Tickers from congressman-stock-watch (new congressional purchases)
+   - Tickers from analyst-smartmoney-13f (new institutional buys)
+   - Tickers from analyst-smartmoney-ptr (new congressional purchases)
    - Tickers from journalism scan (companies with live catalysts in FT/WSJ/SA)
    - Tickers from portfolio-monitor triggers (FIRED sell signals = sell candidates)
    A ticker appearing in 2+ independent sources = elevated conviction; note the overlap.

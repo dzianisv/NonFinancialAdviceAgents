@@ -54,7 +54,7 @@ Never pass `assets: [...]` — the screener is CIO-directed and always runs. Use
 
 ```js
 Skill({ skill: "dip-scanner" })
-Skill({ skill: "13f-watch" })
+Skill({ skill: "analyst-smartmoney-13f" })
 Skill({ skill: "multi-lens-quorum" })
 Skill({ skill: "superforecasting" })
 Skill({ skill: "regime-detection" })

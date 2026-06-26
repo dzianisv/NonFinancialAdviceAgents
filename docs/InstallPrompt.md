@@ -77,7 +77,7 @@ Daily 08:00 UTC (Mon–Fri) — run silently, DM ONLY if an alert fires:
 • dip-screener → if stock ≥25% below 52w high AND RISK_ON → DM alert
 • crypto-dip-scanner → if Fear&Greed <25 AND BTC >20% off high → DM alert
 • trend-stock-research → collect FT/WSJ tickers, add to pool silently
-• 13f-watch + congressman-stock-watch → new buys, add to pool silently
+• analyst-smartmoney-13f + analyst-smartmoney-ptr → new buys, add to pool silently
 • signal-convergence-alert → same ticker in 2+ pools → DM immediately
 
 Weekly Monday 09:30 UTC — full brief, always DM:
@@ -130,13 +130,13 @@ Start now: verify skills are loaded, list missing, run the setup command above, 
 | Skill | Requirement | Status |
 |-------|-------------|--------|
 | dip-screener / crypto-dip-scanner | `yfinance` Python | Pre-installed in pod |
-| congressman-stock-watch | none — scrapes Capitol Trades | Works out of the box |
+| analyst-smartmoney-ptr | none — scrapes Capitol Trades | Works out of the box |
 | feed-fomc | `web_fetch` federalreserve.gov | Reliable |
-| prediction-market-odds | `web_fetch` gamma-api.polymarket.com | Reliable |
+| analyst-smartmoney-polymarket | `web_fetch` gamma-api.polymarket.com | Reliable |
 | trend-stock-research | `web_fetch` FT/WSJ RSS | Reliable |
-| 13f-watch / hedge-fund-13f-analysis | `web_fetch` sec.gov EDGAR | Reliable |
+| analyst-smartmoney-13f / hedge-fund-13f-analysis | `web_fetch` sec.gov EDGAR | Reliable |
 
 **Known limitations:**
 - Yahoo Finance blocks raw `web_fetch` (429). Use `dip_screener.py` / `crypto_dip_scanner.py` only (they use yfinance via Python in the agent bash context).
-- `housestockwatcher.com` / `senatestockwatcher.com` decommissioned — congressman-stock-watch uses Capitol Trades directly.
+- `housestockwatcher.com` / `senatestockwatcher.com` decommissioned — analyst-smartmoney-ptr uses Capitol Trades directly.
 - FRED `T10Y2Y` endpoint returns empty — not used. HY OAS (`BAMLH0A0HYM2`) works.

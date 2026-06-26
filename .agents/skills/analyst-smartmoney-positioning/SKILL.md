@@ -1,5 +1,5 @@
 ---
-name: derivatives-positioning-data
+name: analyst-smartmoney-positioning
 description: Use when a market read needs to know how traders are POSITIONED and what derivatives are PRICING — futures funding/basis/open-interest, options put/call, skew, implied vol, max pain, dealer gamma, COT, VIX term structure, options-implied probability of a move. The positioning/market-implied seat for a quorum or forecast. Works for CRYPTO (Coinglass/Deribit/CME) and EQUITIES/indices (CBOE/VIX/COT/OCC). Use for "how is the market positioned", "what are options pricing", "funding/skew/gamma read", "is leverage crowded", "options-implied move", "max pain". Educational, not advice; positioning is necessary-not-sufficient, and options odds are risk-neutral, not real-world.
 license: MIT
 compatibility: opencode
@@ -11,6 +11,8 @@ metadata:
 ---
 
 # Analyst: Derivatives Positioning (how the market is positioned + what it prices)
+
+This skill is part of the `analyst-smartmoney` family; the parent `analyst-smartmoney` skill synthesizes its output with the other spokes.
 
 Read the market *beneath spot*: where leverage sits, what options price, who is offside. Two halves —
 **futures/flow** and **options/implied** — read **together** (funding without skew is half a picture).
@@ -76,7 +78,7 @@ Convert options into a **distribution**, not just OI levels:
 - **Implied move** = ATM straddle / spot → the 1-SD range by expiry.
 - **Risk-neutral probability** from the strike's delta/price (e.g. 70k-call delta ≈ P(touch), roughly).
   Quote it as **risk-neutral** and haircut for the vol risk premium — it overstates tail odds.
-- This is the **continuous** complement to `prediction-market-odds` (discrete event bets). Use both:
+- This is the **continuous** complement to `analyst-smartmoney-polymarket` (discrete event bets). Use both:
   prediction markets for "will the Fed cut", options for "where does price land by expiry".
 
 ## Output shape
@@ -105,7 +107,7 @@ Blind spot:   positioning ≠ destiny; risk-neutral ≠ real odds
 
 The **positioning seat** in `multi-lens-quorum` and `superforecasting`. **Feeds the
 reflexivity seat** (supplies the liquidation/crowding data its cascades run on) — distinct from it (this
-= gauge, reflexivity = theory). Complements `prediction-market-odds` (discrete) with the continuous
+= gauge, reflexivity = theory). Complements `analyst-smartmoney-polymarket` (discrete) with the continuous
 options-implied distribution. Don't double-count it against reflexivity in the same quorum.
 
 > Educational, not advice. Positioning is necessary-not-sufficient; options odds are risk-neutral. Re-pull

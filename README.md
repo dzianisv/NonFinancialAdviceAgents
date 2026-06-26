@@ -97,16 +97,16 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
 <text x="410" y="140" text-anchor="middle" fill="#bbb" font-size="8.5" font-style="italic">— regulatory / macro / odds —</text>
 
 <rect x="98"  y="146" width="114" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="155" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">13f-watch</text>
+<text x="155" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">analyst-smartmoney-13f</text>
 <text x="155" y="177" text-anchor="middle" fill="#888" font-size="9">fund filings (EDGAR)</text>
 <text x="155" y="189" text-anchor="middle" fill="#bbb" font-size="7.5">13F quarterly</text>
 
 <rect x="222" y="146" width="108" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="276" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">13d-watch</text>
+<text x="276" y="163" text-anchor="middle" fill="#555" font-size="8" font-family="monospace" font-weight="600">analyst-smartmoney-13d</text>
 <text x="276" y="177" text-anchor="middle" fill="#888" font-size="9">activist filings</text>
 
 <rect x="340" y="146" width="154" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="417" y="163" text-anchor="middle" fill="#555" font-size="7.5" font-family="monospace" font-weight="600">congressman-stock-watch</text>
+<text x="417" y="163" text-anchor="middle" fill="#555" font-size="7.5" font-family="monospace" font-weight="600">analyst-smartmoney-ptr</text>
 <text x="417" y="178" text-anchor="middle" fill="#888" font-size="9">trades disclosures</text>
 
 <rect x="504" y="146" width="112" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
@@ -114,7 +114,7 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
 <text x="560" y="178" text-anchor="middle" fill="#888" font-size="9">Fed rates / statements</text>
 
 <rect x="626" y="146" width="144" height="44" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="698" y="163" text-anchor="middle" fill="#555" font-size="7.5" font-family="monospace" font-weight="600">prediction-market-odds</text>
+<text x="698" y="163" text-anchor="middle" fill="#555" font-size="7.5" font-family="monospace" font-weight="600">analyst-smartmoney-polymarket</text>
 <text x="698" y="178" text-anchor="middle" fill="#888" font-size="9">Polymarket / Kalshi</text>
 
 <!-- ═══ GATHER row B: news feeds ═══ -->
@@ -154,7 +154,7 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
 <text x="347" y="302" text-anchor="middle" fill="#888" font-size="9">ETF flows / CEX depth</text>
 
 <rect x="432" y="270" width="180" height="40" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
-<text x="522" y="286" text-anchor="middle" fill="#555" font-size="7.5" font-family="monospace" font-weight="600">derivatives-positioning-data</text>
+<text x="522" y="286" text-anchor="middle" fill="#555" font-size="7.5" font-family="monospace" font-weight="600">analyst-smartmoney-positioning</text>
 <text x="522" y="302" text-anchor="middle" fill="#888" font-size="9">funding, OI, options</text>
 
 <rect x="622" y="270" width="104" height="40" rx="5" fill="white" stroke="#ddd" stroke-width="1.2"/>
@@ -475,7 +475,7 @@ That's the whole setup. **You don't run a workflow or type a slash command** —
 
 ```
 "Should I buy the dip on BTC today?"          → crypto-dip-scanner / analyst-crypto
-"What did Buffett just buy?"                   → 13f-watch
+"What did Buffett just buy?"                   → analyst-smartmoney-13f
 "Run the weekly committee."                    → agentic-fund-orchestration
 "What's the market regime right now?"          → regime-detection
 "What would Lyn Alden think of this?"          → analytics-lyn-alden
@@ -559,15 +559,15 @@ Full spec: [`crypto/`](crypto/) — `crypto.goal.md` · `crypto.prd.md` · `cryp
 
 | Skill | Description |
 |---|---|
-| `13f-watch` | Watch 13F filings, surface new initiations + cross-fund conviction clusters; dedupes candidates |
-| `congressman-stock-watch` | Congressional stock trades feed |
+| `analyst-smartmoney-13f` | Watch 13F filings, surface new initiations + cross-fund conviction clusters; dedupes candidates |
+| `analyst-smartmoney-ptr` | Congressional stock trades feed |
 | `crypto-dip-scanner` | Daily BTC/ETH/SOL/BNB/AVAX dip scanner; alerts on -30%+ from 52w high + extreme fear |
 | `dip-screener` | Equity dip screener |
 | `dip-tranches-strategy` | Staged entry / tranche sizing for dip entries |
 | `feed-fomc` | Fed FOMC calendar, statement, and dot-plot monitor |
 | `liveness-monitor` | Monitors that scheduled jobs are running; DMs on stale job |
 | `portfolio-monitor` | Portfolio state monitor |
-| `prediction-market-odds` | Polymarket / Kalshi odds for macro/market events |
+| `analyst-smartmoney-polymarket` | Polymarket / Kalshi odds for macro/market events |
 | `regime-detection` | Market regime classifier (risk-on / risk-off / transition) |
 | `signal-convergence-alert` | Multi-source convergence signal detector |
 

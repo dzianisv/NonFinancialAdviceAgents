@@ -1,5 +1,5 @@
 ---
-name: 13f-watch
+name: analyst-smartmoney-13f
 description: >-
   Watch recent 13F filings to PROPOSE new stock buy-candidates from what
   super-investors just bought, DEEP-READ every interesting filing (compute Q/Q
@@ -21,11 +21,13 @@ compatibility: opencode
 metadata:
   version: "3.0"
   domain: institutional-flow-watchlist
-  role: 13f-watcher-deep-analyst-scorer-deduper
+  role: smartmoney-13f-deep-analyst-scorer-deduper
   note: "Absorbs hedge-fund-13f-analysis (deep-read + portfolio cross-ref)"
 ---
 
 # 13F Watch — Institutional Buy-Candidate Tracker
+
+This skill is part of the `analyst-smartmoney` family; the parent `analyst-smartmoney` skill synthesizes its output with the other spokes.
 
 <role>
 You are the 13F watch desk — an institutional-flow tracking agent that scans quarterly
@@ -89,7 +91,7 @@ starting cold — the *change* in who-owns-what is itself the signal.
 ## Scripts
 
 ```bash
-W="python3 .agents/skills/13f-watch/watch.py"   # ledger at $THIRTEENF_LEDGER or ./13f/recommended.jsonl
+W="python3 .agents/skills/analyst-smartmoney-13f/watch.py"   # ledger at $THIRTEENF_LEDGER or ./13f/recommended.jsonl
 
 $W roster                       # show tracked managers
 $W seen <TICKER> --quarter Q    # exit 0 = SKIP (already recommended); exit 1 = NEW
@@ -194,7 +196,7 @@ $W record --ticker XYZ --manager klarman --quarter 2026Q1 --action new \
 
 ## Output Contract
 
-Save the final report to: **`research/13f-watch-{YYYY-MM-DD}.md`**
+Save the final report to: **`research/analyst-smartmoney-13f-{YYYY-MM-DD}.md`**
 
 <output_format>
 The report MUST contain these sections in order:
@@ -236,14 +238,14 @@ Filings trickle in during the ~6 weeks before deadline.
 
 ## Fit
 
-A **WHICH-finder** (sibling to `stocks-trend-screener`, `13d-watch`, `congressman-stock-watch`)
+A **WHICH-finder** (sibling to `stocks-trend-screener`, `analyst-smartmoney-13d`, `analyst-smartmoney-ptr`)
 feeding the pipeline:
 
 ```
-13f-watch finds → multi-lens-quorum judges → superforecasting times
+analyst-smartmoney-13f finds → multi-lens-quorum judges → superforecasting times
 ```
 
-**Distinct from 13d-watch:** 13F is quarterly, long-only, large-cap conviction sizing.
+**Distinct from analyst-smartmoney-13d:** 13F is quarterly, long-only, large-cap conviction sizing.
 13D is real-time, activist-driven, event-catalyst. They are complementary with typically
 zero ticker overlap (validated 2026-06-18: 0% overlap on first concurrent run).
 

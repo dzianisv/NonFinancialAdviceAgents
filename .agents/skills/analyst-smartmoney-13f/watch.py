@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""13f-watch — dedup ledger + manager roster for the 13F buy-watcher.
+"""analyst-smartmoney-13f — dedup ledger + manager roster for the 13F buy-watcher.
 
 The script owns the DETERMINISTIC parts: who we track, and what we've ALREADY recommended
 (so the same ticker is never recommended twice per quarter). The judgment parts — pulling
-filings, reading puts-vs-longs, interpreting WHY — are the agent's job via the 13f-watch
+filings, reading puts-vs-longs, interpreting WHY — are the agent's job via the analyst-smartmoney-13f
 SKILL.md (which leans on hedge-fund-13f-analysis).
 
 Dedup scope: ticker + quarter. Same name can surface again in a new quarter if managers
@@ -104,7 +104,7 @@ def list_(a):
 
 
 def main():
-    p = argparse.ArgumentParser(description="13f-watch dedup ledger + roster")
+    p = argparse.ArgumentParser(description="analyst-smartmoney-13f dedup ledger + roster")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("roster").set_defaults(fn=roster)
     s = sub.add_parser("seen")
