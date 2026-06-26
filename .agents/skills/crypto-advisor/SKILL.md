@@ -491,6 +491,26 @@ Educational only. Not financial advice. DYOR.
 
 ---
 
+## Set a buy-alert (notify-me-when) — for WAIT / buy-zone verdicts
+
+When a token's verdict is "not yet, but buy at $X" or "act when RSI/MACD hits V", offer to
+register a durable alert so the user is pinged **with your reasoning** when it triggers. Use
+the **`mkt`** skill — it carries the thesis into the notification (mkt's own alert message
+can't). Emit the alert contract and register it:
+
+```bash
+cd .agents/skills/mkt/scripts
+bun mkt-alert.ts add --desk crypto --symbol AAVE-USD \
+  --condition below --value 73 \
+  --reason "Denied Kraken-rumor pop fading; \$73 = EMA20 reclaim. Buy tranche 1." \
+  --channel telegram:@CryptoAiInvestor --expiry 2026-07-31
+```
+
+Indicator and compound buy-zones map to mkt conditions (`rsi_below`, `macd_cross`,
+`above`+`macd_cross` with `--match all`). A scheduled `bun check.ts` (runtime cron) then
+fires the Telegram/ntfy notification with the reasoning. See `.agents/skills/mkt/SKILL.md`
+for the three trigger patterns and the per-runtime scheduler cookbook. Recommend-only.
+
 ## Running continuously
 
 ```

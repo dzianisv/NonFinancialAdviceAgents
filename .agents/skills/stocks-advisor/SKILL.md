@@ -313,20 +313,20 @@ the theme sits in its cycle. You MUST web_fetch before citing any news.
 DATA PACKAGE:
   <inject the package + the theme tag assigned in discovery>
 
-⛔ HARD RULE: call web_fetch on a real URL before citing it, OR cite a record returned by the feed
-scripts (which print real URLs + verbatim publisher teasers). No fetched URL / no feed record = not a
-source. A fabricated headline invalidates the whole verdict.
+⛔ HARD RULE: call web_fetch on a real URL before citing it. No fetched URL = not a source.
+A fabricated headline invalidates the whole verdict.
 
-GET WSJ + FT FIRST via the paywall-free feed scripts (https://www.wsj.com/news/markets and
-https://www.ft.com/markets are bot-blocked from agent IPs — do NOT rely on web_fetching them):
-  bun .agents/skills/feed-wsj/scripts/fetch_wsj.ts --feed markets,business --query "<theme/ticker>" --days 7 --text
-  bun .agents/skills/feed-ft/scripts/fetch_ft.ts  --section markets,companies --query "<theme/ticker>" --days 7 --text
-Each record is a real wsj.com/ft.com URL + a 1-sentence publisher teaser + date. The teaser is itself a
-verbatim publisher quote — cite it as [T1]/[T2] url (date) — "<teaser>" WITHOUT needing the paywalled body.
-To deepen a quote, optionally web_fetch the article URL the script returned (works when logged in; if it
-paywalls, the teaser still stands as the citation). Then fetch ≥1 of the non-paywalled outlets for breadth:
-Bloomberg (https://www.bloomberg.com/markets), Reuters (https://www.reuters.com/markets/), Yahoo Finance
-topic pages. Quote verbatim — never paraphrase from memory.
+FETCH NEWS via Google News RSS — the only reliable free path from agent IPs
+(ft.com/wsj.com bot-block direct fetches; Google News proxies are verified working):
+
+  FT:        web_fetch "https://news.google.com/rss/search?q=site:ft.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
+  WSJ:       web_fetch "https://news.google.com/rss/search?q=site:wsj.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
+  Bloomberg: web_fetch "https://news.google.com/rss/search?q=site:bloomberg.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
+  Broad:     web_fetch "https://news.google.com/rss/search?q=<ticker>+<theme>+2026&hl=en-US&gl=US&ceid=US:en"
+
+Each returns headlines + verbatim RSS teasers (~100-450 chars). Quote the teaser verbatim as [T1]/[T2].
+For full WSJ bodies: web_fetch web.archive.org/web/2/<wsj-url> (Wayback, works for WSJ, blocked for FT).
+Fetch ≥2 real URLs before producing a verdict. Quote verbatim — never paraphrase from memory.
 
 Classify the theme phase:
   EARLY_CYCLE  — theme just forming, few names, skeptics dominate, flows starting
@@ -507,6 +507,27 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 - [ ] A TradingView screenshot is embedded inline (via the `view` tool on the `file_path`) per stock.
 - [ ] Portfolio sizing/concentration was deferred to `stock-chair`; ETF allocation was deferred to
       `tradfi-portfolio-manager`. This skill stayed on individual-stock entries only.
+
+## Set a buy-alert (notify-me-when) — for WATCH verdicts
+
+A WATCH verdict ("good company, wrong price — buy near $X / when RSI < V") is exactly when to
+register a durable alert so the user is pinged **with your entry thesis** when it triggers.
+Use the **`mkt`** skill — it carries the reasoning into the notification (mkt's native alert
+message cannot). Register the entry plan as a job:
+
+```bash
+cd .agents/skills/mkt/scripts
+bun mkt-alert.ts add --desk stocks --symbol NVDA \
+  --condition below --value 142 \
+  --reason "Buy-zone = prior breakout retest + 50d reclaim; add to core, not a new satellite." \
+  --channel telegram:@CryptoAiInvestor --expiry 2026-09-30
+# oversold add: --condition rsi_below --value 30 --period 14 --cooldown 21600
+```
+
+A scheduled `bun check.ts` (runtime cron) fires the notification with the reasoning when the
+zone/indicator is hit. See `.agents/skills/mkt/SKILL.md` for the trigger patterns and
+per-runtime scheduler cookbook. This stays recommend-only and backtest-gated — an alert is a
+reminder to re-evaluate, not an order.
 
 ## Done when
 
