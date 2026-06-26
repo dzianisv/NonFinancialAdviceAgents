@@ -125,6 +125,8 @@ export const SEL_BALANCEOF       = "0x70a08231";
 export const SEL_CONVERT_ASSETS  = "0x07a2d13a";
 export const SEL_PRICE_PER_SHARE = "0x77c7b8fc";
 export const SEL_DECIMALS        = "0x313ce567";
+export const SEL_TOTAL_ASSETS    = "0x01e1d114";
+export const SEL_TOTAL_SUPPLY    = "0x18160ddd";
 
 export const CHAIN_CONFIG: Record<string, {
   blockscout: string; rpcs: string[]; llama: string; chainId: number;
@@ -660,9 +662,9 @@ async function ethPricePerShare(rpcs: string[], token: string, blockHex: string)
 }
 
 async function receiptUsd(
-  rpcs: string[], tokenAddr: string, decimals: number, blockHex: string,
+  rpcs: string[], tokenAddr: string, wallet: string, decimals: number, blockHex: string,
 ): Promise<{ value: number; method: string }> {
-  const balance = await ethBalanceOf(rpcs, tokenAddr, "", blockHex);
+  const balance = await ethBalanceOf(rpcs, tokenAddr, wallet, blockHex);
   if (balance === 0n) return { value: 0, method: "balance=0" };
 
   const assets = await ethConvertAssets(rpcs, tokenAddr, balance, blockHex);
@@ -671,6 +673,23 @@ async function receiptUsd(
       const v = Number(assets) / 10 ** d;
       if (v >= 1e-4 && v <= 1e9) return { value: v, method: `convertToAssets/${d}dec` };
     }
+  }
+
+  // ERC-4626 fallback: totalAssets/totalSupply × balance (handles vaults that don't implement convertToAssets)
+  const taRaw = await ethCall(rpcs, tokenAddr, "0x01e1d114", blockHex);
+  const tsRaw = await ethCall(rpcs, tokenAddr, "0x18160ddd", blockHex);
+  if (taRaw && tsRaw) {
+    try {
+      const totalAssets = BigInt(taRaw);
+      const totalSupply = BigInt(tsRaw);
+      if (totalSupply > 0n) {
+        const assetValue = (totalAssets * balance) / totalSupply;
+        for (const d of [6, 18]) {
+          const v = Number(assetValue) / 10 ** d;
+          if (v >= 1e-4 && v <= 1e9) return { value: v, method: `totalAssets/totalSupply×balance/${d}dec` };
+        }
+      }
+    } catch {}
   }
 
   const pps = await ethPricePerShare(rpcs, tokenAddr, blockHex);
@@ -703,6 +722,7 @@ export async function fetchTransfers(chain: string, wallet: string): Promise<Tra
 async function basisAt(opts: {
   rpcs: string[];
   tokenAddr: string;
+  wallet: string;
   decimals: number;
   blockHex: string | null;
   entries: EntryTransfer[];
@@ -710,10 +730,10 @@ async function basisAt(opts: {
   windowTs: number;
   preCost: number;
 }): Promise<BasisResult> {
-  const { rpcs, tokenAddr, decimals, blockHex, entries, exits, windowTs, preCost } = opts;
+  const { rpcs, tokenAddr, wallet, decimals, blockHex, entries, exits, windowTs, preCost } = opts;
   if (!blockHex) return { value: 0, method: "no block", archiveSuspect: false };
 
-  const { value: v, method: m } = await receiptUsd(rpcs, tokenAddr, decimals, blockHex);
+  const { value: v, method: m } = await receiptUsd(rpcs, tokenAddr, wallet, decimals, blockHex);
 
   const entriesBefore  = entries.filter((e) => e.ts < windowTs);
   const exitsBefore    = exits.filter((e) => e.ts < windowTs);
@@ -841,6 +861,7 @@ async function main() {
       const basisResult = await basisAt({
         rpcs: cfg.rpcs,
         tokenAddr,
+        wallet,
         decimals,
         blockHex: bWindow ? `0x${bWindow.toString(16)}` : null,
         entries: classified.entries,
@@ -850,7 +871,7 @@ async function main() {
       });
 
       const curUsd = bNow
-        ? (await receiptUsd(cfg.rpcs, tokenAddr, decimals, `0x${bNow.toString(16)}`)).value
+        ? (await receiptUsd(cfg.rpcs, tokenAddr, wallet, decimals, `0x${bNow.toString(16)}`)).value
         : 0;
 
       const result = positionPnL({
