@@ -666,6 +666,7 @@ async function ethPricePerShare(rpcs: string[], token: string, blockHex: string)
 
 async function receiptUsd(
   rpcs: string[], tokenAddr: string, wallet: string, decimals: number, blockHex: string,
+  llamaChainFallback?: string,
 ): Promise<{ value: number; method: string }> {
   const balance = await ethBalanceOf(rpcs, tokenAddr, wallet, blockHex);
   if (balance === 0n) return { value: 0, method: "balance=0" };
@@ -700,6 +701,15 @@ async function receiptUsd(
     const sharesFloat = Number(balance) / 1e18;
     const lpAmount    = sharesFloat * (Number(pps) / 1e18);
     if (lpAmount >= 1e-4 && lpAmount <= 1e9) return { value: lpAmount, method: "getPricePerFullShare×$1(est)" };
+  }
+
+  if (llamaChainFallback) {
+    const nowTs = Math.floor(Date.now() / 1000);
+    const price = await llamaPriceHistorical(llamaChainFallback, tokenAddr, nowTs);
+    if (price !== null) {
+      const v = Number(balance) / 10 ** decimals * price;
+      if (v >= 1e-4 && v <= 1e9) return { value: v, method: `llamaPrice/${price.toFixed(4)}` };
+    }
   }
 
   return { value: 0, method: "unpriced" };
@@ -789,6 +799,7 @@ async function main() {
   console.log(`\nYield Trace — ${wallet} — window=${windowArg}\n${"=".repeat(78)}`);
 
   const allResults: PnLResult[] = [];
+  const allSymbols: string[] = []; // parallel to allResults; carries position symbol for bucketing
   const allTimelines: PositionTimeline[] = [];
 
   for (const chain of chains) {
@@ -883,7 +894,7 @@ async function main() {
       });
 
       const curUsd = bNow
-        ? (await receiptUsd(cfg.rpcs, tokenAddr, wallet, decimals, `0x${bNow.toString(16)}`)).value
+        ? (await receiptUsd(cfg.rpcs, tokenAddr, wallet, decimals, `0x${bNow.toString(16)}`, cfg.llama)).value
         : 0;
 
       const result = positionPnL({
@@ -897,7 +908,9 @@ async function main() {
       });
 
       allResults.push(result);
-      allTimelines.push({
+      allSymbols.push(symbol);
+      const isPendlePt = /^pt[-–]/i.test(symbol);
+      if (!isPendlePt) allTimelines.push({
         deposits: classified.entries.map((e) => ({ ts: e.ts, amount: e.costIn })),
         withdrawals: classified.exits.map((e) => ({ ts: e.ts, amount: e.proceedsOut })),
         realizedPnL: result.windowed,
@@ -919,12 +932,19 @@ async function main() {
     }
   }
 
-  // Separate results into yield vs principal losses
-  // A "principal loss" is a position where less than 10% of cost was recovered (proceeds+cur < cost*0.1)
-  // and total cost > $500 (to avoid zeroed-cost noise)
+  // Separate results into: Pendle PT (YT untracked), principal losses, yield
+  // Pendle PT: symbol starts with "PT-" — PT-only accounting is incomplete without YT yield claims
+  // Principal loss: <10% of cost recovered (proceeds+cur < cost*0.1) and cost > $500
+  const pendlePtResults: PnLResult[] = [];
   const principalLossResults: PnLResult[] = [];
   const yieldResults: PnLResult[] = [];
-  for (const r of allResults) {
+  for (let i = 0; i < allResults.length; i++) {
+    const r = allResults[i];
+    const sym = allSymbols[i];
+    if (/^pt[-–]/i.test(sym)) {
+      pendlePtResults.push(r);
+      continue;
+    }
     const cost = r.lifetimeBreakdown.totalCost;
     const recovered = r.lifetimeBreakdown.totalProceeds + r.lifetimeBreakdown.currentValue;
     if (cost > 500 && recovered < cost * 0.1) {
@@ -937,8 +957,11 @@ async function main() {
   const yieldWindowed  = yieldResults.reduce((s, r) => s + r.windowed, 0);
   const lossLifetime   = principalLossResults.reduce((s, r) => s + r.lifetime, 0);
   const lossWindowed   = principalLossResults.reduce((s, r) => s + r.windowed, 0);
-  const totalLifetime  = allResults.reduce((s, r) => s + r.lifetime, 0);
-  const totalWindowed  = allResults.reduce((s, r) => s + r.windowed, 0);
+  const ptLifetime     = pendlePtResults.reduce((s, r) => s + r.lifetime, 0);
+  const ptWindowed     = pendlePtResults.reduce((s, r) => s + r.windowed, 0);
+  // NET excludes Pendle PT (incomplete: PT-only redemption without YT yield claims)
+  const netLifetime    = yieldLifetime + lossLifetime;
+  const netWindowed    = yieldWindowed + lossWindowed;
 
   console.log(`\n${"=".repeat(78)}`);
   console.log(`  Yield positions:`);
@@ -950,8 +973,14 @@ async function main() {
     console.log(`    ${windowArg} windowed = $${lossWindowed.toFixed(2)}`);
   }
   console.log(`  NET (yield + losses):`);
-  console.log(`    lifetime  = $${totalLifetime.toFixed(2)}`);
-  console.log(`    ${windowArg} windowed = $${totalWindowed.toFixed(2)}`);
+  console.log(`    lifetime  = $${netLifetime.toFixed(2)}`);
+  console.log(`    ${windowArg} windowed = $${netWindowed.toFixed(2)}`);
+  if (pendlePtResults.length > 0) {
+    console.log(`  Pendle PT [YT yield untracked — excluded from NET]:`);
+    console.log(`    lifetime  = $${ptLifetime.toFixed(2)}`);
+    console.log(`    ${windowArg} windowed = $${ptWindowed.toFixed(2)}`);
+    console.log(`    note: PT-only P&L = YT cost. Add YT claim txs to get true return.`);
+  }
   console.log(`${"=".repeat(78)}\n`);
 
   if (allTimelines.length > 0) {
