@@ -70,6 +70,7 @@ export async function fetchCryptoFeed(
       published_at: toISO(item.pubDate),
       lang: "en",
       tags: item.categories,
+      assets: [],
     });
   }
 

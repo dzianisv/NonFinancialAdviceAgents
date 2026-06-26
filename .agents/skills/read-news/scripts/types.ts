@@ -16,6 +16,7 @@ export interface Article {
   published_at: string;  // ISO datetime
   lang: string;          // default "en"
   tags: string[];        // from RSS categories
+  assets: string[];      // normalized asset symbols this article is about, e.g. ["AAVE","BTC"]
 }
 
 export interface FeedResult {

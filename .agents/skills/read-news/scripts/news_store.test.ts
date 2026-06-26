@@ -16,6 +16,8 @@ import {
   parseDt,
   articleCount,
   recentArticles,
+  normalizeAssets,
+  queryByAsset,
 } from "./news_store";
 
 const TEST_DIR = ".db/test-news-store";
@@ -848,3 +850,124 @@ describe("golden parity test (frozen snapshot vs retired news_store.py)", () => 
 
 // Type alias for use in parity test
 type IngestResult = { new: number; duplicate: number; events_touched: number };
+
+// ── normalizeAssets ───────────────────────────────────────────────────────────
+
+describe("normalizeAssets", () => {
+  test("uppercases and deduplicates", () => {
+    expect(normalizeAssets(["btc", "BTC", "Btc"])).toEqual(["BTC"]);
+  });
+
+  test("trims whitespace", () => {
+    expect(normalizeAssets(["  aave  ", "ETH"])).toEqual(["AAVE", "ETH"]);
+  });
+
+  test("drops non-strings and empties", () => {
+    expect(normalizeAssets([1, null, "", "SOL", true])).toEqual(["SOL"]);
+  });
+
+  test("returns [] for non-array input", () => {
+    expect(normalizeAssets("BTC")).toEqual([]);
+    expect(normalizeAssets(null)).toEqual([]);
+    expect(normalizeAssets(undefined)).toEqual([]);
+  });
+});
+
+// ── article_assets junction table ─────────────────────────────────────────────
+
+describe("article_assets junction rows", () => {
+  test("ingesting with assets creates junction rows", () => {
+    const db = connect(":memory:");
+    ingest(db, [
+      { title: "AAVE governance update", summary: "AAVE holders voted.", source: "s", url: "https://s.com/aave1", assets: ["AAVE"] },
+      { title: "BTC and ETH rally", summary: "Both assets rose sharply.", source: "s", url: "https://s.com/btceth", assets: ["BTC", "ETH"] },
+    ]);
+    const rows = db.prepare("SELECT * FROM article_assets ORDER BY asset").all() as { article_id: number; asset: string }[];
+    const assets = rows.map((r) => r.asset);
+    expect(assets).toContain("AAVE");
+    expect(assets).toContain("BTC");
+    expect(assets).toContain("ETH");
+    expect(rows.length).toBe(3);
+  });
+
+  test("ingesting without assets field creates zero junction rows", () => {
+    const db = connect(":memory:");
+    ingest(db, [
+      { title: "No assets here", summary: "Just a regular article.", source: "s", url: "https://s.com/noassets" },
+    ]);
+    const count = (db.prepare("SELECT COUNT(*) as c FROM article_assets").get() as { c: number }).c;
+    expect(count).toBe(0);
+  });
+});
+
+// ── queryByAsset ──────────────────────────────────────────────────────────────
+
+describe("queryByAsset", () => {
+  function setupDb() {
+    const db = connect(":memory:");
+    ingest(db, [
+      { title: "AAVE governance update", summary: "AAVE holders voted on a new proposal.", source: "s", url: "https://s.com/aave1", assets: ["AAVE"] },
+      { title: "BTC and ETH rally", summary: "Both assets rose sharply today.", source: "s", url: "https://s.com/btceth", assets: ["BTC", "ETH"] },
+      { title: "No asset article", summary: "This article has no assets.", source: "s", url: "https://s.com/none" },
+    ]);
+    return db;
+  }
+
+  test("lowercase input matches uppercase stored asset (case-insensitive)", () => {
+    const db = setupDb();
+    const results = queryByAsset(db, "aave");
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("AAVE governance update");
+  });
+
+  test("BTC query returns BTC/ETH article but not AAVE article", () => {
+    const db = setupDb();
+    const results = queryByAsset(db, "BTC");
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("BTC and ETH rally");
+  });
+
+  test("ETH query returns BTC/ETH article", () => {
+    const db = setupDb();
+    const results = queryByAsset(db, "ETH");
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("BTC and ETH rally");
+  });
+
+  test("no-asset article is not returned by any asset query", () => {
+    const db = setupDb();
+    expect(queryByAsset(db, "AAVE").map((e) => e.title)).not.toContain("No asset article");
+    expect(queryByAsset(db, "BTC").map((e) => e.title)).not.toContain("No asset article");
+  });
+
+  test("unknown asset returns empty array", () => {
+    const db = setupDb();
+    expect(queryByAsset(db, "UNKNOWN_TICKER_XYZ")).toEqual([]);
+  });
+
+  test("k limit is respected", () => {
+    const db = connect(":memory:");
+    // Ingest 5 distinct AAVE articles
+    for (let i = 0; i < 5; i++) {
+      ingest(db, [
+        { title: `AAVE article ${i}`, summary: `Unique summary for article number ${i} about AAVE protocol.`, source: "s", url: `https://s.com/aave-${i}`, assets: ["AAVE"] },
+      ]);
+    }
+    const results = queryByAsset(db, "AAVE", { k: 3 });
+    expect(results.length).toBeLessThanOrEqual(3);
+  });
+
+  test("days filter excludes old events", () => {
+    const db = connect(":memory:");
+    const recentPub = new Date().toISOString();
+    const oldPub = new Date(Date.now() - 60 * 86_400_000).toISOString();
+    ingest(db, [
+      { title: "Recent AAVE news", summary: "AAVE protocol update just happened today.", source: "s", url: "https://s.com/aave-recent", assets: ["AAVE"], published_at: recentPub },
+      { title: "Old AAVE news from long ago", summary: "AAVE had a governance vote 60 days back.", source: "s", url: "https://s.com/aave-old", assets: ["AAVE"], published_at: oldPub },
+    ]);
+    const results = queryByAsset(db, "AAVE", { days: 7 });
+    const titles = results.map((e) => e.title);
+    expect(titles).toContain("Recent AAVE news");
+    expect(titles).not.toContain("Old AAVE news from long ago");
+  });
+});

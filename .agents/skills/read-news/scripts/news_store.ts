@@ -29,6 +29,7 @@ export interface Article {
   published_at: string;
   lang: string;
   tags: string[];
+  assets: string[];
 }
 
 export interface EventRecord {
@@ -195,16 +196,34 @@ CREATE TABLE IF NOT EXISTS articles (
     source        TEXT, url TEXT, title TEXT, summary TEXT,
     published_at  TEXT, lang TEXT, tags TEXT,
     canonical_url TEXT, content_hash TEXT, simhash TEXT,
+    assets TEXT NOT NULL DEFAULT '[]',
     ingested_at   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_art_canon ON articles(canonical_url);
 CREATE INDEX IF NOT EXISTS idx_art_hash  ON articles(content_hash);
+CREATE TABLE IF NOT EXISTS article_assets (
+    article_id INTEGER NOT NULL REFERENCES articles(id),
+    asset      TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_aa_asset   ON article_assets(asset);
+CREATE INDEX IF NOT EXISTS idx_aa_article ON article_assets(article_id);
 CREATE VIRTUAL TABLE IF NOT EXISTS articles_fts
     USING fts5(title, summary, content='articles', content_rowid='id');
 CREATE TRIGGER IF NOT EXISTS art_ai AFTER INSERT ON articles BEGIN
     INSERT INTO articles_fts(rowid, title, summary) VALUES (new.id, new.title, new.summary);
 END;
 `;
+
+export function normalizeAssets(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const a of raw) {
+    if (typeof a !== "string") continue;
+    const s = a.trim().toUpperCase();
+    if (s && !out.includes(s)) out.push(s);
+  }
+  return out;
+}
 
 export function connect(dbPath: string): Database {
   if (dbPath !== ":memory:") {
@@ -284,6 +303,7 @@ export function ingest(db: Database, records: Row[]): IngestResult {
     const emb = embed(`${title}. ${summary}`);
     const src = ((rec.source as string) || "").trim() || "unknown";
     const pub = (rec.published_at as string) || ts;
+    const assets = normalizeAssets(rec.assets);
 
     // Layer 2: near-dup clustering
     const ev = findEvent(db, norm, emb);
@@ -311,15 +331,18 @@ export function ingest(db: Database, records: Row[]): IngestResult {
       touched++;
     }
 
-    db.prepare(
+    const artResult = db.prepare(
       "INSERT INTO articles(event_id, source, url, title, summary, published_at, lang, tags,"
-      + " canonical_url, content_hash, simhash, ingested_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+      + " canonical_url, content_hash, simhash, assets, ingested_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
     ).run(
       eventId, src, (rec.url as string) ?? null, title, summary, pub,
       (rec.lang as string) ?? null,
       JSON.stringify((rec.tags as string[]) || []),
-      curl, chash, sh, ts,
+      curl, chash, sh, JSON.stringify(assets), ts,
     );
+    const articleId = artResult.lastInsertRowid as number;
+    const insAsset = db.prepare("INSERT INTO article_assets(article_id, asset) VALUES (?,?)");
+    for (const a of assets) insAsset.run(articleId, a);
     newCount++;
   }
   return { new: newCount, duplicate: dup, events_touched: touched };
@@ -389,6 +412,32 @@ export function query(
     if (out.length >= k) break;
   }
   return out;
+}
+
+// ── Query by asset ────────────────────────────────────────────────────────────
+
+export function queryByAsset(
+  db: Database,
+  asset: string,
+  opts: { days?: number; k?: number } = {},
+): EventRecord[] {
+  const norm = asset.trim().toUpperCase();
+  const k = opts.k ?? 10;
+  const params: unknown[] = [norm];
+  let dateFilter = "";
+  if (opts.days) {
+    const cutoff = new Date(Date.now() - opts.days * 86_400_000).toISOString();
+    dateFilter = " AND e.first_seen >= ?";
+    params.push(cutoff);
+  }
+  params.push(k);
+  const rows = db.prepare(
+    `SELECT e.* FROM events e WHERE e.event_cluster_id IN`
+    + ` (SELECT DISTINCT a.event_id FROM article_assets aa JOIN articles a ON a.id = aa.article_id WHERE aa.asset = ?)`
+    + dateFilter
+    + ` ORDER BY e.last_updated DESC LIMIT ?`,
+  ).all(...params) as Row[];
+  return rows.map(eventDict);
 }
 
 // ── New since ────────────────────────────────────────────────────────────────
@@ -470,7 +519,7 @@ if (import.meta.main) {
     return i >= 0 && i + 1 < args.length ? args[i + 1] : null;
   }
 
-  const CMDS = ["ingest", "query", "new-since", "mark-surfaced"] as const;
+  const CMDS = ["ingest", "query", "new-since", "mark-surfaced", "by-asset"] as const;
   const cmd = args.find((a) => (CMDS as readonly string[]).includes(a));
 
   if (!cmd) {
@@ -515,6 +564,16 @@ if (import.meta.main) {
       ids.push(args[i]);
     }
     console.log(JSON.stringify(markSurfaced(db, ids, onDate), null, 2));
+
+  } else if (cmd === "by-asset") {
+    const assetArg = getArg("--asset");
+    if (!assetArg) { console.error("--asset required"); process.exit(1); }
+    const daysArg = getArg("--days");
+    const kArg = getArg("--k");
+    console.log(JSON.stringify(queryByAsset(db, assetArg, {
+      days: daysArg ? parseInt(daysArg) : undefined,
+      k: kArg ? parseInt(kArg) : 10,
+    }), null, 2));
 
   } else {
     console.error(`Unknown command: ${cmd}`);
