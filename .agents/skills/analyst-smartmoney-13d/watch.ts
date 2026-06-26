@@ -8,8 +8,8 @@
  *   record                   Record a new recommendation (reads JSON from stdin)
  *   list [--json]            List all recorded recommendations
  *
- * Storage: JSONL at $THIRTEEND_LEDGER or .cache/13D/recommended.jsonl
- * Roster:  JSON  at $THIRTEEND_ROSTER or .cache/13D/roster.json
+ * Storage: JSONL at $THIRTEEND_LEDGER or .ledgers/13D/recommended.jsonl
+ * Roster:  JSON  at $THIRTEEND_ROSTER or .ledgers/13D/roster.json
  *
  * Exit codes: 0=seen/success, 1=new/not-found, 2=error, 3=dup-on-record
  */
@@ -49,9 +49,9 @@ interface LedgerRecord {
 const SCRIPT_DIR = dirname(new URL(import.meta.url).pathname);
 const REPO_ROOT = join(SCRIPT_DIR, "..", "..", "..");
 const LEDGER_PATH =
-  process.env.THIRTEEND_LEDGER || join(REPO_ROOT, ".cache", "13D", "recommended.jsonl");
+  process.env.THIRTEEND_LEDGER || join(REPO_ROOT, ".ledgers", "13D", "recommended.jsonl");
 const ROSTER_PATH =
-  process.env.THIRTEEND_ROSTER || join(REPO_ROOT, ".cache", "13D", "roster.json");
+  process.env.THIRTEEND_ROSTER || join(REPO_ROOT, ".ledgers", "13D", "roster.json");
 
 // --- Helpers ---
 

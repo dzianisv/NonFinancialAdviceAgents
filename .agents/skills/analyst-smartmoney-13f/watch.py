@@ -9,8 +9,8 @@ SKILL.md (which leans on hedge-fund-13f-analysis).
 Dedup scope: ticker + quarter. Same name can surface again in a new quarter if managers
 show fresh action — each quarterly filing cycle is independent.
 
-Storage: JSONL at $THIRTEENF_LEDGER or .cache/13F/recommended.jsonl
-Roster:  JSON  at .cache/13F/roster.json (falls back to the verified default below)
+Storage: JSONL at $THIRTEENF_LEDGER or .ledgers/13F/recommended.jsonl
+Roster:  JSON  at .ledgers/13F/roster.json (falls back to the verified default below)
 
 Usage:
   watch.py roster
@@ -24,7 +24,7 @@ from datetime import date
 
 _SKILL_DIR = os.path.dirname(os.path.abspath(__file__))
 _REPO_ROOT = os.path.abspath(os.path.join(_SKILL_DIR, "..", "..", ".."))
-LEDGER = os.environ.get("THIRTEENF_LEDGER", os.path.join(_REPO_ROOT, ".cache", "13F", "recommended.jsonl"))
+LEDGER = os.environ.get("THIRTEENF_LEDGER", os.path.join(_REPO_ROOT, ".ledgers", "13F", "recommended.jsonl"))
 ROSTER = os.path.join(os.path.dirname(LEDGER), "roster.json")
 
 # Verified CIKs only (SEC EDGAR). Honesty rule: never fabricate a CIK — unknowns are resolved
