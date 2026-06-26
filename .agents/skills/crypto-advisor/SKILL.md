@@ -335,6 +335,22 @@ Map seat postures to `quorum_verdict` using this truth table — no interpretati
 | **SELL** | `quorum_verdict = BEARISH`, seats_bear ≥ 4 |
 | **HOLD** | everything else (including `dominant_zone = UNKNOWN`) |
 
+## Portfolio Governor — regime-aware buy cap
+
+Before finalising signals, count total BUY + BUY(small) signals across all tokens. Apply regime cap based on the Fear & Greed index fetched during the run:
+
+| Regime (F&G)          | Max simultaneous BUYs |
+|-----------------------|-----------------------|
+| Extreme Fear (0–24)   | 4                     |
+| Fear (25–49)          | 6                     |
+| Neutral+ (50–100)     | no cap                |
+
+If total BUYs exceed the cap: downgrade lowest-conviction BUYs to HOLD, starting from the bottom of the ranked list (smallest seats_bull first, then lowest confidence), until the cap is met. Print: `⚠️ Governor: {n} BUY(s) downgraded to HOLD (regime cap F&G={value})`.
+
+Rationale: in a Fear regime the risk-reward of concentrated buying is poor; the governor enforces the "60–70% dry powder" discipline that a pure signal table cannot.
+
+---
+
 **WAIT / HOLD with a named buy-zone** (e.g. "not now, but buy AAVE near $73") → register a
 notify-me job carrying your thesis via the **`mkt`** skill, so the user is pinged when the
 price/RSI/MACD level hits. See *Set a buy-alert* below.
@@ -440,7 +456,7 @@ Self-check before printing:
 
 > **Why this step exists:** The UNI error. The quorum produced "no fee accrual" with confidence because the data package didn't contradict it. A fresh agent reading TheBlock for 60 seconds would have seen "UNIfication passes 99.9% — fee switch activated". No further reasoning required. The error was not in the quorum logic — it was in the absence of a live news check before accepting the verdict.
 
-**4a. For each token, spawn a verdict-critic subagent in parallel.** Pass it:
+**4a. For **every token** (not just flagged ones), spawn a verdict-critic subagent in parallel.** ⛔ All tokens must be covered — partial coverage is INCOMPLETE. Pass it:
 - Token symbol and the full quorum verdict text (signal, zone, quorum, all 5 seat postures, key claims)
 - The following instructions:
 
@@ -491,7 +507,7 @@ If FLAG: "<specific verdict text that must be corrected> → correct to: <correc
 
 **4c. Act on FLAGs before printing Block 1:**
 - `OVERALL: FLAG` on any token → **revise that token's quorum verdict** to address the specific critique, re-run the signal decision for that token, and mark it `⚠️ REVISED` in Block 1.
-- `OVERALL: PASS` on all tokens → print `✅ Verdict Critic: all {N} tokens passed`.
+- `OVERALL: PASS` on all tokens → print `✅ Verdict Critic: {n}/{total} tokens reviewed` where `n` must equal `total` (total = count of tokens in the universe this run). ⛔ If n < total, the run is INCOMPLETE — do not proceed to Block 1.
 
 > The critic cannot access TradingView tools — only `web_fetch`. That is intentional: it reads the world, not the chart. Technical signals are the quorum's job; the critic's only job is "does today's news contradict this?"
 
@@ -512,6 +528,8 @@ After printing Block 3, run the `reference-validator` post-hook to verify every 
 ```
 
 **5b. Spawn `reference-validator` as a subagent** — pass the full JSON array. The validator re-fetches every URL and checks if the quoted text is actually present in the page. It can use `web_fetch` (subagents have that tool; only `tradingview-*` tools are orchestrator-only).
+
+⛔ **Non-skippable:** spawning the reference-validator subagent is mandatory. Self-attested prose checkmarks ("all citations verified", "✅ sources confirmed") do NOT satisfy this step — a subagent must actually run and its raw output must be printed verbatim in Step 5c. If the subagent is not spawned, mark the entire run as INCOMPLETE.
 
 ```
 Invoke the reference-validator skill with this citations JSON:
