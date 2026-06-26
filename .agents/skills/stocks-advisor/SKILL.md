@@ -198,13 +198,16 @@ Call `tradingview-tv_health_check` ONCE before starting the loop.
 
 ---
 
-## Step 0.8 — Triage when N > 12 (mandatory cap — do NOT full-panel every name)
+## Step 0.8 — Screen every name with fundamentals.py; reserve TradingView for deep dives
 
-The per-ticker loop is ~9 MCP calls + 5 subagents per name; a real book of 50-80 names makes that thousands of calls. So when the holdings/watchlist has more than 12 names, triage:
-1. Rank every holding by decision-relevance: concentration weight (% of book), |unrealized P&L %|, whether it's a cash-deploy candidate, and proximity to a key technical level.
-2. Run the full 5-seat panel on the **top K only (default K = 10)**.
-3. Every other name gets a ONE-LINE `fundamentals.py`-only screen (no TradingView pull, no 5 seats). Promote any screened name into the full panel if it crosses a TRIM/EXIT threshold (e.g. > concentration cap, fundamental break, > -25% with deteriorating earnings).
-4. State K explicitly in the output so the user sees exactly which names were deep-analyzed vs one-line screened. Never silently drop names.
+`fundamentals.py` (yfinance) is the DEFAULT data source for the WHOLE book — it is cheap, needs no chart slot, and runs for every name (price, ma50, ma200, vs_200d_ma, vs_50d_ma, 52w_high/low, dd_from_52wh, valuation, growth). TradingView (live RSI/BB/MACD + screenshot) is the single-chart-slot bottleneck — pulling it for every name does not scale (a 50-80 name book = thousands of MCP calls). So TradingView is SELECTIVE, not default: use it only when a name needs a deeper technical look. Not all names do.
+
+1. **Screen ALL names with `fundamentals.py` first.** This is the baseline for every holding/candidate — run it for the entire list (parallelizable; it is a plain script, not an MCP call). Produce a one-line read per name: trend (above/below 200d & 50d), valuation, growth, drawdown.
+2. **Rank by decision-relevance** from that screen: concentration weight (% of book), |unrealized P&L %|, cash-deploy candidate, proximity to a key level (near 50d/200d or a 52w extreme), or a fundamental/thesis break.
+3. **Select the deep-dive subset** — the names that actually warrant a chart: the top decision-relevant names (default K ≈ 10) PLUS any name the screen flags (sitting on a trigger level, a TRIM/EXIT candidate, or a deploy target). Everything else stays fundamentals-only.
+4. **Run TradingView (Step 1.5, sequential single slot) + the full 5-seat panel ONLY on the deep-dive subset.** Every other name gets its verdict from the fundamentals screen alone (HOLD/TRIM/EXIT, or WATCH for a watchlist) — no TradingView, no 5 seats.
+5. If TradingView is down (DEGRADED_TECH, Step 0.7), the deep-dive subset also falls back to fundamentals-only — the whole book is screen-level, nothing blocks.
+6. State explicitly in the output which names got the TradingView deep dive vs the fundamentals-only screen, and the K used. Never silently drop a name.
 
 ---
 
@@ -237,7 +240,7 @@ sqlite3 "$DB" 'ALTER TABLE stock_analysis ADD COLUMN smartmoney TEXT;' 2>/dev/nu
 
 ## Step 1.5 — Sequential per-stock loop (orchestrator only; do NOT parallelize the data pull)
 
-Pick the next `pending` todo and `UPDATE todos SET status='in_progress'`. Then, for that ticker:
+This loop runs ONLY for the deep-dive subset selected in Step 0.8 — not every name. Names that stayed fundamentals-only never enter this loop. Pick the next `pending` todo and `UPDATE todos SET status='in_progress'`. Then, for that ticker:
 
 **1a. Pull TradingView data (MCP, in this session):**
 
@@ -411,6 +414,32 @@ CEG     Constellation   SKIP      2/5   —              none (LATE_CYCLE)  ENER
 
 ---
 
+## Step 3.5 — Sources & data provenance appendix (MANDATORY — always print)
+
+After the signal table, ALWAYS print a consolidated **SOURCES & DATA** block — non-negotiable transparency so every news claim and market-data point is traceable to its origin. Aggregate from every seat that fetched:
+
+1. **News / narrative sources** — every URL the narrative seat web_fetched OR got from the feed scripts (`feeds/wsj.ts`, `feeds/ft.ts`, `read_news.ts`). One per line: `[Tn] https://url (date) — "verbatim teaser/quote"`.
+2. **Smart-money / filing sources** — every URL the smart-money seat actually web_fetched (openinsider, 13f.info, EDGAR, capitoltrades, finviz/marketbeat fallbacks — whatever was really used). One per line.
+3. **Market-data provenance** — state the origin of prices/indicators/fundamentals explicitly: `fundamentals.py (yfinance) per ticker: {tickers run}` and `Technicals: TradingView studies RSI/BB/MACD/Volume` (or, in DEGRADED_TECH mode: `Technicals: DEGRADED — MA levels from fundamentals.py only, no TradingView`).
+4. If any seat returned `INSUFFICIENT DATA`, list it here explicitly rather than omitting it.
+
+Format:
+```
+SOURCES & DATA — {DATE}
+News ({n}):
+  [T1] https://... (date) — "verbatim teaser"
+  ...
+Filings/flows ({n}):
+  https://...
+Market data:
+  fundamentals.py (yfinance): {tickers}
+  Technicals: {TradingView studies | DEGRADED MA-only}
+```
+
+Rule: never print a verdict that depends on a source you cannot list here. No source listed = the claim must be removed. This appendix is required in BOTH normal and DEGRADED_TECH mode.
+
+---
+
 ## Step 4 — Portfolio-level synthesis (hand off to `stock-chair`)
 
 The per-stock blocks answer "where do I enter each name." The **portfolio view** — concentration, hidden
@@ -467,6 +496,7 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 - [ ] Portfolio sizing/concentration was deferred to `stock-chair`; ETF allocation was deferred to
       `tradfi-portfolio-manager`. This skill stayed on individual-stock entries only.
 - [ ] recall.ts `source` was checked; if `grep-fallback`, the run is tagged MEMORY_DEGRADED and recalled stances flagged low-confidence.
+- [ ] A consolidated **SOURCES & DATA** appendix is printed (Step 3.5) listing every web_fetched news/filing URL, every feed-script record, and the market-data provenance (fundamentals.py tickers + technicals mode) — required in normal AND DEGRADED mode.
 
 ## Set a buy-alert (notify-me-when) — for WATCH verdicts
 
@@ -493,5 +523,5 @@ reminder to re-evaluate, not an order.
 
 Each analyzed stock has a 5-seat panel, a BUY/WATCH/SKIP decision from the verdict table, and a concrete
 entry plan (zone + trigger + stop + conviction + invalidation); the signal table with the theme map is
-printed; every news claim is sourced; and the output is flagged as an educational, backtest-gated
+printed; every news claim is sourced; the consolidated SOURCES & DATA appendix (Step 3.5) is printed listing all web_fetched URLs, feed-script records, and market-data provenance; and the output is flagged as an educational, backtest-gated
 hypothesis — not advice.
