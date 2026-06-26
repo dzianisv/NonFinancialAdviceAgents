@@ -221,16 +221,12 @@ If NO browser: state "No browser — FT/Bloomberg bodies unavailable. Headlines 
 <instructions>
 ## Step 0 — Mode detection (MANDATORY FIRST STEP)
 
-**Your FIRST output line must declare the detected mode and the exact trigger word that decided it**, e.g. `Mode: CONVICTION_MODE (trigger: "high-confidence")`. Forcing this declaration prevents silent misrouting — the single most common failure of this skill.
-
 Read the user's trigger phrase:
-- "high confidence" / "high-confidence", "surge", "buy today" / "to buy", "no noise", "best picks", "just give me names", "your best ideas", "only strong ones" → **CONVICTION_MODE**
+- "high confidence", "no noise", "best picks", "just give me names", "your best ideas", "only strong ones" → **CONVICTION_MODE**
 - "find trends", "weekly scan", "full research", "what's waking up", "scan for emerging" → **RESEARCH_MODE**
 - Default if ambiguous → **RESEARCH_MODE**
 
-**Mode vs depth (critical precedence rule):** "research", "deep research", "deep-research", "do /deep-research", "dig deep" set DEPTH, **not mode**. If ANY CONVICTION trigger above is present, the request is **CONVICTION_MODE** even when "deep-research" also appears — "deep-research" then means *do the full feed-stack verification on each candidate*, it does NOT switch you to RESEARCH_MODE. A request for "high-confidence surge picks, do deep research" is CONVICTION_MODE with thorough verification. Route to RESEARCH_MODE only when NO conviction trigger is present.
-
-In CONVICTION_MODE: skip the subagent fan-out in Step 2, use the CONVICTION_MODE path in orchestration, and apply the 4-question skeptic filter. Output MAX 3 names; **only SURVIVED + HIGH advances — MEDIUM/LOW go to a brief watchlist, never into the finalist list.** If fewer than 3 pass at HIGH, output fewer (an honest 1-name answer beats 3 padded ones). Show only the final table + per-survivor thesis; no full RESEARCH_MODE table, no process narrative.
+In CONVICTION_MODE: skip the subagent fan-out in Step 2, use the CONVICTION_MODE path in orchestration, and apply the 4-question skeptic filter. Show only the final 3-name table. No intermediate process output.
 
 In RESEARCH_MODE: execute all 5 steps as described below in full.
 
