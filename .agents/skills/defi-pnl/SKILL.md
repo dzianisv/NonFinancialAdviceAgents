@@ -242,6 +242,31 @@ Target: ≥5% on deployed capital. If TWAB is small relative to total portfolio,
 
 ---
 
+## Validation checklist — run before reporting
+
+After running yield_trace.ts, scan every position line for these red flags.
+Any flag → investigate and fix before reporting. Do NOT suppress with a note or bucket workaround.
+
+| Red flag | What it means | How to fix |
+|---|---|---|
+| APY > 50% on a stablecoin position | Cost basis mis-attributed (not a real 50%+ stable yield) | Check if cost = 0 or cost = N × real_deposit; look for multi-leg mint in same tx |
+| `cost = X × 2` where X = actual deposit | tx-hash double-count in classifyTransfers() — Pendle/Curve/zap routers send receipt token in 2+ legs per tx; loop fires twice on same stable outflow | Fix: group by tx hash, compute net RT flow per hash, one entry/exit event per hash |
+| Position with `∞` APY (cost=$0, proceeds>0) | A stablecoin used as payment is not in stablesMap → treated as receipt token with $0 cost | Fix: add the token to stablesMap + stableAddrs |
+| Two positions whose combined proceeds ≈ one position's current value | Same dollar flow counted twice across two positions | Trace shared tx hashes; one of the two positions is a pass-through, not real yield |
+| `reconcile ratio < 0` | Yield is negative — check for the above before concluding it's a real loss |
+| Any position showing lifetime PnL > $5,000 with cost < $2,000 | Suspicious outsized return; verify cost basis on-chain via Blockscout |
+
+**Quick validation script (run after yield_trace.ts):**
+Check each non-zero position manually:
+1. grep the output for `lifetime=$` — flag any where lifetime > 2× cost
+2. For each flagged position, look up 1-2 entry tx hashes on Blockscout and confirm stable outflow matches `cost=` in the output
+3. If cost is doubled vs what Blockscout shows → double-count bug
+4. If cost is $0 but Blockscout shows a stable outflow → stablesMap miss
+
+**Never paper over a red flag with a bucket ("excluded", "untracked").** First confirm the underlying position is economically real, THEN decide if exclusion is appropriate (e.g. Pendle YT genuinely untracked). Excluding a fabricated loss hides a bug.
+
+---
+
 ## Done when
 
 - [ ] All protocols enumerated from both DeBank (current view) and on-chain receipt scan
