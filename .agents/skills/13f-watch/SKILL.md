@@ -236,7 +236,7 @@ Filings trickle in during the ~6 weeks before deadline.
 
 ## Fit
 
-A **WHICH-finder** (sibling to `trend-stock-research`, `13d-watch`, `congressman-stock-watch`)
+A **WHICH-finder** (sibling to `stocks-trend-screener`, `13d-watch`, `congressman-stock-watch`)
 feeding the pipeline:
 
 ```

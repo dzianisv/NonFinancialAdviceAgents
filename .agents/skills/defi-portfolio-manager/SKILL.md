@@ -12,14 +12,15 @@ description: >
   crypto-native risk, not equity/macro cycles. Not for tradfi/equity portfolios.
 license: MIT
 compatibility: >
-  Needs network access to DefiLlama (yields.llama.fi) and Morpho (api.morpho.org), an agent runtime
+  Needs network access to DefiLlama (yields.llama.fi), Morpho (api.morpho.org), Hyperliquid
+  (api.hyperliquid.xyz) and Merkl (api.merkl.xyz) — the latter three public, no key — an agent runtime
   that can spawn subagents (Claude Code / OpenCode Task/Agent tool), and WebSearch for incident news.
   Reading a live book needs either the `chrome-use` skill (for an on-chain `0x…` wallet, via the
   DeBank web UI — no API key) or the `gws` Google Workspace CLI authenticated for the investor's
   account (for a manual Google-Sheet book).
 metadata:
   author: engineer
-  version: "2.4"
+  version: "2.8"
 ---
 
 # Crypto Hedge Fund — Portfolio Team
@@ -42,7 +43,7 @@ context/data it needs, and the output shape you want back. **Run the independent
 
 | Specialist | Mandate | Returns |
 |---|---|---|
-| **Portfolio Analyst** | Load the live book (Data §); compute total value, blended yield, idle cash, concentration, per-position risk grade. | Current-state table + problems |
+| **Portfolio Analyst** | Load the live book (Data §); compute total value, blended yield, idle cash, concentration, per-position risk grade. **Ground-truth each held position against the protocol's OWN source by address (Data §), not the aggregator's name/TVL/mid** — Morpho vaults checked for deprecation (delisted / deposit-disabled / ~0%-APY = dead money even on a fat DeBank balance); Hyperliquid priced off perp marks (illiquid dust → $0, HLP → reject); surface unclaimed Merkl rewards (idle earned money → claim) priced by canonical address. | Current-state table + problems (incl. DEAD/deprecated vaults, flagged dust, unclaimed rewards) |
 | **Yield Researcher** | Sweep the eligible venue menu across chains (live APY base/reward, TVL/capacity, liquidity terms). Fan out further (stable-lending / staking / RWA) if broad. | Ranked clean-venue menu |
 | **Risk & Incident Auditor** | WebSearch current incidents (exploits, depegs, paused withdrawals, curator/oracle changes); grade every held + candidate venue against crypto failure modes; **veto** anything with a live incident or shitty collateral. | Per-venue clean/flagged verdicts |
 | **Strategy Constructor** | Given the three outputs above, build the MODERATE target allocation under the bands/caps; crash-test it. | Target table + crash test |
@@ -90,6 +91,8 @@ long-tail / meme / governance-pump tokens, Pendle-PT / looped / leveraged-loop c
 (you're the house), unaudited or <6-month / <$20M-TVL venues, APY that is mostly token emissions, bridged/
 wrapped assets with custody or bridge risk, and **anything whose yield source you cannot name.**
 
+**Stablecoin allowlist — held AND as collateral, only: USDC, USDT, DAI.** Reject any position that holds, or lends/LPs into a market collateralized by, any *other* stablecoin — USR, USDe/sUSDe, GHO, crvUSD, FRAX, USDS, PYUSD, USD0, etc. This is an allowlist, not a blocklist: if a position's held or collateral stablecoin is not USDC/USDT/DAI, it is OUT regardless of APY or audit status. Exotic/synthetic stablecoins can hard-depeg, and on isolated-lending venues the loss is socialized to suppliers as bad debt that **does not** auto-liquidate when the collateral oracle is stale. (USR/Resolv, Mar 2026: an exploit minted ~80M unbacked USR and broke the peg to ~$0.17; a Gauntlet-curated USDC vault took ~$433k of bad debt because the collateral oracle never repriced, so liquidations never fired — and USDC suppliers recovered only ~0.5:1 via a curator settlement months later.)
+
 ## Decision principles
 
 - **Take the real yield, refuse the premium you can't name.** Honest base ~3.5–4.7%; a clean directional/satellite sleeve adds real yield. Anything sustained well above ~8% on a "stablecoin" is unpriced risk until you name it.
@@ -101,7 +104,7 @@ wrapped assets with custody or bridge risk, and **anything whose yield source yo
 
 - **NEVER custody keys, sign, or broadcast.** Produce tickets; the investor executes. No custody/signing tools.
 - **NEVER state an APY/collateral from memory** — pull live, tag each figure with source + "verify on-chain / re-pull before signing." Label anything not freshly pulled "unverified — confirm before sizing." Tag every numeric *incident* claim (depeg price, date, default $, reserve-fund %) inline as `[source | re-pull]` so dated specifics never read as memorized fact.
-- **Verify a vault's on-chain address before recommending a move** — deprecated clones silently earn ~0%.
+- **Verify each held position against the protocol's OWN canonical source by on-chain address — never an aggregator name-match nor a thin mid; each source has a blind spot.** MANDATORY data steps, not cautions: (a) for every Morpho position run the deprecation-check helper (Data §) — deprecated/delisted/deposit-disabled clones silently earn ~0%, migrate them; (b) value a Hyperliquid book from HL's own API off **perp marks** (Data § HL helper) — a thin spot mid misprices illiquid dust (a 1.3M-unit MAX bag quotes at ~$8.65M, realizable ~$0) and DeBank can't see HLP/perp-account state; (c) read incentive rewards from **Merkl** (Data § Merkl helper) but price reward tokens by canonical address — a symbol-spoofed "USDC" campaign token at a placeholder $1 faked $5,110 of claimable vs ~$187 real. Trust the venue's authoritative figure (vault `listed`/`netApy`, perp mark, vault equity, canonical-address reward price), not the balance/APY an aggregator paints.
 - **Reason from crypto-native risk, not tradfi/macro cycles.** This book is separate from any tradfi `GOAL.md`.
 
 ## Data (read-only inputs)
@@ -113,7 +116,11 @@ wrapped assets with custody or bridge risk, and **anything whose yield source yo
   - `bun .agents/skills/defi-portfolio-manager/scripts/portfolio_cache.ts wallets` — list known addresses (label · last snapshot date · USD total). **Run this at Intake** to learn where to read.
   - `… latest [address]` — most-recent snapshot rows, to diff against today's live read; `… dates` — snapshot history.
   - `… append -` — after every fresh live read, pipe a JSON array of position rows to record a new dated snapshot (columns: `snapshot_date,address,wallet_label,chain,protocol,position_type,symbol,amount,usd_value,apy_pct,in_range,source,notes`; `snapshot_date`+`address` required). Each call appends a new date — never overwrite history.
-- **Live APY + collateral:** DefiLlama `curl -s https://yields.llama.fi/pools` (+ `/chart/{poolId}` for 30-day history); Morpho `https://api.morpho.org/graphql` for vault collateral (chainId 1=Ethereum, 8453=Base).
+- **Live APY menu:** DefiLlama `curl -s https://yields.llama.fi/pools` (+ `/chart/{poolId}` for 30-day history) is the menu of *alternatives* only. **A HELD position's APY/status MUST come from its own on-chain contract/address, NEVER a DefiLlama name-match** — a name-match hands a deprecated vault a healthy lookalike's rate (the exact ~0%-APY trap in Decision principles; a real run quoted Seamless/ExtraFi at ~4.5% while the held vaults paid 0%).
+- **Held-vault lifecycle / deprecation check (MANDATORY for any Morpho-curated book):** `bun .agents/skills/defi-portfolio-manager/scripts/morpho_vault_status.ts <wallet> [--chains 1,8453]` queries Morpho `https://api.morpho.org/graphql` for the vaults the wallet ACTUALLY holds (v1 + v2, by address) and prints each one's `listed` / `warnings` / real `netApy`, flagging any delisted / `deposit_disabled` / `not_whitelisted` / ~0%-APY vault as DEAD money to migrate (exits 2 if any are flagged). Run it per wallet before grading. For **non-Morpho** curated vaults, open the protocol's own app/API for the held address and apply the same listed/active/non-zero-yield test — aggregators (DeBank/DefiLlama) do not surface deprecation. Morpho GraphQL also serves vault collateral (chainId 1=Ethereum, 8453=Base).
+- **Hyperliquid book — ground-truth from HL's own public API (`https://api.hyperliquid.xyz/info`, no key), NOT DeBank:** `bun .agents/skills/defi-portfolio-manager/scripts/hyperliquid_status.ts <wallet>` pulls the figures only HL is authoritative for — perp account value, open perp positions, and vault deposits incl. **HLP equity** — and prices spot balances off the canonical **perp MARK** oracle, NEVER the spot mid. It flags (a) any spot token with no perp oracle and not a stable as **illiquid dust valued $0** — HL's own spot mid quotes the wallet's 1.3M-unit MAX bag at $6.57 ≈ $8.65M, unrealizable, the same false-positive class as a CoinGecko name-match — and (b) **HLP / perp-LP** vaults the skill rejects (you're the house). Trust a thin spot/last-trade mid for nothing.
+- **Incentive rewards — Merkl is the canonical source (`https://api.merkl.xyz/v4/users/<wallet>/rewards?chainId=<id>`, no key), NOT DeBank:** `bun .agents/skills/defi-portfolio-manager/scripts/merkl_rewards.ts <wallet> [--chains 1,8453,42161,10]` returns **earned / claimed / claimable (unclaimed)** per reward token — unclaimed rewards are idle money the investor already earned but hasn't collected, a real efficiency to surface as a **claim ticket**. Same price-by-canonical-address discipline: it **FLAGS any reward whose symbol is a major stable at a non-canonical address as UNVERIFIED and keeps it OUT of the collect-now total** (a real wallet showed a "USDC" reward at `0xBE1e…` = on-chain "USD Coin (wrapped)" implying $5,110 — which, in this exact case, an on-chain trace CONFIRMED was real: the wrapper redeemed 1:1 for canonical USDC atomically inside the Merkl claim tx — claim → burn wrapper → receive 0x8335… USDC, Base tx 0xb1a64e9a… — a legitimate Resolv remediation worth ~$5,110). So a flag means **trace the claim/redemption tx by address before counting OR discarding** — UNVERIFIED is never the same as worthless. Confirm a flagged token's 1:1 redeemability + exit liquidity (or its atomic-redemption tx) before counting it.
+- **Realized / historical yield over a trailing window (1Y, 2Y, YTD) is a DIFFERENT question — route to the `defi-pnl` skill.** This skill measures the *current-state forward* picture (today's APY, today's value); it does NOT trace dated cash flows. For "how much did I actually earn from my stablecoin/LP book over the last N years", use `defi-pnl` (`.agents/skills/defi-pnl/scripts/yield_trace.ts`) — it scans on-chain ERC-20 receipt-token mints/burns, **prices emission rewards** (AERO/VELO/CRV — the part DeBank and a naive trace drop to $0), and reconciles bottom-up vs a T-bill benchmark.
 - **Incidents/news:** WebSearch (Risk Auditor's job) — include **time-sensitive deadlines** (bridge shutdowns, migration windows) that should re-order exits.
 - **Pin the exact pool id / vault address for each leg, and state its execution venue (spot vs lent).** Beware **name-collision** venues — e.g. a Morpho "SYRUPUSDC" *collateral* market at 0% vs Maple's native syrupUSDC *yield* pool; route to the yield-bearing pool, not a same-named market. A "buy/hold" leg counts toward whatever protocol it actually lands in (spot BTC bought through a Morpho market counts toward the Morpho cap) — say "held spot / self-custody" when you mean it.
 
@@ -139,6 +146,7 @@ tail risk that didn't trigger in-sample and by churning.
 - You delegated to specialist subagents (analyst / researcher / risk auditor at minimum) and synthesized, applying risk vetoes — not a solo analysis.
 - The target fits the MODERATE bands and holds zero shitty assets; the caps checklist is compliant by construction.
 - Every APY/collateral/address is live-pulled, tagged with source + re-pull; nothing from memory.
+- Every held position is valued from the protocol's OWN canonical source by address, never an aggregator name-match or a thin mid: Morpho vaults checked for deprecation (helper exits 2 if any flagged) → DEAD ones ticketed to migrate; a Hyperliquid book priced off perp marks with illiquid dust shown at $0 (not its spot-mid value) and HLP/perp-LP flagged for rejection; unclaimed Merkl rewards surfaced as claim tickets, with symbol-spoofed reward tokens flagged UNVERIFIED and kept out of the collect-now total.
 - You delivered concrete from→to tickets — even for "hold."
 - You recorded today's read to `.crypto-portfolio.csv` (dated `append`) so the wallet registry + last snapshot stay current for the next run.
 - You did not sign or move any funds.

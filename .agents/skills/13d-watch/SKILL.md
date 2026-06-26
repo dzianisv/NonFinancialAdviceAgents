@@ -200,7 +200,7 @@ The report MUST contain these sections in order:
 
 ## Fit
 
-A **WHICH-finder** (sibling to `13f-watch`, `trend-stock-research`, `congressman-stock-watch`)
+A **WHICH-finder** (sibling to `13f-watch`, `stocks-trend-screener`, `congressman-stock-watch`)
 feeding the pipeline:
 
 ```

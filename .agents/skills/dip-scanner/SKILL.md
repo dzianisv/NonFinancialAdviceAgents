@@ -149,7 +149,7 @@ That path is read by `signal-convergence-alert` at 08:30 UTC.
 
 ## Cross-checks
 
-- **Equity:** if a HIGH/MEDIUM ticker also appears in recent FT/WSJ coverage -> CONVERGENCE signal (elevate conviction via `trend-stock-research`).
+- **Equity:** if a HIGH/MEDIUM ticker also appears in recent FT/WSJ coverage -> CONVERGENCE signal (elevate conviction via `stocks-trend-screener`).
 - **Crypto:** if a HIGH/MEDIUM coin + extreme fear + negative funding -> triple convergence. Strongest signal.
 - **Cross-universe:** if BOTH equity and crypto are dipping simultaneously + VIX elevated -> systemic de-risk event (note as correlated, not independent signals).
 

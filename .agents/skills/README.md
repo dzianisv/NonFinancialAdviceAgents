@@ -41,7 +41,7 @@ npx -y skills add dzianisv/backtest --skill congressman-stock-watch --agent open
 # Install individual skills by raw URL
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/13f-watch/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/congressman-stock-watch/SKILL.md
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/trend-stock-research/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/stocks-trend-screener/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/hedge-fund-manager/SKILL.md
 ```
 
@@ -94,7 +94,7 @@ USER QUESTION
      │        → defi-portfolio-manager (DeFi-native: yield + risk + protocol audit)
      │
      └── "find trending stocks / any convergence?"
-              → trend-stock-research → signal-convergence-alert
+              → stocks-trend-screener → signal-convergence-alert
 ```
 
 ---
@@ -286,7 +286,7 @@ multi-lens-quorum (method — not a fixed roster)
 ```
 
 **Three non-overlapping jobs — keep them distinct:**
-- `trend-stock-research` finds WHICH names (discovery → watchlist)
+- `stocks-trend-screener` finds WHICH names (discovery → watchlist)
 - `multi-lens-quorum` judges WHETHER / how much (buy/hold/size verdict)
 - `superforecasting` predicts WHAT happens by a date (graded probability)
 
@@ -585,7 +585,7 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 | [13f-watch](13f-watch/SKILL.md) | Pull new institutional 13F buys; dedupe ledger | weekly |
 | [13d-watch](13d-watch/SKILL.md) | Real-time SEC 13D/13G activist filings (>5% stake) | weekly |
 | [congressman-stock-watch](congressman-stock-watch/SKILL.md) | Pull STOCK Act purchase disclosures; dedupe ledger | weekly |
-| [trend-stock-research](trend-stock-research/SKILL.md) | Read financial journalism; surface emerging tickers | weekly |
+| [stocks-trend-screener](stocks-trend-screener/SKILL.md) | Read financial journalism; surface emerging tickers | weekly |
 | [hedge-fund-13f-analysis](hedge-fund-13f-analysis/SKILL.md) | Deep-read a single 13F filing (EDGAR) | on-demand |
 | [signal-convergence-alert](signal-convergence-alert/SKILL.md) | Cross-reference ≥2 source pools → elevated conviction | daily |
 

@@ -16,7 +16,7 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 |---|---|---|
 | "What to buy this week?" | `hedge-fund-committee` workflow | open-universe weekly buy memo |
 | "Should I buy/sell/trim X?" | `research-market` workflow | pass query + date + prior_context |
-| "Find trending stocks" | `trend-stock-research` workflow | journalism screen → quorum |
+| "Find trending stocks" | `stocks-trend-screener` workflow | journalism screen → quorum |
 | Buy/hold/size judgment | `multi-lens-quorum` skill | 4-7 independent lenses |
 | "Where does X go by [date]?" | `superforecasting` skill | logged to forecast-ledger for scoring |
 | Macro view | `macro-panel` skill | 9 analytics-* thinker lenses |
@@ -25,7 +25,7 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 | Weekly portfolio review | `tradfi-portfolio-manager` skill | REVIEW→ASSESS→RESEARCH→DECIDE→ORDER |
 | Compare two outputs | `pairwise-eval` workflow | blind A/B, N judges |
 
-`trend-stock-research` finds WHICH names → `multi-lens-quorum` judges WHETHER/size → `superforecasting` times. Chain in that order.
+`stocks-trend-screener` finds WHICH names → `multi-lens-quorum` judges WHETHER/size → `superforecasting` times. Chain in that order.
 
 ## Invoking workflows
 
@@ -130,7 +130,7 @@ All in `.agents/skills/`. Full architecture diagrams: `.agents/skills/README.md`
 |---|---|
 | `dip-scanner` | equity (S&P100 ≥20/25/30% below 52w high, RISK_ON gate) + crypto (F&G <25 gate). `dip_scanner.py --universe all` |
 | `signal-convergence-alert` | crosses pools/ledgers; DMs on ≥2 sources per ticker; ≥3 → `multi-lens-quorum`. `convergence.py` |
-| `trend-stock-research` | mention-velocity vs ticker's own baseline → convergence pool. `mention_velocity.py` |
+| `stocks-trend-screener` | mention-velocity vs ticker's own baseline → convergence pool. `mention_velocity.py` |
 
 ### Slow advisor (weekly workflow)
 | Workflow | Role |

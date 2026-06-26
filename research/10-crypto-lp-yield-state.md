@@ -232,3 +232,102 @@ Or just ask the installed **`risk-assessment`** skill ("is Maple safe?") — it 
 - Morpho GraphQL API — https://api.morpho.org/graphql
 - DefiLlama yields UI — https://defillama.com/yields
 - Morpho app (collateral per vault) — https://app.morpho.org
+
+---
+
+## 2026-06-25 Update — Maple syrupUSDC & sUSDe Deep Security Research
+
+*3 parallel research agents, 12+ primary sources each. Date: 2026-06-25.*
+
+---
+
+### Maple Finance syrupUSDC — VERDICT: 🟡 YELLOW
+
+**What it is:** Overcollateralized institutional lending pool. NOT the same as 2022 V1 (undercollateralized credit, now defunct). syrupUSDC V2 has zero defaults since inception.
+
+| Item | Detail |
+|---|---|
+| **Contract** | `0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b` (ETH mainnet) |
+| **Type** | Custom Maple V2 pool token (ERC-20, NOT standard ERC-4626) |
+| **Upgradeable** | Yes (proxy) — requires DAO vote + governor timelock |
+| **Withdrawal** | FIFO queue, normally <24h, contractual max **30 days** |
+| **Pool size** | ~$3.3B AUM (May 2026) |
+| **APY** | ~4.67% (May 2026 avg) |
+| **Risk-free rate** | ~4.25–4.50% |
+| **Premium** | **~20–50 bps over T-bills** |
+| **Collateral ratio** | **145–156%** LTV ~65–70% |
+| **Collateral assets** | BTC, ETH, SOL, **PT_sUSDe** ⚠️ held at Anchorage/BitGo/Zodia |
+| **Borrowers** | KYC'd institutional — identities NOT disclosed |
+| **Jurisdiction** | Cayman Islands SPC (bankruptcy-remote) |
+| **Auditors** | Trail of Bits, Spearbit, Sherlock, 0xMacro — 12 engagements |
+| **Exploits** | None |
+| **Oct 2025 stress test** | 9 margin calls, all cured within 3 hours, zero losses |
+
+**Top 3 risks:**
+1. **Borrower opacity** — identities never disclosed; can't vet counterparties
+2. **30-day withdrawal queue lock** in panic (secondary market may trade at discount)
+3. **PT_sUSDe as collateral** — if Ethena blows up, Maple collateral is simultaneously impaired ⚠️ *these two positions are NOT independent*
+
+**Risk-adjusted verdict:** Earning 20–50bps over T-bills for credit + custodian + lock risk is thin. Acceptable at small size; watch the [Proof of Reserves dashboard](https://app.maple.finance/earn/details). If collateral ratio drops below 120% or Ethena stress materializes, queue withdrawal immediately.
+
+---
+
+### Ethena sUSDe — VERDICT: 🟡 YELLOW
+
+**What it is:** Yield-bearing synthetic dollar. sUSDe = ERC-4626 vault over USDe. USDe = spot ETH/BTC held off-exchange + short perp on CEXes = delta-neutral. NOT algorithmic.
+
+| Item | Detail |
+|---|---|
+| **USDe contract** | `0x4c9EDD5852cd905f086C759E8383e09bff1e68B3` (ETH) |
+| **sUSDe contract** | `0x9d39a5de30e57443bff2a8307a4256c8797a3497` (ETH) |
+| **L2 (Base/Arb/etc)** | `0x211Cc4DD073734dA055fbF44a2b4667d5E5fE5d2` (bridged OFT) |
+| **Admin** | Dev multisig `0x3b0aaf6e6fcd4a7ceef8c92c32dfea9e64dc1862` (5/11 signers) |
+| **USDe price** | $0.9982 (fully at peg, June 25 2026) |
+| **USDe supply** | ~$4.47B |
+| **sUSDe price** | $1.23 (+23% since Feb 2024 launch ≈ 10% annualized) |
+| **Backing** | ~87-92% BTC+ETH perp hedges; ~6% ETH LSTs; ~7% liquid stables |
+| **Custodians** | Copper (Clearloop), Ceffu — assets NEVER deposited on exchange |
+| **CEX hedge split** | Binance **50%** ⚠️ / Bybit 25% / OKX 15% / Deribit 5% / Bitget 5% |
+| **Reserve fund** | ~$46–60M at `0x2b5ab59163a6e93b4486f6055d33ca4a115dd4d5` |
+| **Reserve runway** | ~60 days worst-case; ~200 days realistic |
+| **Negative funding days** | 8.84% of historical days; longest streak = 13 days |
+| **Unstaking cooldown** | 7 days (configurable up to 90 days) |
+| **Jurisdiction** | Ethena (BVI) Limited, British Virgin Islands |
+| **Audits** | 7 firms / 12 engagements (Zellic, Quantstamp, Spearbit, Pashov, Code4rena, Cyfrin, Chaos Labs) — zero critical issues |
+| **APY (2024 avg)** | ~19%; current estimated ~5–12% (funding compressing) |
+
+**⚠️ Critical role:** `FULL_RESTRICTED_STAKER_ROLE` — Ethena can **freeze and repossess** any sUSDe balance for compliance.
+
+**Top 3 risks:**
+1. **Binance 50% concentration** — if Binance fails: 1-day unsettled PnL at risk (~$615K), forced re-hedge → temporary depeg pressure
+2. **Persistent negative funding** — reserve fund covers ~60–200 days; beyond that, backing erodes
+3. **Regulatory/governance** — BVI entity, committee governance, GATEKEEPER can freeze mint/redeem
+
+**vs USR (the stablecoin that blew up):** Different failure mode. USR failed via minting exploit (attacker minted 80M unbacked tokens). sUSDe has per-block mint limits (~100K max), automated GATEKEEPER, and 12 audits. sUSDe's risk is macroeconomic, not smart-contract.
+
+---
+
+### Cross-position correlation warning
+
+| Position | Exposure to Ethena failure |
+|----------|---------------------------|
+| sUSDe directly | Full |
+| Maple syrupUSDC | Partial — PT_sUSDe accepted as borrower collateral |
+
+**If Ethena depegs: both sUSDe and Maple collateral impaired simultaneously.** Size accordingly.
+
+---
+
+### Updated risk stack (stablecoins/yield)
+
+```
+Direct USDC/USDT/DAI     ← target (zero synthetic risk)
+        ↓
+      eUSD               ← acceptable (USDC/USDT in Aave/Compound), but 0% yield → convert
+        ↓
+    syrupUSDC            ← credit risk, 20-50bps premium, 30d lock — watch collateral ratio
+        ↓
+      sUSDe              ← macro/CEX risk, real yield — size-limit, watch funding rates
+        ↓
+Anything else            ← EXIT (non-USDC/USDT/DAI collateral violates allowlist)
+```
