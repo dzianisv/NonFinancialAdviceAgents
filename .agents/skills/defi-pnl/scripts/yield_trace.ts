@@ -139,7 +139,7 @@ export const CHAIN_CONFIG: Record<string, {
   },
   ethereum: {
     blockscout: "https://eth.blockscout.com/api",
-    rpcs: ["https://ethereum.publicnode.com", "https://1rpc.io/eth", "https://eth.llamarpc.com"],
+    rpcs: ["https://ethereum.publicnode.com", "https://1rpc.io/eth"],
     llama: "ethereum",
     chainId: 1,
   },
@@ -416,7 +416,8 @@ export function positionPnL(opts: {
   const emissionUsdAfter   = clipWindow(pricedEmissions, windowTs).reduce((s, e) => s + e.usdValue, 0);
   const basis              = basisAtWindow.value;
 
-  const windowed = proceedsAfter + stableRewAfter + emissionUsdAfter + currentValue - costAfter - basis;
+  const rawWindowed = proceedsAfter + stableRewAfter + emissionUsdAfter + currentValue - costAfter - basis;
+  const windowed = basisAtWindow.archiveSuspect ? lifetime : rawWindowed;
 
   return {
     lifetime,
@@ -529,8 +530,17 @@ export const DIRECTIONAL_POSITION_TOKENS = new Set([
   // Governance / directional tokens explicitly listed in spec
   "arb", "op", "link", "uni", "gmx", "pendle",
   "velo", "aero", "crv", "cvx", "snx", "bal", "ldo", "comp", "morpho",
+  // Protocol governance / reward tokens (not stablecoin vaults)
+  "seam", "extra", "grail", "xgrail", "cake", "zik", "aicc",
   // Misc volatile mentioned in scope doc
   "larry",
+  // Layer-2 governance tokens
+  "strk", "linea",
+  // Commodity-backed
+  "paxg", "xaut",
+  // Additional known directional (memecoins, L1s, perp/infra tokens)
+  "ton", "hype", "jup", "pump", "trump", "pepe", "shib", "doge",
+  "mochi", "stacy", "goat", "pengu", "brett", "toshi",
 ]);
 
 const SPAM_RE = /https?:|www\.|\.net\b|\.com\b|\.finance\b|\.cc\b|\.io\b|\.xyz\b|t\.me|claim|visit\b|airdrop|points\b|get reward|🎁/i;
@@ -663,6 +673,7 @@ async function ethPricePerShare(rpcs: string[], token: string, blockHex: string)
 
 async function receiptUsd(
   rpcs: string[], tokenAddr: string, wallet: string, decimals: number, blockHex: string,
+  llamaChainFallback?: string,
 ): Promise<{ value: number; method: string }> {
   const balance = await ethBalanceOf(rpcs, tokenAddr, wallet, blockHex);
   if (balance === 0n) return { value: 0, method: "balance=0" };
@@ -699,7 +710,16 @@ async function receiptUsd(
     if (lpAmount >= 1e-4 && lpAmount <= 1e9) return { value: lpAmount, method: "getPricePerFullShare×$1(est)" };
   }
 
-  return { value: Number(balance) / 10 ** decimals, method: "balance×$1(fallback)" };
+  if (llamaChainFallback) {
+    const nowTs = Math.floor(Date.now() / 1000);
+    const price = await llamaPriceHistorical(llamaChainFallback, tokenAddr, nowTs);
+    if (price !== null) {
+      const v = Number(balance) / 10 ** decimals * price;
+      if (v >= 1e-4 && v <= 1e9) return { value: v, method: `llamaPrice/${price.toFixed(4)}` };
+    }
+  }
+
+  return { value: 0, method: "unpriced" };
 }
 
 export async function fetchTransfers(chain: string, wallet: string): Promise<Transfer[]> {
@@ -786,6 +806,8 @@ async function main() {
   console.log(`\nYield Trace — ${wallet} — window=${windowArg}\n${"=".repeat(78)}`);
 
   const allResults: PnLResult[] = [];
+  const allSymbols: string[] = []; // parallel to allResults; carries position symbol for bucketing
+  const allTimelines: PositionTimeline[] = [];
 
   for (const chain of chains) {
     const cfg = CHAIN_CONFIG[chain];
@@ -815,6 +837,10 @@ async function main() {
          "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
          "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58",
          "0x50c5725949a6f0c72e6c4a641f24049a917db0cb",
+         "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1", // DAI Arbitrum/Optimism
+         "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8", // USDC.e Arbitrum
+         "0x4c9edd5852cd905f086c759e8383e09bff1e68b3", // USDe Ethereum (actual on-chain addr)
+         "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34", // USDe Arbitrum (actual on-chain addr)
         ].map((a) => [a, true]),
       ),
     ));
@@ -842,6 +868,10 @@ async function main() {
       "0x50c5725949a6f0c72e6c4a641f24049a917db0cb": { symbol: "DAI",    faceUsd: 1.0 },
       "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": { symbol: "DAI",    faceUsd: 1.0 },
       "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca": { symbol: "USDbC",  faceUsd: 1.0 },
+      "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": { symbol: "DAI",    faceUsd: 1.0 }, // DAI Arbitrum/Optimism
+      "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8": { symbol: "USDC.e", faceUsd: 1.0 }, // USDC.e Arbitrum
+      "0x4c9edd5852cd905f086c759e8383e09bff1e68b3": { symbol: "USDe",   faceUsd: 1.0 }, // USDe Ethereum
+      "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34": { symbol: "USDe",   faceUsd: 1.0 }, // USDe Arbitrum
     };
 
     let skippedCount = 0;
@@ -871,7 +901,7 @@ async function main() {
       });
 
       const curUsd = bNow
-        ? (await receiptUsd(cfg.rpcs, tokenAddr, wallet, decimals, `0x${bNow.toString(16)}`)).value
+        ? (await receiptUsd(cfg.rpcs, tokenAddr, wallet, decimals, `0x${bNow.toString(16)}`, cfg.llama)).value
         : 0;
 
       const result = positionPnL({
@@ -885,6 +915,14 @@ async function main() {
       });
 
       allResults.push(result);
+      allSymbols.push(symbol);
+      const isPendlePt = /^pt[-–]/i.test(symbol);
+      if (!isPendlePt) allTimelines.push({
+        deposits: classified.entries.map((e) => ({ ts: e.ts, amount: e.costIn })),
+        withdrawals: classified.exits.map((e) => ({ ts: e.ts, amount: e.proceedsOut })),
+        realizedPnL: result.windowed,
+        endTs: NOW_TS,
+      });
 
       const archiveFlag = result.basisResult.archiveSuspect ? " ⚠️ ARCHIVE SUSPECT" : "";
       console.log(
@@ -901,12 +939,69 @@ async function main() {
     }
   }
 
-  const totalLifetime = allResults.reduce((s, r) => s + r.lifetime, 0);
-  const totalWindowed = allResults.reduce((s, r) => s + r.windowed, 0);
+  // Separate results into: Pendle PT (YT untracked), principal losses, yield
+  // Pendle PT: symbol starts with "PT-" — PT-only accounting is incomplete without YT yield claims
+  // Principal loss: <10% of cost recovered (proceeds+cur < cost*0.1) and cost > $500
+  const pendlePtResults: PnLResult[] = [];
+  const principalLossResults: PnLResult[] = [];
+  const yieldResults: PnLResult[] = [];
+  for (let i = 0; i < allResults.length; i++) {
+    const r = allResults[i];
+    const sym = allSymbols[i];
+    if (/^pt[-–]/i.test(sym)) {
+      pendlePtResults.push(r);
+      continue;
+    }
+    const cost = r.lifetimeBreakdown.totalCost;
+    const recovered = r.lifetimeBreakdown.totalProceeds + r.lifetimeBreakdown.currentValue;
+    if (cost > 500 && recovered < cost * 0.1) {
+      principalLossResults.push(r);
+    } else {
+      yieldResults.push(r);
+    }
+  }
+  const yieldLifetime  = yieldResults.reduce((s, r) => s + r.lifetime, 0);
+  const yieldWindowed  = yieldResults.reduce((s, r) => s + r.windowed, 0);
+  const lossLifetime   = principalLossResults.reduce((s, r) => s + r.lifetime, 0);
+  const lossWindowed   = principalLossResults.reduce((s, r) => s + r.windowed, 0);
+  const ptLifetime     = pendlePtResults.reduce((s, r) => s + r.lifetime, 0);
+  const ptWindowed     = pendlePtResults.reduce((s, r) => s + r.windowed, 0);
+  // NET excludes Pendle PT (incomplete: PT-only redemption without YT yield claims)
+  const netLifetime    = yieldLifetime + lossLifetime;
+  const netWindowed    = yieldWindowed + lossWindowed;
+
   console.log(`\n${"=".repeat(78)}`);
-  console.log(`  TOTAL lifetime PnL : $${totalLifetime.toFixed(2)}`);
-  console.log(`  TOTAL ${windowArg} PnL     : $${totalWindowed.toFixed(2)}`);
+  console.log(`  Yield positions:`);
+  console.log(`    lifetime  = $${yieldLifetime.toFixed(2)}`);
+  console.log(`    ${windowArg} windowed = $${yieldWindowed.toFixed(2)}`);
+  if (principalLossResults.length > 0) {
+    console.log(`  Principal losses (booked separately):`);
+    console.log(`    lifetime  = $${lossLifetime.toFixed(2)}`);
+    console.log(`    ${windowArg} windowed = $${lossWindowed.toFixed(2)}`);
+  }
+  console.log(`  NET (yield + losses):`);
+  console.log(`    lifetime  = $${netLifetime.toFixed(2)}`);
+  console.log(`    ${windowArg} windowed = $${netWindowed.toFixed(2)}`);
+  if (pendlePtResults.length > 0) {
+    console.log(`  Pendle PT [YT yield untracked — excluded from NET]:`);
+    console.log(`    lifetime  = $${ptLifetime.toFixed(2)}`);
+    console.log(`    ${windowArg} windowed = $${ptWindowed.toFixed(2)}`);
+    console.log(`    note: PT-only P&L = YT cost. Add YT claim txs to get true return.`);
+  }
   console.log(`${"=".repeat(78)}\n`);
+
+  if (allTimelines.length > 0) {
+    const rec = reconcile(allTimelines);
+    console.log(`${"─".repeat(78)}`);
+    console.log(`  RECONCILE (T-bill sanity check):`);
+    console.log(`    TWAB deployed  = $${rec.twabUsd.toFixed(0)}`);
+    console.log(`    Benchmark APY  = ${(rec.benchmarkApy * 100).toFixed(1)}% → $${rec.benchmark.toFixed(0)}`);
+    console.log(`    Bottom-up      = $${rec.bottomUp.toFixed(0)}`);
+    console.log(`    Ratio          = ${rec.ratio.toFixed(2)}${rec.underCountFlag ? " ⚠️ UNDER-COUNT (ratio < 0.8)" : " ✓"}`);
+    const yieldApy = rec.twabUsd > 0 ? (netWindowed / rec.twabUsd * 100) : 0;
+    console.log(`    Yield APY (NET/TWAB)  = ${yieldApy.toFixed(1)}%`);
+    console.log(`${"─".repeat(78)}`);
+  }
 }
 
 if (import.meta.main) main();

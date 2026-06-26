@@ -224,6 +224,24 @@ Aerodrome: getReserves()              0x0902f1ac   earned(address)     0x008cc26
 
 ---
 
+## APY interpretation — deployed capital vs total portfolio
+
+The script computes yield on **TWAB (time-weighted average deployed balance)**, not total portfolio value.
+
+A wallet with $200k total but only $60k in yield protocols should expect:
+- Yield on $60k at 5–8% = $3k–$5k/year → script shows ~$3.5k for L3 → correct ✓
+- The remaining $140k in directional assets (ETH, STRK, LINEA) earns no yield and is out of scope
+
+**APY line in reconcile output** (`Yield APY = NET/TWAB`) is the reliable metric.
+Target: ≥5% on deployed capital. If TWAB is small relative to total portfolio, the portfolio is under-deployed in yield.
+
+**Common mis-reads:**
+- "Script shows only 0.4% yield" → dividing by total portfolio, not TWAB → wrong
+- "NET is negative" → directional token losses (LINEA, STRK) in yield bucket → add to DIRECTIONAL_POSITION_TOKENS
+- "reconcile ratio < 0.8" → positions missed or archive RPC failed; investigate before trusting the number
+
+---
+
 ## Done when
 
 - [ ] All protocols enumerated from both DeBank (current view) and on-chain receipt scan
