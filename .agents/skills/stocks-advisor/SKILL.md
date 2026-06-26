@@ -313,9 +313,8 @@ the theme sits in its cycle. You MUST web_fetch before citing any news.
 DATA PACKAGE:
   <inject the package + the theme tag assigned in discovery>
 
-⛔ HARD RULE: call web_fetch on a real URL before citing it, OR cite a record returned by the feed
-scripts (which print real URLs + verbatim publisher teasers). No fetched URL / no feed record = not a
-source. A fabricated headline invalidates the whole verdict.
+⛔ HARD RULE: call web_fetch on a real URL before citing it. No fetched URL = not a source.
+A fabricated headline invalidates the whole verdict.
 
 GET WSJ + FT FIRST via the paywall-free feed scripts (https://www.wsj.com/news/markets and
 https://www.ft.com/markets are bot-blocked from agent IPs — do NOT rely on web_fetching them):
@@ -507,6 +506,27 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 - [ ] A TradingView screenshot is embedded inline (via the `view` tool on the `file_path`) per stock.
 - [ ] Portfolio sizing/concentration was deferred to `stock-chair`; ETF allocation was deferred to
       `tradfi-portfolio-manager`. This skill stayed on individual-stock entries only.
+
+## Set a buy-alert (notify-me-when) — for WATCH verdicts
+
+A WATCH verdict ("good company, wrong price — buy near $X / when RSI < V") is exactly when to
+register a durable alert so the user is pinged **with your entry thesis** when it triggers.
+Use the **`mkt`** skill — it carries the reasoning into the notification (mkt's native alert
+message cannot). Register the entry plan as a job:
+
+```bash
+cd .agents/skills/mkt/scripts
+bun mkt-alert.ts add --desk stocks --symbol NVDA \
+  --condition below --value 142 \
+  --reason "Buy-zone = prior breakout retest + 50d reclaim; add to core, not a new satellite." \
+  --channel telegram:@CryptoAiInvestor --expiry 2026-09-30
+# oversold add: --condition rsi_below --value 30 --period 14 --cooldown 21600
+```
+
+A scheduled `bun check.ts` (runtime cron) fires the notification with the reasoning when the
+zone/indicator is hit. See `.agents/skills/mkt/SKILL.md` for the trigger patterns and
+per-runtime scheduler cookbook. This stays recommend-only and backtest-gated — an alert is a
+reminder to re-evaluate, not an order.
 
 ## Done when
 
