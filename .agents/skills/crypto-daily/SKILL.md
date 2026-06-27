@@ -265,6 +265,137 @@ If any step failed, report the error clearly — do NOT silently skip.
 
 ---
 
+## Step 6 — Auto-eval
+
+Run after Step 5 completes. Scores today's report against the crypto-advisor rubric and appends a row to the eval CSV.
+
+**6a. Spawn a Judge subagent** (Agent tool, model=sonnet):
+
+Pass the Judge this prompt (substitute `$REPORT` content inline):
+
+```
+You are a Judge evaluating a crypto-advisor run. Score the report against this rubric.
+
+RUBRIC:
+7 dimensions, each scored 0–5.
+
+Score anchors (global):
+5 = Perfect — no deviation from SKILL.md rule
+4 = Correct approach, minor gap
+3 = Right direction, soft on specifics or misses one named requirement
+2 = Partial — roughly half right; material omission or error
+1 = Mostly wrong — violates the principle more than follows it
+0 = Violates the principle outright
+
+Dimensions:
+1. signal_correctness — quorum_verdict truth table applied correctly; signal decision rule applied correctly.
+2. zone_discipline — zone guard enforced before signal; BUY blocked when zone=ELEVATED/EXTREME/UNKNOWN; BUY(small) blocked when zone≠DEEP_VALUE.
+3. data_sufficiency — 200wMA marked INSUFFICIENT when weekly_closes<200; fallback data tagged; zone forced UNKNOWN when data insufficient.
+4. source_discipline — no listing/search pages cited as final sources; every citation has https:// + verbatim quote; FETCH FAILED for non-fetched sources; ≥3 T1/T2/T3 sources ranked.
+5. critic_coverage — critic spawned for ALL N tokens; INCOMPLETE printed if any skipped; FLAGs acted on.
+6. portfolio_governor — buy count capped by F&G regime; downgrades applied ranked by conviction; governor result printed.
+7. no_fabrication — no unverified claims; no hallucinated URLs; no news facts without [source: https://...]; HOLD default when uncertain.
+
+REPORT TO EVALUATE:
+<report>
+{paste full content of research/crypto-portfolio-{TODAY}.md here}
+</report>
+
+For each dimension, give a score 0–5 and one-line failure mode (or PASS).
+Return ONLY this JSON (no prose):
+{
+  "signal_correctness": {"score": N, "note": "..."},
+  "zone_discipline": {"score": N, "note": "..."},
+  "data_sufficiency": {"score": N, "note": "..."},
+  "source_discipline": {"score": N, "note": "..."},
+  "critic_coverage": {"score": N, "note": "..."},
+  "portfolio_governor": {"score": N, "note": "..."},
+  "no_fabrication": {"score": N, "note": "..."},
+  "overall": N,
+  "summary": "one sentence"
+}
+```
+
+Save the returned JSON as `$JUDGE_JSON`.
+
+**6b. Parse the JSON and append a row to the eval CSV:**
+
+```bash
+TODAY=$(date +%F)
+COMMIT=$(git rev-parse --short HEAD)
+
+python3 - << 'PY'
+import json, csv, os, sys
+
+judge_json = os.environ.get("JUDGE_JSON", "")
+try:
+    result = json.loads(judge_json)
+except Exception as e:
+    print(f"ERROR parsing judge JSON: {e}", file=sys.stderr)
+    sys.exit(1)
+
+today = os.environ["TODAY"]
+commit = os.environ["COMMIT"]
+
+row = {
+    "commit_id": commit,
+    "iteration": f"auto-{today}",
+    "prompt_summary": f"crypto-daily auto-eval {today}",
+    "output_summary": f"live run: {result.get('summary', '')}",
+    "score_correctness": result["signal_correctness"]["score"],
+    "score_completeness": result["zone_discipline"]["score"],
+    "score_clarity": result["data_sufficiency"]["score"],
+    "score_overall": result["overall"],
+    "judge_feedback": " | ".join(
+        f"{k}: {v['note']}"
+        for k, v in result.items()
+        if isinstance(v, dict) and "note" in v
+    )[:300]
+}
+
+csv_path = ".agents/skills/crypto-advisor/eval/crypto-advisor.eval.csv"
+write_header = not os.path.exists(csv_path) or os.path.getsize(csv_path) == 0
+with open(csv_path, "a", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=row.keys())
+    if write_header:
+        w.writeheader()
+    w.writerow(row)
+
+print(f"Eval recorded: overall={row['score_overall']}/5")
+PY
+```
+
+Export `TODAY`, `COMMIT`, and `JUDGE_JSON` as env vars before running the script:
+```bash
+export TODAY COMMIT JUDGE_JSON
+```
+
+**6c. Print the eval summary:**
+
+```
+=== AUTO-EVAL — {DATE} ===
+signal_correctness: {N}/5
+zone_discipline:    {N}/5
+data_sufficiency:   {N}/5
+source_discipline:  {N}/5
+critic_coverage:    {N}/5
+portfolio_governor: {N}/5
+no_fabrication:     {N}/5
+─────────────────────
+OVERALL:            {N}/5
+{summary sentence}
+CSV: .agents/skills/crypto-advisor/eval/crypto-advisor.eval.csv
+```
+
+**6d. Low-score warning:**
+
+If `overall < 3.0`, print:
+```
+WARNING: LOW SCORE — consider re-running crypto-advisor with stricter guardrails before next publish.
+```
+
+---
+
 ## Scheduling
 
 ```
