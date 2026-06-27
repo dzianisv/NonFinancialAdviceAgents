@@ -41,3 +41,25 @@
 - non_obvious 4→3 is actor-run variance (v4 actor abandoned Harmonic Drive on data-access grounds), not the edit.
 - **Next-round target = source_grounding (still 3): require resolving ≥1 publisher URL + ≥1 body quote per finalist** before it counts (partly gated by live-feed limits). Fix one lever per round — do NOT touch mode logic again.
 - Rubric residual stands: add `mode_detection` dim for future rounds (don't retro-apply).
+
+## v5 grounding-gate validation (2026-06-27) — KEPT
+
+v5 change: Step 4.5 grounding gate + EDGAR-primary-body-route + headline-as-quote ban (committed 6a099d8).
+
+| Round | Case | Variant | source_grounding | non_obvious | skeptic | actionability | quorum_routing | prescreen | Mean | Change |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 7h | holdout 05 (CONVICTION dual-theme) | **v5-grounding-gate** | 4 | 5 | 5 | 4 | 4 | 4 | **4.3** | **+0.47 ✓ KEEP** |
+| 7t | train 02 (RESEARCH_MODE over-correction check) | **v5-grounding-gate** | 2 | — | 4 | 4 | 5 | 5 | **4.0** | over-correction PASS |
+
+**Holdout trend (case 05):** v3 3.33 → v4 3.83 → v5 4.3
+
+**Decision: KEEP v5.** Gate works: actor KILLED UUUU on G1+G2 body-source fail instead of passing a headline-cited name as HIGH. Lone HIGH finalist RMBS carries Source(BODY) resolved rambus.com URLs + verbatim body quotes + Source(DATA). Over-correction guard PASSED — actionability 3→4 (did not drop as feared). source_grounding 3→4 (target dim achieved).
+
+**Over-correction check (train case 02, RESEARCH_MODE):** actionability=4, quorum=5, prescreen=5 — gate did NOT degrade RESEARCH_MODE quality. Surfaced new residual: in RESEARCH_MODE the gate only CAPS confidence, so BODY_NOT_REACHED teaser names still route to quorum (only IONQ had a real body read); source_grounding stuck at 2 there.
+
+**Residuals (carry to v6):**
+1. **source_grounding / journalism-corroboration (from case 05):** even grounded finalists lean on company IR press-releases; require ≥1 independent journalism body quote (SA/Bloomberg/Reuters/WSJ) corroborating IR numbers per finalist — not only the company's own press release.
+2. **RESEARCH_MODE routing-block (from case 02 — v6 single lever):** extend the INSUFFICIENT_GROUNDING routing-block from CONVICTION_MODE to RESEARCH_MODE. BODY_NOT_REACHED name = watchlist-only; must NOT route to quorum until body confirmed.
+3. **Runtime cost (note, not yet a fix target):** case 02 actor ran ~26 min (~3× normal). Score held, but it is slow. Note as residual.
+
+**Fix one lever per round** — do NOT bundle journalism-corroboration + RESEARCH_MODE routing-block in same edit.
