@@ -1,0 +1,7 @@
+# Notion target for stocks-advisor research reports.
+# When this file exists AND page_id is non-empty, stocks-advisor publishes each
+# run as a dated child page under page_id (title: "YYYY-MM-DD <narrative>").
+# Delete this file (or blank page_id) to disable publishing — it is opt-in.
+# Retarget by replacing page_url; page_id is the 32-char hex from the URL tail.
+page_url: "https://app.notion.com/p/stocks-advisor-38cac25eb49f800cad98d4eed9c11513"
+page_id: "38cac25eb49f800cad98d4eed9c11513"
