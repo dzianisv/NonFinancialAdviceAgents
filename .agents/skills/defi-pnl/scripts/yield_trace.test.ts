@@ -15,6 +15,7 @@ import {
   groupByHash,
   stableUsd,
   isInScopePosition,
+  toLedgerRow,
   type Transfer,
   type StablesMap,
   type PricedEmission,
@@ -523,5 +524,62 @@ describe("isInScopePosition", () => {
     const r = isInScopePosition({ symbol: "LARRY" });
     expect(r.inScope).toBe(false);
     expect(r.reason).toMatch(/directional/i);
+  });
+});
+
+// ── toLedgerRow tests (pure, no network) ──────────────────────────────────────
+
+describe("toLedgerRow", () => {
+  test("inbound transfer: direction='in', counterparty=from, async fields null", () => {
+    const tx = makeTx({
+      hash: "0xin", contractAddress: USDC, to: WALLET_L, from: OTHER,
+      value: "1500000", tokenDecimal: "6", tokenSymbol: "USDC", timeStamp: "1700000000",
+    });
+    const row = toLedgerRow(tx, WALLET_L, "base", STABLES);
+    expect(row.direction).toBe("in");
+    expect(row.counterparty).toBe(OTHER); // for "in", counterparty is the sender (from)
+    expect(row.chain).toBe("base");
+    expect(row.txHash).toBe("0xin");
+    expect(row.tokenAddr).toBe(USDC);
+    expect(row.usd).toBeNull();                     // filled async by caller
+    expect(row.counterpartyIsContract).toBeNull();  // filled async by caller
+  });
+
+  test("outbound transfer: direction='out', counterparty=to", () => {
+    const tx = makeTx({
+      hash: "0xout", contractAddress: USDC, from: WALLET_L, to: OTHER,
+      value: "1000000", tokenDecimal: "6", tokenSymbol: "USDC",
+    });
+    const row = toLedgerRow(tx, WALLET_L, "base", STABLES);
+    expect(row.direction).toBe("out");
+    expect(row.counterparty).toBe(OTHER); // for "out", counterparty is the recipient (to)
+  });
+
+  test("isStable true for known stable, false for receipt/emission token", () => {
+    const stableTx = makeTx({ hash: "0xs", contractAddress: USDC, to: WALLET_L, from: OTHER });
+    const otherTx  = makeTx({ hash: "0xo", contractAddress: AERO, to: WALLET_L, from: OTHER });
+    expect(toLedgerRow(stableTx, WALLET_L, "base", STABLES).isStable).toBe(true);
+    expect(toLedgerRow(otherTx,  WALLET_L, "base", STABLES).isStable).toBe(false);
+  });
+
+  test("amountFloat applies token decimals correctly", () => {
+    // 1234.56 USDC at 6 decimals
+    const tx6 = makeTx({
+      hash: "0xa", contractAddress: USDC, to: WALLET_L, from: OTHER,
+      value: "1234560000", tokenDecimal: "6",
+    });
+    const row6 = toLedgerRow(tx6, WALLET_L, "base", STABLES);
+    expect(row6.amountFloat).toBeCloseTo(1234.56, 6);
+    expect(row6.decimals).toBe(6);
+    expect(row6.amountRaw).toBe("1234560000");
+
+    // 2.5 tokens at 18 decimals
+    const tx18 = makeTx({
+      hash: "0xb", contractAddress: AERO, to: WALLET_L, from: OTHER,
+      value: "2500000000000000000", tokenDecimal: "18", tokenSymbol: "AERO",
+    });
+    const row18 = toLedgerRow(tx18, WALLET_L, "base", STABLES);
+    expect(row18.amountFloat).toBeCloseTo(2.5, 9);
+    expect(row18.symbol).toBe("AERO");
   });
 });

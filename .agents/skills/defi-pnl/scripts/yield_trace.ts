@@ -159,8 +159,24 @@ export const CHAIN_CONFIG: Record<string, {
 
 // ── Pure helpers ───────────────────────────────────────────────────────────────
 
+/** Deterministic "now" — pinned 2026-06-26 (matches boundary_pnl.NOW). Date.now()/new Date() banned project-wide. */
+const NOW = 1782432000;
+
 export function isoDate(ts: number): string {
-  return new Date(ts * 1000).toISOString().slice(0, 10);
+  // Pure epoch→YYYY-MM-DD, UTC (no `new Date()` — Date constructor banned project-wide).
+  // Howard Hinnant civil-from-days; deterministic for any unix-seconds input.
+  const z = Math.floor(ts / 86400) + 719468;
+  const era = Math.floor((z >= 0 ? z : z - 146096) / 146097);
+  const doe = z - era * 146097;
+  const yoe = Math.floor((doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365);
+  const y = yoe + era * 400;
+  const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+  const mp = Math.floor((5 * doy + 2) / 153);
+  const d = doy - Math.floor((153 * mp + 2) / 5) + 1;
+  const m = mp < 10 ? mp + 3 : mp - 9;
+  const year = y + (m <= 2 ? 1 : 0);
+  const p2 = (n: number) => String(n).padStart(2, "0");
+  return `${year}-${p2(m)}-${p2(d)}`;
 }
 
 export function pad32(addr: string): string {
@@ -199,6 +215,64 @@ export function stableUsd(
   if (faceUsd !== null) return { usd: amt * faceUsd, symbol, note: "face" };
   // faceUsd=null means caller must do a price lookup — we return null here, caller handles
   return { usd: null, symbol, note: "NEEDS_PRICE_LOOKUP" };
+}
+
+// ── Ledger model (additive output mode) ───────────────────────────────────────
+
+/**
+ * One ERC-20 transfer flattened into a wallet-relative ledger row. This is the raw,
+ * unfiltered fact table the judgment layer consumes — EVERY transfer becomes a row,
+ * including spam/airdrops/directional tokens. `usd` and `counterpartyIsContract` are
+ * left null by the pure builder and filled asynchronously by the caller.
+ */
+export interface LedgerRow {
+  ts: number;
+  date: string;          // isoDate(ts)
+  chain: string;
+  txHash: string;
+  tokenAddr: string;     // lowercased contractAddress
+  symbol: string;        // tokenSymbol
+  decimals: number;
+  direction: "in" | "out";   // relative to the wallet: to==wallet ? "in" : "out"
+  counterparty: string;      // lowercased; the side that is NOT the wallet
+  amountRaw: string;         // value
+  amountFloat: number;       // Number(value)/10**decimals
+  isStable: boolean;         // tokenAddr in stablesMap
+  usd: number | null;             // filled async by caller (pricer)
+  counterpartyIsContract: boolean | null; // filled async by caller (isContractAddr)
+}
+
+/**
+ * Pure, synchronous builder: derive every field except `usd` and
+ * `counterpartyIsContract` (both null here). Wallet/counterparty/token comparisons
+ * are lowercased. Direction is wallet-relative; counterparty is the non-wallet side.
+ */
+export function toLedgerRow(
+  tx: Transfer, walletLower: string, chain: string, stablesMap: StablesMap,
+): LedgerRow {
+  const tokenAddr = tx.contractAddress.toLowerCase();
+  const decimals  = parseInt(tx.tokenDecimal, 10);
+  const fromL     = tx.from.toLowerCase();
+  const toL       = tx.to.toLowerCase();
+  const direction: "in" | "out" = toL === walletLower ? "in" : "out";
+  const counterparty = direction === "in" ? fromL : toL;
+  const ts = parseInt(tx.timeStamp, 10);
+  return {
+    ts,
+    date: isoDate(ts),
+    chain,
+    txHash: tx.hash,
+    tokenAddr,
+    symbol: tx.tokenSymbol,
+    decimals,
+    direction,
+    counterparty,
+    amountRaw: tx.value,
+    amountFloat: Number(tx.value) / 10 ** decimals,
+    isStable: tokenAddr in stablesMap,
+    usd: null,
+    counterpartyIsContract: null,
+  };
 }
 
 // ── Core pure function: classifyTransfers ─────────────────────────────────────
@@ -711,7 +785,7 @@ async function receiptUsd(
   }
 
   if (llamaChainFallback) {
-    const nowTs = Math.floor(Date.now() / 1000);
+    const nowTs = NOW;
     const price = await llamaPriceHistorical(llamaChainFallback, tokenAddr, nowTs);
     if (price !== null) {
       const v = Number(balance) / 10 ** decimals * price;
@@ -784,6 +858,109 @@ export async function priceEmissions(
   return priced;
 }
 
+// ── Ledger I/O helpers (additive output mode) ─────────────────────────────────
+
+/** Memoized contract-vs-EOA detector via Blockscout v2 /addresses/{addr}.
+ *  Returns true/false from the `is_contract` field, or null on any error/missing field. */
+const _isContractCache = new Map<string, boolean | null>();
+
+export async function isContractAddr(chain: string, addr: string): Promise<boolean | null> {
+  const cfg = CHAIN_CONFIG[chain];
+  if (!cfg) return null;
+  const addrLower = addr.toLowerCase();
+  const key = `${chain}:${addrLower}`;
+  if (_isContractCache.has(key)) return _isContractCache.get(key)!;
+
+  const base = cfg.blockscout.replace(/\/api$/, "");
+  const url  = `${base}/api/v2/addresses/${addrLower}`;
+  const data = await httpGet(url) as Record<string, unknown> | null;
+
+  let result: boolean | null = null;
+  if (data && typeof data["is_contract"] === "boolean") {
+    result = data["is_contract"] as boolean;
+  }
+  _isContractCache.set(key, result);
+  return result;
+}
+
+/** Unified per-row USD pricer: face value for stables, else historical DefiLlama price ×
+ *  amountFloat. Returns null when an emission/receipt token can't be priced. */
+export async function priceLedgerRow(
+  row: LedgerRow, llamaChain: string, stablesMap: StablesMap,
+): Promise<number | null> {
+  if (row.isStable) {
+    return stableUsd(row.tokenAddr, row.amountRaw, row.decimals, stablesMap).usd;
+  }
+  // FIREWALL: this non-stable `.usd` is advisory only — the boundary engine sums `.usd` solely for isStableRow rows and recomputes non-stable position value on-chain, so a wrong llama price cannot skew PnL.
+  const price = await llamaPriceHistorical(llamaChain, row.tokenAddr, row.ts);
+  if (price === null) return null;
+  return price * row.amountFloat;
+}
+
+/** The per-chain stables map shared by the PnL path and the ledger path.
+ *  Contents are identical to the original inline literal in main() — do not change them. */
+export function buildStablesMap(): StablesMap {
+  return {
+    "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": { symbol: "USDC",   faceUsd: 1.0 },
+    "0xaf88d065e77c8cc2239327c5edb3a432268e5831": { symbol: "USDC",   faceUsd: 1.0 },
+    "0x0b2c639c533813f4aa9d7837caf62653d097ff85": { symbol: "USDC",   faceUsd: 1.0 },
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": { symbol: "USDC",   faceUsd: 1.0 },
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": { symbol: "USDT",   faceUsd: 1.0 },
+    "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9": { symbol: "USDT",   faceUsd: 1.0 },
+    "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58": { symbol: "USDT",   faceUsd: 1.0 },
+    "0x50c5725949a6f0c72e6c4a641f24049a917db0cb": { symbol: "DAI",    faceUsd: 1.0 },
+    "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": { symbol: "DAI",    faceUsd: 1.0 },
+    "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca": { symbol: "USDbC",  faceUsd: 1.0 },
+    "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8": { symbol: "USDC.e", faceUsd: 1.0 }, // USDC.e Arbitrum
+    "0x4c9edd5852cd905f086c759e8383e09bff1e68b3": { symbol: "USDe",   faceUsd: 1.0 }, // USDe Ethereum
+    "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34": { symbol: "USDe",   faceUsd: 1.0 }, // USDe Arbitrum
+  };
+}
+
+/**
+ * --ledger output mode. Fetches ALL transfers per in-scope chain, flattens every one into a
+ * LedgerRow (NO directional/spam scope filter — the judgment layer decides relevance), prices
+ * each row, and resolves whether each counterparty is a contract. Emits one JSON object.
+ * Bypasses the entire PnL/positionPnL/reconcile/receipt-discovery path.
+ */
+async function runLedgerMode(
+  wallet: string, chains: string[], windowArg: string | null, outPath?: string,
+): Promise<void> {
+  const walletLower = wallet.toLowerCase();
+  const stablesMap  = buildStablesMap();
+  const rows: LedgerRow[] = [];
+
+  for (const chain of chains) {
+    const cfg = CHAIN_CONFIG[chain];
+    if (!cfg) { console.warn(`  Unknown chain ${chain}, skipping`); continue; }
+
+    console.error(`[${chain}] fetching transfers for ledger…`);
+    const transfers = await fetchTransfers(chain, wallet);
+    if (!transfers.length) continue;
+
+    for (const tx of transfers) {
+      const row = toLedgerRow(tx, walletLower, chain, stablesMap);
+      row.usd = await priceLedgerRow(row, cfg.llama, stablesMap);
+      row.counterpartyIsContract = await isContractAddr(chain, row.counterparty);
+      rows.push(row);
+    }
+  }
+
+  rows.sort((a, b) => a.chain.localeCompare(b.chain) || a.ts - b.ts);
+
+  const json = JSON.stringify(
+    { wallet, generatedForChains: chains, window: windowArg, rows },
+    null, 2,
+  );
+
+  if (outPath) {
+    await Bun.write(outPath, json);
+    console.error(`Wrote ${rows.length} ledger rows → ${outPath}`);
+  } else {
+    console.log(json);
+  }
+}
+
 // ── main() ────────────────────────────────────────────────────────────────────
 
 async function main() {
@@ -797,11 +974,20 @@ async function main() {
   const chainsArg = argv.includes("--chains") ? argv[argv.indexOf("--chains") + 1] : undefined;
   const chains = chainsArg ? chainsArg.split(",").map((s) => s.trim()) : ["base", "ethereum", "arbitrum", "optimism"];
 
+  // ── LEDGER MODE (additive) — emit the raw transfer fact table and bypass the
+  //    entire PnL/positionPnL/reconcile/receipt-discovery path. ──────────────────
+  if (argv.includes("--ledger")) {
+    const outArg    = argv.includes("--out") ? argv[argv.indexOf("--out") + 1] : undefined;
+    const windowRaw = argv.includes("--window") ? argv[argv.indexOf("--window") + 1] : null;
+    await runLedgerMode(wallet, chains, windowRaw, outArg);
+    return;
+  }
+
   const windowArg = argv.includes("--window") ? argv[argv.indexOf("--window") + 1] : "2y";
   const W1Y_TS = 1750809600; // 2025-06-25
   const W2Y_TS = 1719273600; // 2024-06-25
   const windowTs = windowArg === "1y" ? W1Y_TS : W2Y_TS;
-  const NOW_TS   = Math.floor(Date.now() / 1000);
+  const NOW_TS   = NOW;
 
   console.log(`\nYield Trace — ${wallet} — window=${windowArg}\n${"=".repeat(78)}`);
 
@@ -857,22 +1043,7 @@ async function main() {
       }
     }
 
-    const stablesMap: StablesMap = {
-      "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": { symbol: "USDC",   faceUsd: 1.0 },
-      "0xaf88d065e77c8cc2239327c5edb3a432268e5831": { symbol: "USDC",   faceUsd: 1.0 },
-      "0x0b2c639c533813f4aa9d7837caf62653d097ff85": { symbol: "USDC",   faceUsd: 1.0 },
-      "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": { symbol: "USDC",   faceUsd: 1.0 },
-      "0xdac17f958d2ee523a2206206994597c13d831ec7": { symbol: "USDT",   faceUsd: 1.0 },
-      "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9": { symbol: "USDT",   faceUsd: 1.0 },
-      "0x94b008aa00579c1307b0ef2c499ad98a8ce58e58": { symbol: "USDT",   faceUsd: 1.0 },
-      "0x50c5725949a6f0c72e6c4a641f24049a917db0cb": { symbol: "DAI",    faceUsd: 1.0 },
-      "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": { symbol: "DAI",    faceUsd: 1.0 },
-      "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca": { symbol: "USDbC",  faceUsd: 1.0 },
-      "0xda10009cbd5d07dd0cecc66161fc93d7c9000da1": { symbol: "DAI",    faceUsd: 1.0 }, // DAI Arbitrum/Optimism
-      "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8": { symbol: "USDC.e", faceUsd: 1.0 }, // USDC.e Arbitrum
-      "0x4c9edd5852cd905f086c759e8383e09bff1e68b3": { symbol: "USDe",   faceUsd: 1.0 }, // USDe Ethereum
-      "0x5d3a1ff2b6bab83b63cd9ad0787074081a52ef34": { symbol: "USDe",   faceUsd: 1.0 }, // USDe Arbitrum
-    };
+    const stablesMap: StablesMap = buildStablesMap();
 
     let skippedCount = 0;
     for (const [tokenAddr, { symbol, name, decimals }] of receiptTokens) {
