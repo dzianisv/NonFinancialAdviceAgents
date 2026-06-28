@@ -19,123 +19,116 @@ bun portfolio-memory/recall.ts"]
     SHEET["Step 0 · Load Google Sheet (optional)
 gws sheets +read
 ticker, qty, cost_basis, pnl_pct"]
-    SEED["Step 1 · Seed todo list
-INSERT INTO todos per ticker"]
 
     MACRO["Step 0.9 · Macro-regime synthesis — run ONCE
-WSJ feeds/wsj.ts --feed markets,economy
-FT feeds/ft.ts --section markets,global-economy
-Yahoo Finance breadth
-→ 5-sentence paragraph:
-  Fed/rates · Growth · Inflation · Geopolitics · Liquidity
-Anti-hallucination: every sentence = named dateable fact
-Save to RUN_DIR/macro_regime.txt
-Inject into ALL seat data packages as macro_regime"]
+feeds/wsj.ts + feeds/ft.ts + Yahoo Finance
+→ 5-sentence paragraph saved to
+   RUN_DIR/macro_regime.txt
+Read by Narrative seat only"]
 
-    subgraph SEQ ["Sequential per-stock loop — ONE ticker at a time (shared TradingView slot)"]
+    SEED["Step 1 · Seed ticker queue"]
+
+    subgraph SEQ ["Sequential per-ticker loop — one ticker at a time (TradingView single slot)"]
         direction TB
 
-        subgraph TVPULL ["Orchestrator data pull — subagents cannot call MCP or yfinance"]
+        subgraph SEATS ["5 seats — PARALLEL subagents per ticker"]
             direction LR
-            TV1["TradingView MCP
-chart_set_symbol NASDAQ: NYSE:
-D OHLCV 365d summary + 250 bars
-study values: RSI, BB, MACD, Volume
-W OHLCV 210 bars
+
+            subgraph ST ["Seat 2 · Technical"]
+                direction TB
+                ST_TV["TradingView MCP
+chart_set_symbol
+RSI · MACD · BB · EMA
+OHLCV · Volume · 52w hi/lo
 capture_screenshot"]
-            FYFI["fundamentals.py (yfinance)
-price, ma50, ma200, vs200d
-fwdPE, PEG, rev growth
-FCF yield, ROE
-short pct, inst pct, rec_mean"]
-        end
-
-        PKG["Assemble data package
-TradingView + yfinance merged
-+ macro_regime injected
-+ prior_context injected"]
-
-        subgraph SEATS ["5 seats — PARALLEL subagents"]
-            direction TB
-
-            subgraph NOSEEK ["Seats 1, 2, 4 — injected data ONLY (no external calls)"]
-                direction LR
-                SF["Seat 1 · Fundamental
-FCF yield, PE, PEG
-rev growth, moat
-STRONG / GOOD / FAIR / POOR"]
-                ST["Seat 2 · Technical Bernstein
-Setup, Trigger, Follow-Through
-RSI, BB, MACD, MAs
-SETUP_NAMED / NO_SETUP / BROKEN"]
-                SS["Seat 4 · Sentiment
-short pct, inst pct, rec_mean
-contrarian read
-QUIET_ACCUM / NEUTRAL / CROWDED / EXTREME"]
+                ST_FY["fundamentals.py
+price · ma50 · ma200 · vs200d"]
+                ST_OUT["SETUP_NAMED
+NO_SETUP
+BROKEN
++ entry zone · trigger · stop"]
+                ST_TV --> ST_OUT
+                ST_FY --> ST_OUT
             end
 
-            subgraph NARR ["Seat 3 · Narrative — reads live news"]
+            subgraph SF ["Seat 1 · Fundamental"]
                 direction TB
-                SN_DATA["Receives injected data + macro_regime"]
-                NEWS["read_news.ts --source ft,wsj (discovery)
-feeds/wsj.ts + feeds/ft.ts (citation)
-web_fetch Bloomberg/Reuters (breadth)
-Verbatim quotes required
-No URL = not a source"]
-                SN_OUT["EARLY / MID / LATE / FADING
-theme durability verdict"]
-                SN_DATA --> NEWS --> SN_OUT
+                SF_FY["fundamentals.py
+fwdPE · PEG · FCF yield
+rev growth · ROE · margins"]
+                SF_WEB["web_fetch
+IR page · SEC 10-Q/10-K
+moat evidence"]
+                SF_OUT["STRONG / GOOD
+FAIR / POOR"]
+                SF_FY --> SF_OUT
+                SF_WEB --> SF_OUT
             end
 
-            subgraph SM ["Seat 5 · Smart-Money — disclosed flows"]
+            subgraph SN ["Seat 3 · Narrative"]
                 direction TB
-                SM_IN["Receives injected data + macro_regime"]
+                SN_MR["Read macro_regime.txt"]
+                SN_NEWS["read_news.ts --source ft,wsj
+feeds/wsj.ts · feeds/ft.ts
+web_fetch Bloomberg/Reuters
+Verbatim quotes · No URL = not a source"]
+                SN_OUT["EARLY / MID
+LATE / FADING"]
+                SN_MR --> SN_OUT
+                SN_NEWS --> SN_OUT
+            end
+
+            subgraph SS ["Seat 4 · Sentiment"]
+                direction TB
+                SS_FY["fundamentals.py
+short_pct · inst_pct · rec_mean"]
+                SS_OUT["QUIET_ACCUM
+NEUTRAL · CROWDED
+EXTREME"]
+                SS_FY --> SS_OUT
+            end
+
+            subgraph SM ["Seat 5 · Smart-Money"]
+                direction TB
                 SM_FETCH["web_fetch per-ticker:
 openinsider.com Form 4 (code P)
-13f.info stock page (net adds/trims)
-EDGAR SC 13D/13G search
-capitoltrades.com PTR buys
+13f.info net adds/trims
+EDGAR SC 13D/13G
+capitoltrades.com PTR
 No URL = not a source"]
-                SM5["ACCUMULATING / DISTRIBUTING / NEUTRAL
-CONVICTION: HIGH / MED / LOW"]
-                SM_IN --> SM_FETCH --> SM5
+                SM_OUT["ACCUMULATING
+DISTRIBUTING
+NEUTRAL"]
+                SM_FETCH --> SM_OUT
             end
         end
 
-        VDT["Verdict decision table
-BUY:   Fund GTE GOOD + SETUP_NAMED + MID or EARLY + not EXTREME
-WATCH: Fund GTE GOOD but NO_SETUP (wait for trigger)
-SKIP:  Fund POOR or LATE or FADING or BROKEN
-SKIP dominates · Conviction 1-5"]
+        VDT["Verdict
+BUY:   Fund ≥ GOOD + SETUP_NAMED + phase ∈ EARLY/MID + not EXTREME
+WATCH: Fund ≥ GOOD + NO_SETUP
+SKIP:  Fund = POOR | phase ∈ LATE/FADING | BROKEN
+SKIP dominates · Conviction 1–5"]
 
-        PERSIST["UPDATE stock_analysis
-bun portfolio-memory/remember.ts"]
+        PERSIST["bun portfolio-memory/remember.ts"]
 
-        TV1 --> PKG
-        FYFI --> PKG
-        PKG --> SEATS
-        SF & ST & SN_OUT & SS & SM5 --> VDT
-        VDT --> PERSIST
+        ST_OUT & SF_OUT & SN_OUT & SS_OUT & SM_OUT --> VDT --> PERSIST
     end
 
-    SYNTH["Step 4 · Portfolio-synthesis seat — run ONCE after per-stock loop
-/model opus /effort xhigh — single subagent, cross-position reasoning
+    SYNTH["Step 4 · Portfolio-synthesis seat — once after loop
+/model opus /effort xhigh
 
-Input: all per-stock verdicts + holdings + macro_regime + theme map
+Reads all per-stock verdicts + holdings + macro_regime.txt
 
-Output (5 sections):
-1. FACTOR CORRELATION MAP — group by Fed/USD/oil/AI-capex/China;
-   flag any factor > 25% book weight as CONCENTRATION RISK
-2. OVER-DIVERSIFICATION CRITIQUE — if > 40 names, list index-like
-   positions replaceable by VOO (Carver: marginal benefit falls past ~20)
-3. CROSS-POSITION CONFLICTS — ADD + TRIM pairs sharing same factor
-4. PORTFOLIO STRUCTURE VERDICT — biggest structural risk + single action
-5. CASH DEPLOYMENT PRIORITY — top 3 ADD candidates ranked by portfolio fit"]
+1. FACTOR CORRELATION MAP — flag any factor > 25% book
+2. OVER-DIVERSIFICATION CRITIQUE — > 40 names → index noise
+3. CROSS-POSITION CONFLICTS — ADD + TRIM on same factor
+4. PORTFOLIO STRUCTURE VERDICT — biggest risk + one action
+5. CASH DEPLOYMENT PRIORITY — top 3 ADD candidates"]
 
     SIGNAL["Signal table
-Ticker, Decision, Conv, Entry zone, Trigger, Theme"]
+Ticker · Decision · Conv · Entry · Trigger · Theme"]
     CHAIR[["stock-chair
-portfolio synthesis, sizing, concentration"]]
+sizing · concentration"]]
 
     USER --> MEM --> SHEET --> MACRO --> SEED --> SEQ
     PERSIST --> SYNTH --> SIGNAL --> CHAIR
