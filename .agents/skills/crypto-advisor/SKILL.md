@@ -206,7 +206,17 @@ open('$RUN_DIR/{TOKEN}/data_package.json', 'w').write(pkg)
 " "$DATA_PACKAGE_JSON"
 ```
 
-**1d. Run the 5-seat quorum on the package.** Reason through the 5 seats inline, or spawn the five `analysis-*` seat subagents **in parallel** (on-chain, sentiment, macro, order-flow, narrative) with the package **injected** — seats share nothing, so they parallelize; only the data pull is serial. Each seat returns: zone, posture (BULLISH|NEUTRAL|BEARISH), confidence, 1-line bull, 1-line bear, invalidation.
+**1d. Run the 5-seat quorum — each seat owns its own data.** Spawn all five seats **in parallel** (seats share nothing). Only the Trend seat receives the TradingView package (subagents cannot access MCP tools). All other seats receive only `{ token, price_usd }` and are responsible for fetching their own data.
+
+| Seat | Skill | Data it fetches itself |
+|---|---|---|
+| **Trend** | `analytics-stanley-druckenmiller` | Receives TV package from CIO. No additional fetch needed. |
+| **Value** | `analytics-benjamin-graham` | Fetches price history + ATH reference to compute zone and margin of safety. |
+| **Quality** | `analytics-warren-buffett` | `web_fetch https://defillama.com/protocol/{slug}` — revenue, TVL, moat signals. |
+| **Cycle** | `analytics-ray-dalio` | `web_fetch https://api.alternative.me/fng/?limit=1` (F&G) + macro headlines. |
+| **On-chain** | `analysis-onchain-defi` | `web_fetch https://defillama.com/protocol/{slug}` — fee distribution, revenue accrual. |
+
+Each seat returns: `{ vote: BULLISH|NEUTRAL|BEARISH, reason: "<School>: one-line citing own data" }`.
 
 **On-chain seat — tokenomics live check (DeFi tokens).** For any non-L1 token (not BTC/ETH/SOL/TON), verify protocol mechanics via live fetch before the on-chain verdict. **NEVER state a tokenomics claim (fee switch, buyback, burn, staking yield, revenue accrual) from memory — governance votes change protocol economics at any time.**
 
@@ -214,7 +224,7 @@ open('$RUN_DIR/{TOKEN}/data_package.json', 'w').write(pkg)
 2. If DeFiLlama shows non-zero revenue AND your recall says "no accrual" → **you are stale**. Fetch the governance forum: `web_fetch https://www.theblock.co/search?query={TOKEN}+fee+switch` and `web_fetch https://gov.uniswap.org` (or the protocol's forum).
 3. Characterize mechanics only after the live fetch. Quote the source verbatim; cite the URL.
 
-**Narrative seat — sourcing protocol.**
+**Cycle + Quality seats — news sourcing protocol.** (Cycle = Dalio fetches macro; Quality = Buffett fetches protocol revenue + news. Both follow this rule:)
 
 **HARD RULE: call `web_fetch` on a real URL before citing it — OR cite a record from a feed script (`feeds/wsj.ts`/`feeds/ft.ts`/`read_news.ts`), which return real URLs + verbatim publisher teasers. A URL neither web_fetched nor returned by a feed script this run is NOT a source. A headline with no URL is a hallucination and invalidates the entire narrative verdict.**
 
@@ -262,29 +272,36 @@ A descriptive summary ("protocol revenue confirmed", "GHO expansion ongoing") is
 5. **Show the ranking reason** per source (one sentence, e.g. "T1: F&G returned value=18 with timestamp — hard data point").
 6. **State the invalidation anchor**: what would reverse this verdict.
 
-Narrative seat output format (inline, per token):
+Seat output format (inline, per token — all seats except Trend):
 ```
-NARRATIVE — {TOKEN}
-Posture: BULLISH | NEUTRAL | BEARISH
+{SEAT_NAME} ({SCHOOL}) — {TOKEN}
+Vote: BULLISH | NEUTRAL | BEARISH
 Sources fetched (ranked):
   [T1] https://<actual-url-you-called-web_fetch-on> — "<verbatim quote from page>" → T1 because: <one sentence>
   [T2] https://<actual-url-you-called-web_fetch-on> — "<verbatim quote from page>" → T2 because: <one sentence>
-  [T3] https://<actual-url-you-called-web_fetch-on> — "<verbatim quote from page>" → T3 because: <one sentence>
   [FETCH FAILED: https://...] — not counted
-Bull: <1-line>
-Bear: <1-line>
+Reason: <School>: <one-line citing own fetched data>
 Invalidation: <what reverses this verdict>
 ```
 
-**Fewer than 2 successfully fetched sources after trying all applicable URLs → set posture = NEUTRAL and note "INSUFFICIENT DATA". Do not guess.**
+Trend seat output format (receives TV package from CIO):
+```
+TREND (Druckenmiller) — {TOKEN}
+Vote: BULLISH | NEUTRAL | BEARISH
+MA alignment: EMA20={x} SMA50={x} SMA200={x} death_cross={bool}
+RSI: {x} MACD: {hist}
+Reason: Druckenmiller: <one-line on price structure>
+```
+
+**Fewer than 2 successfully fetched sources after trying all applicable URLs → set vote = NEUTRAL and note "INSUFFICIENT DATA". Do not guess.**
 
 **Cache seat results** — write each seat's output as it returns:
 ```bash
-echo '{on_chain_seat_json}'   > "$RUN_DIR/{TOKEN}/seat_on_chain.json"
-echo '{sentiment_seat_json}'  > "$RUN_DIR/{TOKEN}/seat_sentiment.json"
-echo '{macro_seat_json}'      > "$RUN_DIR/{TOKEN}/seat_macro.json"
-echo '{order_flow_seat_json}' > "$RUN_DIR/{TOKEN}/seat_order_flow.json"
-echo '{narrative_seat_json}'  > "$RUN_DIR/{TOKEN}/seat_narrative.json"
+echo '{value_seat_json}'   > "$RUN_DIR/{TOKEN}/seat_value.json"
+echo '{quality_seat_json}' > "$RUN_DIR/{TOKEN}/seat_quality.json"
+echo '{cycle_seat_json}'   > "$RUN_DIR/{TOKEN}/seat_cycle.json"
+echo '{trend_seat_json}'   > "$RUN_DIR/{TOKEN}/seat_trend.json"
+echo '{onchain_seat_json}' > "$RUN_DIR/{TOKEN}/seat_onchain.json"
 ```
 Each seat JSON includes at minimum: `{posture, confidence, bull_line, bear_line, invalidation, sources:[]}`.
 
