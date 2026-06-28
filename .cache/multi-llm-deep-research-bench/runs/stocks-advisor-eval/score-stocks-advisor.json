@@ -1,0 +1,42 @@
+{
+  "label": "stocks-advisor-agentic",
+  "query": "Portfolio review: HOLD/ADD/TRIM/EXIT per position, $26,320 cash to deploy. ~$578k equity, 85 IBKR positions. Dominant risk: COIN 21.5% weight, -$95,880.",
+  "mode": "agentic (TradingView MCP + yfinance fundamentals.py + web_fetch news + 5-seat panel)",
+  "reasoning": {
+    "comprehensiveness": "The report covers all required sub-questions: HOLD/ADD/TRIM/EXIT for all 85 positions (10 via full 5-seat panel, ~45 via fundamentals screen, remainder noted), a tax harvest table with dollar amounts, cash deployment plan for $26,320, SETUP ALERTS with exact price triggers, a TOP RECAP prose summary, and a high-confidence RECAP table. ETFs correctly deferred to tradfi-portfolio-manager per skill scope. All standard sections present: signal table, sources appendix, base-rate honesty disclosure, memory-degraded flag, INSUFFICIENT DATA flags where applicable. No major sub-question missing that a portfolio manager would expect. Score 5.",
+    "groundedness": "Material claims are backed by live TradingView data (RSI 38.34 / MACD -8.62 / EMA $175.88 for COIN, etc.) and fundamentals.py yfinance outputs (fwdPE, PEG, FCF yield, revenue growth — specific numbers per ticker). News claims carry named sources with dates: ACN 4-analyst simultaneous downgrade sourced to Barron's, Investing.com, Finviz (Jun 18/22/26 2026); MRVL CFO $65M filing and new CFO Dan Durn sale of 2,250sh at $281 from Finviz; NKE CEO Hill $1M + Tim Cook $1.06M open-market buys from MarketBeat with specific dates. Key failure: openinsider.com ECONNREFUSED — explicitly acknowledged as INSUFFICIENT DATA; fallback sources used. Yahoo Finance 503 on individual stock pages — acknowledged. Memory DEGRADED (grep-fallback) flagged. Main deduction: primary smart-money source (openinsider) unavailable this run; secondary sources used for 3 of 10 stocks. Score 4.",
+    "citation_quality": "11 specific URLs in the SOURCES & DATA appendix with dates and verbatim teasers. Inline [source: URL] used for key narrative claims throughout the per-stock blocks. Verbatim headline quotes present (e.g., 'A Bad Bet on Durability' Barron's; 'Bitcoin Crashes Below $60,000 as Crypto Stocks Enter Free Fall' GuruFocus; 'Marvell's 265% Surge Faces $1 Trillion Test' Bloomberg). Technical data cited as 'TradingView studies RSI(14)/MACD(12,26,9)' and 'fundamentals.py (yfinance)' — explicit provenance. Failure modes explicitly labeled: ECONNREFUSED, HTTP 503, INSUFFICIENT DATA. Main gap: marketbeat.com was used as secondary source for insider trades (ACN, NKE, MSFT) where openinsider.com was down — these are specific and verifiable but from a secondary aggregator not the primary SEC filing source. Score 4.",
+    "relevance": "Every section advances the portfolio review question. The per-stock blocks each end with a decision + concrete entry zone/trigger/stop/target. Tax harvest table directly addresses 'which losses to realize.' Cash deployment plan directly addresses '$26,320 to deploy.' ETF deferral is explicit and appropriate (not avoidance — the skill correctly routes ETF allocation to tradfi-portfolio-manager). SETUP ALERTS translate WATCH/HOLD positions into actionable conditions. No padding or topic drift detected. TOP RECAP opens with the two most time-sensitive actions (ACN EXIT, MRVL TRIM) and the market regime in one sentence. Score 5.",
+    "actionability": "The RECAP table lists 8 specific actions: 4 EXITs (ACN, ORCL, EPAM, TONX), 1 TRIM with share counts (COIN: trim 200-300 shares), and 2 additional TRIMs (MRVL, TSLA) with sizing guidance. Dollar amounts specified for cash deployment (AVGO $2.5k-3.5k, META $5k-8k, MSFT $2.5k-3.5k). SETUP ALERTS have exact daily close price triggers (AVGO >$380, META >$580, MSFT >$400, NEM >$108, NKE >$48, ADBE >$225). Tax harvest table shows specific dollar amounts per position. ACN: 'Exit at market / next open; do not wait for a bounce.' COIN: 'Trim on any intraday bounce above $155.' NKE: 'Do NOT add before earnings Tuesday.' These are all executable without further research. Score 5.",
+    "insight": "Non-trivial synthesis present: (1) COIN trim framed as concentration management (21.5% > 15% cap), NOT a stop-loss decision — the tax harvest is a secondary benefit, not the reason; this distinction matters for the decision. (2) MRVL: both the outgoing CFO ($65M filing) AND the newly-arrived CFO Dan Durn simultaneously distributing is identified as especially bearish — a new executive selling immediately after joining signals they see the peak. (3) ACN RSI 26.69 is deeply oversold — but 'oversold in a downtrend = knife catch, not opportunity' is the correct framing, avoiding the common novice mistake of buying RSI<30. (4) ADBE: new CFO Dan Durn moved from MRVL to ADBE — talent flowing toward ADBE is a subtle positive signal. (5) Iran-Hormuz escalation → explicit CVX/LNG tailwind in the portfolio identified. (6) NKE: distinguishing the CEO buy signal from the separate EVP sell (different executives, different reasoning). Missing relative to Claude.ai's 94: explicit portfolio-level factor correlation analysis (COIN + AI semis + gold all correlated to the same hawkish-Fed/liquidity story — can fall together); no explicit critique of 85-position over-diversification as a structural alpha-dilution problem. Score 4."
+  },
+  "dims": {
+    "comprehensiveness": 5,
+    "groundedness": 4,
+    "citation_quality": 4,
+    "relevance": 5,
+    "actionability": 5,
+    "insight": 4
+  },
+  "failures": {
+    "groundedness": "openinsider.com unreachable (ECONNREFUSED) — primary smart-money source unavailable; fallback to marketbeat/finviz secondary aggregators for insider data on 3/10 deep-dive stocks; Yahoo Finance individual stock news pages returning HTTP 503",
+    "citation_quality": "Smart-money insider data cited from marketbeat.com (secondary aggregator) rather than primary SEC EDGAR filings or openinsider.com; one ADBE narrative source returned 503 (only 1 of 2 required sources fetched for ADBE narrative seat)",
+    "insight": "Missing portfolio-level factor correlation analysis (COIN + AI semis + gold correlated to same Fed/liquidity story — can fall together in a rate-hike scenario); 85-position over-diversification not explicitly flagged as alpha-dilution structural problem"
+  },
+  "mean": 4.5,
+  "score_100": {
+    "data_grounding_25": 20,
+    "factual_accuracy_25": 20,
+    "actionability_20": 20,
+    "risk_honesty_15": 14,
+    "insight_15": 12,
+    "total_100": 86
+  },
+  "score_map_notes": {
+    "data_grounding_25": "groundedness (4) × 5 = 20",
+    "factual_accuracy_25": "citation_quality (4) × 5 = 20",
+    "actionability_20": "actionability (5) × 4 = 20",
+    "risk_honesty_15": "(comprehensiveness 5 + insight 4) / 2 × 3 = 4.5 × 3 = 13.5 → 14",
+    "insight_15": "insight (4) × 3 = 12"
+  }
+}

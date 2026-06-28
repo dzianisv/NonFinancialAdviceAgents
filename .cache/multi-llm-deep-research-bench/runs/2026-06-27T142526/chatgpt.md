@@ -1,0 +1,118 @@
+Skip to content
+Chat history
+New chat
+Library
+Projects
+Apps
+Codex
+More
+Recents
+Portfolio Strategy and Analysis
+Investment Strategy Focus
+NVDA Bull vs Bear Case
+Investment Strategy & Portfolio
+Meaning of USR
+Withdrawal Issue Morpho Vault
+Open source multi-chain wallets
+Cheapest ARM64 VM Hosting
+Postmortem Process Explained
+Tool Comparison Overview
+Den
+Free
+Upgrade
+ChatGPT
+Upgrade
+Share
+Read news. What is financial narrative. What I have to focus to buy now with 1-3 years horizont? What it makes sense to drop from portfolio. I don't want to sell crypto-related stocks, I am bulish on it. Let's focus on large cap stocks to buy if fairly valued now. Let's focus on etf to buy if fairly or undervalued valued now (like VXUS). Or focus on high confidence growth stocks.
+Here is my porfolio
+Position,Quantity,Type,Unrealized_PnL
+COIN,835,Stock,-96484.80
+TONX,1300,Stock,-5540.28
+ACN,39,Stock,-4583.91
+PYPL,185,Stock,-3866.92
+ADBE,28,Stock,-3148.47
+NKE,115,Stock,-3077.49
+META,8,Stock,-1132.60
+MSFT,33,Stock,-1118.00
+CAG,200,Stock,-941.14
+ARE,30,Stock,-906.00
+LYFT,150,Stock,-901.50
+COUR,600,Stock,-879.01
+ORCL,13,Stock,-811.64
+EPAM,10,Stock,-657.40
+CMCSA,150,Stock,-647.61
+FIS,20,Stock,-609.30
+ESTC,20,Stock,-602.00
+GIS,30,Stock,-350.55
+HIMS,50,Stock,-306.35
+KHC,175,Stock,-294.82
+DLB,15,Stock,-261.45
+CVNA,15,Stock,-250.95
+PEP,43,Stock,-239.57
+SOFI,75,Stock,-30.89
+CRCL,20,Stock,-29.10
+VSNT,6,Stock,-20.39
+ROBO,15,ETF,-15.23
+VXUS,15,ETF,-4.95
+MSCI,5,Stock,-2.72
+BTC,0.0168969,Crypto,10.28
+GSY,100,ETF,11.35
+PFE,200,Stock,13.75
+JACK,80,Stock,63.04
+BRK B,9,Stock,86.51
+O,20,Stock,126.96
+SPLV,10,ETF,127.30
+LNG,5,Stock,171.34
+CVX,15,Stock,196.40
+IBKR,2.8856,Stock,203.32
+KO,15,Stock,216.30
+XOM,10,Stock,243.90
+VWO,115,ETF,247.81
+SCHD,50,ETF,275.50
+VTR,15,Stock,304.96
+AMZN,16,Stock,305.27
+BMY,25,Stock,331.31
+DDOG,5,Stock,359.25
+AMD,1,Stock,365.74
+KVUE,100,Stock,388.50
+XLI,15,ETF,444.73
+HRMY,70,Stock,523.70
+AAL,100,Stock,534.73
+AVGO,17,Stock,552.43
+TXN,5,Stock,602.07
+VHT,14,ETF,701.30
+RDDT,30,Stock,781.35
+PSLV,115,ETF,818.73
+ENOR,100,ETF,864.50
+QCOM,39,Stock,1351.44
+OUST,80,Stock,1395.20
+ILF,160,ETF,1836.24
+INTC,20,Stock,1849.95
+HOOD,108,Stock,1920.90
+ASML,2,Stock,1952.93
+XLE,208,ETF,2016.85
+EWZ,278,ETF,2215.10
+GDX,70,ETF,2859.30
+RSP,59,ETF,3256.97
+VEA,165,ETF,3313.42
+TSLA,47,Stock,4052.62
+URNM,431.1294,ETF,5167.20
+PHYS,511,ETF,5557.00
+GOOG,40,Stock,7004.76
+VOO,41,ETF,7024.62
+MRVL,75,Stock,13517.30
+NEM,493,Stock,26681.35
+
+show me table with asset, what to do, reasoning. just for high reasoning.  short. plain english
+Show more
+
+Reuters
++2
+Vanguard Advisors
++2
+Reuters
++2
+Vanguard
++2
+
+ChatGPT can make mistakes. Check important info.

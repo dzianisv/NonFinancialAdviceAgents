@@ -303,6 +303,23 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
 
 ### Prerequisites
 
+- **TradingView Desktop** — required by the `crypto-advisor` skill to pull live chart data (OHLCV, RSI, MACD, Bollinger Bands) via the MCP TradingView server.
+
+  **Install (macOS):**
+  ```bash
+  brew install --cask tradingview
+  ```
+  Or download from: https://www.tradingview.com/desktop/
+
+  **Launch with remote debugging enabled** (required every session before running `/crypto-daily` or `crypto-advisor`):
+  ```bash
+  open -a TradingView --args --remote-debugging-port=9222
+  ```
+
+  Wait ~10 seconds for the splash screen to clear, then run your skill. The MCP server connects to port 9222. If `crypto-advisor` reports "CDP connection failed", TradingView is not running with debugging — re-run the launch command above.
+
+  > **Why this is needed:** The `crypto-advisor` skill reads live chart data (price, RSI, MACD, OHLCV bars, Bollinger Bands) directly from your running TradingView Desktop instance via Chrome DevTools Protocol. There is no API key or cloud alternative — the desktop app is the data source.
+
 - **Python 3** with `yfinance` — used by the data-pulling `.py` scripts bundled in `.agents/skills/` (e.g. `dip_screener.py`, `crypto_dip_scanner.py`, `ledger.py`). Install once: `pip install yfinance`.
 - **Claude Code ≥ v2.1.154** with Dynamic Workflows enabled (`/config`) — required to run `/hedge-fund-committee`, `/research-market`, and the other slash-command workflows.
 - **`opencode-drawer-workflows` plugin (v1.6.0+)** — required to run `.workflow.js` files from OpenCode sessions. Provides tools: `workflow`, `workflow_status`, `workflow_stop`, `workflow_save_run`. Install:

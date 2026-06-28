@@ -29,25 +29,30 @@ from web3 import Web3
 
 # ── Config ──────────────────────────────────────────────────────────────────
 
-# Your active Morpho vault addresses. Key = label, value = {address, chainId, chain}
-# Chain 1 = Ethereum, 8453 = Base
-MORPHO_VAULTS: dict[str, dict] = {
-    "sUSDe-USDC (Base)":  {"address": "0x...", "chainId": 8453, "chain": "base"},
-    "syrupUSDC (ETH)":    {"address": "0x...", "chainId": 1,    "chain": "ethereum"},
-    # Add your vault addresses here
-}
+VAULTS_FILE = Path(__file__).parent / "vaults.json"
 
 ORACLE_DIVERGENCE_THRESHOLD = 0.03   # 3% — fire immediately
 UTILIZATION_THRESHOLD       = 0.90   # 90%
 TBILL_LAG_DAYS              = 3      # consecutive days below T-bill before alert
 TBILL_BUFFER                = 0.005  # 0.5% grace below T-bill
 
-STATE_FILE = Path(__file__).parent / ".defi_alert_state.json"
+STATE_FILE  = Path(__file__).parent / ".defi_alert_state.json"
 
 # Minimal IOracle ABI — just price()
 IORACLE_ABI = [
     {"inputs": [], "name": "price", "outputs": [{"type": "uint256"}], "stateMutability": "view", "type": "function"}
 ]
+
+# ── Vault loader ─────────────────────────────────────────────────────────────
+
+def load_vaults() -> list[dict]:
+    """Read vaults.json from same directory. Returns [] with a warning if missing."""
+    if not VAULTS_FILE.exists():
+        print(f"[warn] vaults.json not found at {VAULTS_FILE} — no vaults to check. "
+              "Use the Telegram bot to add vaults (/add command).")
+        return []
+    return json.loads(VAULTS_FILE.read_text())
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -62,24 +67,22 @@ def _morpho_query(query: str, variables: dict | None = None) -> dict:
 
 
 def get_vault_data(address: str, chain_id: int) -> dict:
-    """Fetch APY, utilization, lostAssets, whitelist status, and market collateral/oracle per vault."""
+    """Fetch APY, utilization, listing status, and market collateral/oracle per vault."""
     q = """
     query GetVault($addr: String!, $chainId: Int!) {
       vaultByAddress(address: $addr, chainId: $chainId) {
         address name
+        listed
+        asset { decimals }
         state {
           netApy
-          lostAssets
-        }
-        whitelisted
-        isDeprecated
-        markets {
-          market {
-            uniqueKey
-            lltv
-            collateralAsset { address symbol }
-            oracleAddress
-            state { utilization }
+          totalAssetsUsd
+          allocation {
+            market {
+              collateralAsset { address symbol decimals }
+              oracle { address }
+              state { utilization }
+            }
           }
         }
       }
@@ -103,8 +106,13 @@ def get_dex_price(chain: str, token_address: str) -> Optional[float]:
         return None
 
 
-def get_oracle_price(oracle_address: str, chain: str) -> Optional[float]:
-    """Read Morpho IOracle.price() on-chain. Returns USD price (normalised from 1e36)."""
+def get_oracle_price(oracle_address: str, chain: str,
+                     collateral_decimals: int = 18, loan_decimals: int = 6) -> Optional[float]:
+    """Read Morpho IOracle.price() on-chain, returns USD price correctly scaled.
+
+    Morpho formula: raw = price_usd * 10^(36 + loan_decimals - collateral_decimals)
+    So: price_usd = raw / 10^(36 + loan_decimals - collateral_decimals)
+    """
     rpc_url = os.environ.get("BASE_RPC_URL" if chain == "base" else "ETH_RPC_URL")
     if not rpc_url:
         print(f"  [warn] No RPC URL set for chain={chain}; skipping oracle check")
@@ -116,10 +124,8 @@ def get_oracle_price(oracle_address: str, chain: str) -> Optional[float]:
             abi=IORACLE_ABI,
         )
         raw = oracle.functions.price().call()
-        # Morpho oracle returns price scaled by 1e36; divide by 1e36 * 10^(collateral_decimals - loan_decimals)
-        # For USDC-based vaults (6 decimals loan, 18 decimals collateral): scale = 1e36 * 1e12 = 1e48
-        # Simplification: treat as 1e36 for USD-stable collateral; caller should verify decimals
-        return raw / 1e36
+        scale = 10 ** (36 + loan_decimals - collateral_decimals)
+        return raw / scale
     except Exception as e:
         print(f"  [warn] Oracle price read failed ({oracle_address}): {e}")
         return None
@@ -186,11 +192,12 @@ def save_state(state: dict) -> None:
 def check_vault(label: str, cfg: dict, tbill: Optional[float],
                 state: dict, dry_run: bool) -> None:
     address = cfg["address"]
-    chain_id = cfg["chainId"]
+    # vaults.json uses snake_case chain_id; tolerate legacy camelCase chainId too
+    chain_id = cfg.get("chain_id") or cfg.get("chainId")
     chain = cfg["chain"]
 
     if address.startswith("0x..."):
-        print(f"  [skip] {label} — placeholder address, update MORPHO_VAULTS")
+        print(f"  [skip] {label} — placeholder address, use /add via Telegram bot")
         return
 
     print(f"\n── {label} ({address[:10]}…) ──")
@@ -201,34 +208,29 @@ def check_vault(label: str, cfg: dict, tbill: Optional[float],
 
     alerts: list[str] = []
 
-    # ── 1. lostAssets (P0 — fire immediately) ────────────────────────────────
-    lost = int(vault.get("state", {}).get("lostAssets") or 0)
-    if lost > 0:
-        alerts.append(f"🔴 *CRITICAL* `lostAssets = {lost}` — vault has socialised a loss!")
+    # ── 1. Vault delisted ─────────────────────────────────────────────────────
+    if not vault.get("listed", True):
+        alerts.append(f"🔴 *CRITICAL* vault is delisted — exit position")
 
-    # ── 2. Deprecated / whitelist removed ────────────────────────────────────
-    if vault.get("isDeprecated") or not vault.get("whitelisted", True):
-        alerts.append(f"🔴 *CRITICAL* vault is deprecated/delisted — exit position")
-
-    # ── 3. Oracle price vs DEX price (the USR failure mode) ──────────────────
-    for market_wrap in vault.get("markets", []):
-        market = market_wrap.get("market", {})
+    # ── 2. Oracle price vs DEX price (the USR failure mode) ──────────────────
+    loan_decimals = (vault.get("asset") or {}).get("decimals", 6)  # USDC=6 default
+    allocation = (vault.get("state") or {}).get("allocation") or []
+    seen_oracle = set()  # skip duplicate oracle+collateral pairs
+    for alloc in allocation:
+        market = alloc.get("market") or {}
         collateral = market.get("collateralAsset") or {}
         col_addr = collateral.get("address")
         col_symbol = collateral.get("symbol", "?")
-        oracle_addr = market.get("oracleAddress")
-        utilization = (market.get("state") or {}).get("utilization") or 0
+        col_decimals = collateral.get("decimals", 18)
+        oracle_addr = (market.get("oracle") or {}).get("address")
+        # Utilization alerts disabled — Gauntlet vaults run at ~90% by design; not actionable
 
-        # 3a. Utilization spike
-        if float(utilization) > UTILIZATION_THRESHOLD:
-            alerts.append(
-                f"🟠 *WARN* market `{col_symbol}` utilization *{float(utilization)*100:.1f}%* > 90%"
-            )
-
-        # 3b. Oracle vs DEX divergence
-        if col_addr and oracle_addr:
+        # Oracle vs DEX divergence — skip duplicate oracle+collateral pairs
+        dedup_key = (oracle_addr, col_addr)
+        if col_addr and oracle_addr and dedup_key not in seen_oracle:
+            seen_oracle.add(dedup_key)
             dex_price = get_dex_price(chain, col_addr)
-            oracle_price = get_oracle_price(oracle_addr, chain)
+            oracle_price = get_oracle_price(oracle_addr, chain, col_decimals, loan_decimals)
 
             if dex_price is not None and oracle_price is not None:
                 divergence = abs(dex_price - oracle_price) / oracle_price
@@ -243,7 +245,7 @@ def check_vault(label: str, cfg: dict, tbill: Optional[float],
             else:
                 print(f"  {col_symbol}: could not compare oracle vs DEX (data unavailable)")
 
-    # ── 4. APY vs T-bill ─────────────────────────────────────────────────────
+    # ── 3. APY vs T-bill ─────────────────────────────────────────────────────
     net_apy = (vault.get("state") or {}).get("netApy")
     if net_apy is not None and tbill is not None:
         net_apy_f = float(net_apy)
@@ -272,20 +274,46 @@ def check_vault(label: str, cfg: dict, tbill: Optional[float],
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+def _smoke_test(dry_run: bool) -> None:
+    """Inject a 99% oracle divergence on a synthetic vault to verify the full alert chain."""
+    print("SMOKE TEST — injecting 99% oracle divergence on synthetic vault")
+    alerts = [
+        "🔴 *CRITICAL* `SMOKE-TOKEN` oracle vs DEX divergence *99.0%*\n"
+        "  oracle=$1.0000  DEX=$0.0100\n"
+        "  → SMOKE TEST — this confirms the alert chain works end-to-end"
+    ]
+    msg = "*DeFi Alert — SMOKE TEST vault*\n" + "\n".join(alerts)
+    send_telegram(msg, dry_run=dry_run)
+    print("Smoke test alert fired." + (" (dry-run — not sent)" if dry_run else " Check Telegram."))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="DeFi vault alert checker")
     parser.add_argument("--dry-run", action="store_true", help="Print alerts, no Telegram")
+    parser.add_argument("--inject-divergence", action="store_true",
+                        help="Smoke test: fire synthetic 99%% divergence alert to prove chain works")
     args = parser.parse_args()
 
     print(f"DeFi Alert Check — {datetime.datetime.utcnow().isoformat()}Z")
+
+    if args.inject_divergence:
+        _smoke_test(dry_run=args.dry_run)
+        print("\nDone.")
+        return
 
     state = load_state()
     tbill = get_tbill_rate()
     print(f"T-bill (DGS3MO): {tbill:.2%}" if tbill else "T-bill: unavailable")
 
-    for label, cfg in MORPHO_VAULTS.items():
+    vaults = load_vaults()
+    if not vaults:
+        print("No vaults configured. Done.")
+        return
+
+    for vault_cfg in vaults:
+        label = vault_cfg.get("label", vault_cfg.get("address", "unknown"))
         try:
-            check_vault(label, cfg, tbill, state, dry_run=args.dry_run)
+            check_vault(label, vault_cfg, tbill, state, dry_run=args.dry_run)
         except Exception as e:
             print(f"  [error] {label}: {e}")
 

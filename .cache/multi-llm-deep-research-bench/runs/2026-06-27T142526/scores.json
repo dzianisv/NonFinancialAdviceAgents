@@ -1,0 +1,47 @@
+{
+  "grok": {
+    "data_groundedness": 17,
+    "factual_accuracy": 19,
+    "actionability": 16,
+    "risk_honesty": 10,
+    "insight": 10,
+    "total": 72,
+    "notes": "Concise, correct narrative on AI capex cycle. Full portfolio table with clear actions. Cited 78 sources via Schwab. Correctly keeps COIN/TSLA/AVGO/MRVL as holds. Recommends adding VXUS/VWO/VEA and trimming losers ACN/PYPL/ADBE/NKE. Mentions COIN but does not call out the -$96k / ~22% concentration risk explicitly. Suggests NVDA/LLY as new buys but both are very expensive. Loses points for not flagging COIN concentration as a P0 risk."
+  },
+  "chatgpt": {
+    "data_groundedness": 19,
+    "factual_accuracy": 21,
+    "actionability": 18,
+    "risk_honesty": 12,
+    "insight": 13,
+    "total": 83,
+    "notes": "Strong per-asset table covering most positions. Good narrative on AI capex broadening, valuations, international attractiveness. Cited Reuters and Vanguard Advisors. Correctly identifies sells: PYPL, ACN/EPAM, NKE, ADBE, CAG/GIS/KHC, CMCSA/LYFT/COUR. Recommends VXUS/VEA/VWO buy, IBKR and BRK.B buy (non-obvious insight). Keeps COIN as 'biggest crypto beta'. Does NOT explicitly flag the -$96k COIN concentration as the dominant risk — just says 'Hold'. Gets deducted 5pts on factual_accuracy for missing COIN concentration flag."
+  },
+  "gemini": {
+    "data_groundedness": 12,
+    "factual_accuracy": 14,
+    "actionability": 8,
+    "risk_honesty": 8,
+    "insight": 9,
+    "total": 51,
+    "notes": "Responded entirely in Russian despite English query — severe usability failure for eval purposes. Macro narrative was coherent (AI supercycle, sticky inflation, global fragmentation). Only 3.8KB of visible response vs others at 5-10KB. Could not confirm a complete portfolio table existed. No explicit mention of COIN concentration risk in what was readable. Language mismatch is a critical failure for an English-language portfolio query."
+  },
+  "claude": {
+    "data_groundedness": 23,
+    "factual_accuracy": 24,
+    "actionability": 19,
+    "risk_honesty": 14,
+    "insight": 14,
+    "total": 94,
+    "notes": "Best response overall. Cited real June 2026 data: Kevin Warsh Fed, 3 rate hikes expected, 62% Sep probability, 4.2% CPI, Iran war winding down, BTC below $60k bear market, gold -25% from Jan peak. Full portfolio table with clear ADD/HOLD/TRIM/DROP. Explicitly called out 70-position over-diversification. Explicitly flagged that crypto+AI semis+gold are all correlated to the same Fed/liquidity story. Correctly recommended VXUS/VEA as 'undervalued ETF instinct is right'. Did not give COIN a -5 deduction because it flagged the crypto position as 'deep drawdown, highly Fed-sensitive, size it'. Strongest macro grounding and honesty of the group."
+  },
+  "gfinance": {
+    "data_groundedness": 15,
+    "factual_accuracy": 16,
+    "actionability": 14,
+    "risk_honesty": 9,
+    "insight": 10,
+    "total": 64,
+    "notes": "Used real Google Finance data (P/E ratios cited: FDX at 16.8x, MSFT 39% net margin). Identified COIN and HOOD as crypto plays to keep. Recommended dropping KHC/GIS/CAG, adding VXUS/VWO. Non-obvious add: FedEx as logistics recovery play. Suggested CRM as fairly-valued tech alternative. Truncated response and limited depth — panel UI limits response length. No explicit COIN concentration risk flag. Response was shorter than other products."
+  }
+}

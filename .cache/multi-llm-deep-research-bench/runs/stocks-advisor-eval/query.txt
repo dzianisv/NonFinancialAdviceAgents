@@ -1,0 +1,11 @@
+QUERY: stocks-advisor portfolio review
+
+Holdings: https://docs.google.com/spreadsheets/d/1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8/edit?gid=1914937017
+Tab: IBKR
+Cash to deploy: $26,320
+Focus: portfolio review — HOLD/ADD/TRIM/EXIT per position
+
+Context: ~$578k equity across 85 positions (+ ~$519k in money market funds VUSXX/VMRXX + $71k cash).
+Dominant position: COIN 835 shares, 21.5% of equity book, -$95,880 unrealized loss.
+This is the same portfolio reviewed by Claude.ai (Opus 4.8), ChatGPT (free), Grok (Fast), Google Finance Beta, and Gemini 3.1 Pro in the multi-LLM benchmark on 2026-06-27.
+The agentic stocks-advisor skill uses: TradingView MCP (live RSI/MACD/BB), yfinance fundamentals.py, web_fetch news, 5-seat analyst panel per stock.

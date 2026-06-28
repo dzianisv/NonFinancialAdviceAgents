@@ -1,0 +1,70 @@
+{
+  "label": "stocks-advisor-agentic-v2",
+  "query": "Portfolio review: HOLD/ADD/TRIM/EXIT per position, $26,320 cash to deploy. ~$578k equity, 85 IBKR positions.",
+  "mode": "agentic v2 (TradingView MCP + yfinance + web_fetch + 5-seat panel + macro-regime synthesis + portfolio-synthesis seat)",
+  "improvements_tested": ["step-0.9-macro-regime", "step-4-portfolio-synthesis", "inline-citations-reinforced"],
+  "reasoning": {
+    "comprehensiveness": "v2 preserves all v1 sections and adds two new structural sections (MACRO REGIME and PORTFOLIO SYNTHESIS). The report now covers all required sub-questions: HOLD/ADD/TRIM/EXIT for all 85 positions, tax harvest table, cash deployment plan, SETUP ALERTS, TOP RECAP, RECAP table, SOURCES & DATA appendix, AND a dedicated 5-sentence macro-regime paragraph, AND a 5-sub-section portfolio-synthesis analysis. No sub-question missing. Score 5 (unchanged from v1).",
+    "groundedness": "v1 scored 4 for two reasons: (1) openinsider.com ECONNREFUSED forcing secondary aggregators for smart-money data, and (2) macro narrative not synthesized into a crisp named-fact statement. The v2 directly addresses reason (2) with the MACRO REGIME paragraph: 5 sentences, each with a named source and a dateable fact — FT (Jun 27) on hawkish Fed chair, WSJ (Jun 27) on S&P 500 longest losing streak in 10 months, WSJ/WSJ (Jun 26) on oil above $70 and gold -3.44%, FT (Jun 28) on Hormuz mines restricting shipping to half prewar levels, FT (Jun 26) on SpaceX bonds selling to junk-grade yields. The macro narrative grounding gap cited in the comparison analysis ('the skill did not synthesize these into the same crisp macro-regime statement that Claude.ai delivered') is directly closed. The openinsider issue persists for per-stock smart-money data, but the macro grounding improvement is material. v1 score: 4 — v2 score: 5 — Change: +1. Reason for change: formal macro-regime paragraph with 5 named dateable facts from live WSJ/FT feeds closes the macro narrative gap.",
+    "citation_quality": "v1 scored 4 because smart-money insider data used marketbeat.com/finviz (secondary aggregators) where openinsider.com was unreachable, and ADBE had only 1 of 2 required narrative sources. The v2 adds 5 new source URLs (T12-T16) to the SOURCES & DATA appendix (11 → 16 sources), and the macro-regime paragraph has 5 inline citations with exact dates and URLs. However, the per-stock smart-money citations for MRVL, ACN, NKE, MSFT remain from secondary aggregators — this is a structural issue from the original run that the v2 section additions do not fix. The macro section citations are strong (primary sources: WSJ, FT with specific article URLs and dates), but they address a different dimension than the stated citation failure (which was specifically about insider data sourcing). The overall citation quality improves but the primary stated failure persists. v1 score: 4 — v2 score: 4 — Change: 0. Reason for no change: the macro section adds primary-source inline citations (meaningful improvement), but the core citation quality deficiency (secondary aggregator for smart-money data on 3-4 stocks) is structurally unchanged in the per-stock blocks.",
+    "relevance": "Every section advances the portfolio review question. The two new sections (macro-regime, portfolio-synthesis) are both directly portfolio-relevant — the macro regime informs all ADD/TRIM decisions, and the portfolio-synthesis seat identifies the 44% Fed/Liquidity concentration risk which is the most actionable structural finding. No padding. Score 5 (unchanged from v1).",
+    "actionability": "The v2 adds no new action items beyond v1 (the per-stock verdicts are unchanged). However, the portfolio-synthesis Cash Deployment Priority section reinforces the ADD sequence (AVGO first, META second, MSFT third) with portfolio-level justification, and the Portfolio Structure Verdict makes the COIN TRIM the single most-prioritized action. The actionability of the report is unchanged but better-justified. Score 5 (unchanged from v1).",
+    "insight": "v1 scored 4 with the explicit gap: 'Missing portfolio-level factor correlation analysis (COIN + AI semis + gold correlated to same Fed/liquidity story); 85-position over-diversification not explicitly flagged as alpha-dilution structural problem.' The v2 Portfolio Synthesis section directly closes BOTH gaps: (1) Factor Correlation Map groups holdings by primary risk factor and identifies that 44% of equity is in a single Fed/Liquidity bucket — COIN (21.5%) + MRVL (3.5%) + TSLA (3.1%) + MSFT (2.1%) + NEM (8.2%, partial) + AVGO (1.1%) + META (0.8%) + HOOD (~1.8%) + RDDT (~0.9%); (2) Over-Diversification Critique explicitly calls out 12 positions under $2,000 MV, names them, and recommends concentrating from 85 to 30–35 names as the structural fix; (3) Cross-Position Conflicts analysis correctly identifies that ADD META / TRIM MRVL is a quality rotation within the same factor bucket, not a conflict; (4) Portfolio Structure Verdict names COIN trim as the single action that reduces structural risk most. All four of the specific missing insight elements from the v1 scoring are now present. v1 score: 4 — v2 score: 5 — Change: +1. Reason for change: portfolio-synthesis seat directly closes both stated gaps (factor correlation analysis + over-diversification critique)."
+  },
+  "dims": {
+    "comprehensiveness": 5,
+    "groundedness": 5,
+    "citation_quality": 4,
+    "relevance": 5,
+    "actionability": 5,
+    "insight": 5
+  },
+  "failures": {
+    "citation_quality": "Smart-money insider data (MRVL CFO filing, ACN C-suite selling, NKE CEO buy) still cited from finviz/marketbeat secondary aggregators — openinsider.com was down during the original run and v2 improvements (macro section, portfolio-synthesis section) add new inline citations but do not retroactively fix the per-stock smart-money citation sourcing"
+  },
+  "mean": 4.83,
+  "score_100": {
+    "data_grounding_25": 25,
+    "factual_accuracy_25": 20,
+    "actionability_20": 20,
+    "risk_honesty_15": 15,
+    "insight_15": 15,
+    "total_100": 95
+  },
+  "score_map_notes": {
+    "data_grounding_25": "groundedness (5) × 5 = 25 (+5 from v1's 20)",
+    "factual_accuracy_25": "citation_quality (4) × 5 = 20 (unchanged from v1)",
+    "actionability_20": "actionability (5) × 4 = 20 (unchanged from v1)",
+    "risk_honesty_15": "(comprehensiveness 5 + insight 5) / 2 × 3 = 5.0 × 3 = 15 (+1 from v1's 13.5→14)",
+    "insight_15": "insight (5) × 3 = 15 (+3 from v1's 12)"
+  },
+  "v1_comparison": {
+    "v1_total": 86,
+    "v2_total": 95,
+    "delta": 9,
+    "claude_ai_benchmark": 94,
+    "gap_vs_claude": -1,
+    "gap_closed_pct": "112%",
+    "result": "v2 surpasses Claude.ai benchmark by 1 point (95 vs 94)"
+  },
+  "improvement_attribution": {
+    "step_0.9_macro_regime": {
+      "affected_dims": ["groundedness"],
+      "groundedness_change": "+1 (4→5)",
+      "score_impact": "+5 pts (data_grounding_25: 20→25)",
+      "evidence": "5 named dateable facts from live WSJ/FT feeds: hawkish Fed chair (FT Jun 27), longest losing streak in 10 months (WSJ Jun 27 / FT Jun 26), oil above $70 + gold -3.44% (WSJ Jun 26), Hormuz mines restricting shipping to half capacity for months (FT Jun 28), SpaceX bonds at junk yields (FT Jun 26)"
+    },
+    "step_4_portfolio_synthesis": {
+      "affected_dims": ["insight", "risk_honesty_15"],
+      "insight_change": "+1 (4→5)",
+      "score_impact": "+4 pts (insight_15: 12→15 = +3; risk_honesty_15: 14→15 = +1)",
+      "evidence": "Factor correlation map identifies 44% Fed/Liquidity concentration (>25% threshold); over-diversification critique names 12 positions under $2k and recommends 85→30-35 consolidation; cross-position conflict analysis; single-action portfolio structure verdict"
+    },
+    "inline_citations_reinforced": {
+      "affected_dims": ["citation_quality"],
+      "citation_quality_change": "0 (4→4) — citations added in new sections but primary per-stock smart-money citation failure is structural and unchanged",
+      "score_impact": "0 pts",
+      "evidence": "Macro section adds 5 new inline citations (T12-T16); sources appendix grows 11→16 URLs; but finviz/marketbeat secondary aggregator issue for insider data on MRVL/ACN/NKE remains unchanged in per-stock blocks"
+    }
+  }
+}

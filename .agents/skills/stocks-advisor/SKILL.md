@@ -99,11 +99,16 @@ From the `fundamental-analysis` skill, on full-history backtests of the investab
 vs SPY: **only 1 of 10 methods beat SPY on return (momentum); 0 of 10 beat it on Sharpe — including the ETF
 that implements Morningstar's own stock-picking.** Single-stock selection is a low-base-rate bet. So:
 - Single names are **satellites**, the index is the **core and the bar**.
+
+> Source: Carver, *Systematic Trading*, Ch.2 — single-equity Sharpe ratio ≈ 0.15; a diversified equity index SR ≈ 0.20; each additional uncorrelated instrument raises the portfolio Sharpe; individual stock selection is structurally at a disadvantage to indexing on a risk-adjusted basis.
+
 - A passing panel is a **hypothesis**, not validated alpha. TA setups are **hypothesis generation** —
   validate any mechanical rule with `strategy-discovery-backtest` (full costs, walk-forward) before risking
   real capital.
 - yfinance fundamentals are **point-in-time UNSAFE** (today's numbers) — fine for *current* entry analysis,
   never for backtesting a screen.
+
+> Source: Housel, *Psychology of Money*, Ch.1 — "doing well with money has a little to do with how smart you are and a lot to do with how you behave"; systematic checklists and fixed decision rules enforce the behavioral discipline that discretionary portfolios consistently lack.
 
 ---
 
@@ -237,6 +242,9 @@ Call `tradingview-tv_health_check` ONCE before the loop.
     `52w_high/low`, `dd_from_52wh`.
   - RSI / Bollinger / MACD = **UNAVAILABLE** — do not guess them. Technical STATE collapses to
     `{ABOVE_TREND, BELOW_TREND, UNKNOWN}` (above/below the 200d).
+
+> Source: Carver, *Systematic Trading*, Ch.7 (Forecasts / EWMAC) — exponentially weighted moving average crossovers are the primary evidence-based trend-following rule class; above/below a long-period MA is the simplest valid trend-state signal, grounded in the same prospect-theory behavioral rationale as all trend following.
+
   - No live bar-close trigger is computable → every name is **WATCH-only, never BUY**; entry zones come from
     MA levels.
   - Skip `capture_screenshot`; the screenshot self-check item does NOT apply in this mode.
@@ -292,6 +300,8 @@ MACRO REGIME — {DATE}
 4. Geopolitics/exogenous: [the single most market-relevant geopolitical fact this week, named]
 5. Liquidity/risk appetite: [equity market trend + vol signal, e.g. "VIX at 18, Nasdaq -3% week"]
 ```
+
+> Source: Howell, *Capital Wars*, Preface — "economic cycles are driven by financial flows, namely quantities of savings and credits, and not by high street inflation or the level of interest rates"; Global Liquidity ($130 trillion pool of footloose capital) is the dominant driver of asset-price booms and busts; Fed/rates matter primarily through their effect on liquidity supply, not through the cost-of-capital channel alone.
 
 **Anti-hallucination rule:** every sentence names a source and a specific, dateable fact — none from memory.
 If a dimension has no data from the feeds this run, write "No live signal for [dimension] this run."
@@ -369,9 +379,13 @@ peg_ratio, revenue_growth, earnings_growth, gross_margin, operating_margin, fcf,
 short_percent, institutional_pct, recommendation_mean, analyst_count, dd_from_52wh, vs_200d_ma, vs_50d_ma.
 Any field yfinance lacks is `null` — never fill a null with a guess.
 
+> Source: Graham, *The Intelligent Investor*, Ch.14 — defensive investor screen: fwdPE ≤ 15 and price-to-book ≤ 1.5; margin of safety is the gap between price and intrinsic value. Lynch, *One Up on Wall Street* — PEG < 1.0 = undervalued growth; FCF yield threshold: Portfolio heuristic — positive FCF is the prerequisite for compounding without dilution. Institutional ownership (`institutional_pct`): Portfolio heuristic derived from 13F flow literature; high institutional concentration signals crowding risk (see conviction rules).
+
 **1c. Assemble the data package** by merging the TradingView study values (RSI, BB, MACD, Volume, 52w hi/lo
 from `summary=true`, the daily/weekly close arrays) with the full `fundamentals.py` JSON. This single package
 is what every seat receives — seats add nothing to it except the narrative seat's fetched news.
+
+> Source: Wilder, *New Concepts in Technical Trading Systems* (1978) — RSI(14) is the original specification; readings < 30 = oversold, > 70 = overbought as sentiment extremes, not automatic reversal signals. Appel (MACD inventor, 1979) — MACD(12,26,9) crossover signals momentum regime change. Bernstein, *Ultimate Day Trader*, Ch.9 — MACD and Momentum are listed as key Trigger tools within the STF framework; use in conjunction with a Setup, never in isolation.
 
 **Cache the data package:**
 ```bash
@@ -395,6 +409,8 @@ reads ONE lens and returns the fixed shape below. Seats share nothing, so they r
 > news + run paywall-free feed scripts (`feeds/wsj.ts`/`feeds/ft.ts`); the **smart-money seat** may web_fetch
 > disclosed-flow sources (openinsider.com, 13f.info, EDGAR, capitoltrades.com). All other seats: injected
 > data only.
+
+> Source: Surowiecki, *The Wisdom of Crowds* (2004) — independent assessments from multiple expert perspectives, aggregated without anchoring to each other's views, consistently outperform single-expert forecasts; the 5-seat structure enforces independence by design (seats share data but never see each other's verdicts before returning their own).
 
 | Seat | Lens file (read ONLY this) | Output shape |
 |---|---|---|
@@ -458,10 +474,14 @@ Tie-break / precedence: **SKIP dominates** (any single SKIP trigger forces SKIP)
 **technical trigger** decides — *no trigger, no trade* (Bernstein). A strong fundamental with no bar-close
 trigger is always a WATCH, never a BUY.
 
+> Source: Bernstein, *Ultimate Day Trader*, Ch.3 (Set-Up→Trigger→Follow-Through) — a Setup pattern alone is not an entry signal; a Trigger — a specific completed-bar confirmation event — must verify the market is moving as the Setup predicts before any entry is taken; without confirmation, the setup is a hypothesis, not a trade.
+
 **Conviction (1–5):** start at 3. +1 if ≥3 seats align; +1 if EARLY_CYCLE with QUIET_ACCUM positioning;
 −1 if Sentiment CROWDED; −1 if PEG > 2 or negative FCF yield; −1 if LATE_CYCLE; +1 if Smart-money
 ACCUMULATING with ≥2 other seats aligned; −1 if Smart-money DISTRIBUTING (also caps any BUY conviction at 3/5
 — insiders/institutions distributing is a hard ceiling). Clamp to 1–5.
+
+> Source: Lynch, *One Up on Wall Street* — PEG < 1.0 signals undervalued growth; PEG > 2 implies price has outrun projected earnings (basis for the −1 penalty). Carver, *Systematic Trading*, Ch.2 — "crowded trades are deadly"; when the majority of participants share the same position, forced liquidations create abrupt reversals (basis for CROWDED −1). Smart-money modifier: Portfolio heuristic derived from 13F/Form-4 institutional-flow literature; no single academic study establishes the exact conviction weights used here.
 
 **Smart-money is a conviction modifier, not a primary driver.** Seat 5 never sets BUY/WATCH/SKIP — the table
 above governs the decision. Its only effect is on conviction (per the rules above).
@@ -479,6 +499,8 @@ When positions are loaded with cost basis, map seat votes to HOLD/ADD/TRIM/EXIT 
 | **TRIM** | Position weight > concentration cap (default >15% of book) **OR** Sentiment EXTREME **OR** LATE_CYCLE while extended. Trim to target weight; thesis may still be intact. |
 | **ADD** | The BUY gate (Fundamental ≥ GOOD, Technical SETUP_NAMED with live trigger, Narrative EARLY/MID, Sentiment ≠ EXTREME) is met **AND** current weight < cap. (BUY-equivalent, sized as an add.) |
 | **HOLD** | Thesis intact (Fundamental ≥ FAIR, not FADING) but no add trigger or already at target weight. |
+
+> Source: Carver, *Systematic Trading*, Ch.4 (Portfolio Allocation) — equal instrument weights for a 16-asset portfolio imply 6.25% each; a 15% single-position ceiling (~2× the equal-weight allocation) caps idiosyncratic drawdown without requiring full exit. Stop placement from market structure: Carver Ch.7 & Bernstein Ch.3 — stops must be derived from price volatility and market structure, never from account size or arbitrary dollar amounts.
 
 (LATE_CYCLE → TRIM here, not EXIT: with cost basis and an intact thesis, reduce rather than fully exit —
 unlike the no-position SKIP.)
@@ -637,6 +659,8 @@ Produce a portfolio synthesis with EXACTLY these five sections, in order:
    — each name must earn its place or become index." List positions that are index-like (correlation > 0.85
    to SPY, market cap > $500B) and could be replaced with VOO for lower cost and less monitoring overhead.
 
+> Source: Carver, *Systematic Trading*, Ch.2 & Ch.6 — "the law of active management shows diversification is the best source of additional risk-adjusted returns"; beyond ~20 uncorrelated instruments, marginal diversification benefit falls sharply; very large equity-only books approximate the index, making passive ETFs a cheaper substitute for index-like names.
+
 3. CROSS-POSITION CONFLICTS
    Identify pairs where one seat says ADD and another says TRIM on names sharing the same factor exposure —
    these conflict at the portfolio level even if individually correct.
@@ -648,6 +672,8 @@ Produce a portfolio synthesis with EXACTLY these five sections, in order:
 5. CASH DEPLOYMENT PRIORITY
    Given the per-stock ADD verdicts and cash available ($CASH), rank ADD candidates by portfolio-level fit
    (fills a gap, reduces concentration, best risk:reward). Maximum 3 names.
+
+> Source: Carver, *Systematic Trading*, Ch.9 (Volatility Targeting) — "positions should be sized based on how volatile markets are, how confident your price forecasts are, and the amount of capital you wish to gamble"; staged entry (tranching cash into ranked ADD candidates) is the practical implementation of volatility-scaled position building. George (2004), *52-Week High and Momentum* — proximity to the 52-week high is a positive momentum predictor; used here as a tie-breaker when ranking ADD candidates by technical strength.
 
 Do NOT re-analyze individual stocks — the per-stock panels already did that. Reason ACROSS positions and
 surface what the per-stock loop structurally cannot see.

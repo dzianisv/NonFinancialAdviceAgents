@@ -1,0 +1,97 @@
+[
+  {
+    "label": "Maple syrupUSDC",
+    "wallet": "L3",
+    "chain": "eth",
+    "share": "0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b",
+    "deposited": {
+      "USDC": 9005.84
+    },
+    "withdrawn": {},
+    "first_deposit": "2026-01-03T10:08:11.000000Z",
+    "share_in": 7865.339592,
+    "share_out": 0.0
+  },
+  {
+    "label": "Maple syrupUSDC",
+    "wallet": "B3",
+    "chain": "eth",
+    "share": "0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b",
+    "deposited": {
+      "USDC": 8223.103894
+    },
+    "withdrawn": {},
+    "first_deposit": "2025-11-01T11:44:47.000000Z",
+    "share_in": 7223.592675,
+    "share_out": 0.0
+  },
+  {
+    "label": "Fluid fUSDT",
+    "wallet": "B3",
+    "chain": "eth",
+    "share": "0x5C20B550819128074FD538Edf79791733ccEdd18",
+    "deposited": {
+      "USDT": 15633.000156
+    },
+    "withdrawn": {},
+    "first_deposit": "2026-06-25T05:53:47.000000Z",
+    "share_in": 13108.062501,
+    "share_out": 0.0
+  },
+  {
+    "label": "Avantis Jr USDC",
+    "wallet": "B3",
+    "chain": "base",
+    "share": "0x944766f715b51967E56aFdE5f0Aa76cEaCc9E7f9",
+    "deposited": {
+      "USDC": 1000.0
+    },
+    "withdrawn": {},
+    "first_deposit": "2025-10-24T13:07:15.000000Z",
+    "share_in": 781.080066,
+    "share_out": 0.0
+  },
+  {
+    "label": "sUSDe (Ethena)",
+    "wallet": "L3",
+    "chain": "eth",
+    "share": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+    "deposited": {
+      "USDe": 2886.631545031365
+    },
+    "withdrawn": {},
+    "first_deposit": "2026-01-04T17:43:47.000000Z",
+    "share_in": 2376.837986912497,
+    "share_out": 0.0
+  },
+  {
+    "label": "eUSD/meUSD idle",
+    "wallet": "L3",
+    "chain": "base",
+    "share": "0xbb819D845b573B5D7C538F5b85057160cfb5f313",
+    "deposited": {
+      "eUSD": 6070.756921452016
+    },
+    "withdrawn": {
+      "eUSD": 6208.98822240393
+    },
+    "first_deposit": "2025-02-14T22:47:41.000000Z",
+    "share_in": 5984.785155723108,
+    "share_out": 5984.785155723108
+  },
+  {
+    "label": "eUSD/meUSD idle",
+    "wallet": "L1",
+    "chain": "base",
+    "share": "0xbb819D845b573B5D7C538F5b85057160cfb5f313",
+    "deposited": {
+      "eUSD": 2805.9655098822714
+    },
+    "withdrawn": {
+      "eUSD": 2842.0171311500044
+    },
+    "first_deposit": "2025-09-12T11:41:15.000000Z",
+    "share_in": 2739.3934936845494,
+    "share_out": 2739.3934936845494
+  }
+]
