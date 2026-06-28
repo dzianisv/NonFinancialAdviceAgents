@@ -157,11 +157,13 @@ echo "Artifacts: $RUN_DIR"
 
 ---
 
-## Step 1 — Sequential per-token loop (orchestrator only; do NOT parallelize the data pull)
+## Step 1 — Sequential per-token loop
 
 Pick the next `pending` todo, `UPDATE todos SET status='in_progress'`, then for that token:
 
-**1a. Pull TradingView data (MCP, this session).** Call `tradingview-chart_get_state` and inspect `studies`. **Add a study only if its name is NOT already present** — a duplicate pushes a second identical series and produces duplicate rows in `data_get_study_values`. Remove extras with `chart_manage_indicator action=remove`. Required studies (add only if absent): **Relative Strength Index**, **Bollinger Bands**, **MACD**. Do NOT add length-N EMAs (length input ignored — constraint 3). Volume is always present.
+> **Why sequential here:** TradingView MCP uses a single shared chart slot — two tokens cannot be pulled at once. Steps 1a–1c are the **Trend seat pre-fetch only** — the CIO pulls this data because TradingView MCP tools are unavailable inside subagents. No other seat receives or needs this data.
+
+**1a. Pull TradingView data — for the Trend seat.** Call `tradingview-chart_get_state` and inspect `studies`. **Add a study only if its name is NOT already present** — a duplicate pushes a second identical series and produces duplicate rows in `data_get_study_values`. Remove extras with `chart_manage_indicator action=remove`. Required studies (add only if absent): **Relative Strength Index**, **Bollinger Bands**, **MACD**. Do NOT add length-N EMAs (length input ignored — constraint 3). Volume is always present.
 
 ```
 tradingview-chart_get_state                                → inspect studies list; deduplicate before proceeding
@@ -176,7 +178,7 @@ tradingview-chart_set_timeframe  timeframe="D"             → reset to daily
 tradingview-capture_screenshot                             → save screenshot; then call view tool on the returned file_path to embed the image inline in your reply for this token
 ```
 
-**1b. Read indicators from TradingView; compute only the moving averages.** Take RSI(14), Bollinger(20,2), MACD line/signal/hist, Volume from `data_get_study_values` verbatim; 52w high/low + avg volume from the daily `summary=true` pull. Then fill the MA gap:
+**1b. Compute moving averages for Trend seat — from TradingView closes.** Take RSI(14), Bollinger(20,2), MACD line/signal/hist, Volume from `data_get_study_values` verbatim; 52w high/low + avg volume from the daily `summary=true` pull. Then fill the MA gap:
 ```bash
 /Users/engineer/.venv/bin/python3 .agents/skills/crypto-advisor/scripts/indicators.py /tmp/{TOKEN}.json
 ```
@@ -196,14 +198,14 @@ If `weekly_closes >= 200`: compute 200wMA normally; proceed without restriction.
 
 If a TradingView fallback was used (e.g. coingecko prices), tag every MA field: `[fallback: coingecko]`.
 
-**1c. Assemble the data package** — merge the TradingView study values (RSI, BB, MACD, Volume, 52w hi/lo) with the helper's MA block: price, %from-52wh, EMA20, SMA50, SMA200, death_cross, RSI, MACD line/signal/hist, BB upper/mid/lower + position, volume vs 30d avg, 200-week MA + %vs it. Cache it:
+**1c. Assemble the Trend seat package** — merge TradingView study values (RSI, BB, MACD, Volume, 52w hi/lo) with the MA block: price, %from-52wh, EMA20, SMA50, SMA200, death_cross, RSI, MACD line/signal/hist, BB upper/mid/lower + position, volume vs 30d avg, 200-week MA + %vs it. This package goes to the Trend seat only. Cache it:
 ```bash
 mkdir -p "$RUN_DIR/{TOKEN}"
 python3 -c "
 import json, sys
 pkg = sys.argv[1]
-open('$RUN_DIR/{TOKEN}/data_package.json', 'w').write(pkg)
-" "$DATA_PACKAGE_JSON"
+open('$RUN_DIR/{TOKEN}/seat_trend_input.json', 'w').write(pkg)
+" "$TREND_PACKAGE_JSON"
 ```
 
 **1d. Run the 5-seat quorum — each seat owns its own data.** Spawn all five seats **in parallel** (seats share nothing). Only the Trend seat receives the TradingView package (subagents cannot access MCP tools). All other seats receive only `{ token, price_usd }` and are responsible for fetching their own data.
