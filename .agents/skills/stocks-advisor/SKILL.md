@@ -433,10 +433,24 @@ echo '{smart_money_json}'     > "$RUN_DIR/{TICKER}/seat_smart_money.json"
 ```
 Each seat JSON must include at minimum `{verdict, conviction, key_metric, blind_spot, sources:[]}`.
 
+**After all 5 seats return:** proceed to Step 2 (SKEPTIC) → Step 2.5 (CIO SYNTHESIS) → Step 2.7 (RISK
+MANAGER, BUY/ADD only). The per-seat data feeds the Skeptic; Skeptic output feeds the CIO; CIO verdict feeds
+the Risk Manager. The hierarchy is sequential by design — do not skip ahead.
+
 **1e. Persist the seat verdicts and decision:**
+
+After Step 2.7 completes (or Step 2.5 for non-BUY/ADD tickers), the final verdict is available.
+
 ```sql
+-- Add new columns if not present (idempotent)
+ALTER TABLE stock_analysis ADD COLUMN skeptic TEXT;    -- 2>/dev/null || true
+ALTER TABLE stock_analysis ADD COLUMN cio_memo TEXT;   -- 2>/dev/null || true
+ALTER TABLE stock_analysis ADD COLUMN dissent TEXT;    -- 2>/dev/null || true
+ALTER TABLE stock_analysis ADD COLUMN risk_status TEXT;-- 2>/dev/null || true
+
 UPDATE stock_analysis SET company=?, theme=?, theme_phase=?, fundamental=?, technical=?,
-  narrative=?, sentiment=?, smartmoney=?, decision=?, entry_low=?, entry_high=?, trigger=?, stop=?, target=?,
+  narrative=?, sentiment=?, smartmoney=?, skeptic=?, cio_memo=?, dissent=?, risk_status=?,
+  decision=?, entry_low=?, entry_high=?, trigger=?, stop=?, target=?,
   conviction=?, status='done' WHERE symbol=?;
 UPDATE todos SET status='done' WHERE id='stk-{TICKER}';
 ```
@@ -444,7 +458,8 @@ UPDATE todos SET status='done' WHERE id='stk-{TICKER}';
 **Cache the verdict:**
 ```bash
 echo '{verdict_json}' > "$RUN_DIR/{TICKER}/verdict.json"
-# verdict_json = {decision, entry_low, entry_high, trigger, stop, target, conviction, theme, invalidation}
+# verdict_json = {decision, entry_low, entry_high, trigger, stop, target, conviction, theme,
+#                invalidation[3], dissent, cio_memo, risk_status, risk_position_size}
 ```
 
 **1f. Repeat** for the next `pending` todo until none remain.
@@ -462,52 +477,103 @@ bun .agents/skills/portfolio-memory/remember.ts \
 
 ---
 
-## Step 2 — Verdict decision table (seat votes → BUY / WATCH / SKIP)
+## Step 2 — SKEPTIC (subagent — spawn after all 5 seat verdicts for this ticker return)
 
-| Decision | Condition |
-|---|---|
-| **BUY** | Fundamental ≥ GOOD **AND** Technical = SETUP_NAMED (named setup + live trigger) **AND** Narrative phase ∈ {EARLY_CYCLE, MID_CYCLE} **AND** Sentiment ≠ EXTREME |
-| **WATCH** | Fundamental ≥ GOOD **but** Technical = NO_SETUP (no trigger yet) — the entry is not here yet; wait for the trigger |
-| **SKIP** | Fundamental = POOR **OR** Narrative phase ∈ {LATE_CYCLE, FADING} **OR** Technical = BROKEN (below 200d, no base, no setup) |
+The analyst panel is the proposal. The Skeptic is the mandatory institutional adversary — assigned, not
+volunteer. It runs on every ticker regardless of how bullish the panel looks. Never skip this step. Spawn
+as a subagent (`/model sonnet /effort high`).
 
-Tie-break / precedence: **SKIP dominates** (any single SKIP trigger forces SKIP). Between BUY and WATCH, the
-**technical trigger** decides — *no trigger, no trade* (Bernstein). A strong fundamental with no bar-close
-trigger is always a WATCH, never a BUY.
+**Skeptic subagent prompt — inject verbatim, fill `{placeholders}`:**
 
-> Source: Bernstein, *Ultimate Day Trader*, Ch.3 (Set-Up→Trigger→Follow-Through) — a Setup pattern alone is not an entry signal; a Trigger — a specific completed-bar confirmation event — must verify the market is moving as the Setup predicts before any entry is taken; without confirmation, the setup is a hypothesis, not a trade.
+```
+You are the Skeptic for {TICKER}. Your role is mandatory: find the strongest case AGAINST the consensus, even if you privately agree with the analysts.
 
-**Conviction (1–5):** start at 3. +1 if ≥3 seats align; +1 if EARLY_CYCLE with QUIET_ACCUM positioning;
-−1 if Sentiment CROWDED; −1 if PEG > 2 or negative FCF yield; −1 if LATE_CYCLE; +1 if Smart-money
-ACCUMULATING with ≥2 other seats aligned; −1 if Smart-money DISTRIBUTING (also caps any BUY conviction at 3/5
-— insiders/institutions distributing is a hard ceiling). Clamp to 1–5.
+GAP ANALYSIS: Name the single biggest blind spot across all 5 analyst verdicts — data they had but underweighted, or a dimension none of them checked.
+TAIL RISK: Name one specific, non-generic downside scenario. Assign a probability (1–15%) and the expected loss magnitude if it fires. No generics like "macro deterioration."
+HISTORICAL ANALOG: One real failed trade with a structurally identical setup — same thesis type, same narrative phase, same sentiment read. Exact company, year, outcome. No fabricated cases.
 
-> Source: Lynch, *One Up on Wall Street* — PEG < 1.0 signals undervalued growth; PEG > 2 implies price has outrun projected earnings (basis for the −1 penalty). Carver, *Systematic Trading*, Ch.2 — "crowded trades are deadly"; when the majority of participants share the same position, forced liquidations create abrupt reversals (basis for CROWDED −1). Smart-money modifier: Portfolio heuristic derived from 13F/Form-4 institutional-flow literature; no single academic study establishes the exact conviction weights used here.
+INVALIDATION CONDITIONS (all three required before any BUY advances):
+  (a) {falsifiable condition — a specific price level, ratio, or filing event that proves the thesis wrong}
+  (b) {falsifiable condition 2}
+  (c) {falsifiable condition 3}
 
-**Smart-money is a conviction modifier, not a primary driver.** Seat 5 never sets BUY/WATCH/SKIP — the table
-above governs the decision. Its only effect is on conviction (per the rules above).
+SKEPTIC VERDICT: {SKIP | WATCH | BUY} — {one sentence explaining the controlling factor}
+Inputs: {ALL_5_SEAT_VERDICTS_JSON} | {MACRO_REGIME}
+```
 
-**A WATCH verdict is an alert trigger** — "good company, wrong price; buy near $X / when RSI < V" is exactly
-when to register a notify-me job carrying the entry thesis via the **`mkt`** skill (see *Set a buy-alert*).
+Cache output: `echo '{skeptic_json}' > "$RUN_DIR/{TICKER}/seat_skeptic.json"`
 
-### Holdings decision table (when cost basis is known — Google-Sheet path)
+---
 
-When positions are loaded with cost basis, map seat votes to HOLD/ADD/TRIM/EXIT (not BUY/WATCH/SKIP):
+## Step 2.5 — CIO SYNTHESIS (subagent — spawn after Skeptic returns)
 
-| Decision | Condition |
-|---|---|
-| **EXIT** | Fundamental POOR **OR** Narrative FADING **OR** Technical BROKEN **OR** thesis invalidated. Harvest the loss if underwater. (SKIP-equivalent.) |
-| **TRIM** | Position weight > concentration cap (default >15% of book) **OR** Sentiment EXTREME **OR** LATE_CYCLE while extended. Trim to target weight; thesis may still be intact. |
-| **ADD** | The BUY gate (Fundamental ≥ GOOD, Technical SETUP_NAMED with live trigger, Narrative EARLY/MID, Sentiment ≠ EXTREME) is met **AND** current weight < cap. (BUY-equivalent, sized as an add.) |
-| **HOLD** | Thesis intact (Fundamental ≥ FAIR, not FADING) but no add trigger or already at target weight. |
+The CIO reads all 5 analyst verdicts plus the Skeptic's challenge and makes the final call. Cannot abstain.
+Spawn as a subagent (`/model sonnet /effort high`). The CIO's verdict replaces the old deterministic table —
+the rules below are the CIO's decision criteria, applied with judgment, not mechanically.
 
-> Source: Carver, *Systematic Trading*, Ch.4 (Portfolio Allocation) — equal instrument weights for a 16-asset portfolio imply 6.25% each; a 15% single-position ceiling (~2× the equal-weight allocation) caps idiosyncratic drawdown without requiring full exit. Stop placement from market structure: Carver Ch.7 & Bernstein Ch.3 — stops must be derived from price volatility and market structure, never from account size or arbitrary dollar amounts.
+**CIO subagent prompt — inject verbatim, fill `{placeholders}`:**
 
-(LATE_CYCLE → TRIM here, not EXIT: with cost basis and an intact thesis, reduce rather than fully exit —
-unlike the no-position SKIP.)
+```
+You are the CIO for {TICKER}. Read all 5 analyst verdicts and the Skeptic challenge. You cannot abstain.
 
-Precedence: EXIT dominates, then TRIM (concentration is its own lever, independent of the entry signal), then
-ADD vs HOLD on the trigger. In DEGRADED_TECH mode, ADD is unavailable (no live trigger) — the holdings
-verdict is limited to HOLD/TRIM/EXIT.
+CIRCLE OF COMPETENCE: State in 2 sentences how {TICKER} earns money and why competitors cannot replicate it. If you cannot → FINAL VERDICT: PASS. Stop here.
+SKEPTIC RESPONSE: Address the Skeptic's single strongest argument — rebut with evidence, or accept it and explain why you invest despite it.
+VERDICT (believability-weighted: fundamental/narrative 2×, technical 2×):
+  BUY requires: Fundamental ≥ GOOD, named setup + live bar-close trigger, narrative not LATE/FADING, Sentiment ≠ EXTREME.
+  Holdings path: ADD/HOLD/TRIM/EXIT when cost basis is known (EXIT: POOR/FADING/BROKEN; TRIM: weight>15%/EXTREME/LATE; ADD: BUY gate + room; HOLD: else).
+  Conviction (start 3): +1 ≥3 seats; +1 EARLY+QUIET; −1 CROWDED; −1 PEG>2/neg FCF; −1 LATE; +1 SM-accum (≥2 seats); −1 SM-distrib (caps BUY at 3). Clamp 1–5.
+
+Output exactly:
+FINAL VERDICT: {BUY|WATCH|SKIP}  or {ADD|HOLD|TRIM|EXIT}
+CONVICTION: {1–5}/5
+DISSENT LOGGED: {Skeptic's best objection in one sentence — printed even when overruled}
+CIO MEMO: {1 paragraph: controlling factor, Skeptic right/wrong and why, one fact that would change this call}
+Inputs: {ALL_5_VERDICTS_JSON} | {SKEPTIC_JSON} | {MACRO_REGIME}
+```
+
+> Source: Surowiecki, *Wisdom of Crowds* (2004) — domain-weighted aggregation (believability by demonstrated track record in a specific area) consistently outperforms equal-vote averaging; the CIO weights fundamental/narrative for thesis quality and technical for timing rather than treating all 5 seats as peers. Bridgewater ILC design principle: every open position has a standing institutional adversary; the Skeptic role encodes this structurally so the challenge function cannot collapse when the same voice both proposes and critiques.
+
+**A WATCH verdict is an alert trigger.** Register via the `mkt` skill (see *Set a buy-alert*) with the CIO Memo as the thesis string.
+
+Cache output: `echo '{cio_json}' > "$RUN_DIR/{TICKER}/seat_cio.json"`
+
+---
+
+## Step 2.7 — RISK MANAGER CHECK (orchestrator inline — run only when CIO verdict is BUY or ADD)
+
+Skip entirely when CIO verdict is WATCH, SKIP, HOLD, TRIM, EXIT, or PASS. The Risk Manager checks
+portfolio-level constraints only — thesis quality is the CIO's job. Hard rules cannot be overridden by a
+strong thesis. Run this inline (not a subagent) using the portfolio data already loaded.
+
+**Risk Manager check prompt — run inline, fill `{placeholders}`:**
+
+```
+You are the Risk Manager for {TICKER} (CIO: {BUY|ADD}, conviction: {N}/5). Check constraints only — not thesis quality. First breach blocks, no override.
+Rule 1: Position ≥ 10% of book → BLOCKED: "concentration cap — no ADD until trimmed below 8%."
+Rule 2: Primary factor group ≥ 25% of book → BLOCKED: "factor concentration limit."
+Rule 3: Cash < $2,000 → BLOCKED: "insufficient cash for minimum position."
+Rule 4: Conviction ≤ 2/5 → BLOCKED: "below minimum conviction threshold."
+If no rule fires → APPROVED.
+Position size (APPROVED): conviction × 2% × total_book, capped at (10% − current_weight).
+  5/5 → 10% target; 4/5 → 6%; 3/5 → 4%. Subtract current weight for the add size.
+
+Output:
+STATUS: {APPROVED | BLOCKED}
+POSITION SIZE: {$amount, % of book} or "n/a"
+REASON: {rule fired, or "all constraints clear — factor headroom: {pct}%"}
+Portfolio inputs: current_weight={W}%, factor_group={F}, factor_group_weight={FW}%, cash=${CASH}, total_book=${BOOK}
+```
+
+**Verdict flow after Risk Manager:** if APPROVED → CIO verdict stands; if BLOCKED → downgrade to WATCH
+(thesis intact, constraint violated — fix the constraint, then re-run). Log the block reason in the final
+output block so the user knows what to clear.
+
+Cache output: `echo '{risk_json}' > "$RUN_DIR/{TICKER}/seat_risk.json"`
+
+> Source: Citadel operating model (from comparative research) — risk team has operational authority to force position reduction without PM consent; the hard-gate design here encodes this: portfolio-level constraints are enforced by a separate role with veto power, independent of how compelling the thesis is. Carver, *Systematic Trading*, Ch.4 — concentration limits (≤10% single name, ≤25% factor group) are the primary structural protection against idiosyncratic drawdown; stops alone are insufficient.
+
+**Step 2 exit conditions:** after Step 2.7 (or Step 2.5 for non-BUY/ADD verdicts), the final verdict is set.
+Proceed to Step 3. The output format block includes DISSENT LOGGED and RISK STATUS fields (see below).
 
 ---
 
@@ -530,14 +596,18 @@ verdict is limited to HOLD/TRIM/EXIT.
  Narrative   : {EARLY/MID/LATE/FADING} — {one line: why}
  Sentiment   : {QUIET_ACCUM/NEUTRAL/CROWDED/EXTREME} — {one line}
  Smart-money : {ACCUMULATING/DISTRIBUTING/NEUTRAL} — {CONVICTION: HIGH/MED/LOW | one line: key signal}
+ Skeptic     : {SKIP/WATCH/BUY} — {one line: strongest objection}
 
- DECISION: {BUY / WATCH / SKIP}
- Entry zone : ${low}–${high}
- Trigger    : {bar-close above/below X on timeframe Y}
- Stop       : ${level} ({basis: support/MA/range})
- Target     : ${level} (risk:reward {X}:1)
- Conviction : {1-5}/5
- Invalidation: {what kills the thesis — thesis-break, not just the price stop}
+ CIO DECISION: {BUY / WATCH / SKIP / PASS}   (or ADD / HOLD / TRIM / EXIT on holdings path)
+ Entry zone  : ${low}–${high}
+ Trigger     : {bar-close above/below X on timeframe Y}
+ Stop        : ${level} ({basis: support/MA/range})
+ Target      : ${level} (risk:reward {X}:1)
+ Conviction  : {1-5}/5
+ Dissent     : {Skeptic's best objection — printed even when overruled}
+ CIO memo    : {one sentence — controlling factor and what would change this call}
+ Risk status : {APPROVED $X (N% book) | BLOCKED: reason | N/A (not BUY/ADD)}
+ Invalidation: {3 falsifiable conditions from Skeptic — thesis-break, not just the price stop}
 ═══════════════════════════════════════════════════════
 ```
 
@@ -790,6 +860,15 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       URL, every feed-script record, and the market-data provenance — required in normal AND DEGRADED mode.
 - [ ] A final **RECAP (high-confidence only)** + **SETUP ALERTS** table is printed (Step 3.6); high-conviction-
       now and buy-on-condition names are split, never duplicated; if nothing clears the bar, that is stated.
+- [ ] **Skeptic ran on every ticker** (Step 2) — no ticker skipped the adversarial challenge, even when all 5
+      analysts agreed. Skeptic JSON cached at `$RUN_DIR/{TICKER}/seat_skeptic.json`.
+- [ ] **CIO Synthesis ran after Skeptic** (Step 2.5) — final verdict came from the CIO prompt, not the old
+      deterministic table. DISSENT LOGGED field is present in every output block (even when Skeptic was
+      overruled). CIO JSON cached at `$RUN_DIR/{TICKER}/seat_cio.json`.
+- [ ] **Risk Manager Check ran for every BUY/ADD verdict** (Step 2.7) — APPROVED or BLOCKED with reason in the
+      output block. BUY/ADD verdicts without a Risk Manager result are invalid. Risk JSON at `seat_risk.json`.
+- [ ] **Circle of Competence check passed** — the CIO stated the revenue model in 2 sentences before proceeding;
+      PASS verdicts list "circle of competence: unclear" as the block reason, not a score.
 
 ## Set a buy-alert (notify-me-when) — for WATCH verdicts
 
@@ -812,8 +891,9 @@ Recommend-only and backtest-gated — an alert is a reminder to re-evaluate, not
 
 ## Done when
 
-- Each analyzed stock has a 5-seat panel, a verdict-table decision, and a concrete entry plan (zone + trigger
-  + stop + conviction + invalidation).
+- Each analyzed stock has a 5-seat panel → Skeptic challenge → CIO verdict → Risk Manager gate (if BUY/ADD),
+  and a concrete entry plan (zone + trigger + stop + conviction + invalidation).
+- The output block shows DISSENT LOGGED for every ticker (Skeptic's best objection, even when overruled).
 - The signal table with the theme map is printed; every news claim is sourced inline.
 - The SOURCES & DATA appendix (Step 3.5) lists all web_fetched URLs, feed-script records, and market-data
   provenance.
