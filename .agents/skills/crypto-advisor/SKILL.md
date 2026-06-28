@@ -15,6 +15,55 @@ Analyze every token in the universe **sequentially** (single shared chart slot) 
 
 > Educational analysis, not financial advice. No leverage. Ever.
 
+## Architecture
+
+```mermaid
+flowchart TD
+    CIO["🎯 CIO Orchestrator\n(this skill)"]
+    CIO -->|"seed todos\n11 tokens"| LOOP
+
+    subgraph LOOP["Sequential data loop (one chart slot)"]
+        direction TB
+        TV["TradingView MCP\nD+W OHLCV · RSI · BB · MACD"]
+        PY["indicators.py\nEMA20 · SMA50 · SMA200 · 200wMA\ndeath cross"]
+        PKG["DataPackage\nper token"]
+        TV --> PY --> PKG
+    end
+
+    PKG -->|"parallel per token"| SEATS
+
+    subgraph SEATS["5-Seat Quorum (parallel subagents)"]
+        direction LR
+        V["analytics-benjamin-graham\nValue — margin of safety"]
+        Q["analytics-warren-buffett\nQuality — moat + revenue"]
+        C["analytics-ray-dalio\nCycle — regime + fear"]
+        T["analytics-stanley-druckenmiller\nTrend — MA alignment"]
+        O["analysis-onchain-defi\nOn-chain — Burniske\nDeFiLlama value-accrual"]
+    end
+
+    SEATS -->|"vote: BULLISH\nNEUTRAL\nBEARISH"| QUORUM
+
+    subgraph QUORUM["Signal Table"]
+        direction TB
+        COUNT["seats_bull / seats_bear\ncounts"]
+        SIG["seats_bull ≥ 4 → BUY\n≥ 3 → BUY(small)\n< 3 → HOLD\nbear ≥ 4 → SELL"]
+        COUNT --> SIG
+    end
+
+    SIG --> GOV
+
+    subgraph GOV["F&G Governor Cap"]
+        direction TB
+        FG["F&G regime\nExtreme Fear → max 3\nFear → max 5\nNeutral+ → no cap"]
+        RANK["Rank by seats_bull DESC\nDowngrade lowest to WATCH"]
+        FG --> RANK
+    end
+
+    RANK --> CRITIC["Verdict Critic\nchallenge every BUY"]
+    CRITIC --> CITE["Citation Validator\nverify all source URLs"]
+    CITE --> OUT["📋 Report\nSignal table · Per-token verdicts\nACTIVE / WATCH / HOLD / SELL"]
+```
+
 ## Quickstart
 
 ### Default daily run
