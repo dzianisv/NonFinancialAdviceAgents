@@ -39,14 +39,12 @@ def ema(x, n):
     return pd.Series(x).ewm(span=n, adjust=False, min_periods=n).mean()
 
 def rsi(close, period=14):
+    """True Wilder RSI: alpha = 1/period. Matches TradingView and the standard reference."""
     close = pd.Series(close)
     delta = close.diff()
     gain = delta.clip(lower=0)
     loss = (-delta).clip(lower=0)
-    # Smoothed (slow) Wilder RSI: average over 2*period reduces single-run
-    # sensitivity, suiting this engine's long-term/swing horizon so a brief
-    # cluster of up-days doesn't read as overbought on an otherwise flat series.
-    alpha = 1 / (2 * period)
+    alpha = 1 / period
     avg_gain = gain.ewm(alpha=alpha, adjust=False, min_periods=period).mean()
     avg_loss = loss.ewm(alpha=alpha, adjust=False, min_periods=period).mean()
     rs = avg_gain / avg_loss
@@ -223,6 +221,9 @@ def verdict(features):
             else:
                 return {'verdict': 'BUY-ZONE', 'entry_low': support * 0.99, 'entry_high': price * 1.01,
                         'invalidation': support * 0.95, 'level': support}
+        # stage 2 but weekly RSI overbought (>= 70) — wait for pullback to rising 50d
+        return {'verdict': 'WAIT-PULLBACK', 'entry_low': ma50 * 0.98, 'entry_high': ma50 * 1.02,
+                'invalidation': ma200 * 0.98, 'level': ma50}
 
     if stage == 1:
         return {'verdict': 'WAIT-BREAKOUT', 'entry_low': resistance * 0.99, 'entry_high': resistance * 1.02,
@@ -251,6 +252,12 @@ def fetch_stock(symbol):
             raw = raw.iloc[:-1]
         raw = raw[['Open','High','Low','Close','Volume']].copy()
         weekly = raw.resample('W').agg({'Open':'first','High':'max','Low':'min','Close':'last','Volume':'sum'}).dropna(subset=['Close'])
+        # Drop the last weekly bar if its period-end label is in the future
+        # (label='right' means the index is the Sunday at week-end; if that Sunday
+        # hasn't arrived yet the bar covers a partial week of trading data).
+        today_ts = pd.Timestamp.now().normalize()
+        if len(weekly) > 0 and weekly.index[-1].normalize() > today_ts:
+            weekly = weekly.iloc[:-1]
         # Fetch SPY
         try:
             spy_raw = yf.download('SPY', period='3y', interval='1d', progress=False, auto_adjust=True)
@@ -307,7 +314,9 @@ def fetch_crypto_with_fallback(base, forced_exchange=None):
                     dfw = pd.DataFrame(ohlcv_w, columns=['ts','Open','High','Low','Close','Volume'])
                     dfw.index = pd.to_datetime(dfw['ts'], unit='ms')
                     dfw.drop(columns=['ts'], inplace=True)
-                    if len(dfw) > 0 and dfw.index[-1].date() == today:
+                    # For ccxt '1w', the timestamp is the candle open (week start).
+                    # Drop the last bar if it started less than 7 days ago (unclosed week).
+                    if len(dfw) > 0 and (pd.Timestamp.now() - dfw.index[-1]).days < 7:
                         dfw = dfw.iloc[:-1]
             except Exception:
                 dfw = None
@@ -315,6 +324,10 @@ def fetch_crypto_with_fallback(base, forced_exchange=None):
             if dfw is None or len(dfw) < 20:
                 dfw = df.resample('W', label='right', closed='right').agg(
                     {'Open':'first','High':'max','Low':'min','Close':'last','Volume':'sum'}).dropna()
+                # Drop partial current week (period-end label is in the future)
+                today_ts = pd.Timestamp.now().normalize()
+                if len(dfw) > 0 and dfw.index[-1].normalize() > today_ts:
+                    dfw = dfw.iloc[:-1]
 
             meta = {'symbol': symbol, 'asset': 'crypto', 'exchange': exchange_id}
             return df, dfw, meta
@@ -475,6 +488,11 @@ def compute_features(daily, weekly, asset, exchange=None, symbol=None):
 
     # Verdict
     def _verdict():
+        price_v = feats.get('price', np.nan)
+        if price_v is None or (isinstance(price_v, float) and np.isnan(price_v)):
+            # Never emit a confident verdict when price data is missing
+            return {'verdict': '[UNAVAILABLE]', 'entry_low': np.nan, 'entry_high': np.nan,
+                    'invalidation': np.nan, 'level': np.nan}
         vf = {
             'stage': feats.get('stage', 1),
             'price': feats.get('price', 0),
@@ -704,7 +722,9 @@ def main():
 
     # Confluence
     verd = vd.get('verdict', '')
-    if (stage == 2 and verd in {'ACCUMULATE','BUY-ZONE'}) or \
+    if verd == '[UNAVAILABLE]':
+        confluence = '[UNAVAILABLE]'
+    elif (stage == 2 and verd in {'ACCUMULATE','BUY-ZONE'}) or \
        (stage == 4 and verd == 'AVOID-DOWNTREND') or \
        (stage == 1 and verd == 'WAIT-BREAKOUT') or \
        (stage == 3 and verd == 'WAIT-PULLBACK'):
@@ -741,9 +761,14 @@ def main():
     print(f"MOMENTUM:    RSI14 D={_fmt(rsi_d, '.1f')} W={_fmt(rsi_w_val, '.1f')} ({rsi_label}) | MACD(12,26,9) hist {macd_hist_trend}, {macd_zero} zero | div {div_str}")
     print(f"VOLUME:      OBV {obv_trend} | last vol {_fmt(vol_ratio_val, '.2f')}x20avg | {vol_action}")
     print(f"CONFLUENCE:  weekly trend {confluence} with the daily setup")
-    print(f"VERDICT:     {verd} {_fmt(level)}")
-    print(f"ENTRY ZONE:  {_fmt(entry_low)}–{_fmt(entry_high)}")
-    print(f"INVALIDATION:{_fmt(invalidation)} — sustained close beyond = thesis wrong")
+    if verd == '[UNAVAILABLE]':
+        print(f"VERDICT:     [UNAVAILABLE]")
+        print(f"ENTRY ZONE:  [UNAVAILABLE]")
+        print(f"INVALIDATION:[UNAVAILABLE]")
+    else:
+        print(f"VERDICT:     {verd} {_fmt(level)}")
+        print(f"ENTRY ZONE:  {_fmt(entry_low)}–{_fmt(entry_high)}")
+        print(f"INVALIDATION:{_fmt(invalidation)} — sustained close beyond = thesis wrong")
     print(f"NOTES:       {notes}")
     print(f"HONESTY:     Lens, not gospel. TA evidence base is weak/mixed; validate via analyst-systematic-trading before sizing.")
     print(f"DATA:        {data_src} | asof {asof}{degraded_str}")

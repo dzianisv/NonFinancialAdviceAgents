@@ -19,28 +19,28 @@ Momentum and volume indicators **confirm** the trend and structure already ident
     - **Weekly RSI > 70 (equities) or > 80 (crypto) = do not buy, regardless of how clean the daily looks.** Wait for the weekly to reset below 60 before re-engaging.
   - **Bullish divergence:** price makes a new low, RSI makes a HIGHER low → momentum waning on the downside → early confirming clue that a base may be forming. This is an early alert, not a trigger; divergence can persist for weeks. Use it to sharpen attention, not to pull the trigger prematurely.
   - **Bearish divergence:** price makes a new high, RSI makes a LOWER high → distribution/exhaustion → early warning at tops; combine with volume and stage analysis before acting.
-  - The `ta.py` script (`python .agents/skills/research-technical/scripts/ta.py {SYMBOL}`) outputs `rsi_daily` and `rsi_weekly` fields; always read both before encoding a momentum verdict.
+  - The `ta.py` script (`python .agents/skills/research-technical/scripts/ta.py {SYMBOL}`) outputs `rsi_d` and `rsi_w` fields; always read both before encoding a momentum verdict.
 
 - **MACD(12,26,9)** (standard exponential-moving-average construction)
   - **Histogram (MACD line minus signal line):** rising histogram = momentum accelerating; falling = fading. A histogram **turning up from below zero** is early bullish confirmation that a pullback is losing downside momentum — the most actionable signal in this group.
   - **Signal-line cross:** MACD crossing above its signal line = momentum confirming to the upside; crossing below = rolling over. Useful but lagging; combine with histogram direction.
   - **Zero-line:** MACD above zero = bullish momentum regime; below zero = bearish. A zero-line cross confirms a trend shift but is the most lagging of the three MACD reads — treat as regime color, not entry timing.
   - **MACD lags by construction** (it is derived from EMAs of price). It confirms moves already in progress; it does not predict turns. Never use a MACD cross as a standalone buy signal.
-  - The `ta.py` script outputs `macd_hist_direction` (rising/falling/flat) and `macd_above_signal` (bool) and `macd_above_zero` (bool).
+  - The `ta.py` script outputs `macd_hist_trend` ('rising'/'falling') and `macd_hist_last` (the histogram's last value; ≥ 0 means above zero).
 
 - **Volume confirmation (raw bar volume vs 20-period average)**
   - **Breakouts require above-average volume.** A price move through a key resistance level or pattern boundary on volume < 20-period average is suspect — fakeout risk is high. Valid breakouts typically see 1.5× to 2× average volume or more on the breakout bar.
   - **Healthy pullbacks in uptrends show contracting (below-average) volume.** Sellers are not aggressive; this is bullish. The pullback-to-MA entry (from file 02) is highest-conviction when daily pullback bars carry light volume.
   - **Heavy volume on a pullback = warning.** If a stock is retreating on volume above its 20-period average, large sellers may be distributing. Downgrade conviction until volume behavior normalizes.
   - **Base/consolidation volume pattern:** A constructive base shows declining or quiet volume throughout the consolidation, then **expanding volume on the breakout**. Erratic heavy volume inside the base suggests distribution.
-  - The `ta.py` script outputs `last_vol_vs_20avg` (ratio, e.g. 1.4 = 40% above average) for the most recent bar.
+  - The `ta.py` script outputs `vol_ratio` (last-bar volume ÷ 20-bar average; e.g. 1.4 = 40% above average) for the most recent bar.
 
 - **OBV (On-Balance Volume) — accumulation/distribution trend**
-  - OBV direction tracks the net balance of buying vs selling pressure. **OBV making new highs with price = healthy accumulation** — institutions are participating in the move.
-  - **Bullish OBV divergence:** price makes a new low but OBV holds higher or rises → accumulation under the surface → confirms a potential base (combine with RSI divergence for higher confidence).
-  - **Bearish OBV divergence:** price makes a new high but OBV fails to confirm or declines → distribution/exhaustion → early warning of a top; do not add exposure when this appears at extended prices.
-  - OBV is not precise enough for entry timing; use it for regime/health color and divergence alerts only.
-  - The `ta.py` script outputs `obv_trend` (rising/falling/flat) and `obv_divergence` (bullish/bearish/none).
+  - OBV direction tracks the net balance of buying vs selling pressure. **`obv_trend` = 'rising'** with price rising = healthy accumulation — institutions are participating in the move.
+  - OBV contributes as trend confirmation only: 'rising' = accumulation, 'falling' = distribution, 'flat' = neutral. It is a SEPARATE signal from the RSI/price `divergence` field.
+  - **Note:** the engine's ACCUMULATE verdict uses `obv_trend == 'rising'` as one of two confirmation conditions (the other is `divergence == 'bullish'`). Either one elevates a BUY-ZONE to ACCUMULATE.
+  - OBV is not precise enough for entry timing; use it for regime/health color only.
+  - The `ta.py` script outputs `obv_trend` (rising/falling/flat).
 
 - **Timeframe alignment — daily vs weekly synthesis**
   - This skill operates on **daily charts for entry timing, weekly charts for regime.** Weekly is the macro-lens; daily is the trigger-lens. Both must be read.
@@ -61,33 +61,33 @@ Momentum and volume indicators **confirm** the trend and structure already ident
 **Preamble (mandatory):** All rules below are confirmation rules applied AFTER files 01 and 02 have already established a valid structural setup (correct stage, valid entry zone, key levels identified). Momentum and volume CONFIRM the structure read — they are NOT standalone triggers. If no valid structural setup exists from files 01/02, these rules do not generate an entry.
 
 1. **Weekly RSI regime gate (hard filter — run this first):**
-   Run `ta.py {SYMBOL}` and read `rsi_weekly`.
-   - If `rsi_weekly > 70` (equities) or `> 80` (crypto): **STOP. Do not open or add a new position.** The weekly tape is overbought. Even a valid daily pullback entry is likely chasing extended prices. Log verdict as `WAIT — weekly RSI extended`. Re-evaluate when `rsi_weekly` drops below 60.
-   - If `rsi_weekly < 30` (equities) or `< 20` (crypto): flag as potential accumulation zone; combine with stage and OBV divergence before proceeding.
+   Run `ta.py {SYMBOL}` and read `rsi_w`.
+   - If `rsi_w >= 70` (equities) or `>= 80` (crypto): **STOP. Do not open or add a new position.** The weekly tape is overbought; the full verdict becomes **WAIT-PULLBACK {50d MA}**. Even a valid daily pullback entry is likely chasing extended prices. Re-evaluate when `rsi_w` drops below 60.
+   - If `rsi_w < 30` (equities) or `< 20` (crypto): flag as potential accumulation zone; combine with stage and `divergence` before proceeding.
 
 2. **Daily RSI regime check (trend filter):**
-   Read `rsi_daily`.
-   - `rsi_daily > 50` AND trending upward: bullish momentum regime confirmed. Proceed to step 3.
-   - `rsi_daily < 50` OR recently crossed below 50: momentum not confirming. Downgrade conviction; wait for RSI to reclaim 50 before entering a long.
-   - Note bullish divergence if `rsi_daily` makes a higher low while price makes a lower low — flag as early base-formation signal, not a trigger.
+   Read `rsi_d`.
+   - `rsi_d > 50` AND trending upward: bullish momentum regime confirmed. Proceed to step 3.
+   - `rsi_d < 50` OR recently crossed below 50: momentum not confirming. Downgrade conviction; wait for RSI to reclaim 50 before entering a long.
+   - Note bullish divergence (`divergence = 'bullish'`) if `rsi_d` makes a higher low while price makes a lower low — flag as early base-formation signal, not a trigger.
 
 3. **MACD histogram confirmation:**
-   Read `macd_hist_direction` and `macd_above_zero`.
-   - For a pullback entry: look for `macd_hist_direction = rising` (especially from near-zero or below-zero territory). This confirms the pullback is losing downside momentum.
-   - If `macd_hist_direction = falling` and `macd_above_zero = false`: momentum is rolling over in a bearish regime. Do not enter; add to the wait list.
-   - Zero-line: `macd_above_zero = true` adds regime confirmation for longs; not a standalone condition.
+   Read `macd_hist_trend` and `macd_hist_last`.
+   - For a pullback entry: look for `macd_hist_trend = 'rising'` (especially from near-zero or negative territory). This confirms the pullback is losing downside momentum.
+   - If `macd_hist_trend = 'falling'` and `macd_hist_last < 0`: momentum is rolling over in a bearish regime. Do not enter; add to the wait list.
+   - Zero-line: `macd_hist_last >= 0` (histogram above zero) adds regime confirmation for longs; not a standalone condition.
 
 4. **Volume validation at the entry bar or breakout:**
-   Read `last_vol_vs_20avg`.
-   - For a breakout entry (price clearing resistance): require `last_vol_vs_20avg >= 1.3` (at least 30% above 20-period average). Below that, mark as `LOW-VOLUME BREAKOUT — suspect`.
-   - For a pullback-to-MA entry: prefer `last_vol_vs_20avg < 1.0` on the pullback bars (light volume = sellers not aggressive). If pullback volume is > 1.5× average, downgrade to `WAIT — distribution signal`.
+   Read `vol_ratio`.
+   - For a breakout entry (price clearing resistance): require `vol_ratio >= 1.3` (at least 30% above 20-period average). Below that, mark as `LOW-VOLUME BREAKOUT — suspect`.
+   - For a pullback-to-MA entry: prefer `vol_ratio < 1.0` on the pullback bars (light volume = sellers not aggressive). If pullback volume is > 1.5× average, downgrade to `WAIT — distribution signal`.
    - If recent daily volume is erratic (alternating heavy/light) inside a base, flag as unclear; wait for a clean quiet-then-expand pattern.
 
 5. **OBV trend alignment:**
-   Read `obv_trend` and `obv_divergence`.
-   - `obv_trend = rising` with price rising: accumulation confirmed — positive color.
-   - `obv_divergence = bearish` (price new high, OBV not confirming): add a distribution warning to the verdict. Do not add new exposure at these price levels even if RSI and MACD look fine.
-   - `obv_divergence = bullish` at a potential base: positive confirming clue; combine with RSI divergence for higher base-formation confidence.
+   Read `obv_trend` and `divergence`.
+   - `obv_trend = 'rising'` with price rising: accumulation confirmed — positive color. This is one of the two conditions that elevate a BUY-ZONE to ACCUMULATE.
+   - `divergence = 'bearish'` (RSI making lower highs while price makes new highs): add a distribution warning to the verdict. Do not add new exposure at extended prices when this appears.
+   - `divergence = 'bullish'` (RSI making higher lows while price makes lower lows) at a potential base: positive confirming clue; this is the second condition that elevates a BUY-ZONE to ACCUMULATE.
 
 6. **Scoring: confirmation tally (not a scoring formula — qualitative)**
    Count how many of the following are aligned for a long entry:
@@ -104,15 +104,15 @@ Momentum and volume indicators **confirm** the trend and structure already ident
 
 9. **Cross-check regime context:** Pipe current momentum verdict into `regime-detection` and `risk-management` before sizing. Momentum confirmation at the individual ticker level does not override a bearish macro regime; in a risk-off environment, reduce position size even on high-conviction setups.
 
-10. **When multiple divergences align (RSI + OBV both diverging in the same direction):**
-    - Dual bullish divergence (both RSI and OBV making higher lows vs price) at a major support level identified in file 02 = elevated base-formation probability. Widen attention; tighten the watch.
-    - Dual bearish divergence (RSI lower highs + OBV declining vs price new highs) at extended prices = distribution is likely ongoing. The structural entry from file 02 at resistance becomes a short candidate rather than a buy candidate.
+10. **When dual confirmation signals align:**
+    - Dual confirmation (`divergence = 'bullish'` AND `obv_trend = 'rising'`) at a major support level identified in file 02 = elevated ACCUMULATE probability. Highest-conviction add; widen attention.
+    - Dual bearish signal (`divergence = 'bearish'` AND `obv_trend = 'falling'`) at extended prices = distribution likely ongoing. Do not add new exposure; the structural entry from file 02 at resistance becomes a caution, not a buy.
 
 11. **Verdict encoding for the agent:**
     After running `ta.py {SYMBOL}` and applying rules 1–10, encode a structured verdict:
     ```
     MOMENTUM_VERDICT:
-      weekly_rsi_gate: PASS | WAIT_OVERBOUGHT | WATCH_OVERSOLD
+      weekly_rsi_gate: PASS (rsi_w < 70) | WAIT-PULLBACK (rsi_w ≥ 70 — full verdict becomes WAIT-PULLBACK)
       daily_rsi_regime: BULLISH | NEUTRAL | BEARISH
       macd_histogram: CONFIRMING | NEUTRAL | WARNING
       volume_behavior: CONFIRMING | MIXED | WARNING
@@ -148,13 +148,12 @@ Momentum and volume indicators **confirm** the trend and structure already ident
 
 | Field | Source | Used in rule |
 |---|---|---|
-| `rsi_daily` | RSI(14) on daily bars | Rules 2, 6, 10 |
-| `rsi_weekly` | RSI(14) on weekly bars | Rule 1 (hard gate), 6 |
-| `macd_hist_direction` | MACD(12,26,9) histogram slope | Rules 3, 6 |
-| `macd_above_signal` | MACD line vs signal line | Rule 3 (supporting color) |
-| `macd_above_zero` | MACD line vs zero | Rules 3, 6 |
-| `last_vol_vs_20avg` | Last bar volume ÷ 20-bar avg | Rules 4, 6 |
-| `obv_trend` | OBV slope direction | Rules 5, 6 |
-| `obv_divergence` | OBV vs price divergence | Rules 5, 10 |
+| `rsi_d` | RSI(14) on daily bars | Rules 2, 6, 10 |
+| `rsi_w` | RSI(14) on weekly bars | Rule 1 (hard gate), 6 |
+| `macd_hist_trend` | MACD(12,26,9) histogram slope ('rising'/'falling') | Rules 3, 6 |
+| `macd_hist_last` | MACD histogram last value (≥ 0 = above zero) | Rule 3 (regime color) |
+| `vol_ratio` | Last-bar volume ÷ 20-bar average | Rules 4, 6 |
+| `obv_trend` | OBV trend direction (rising/falling/flat) | Rules 5, 6 |
+| `divergence` | RSI(14) vs price divergence (bullish/bearish/none) | Rules 5, 10 |
 
 Always run the script before encoding a verdict. Never substitute visual inspection for computed values in an automated context.

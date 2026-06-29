@@ -149,7 +149,7 @@ before trading it live.
 
 1. **Stage gate (mandatory first).** Compute whether price > 150-day EMA AND the 150d EMA slope
    is positive (current value > value 20 days ago). If EITHER fails: classify Stage 1/3/4 and
-   return **AVOID**. Do not proceed to pattern analysis.
+   return **AVOID-DOWNTREND**. Do not proceed to pattern analysis.
 
 2. **RS line gate.** Compute stock-to-SPY 3-month return ratio slope. If RS line is trending DOWN
    (negative slope over 60 days): tag **LAGGARD** and **reduce conviction by one tier**. If RS

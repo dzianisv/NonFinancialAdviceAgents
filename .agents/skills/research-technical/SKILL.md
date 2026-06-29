@@ -84,7 +84,7 @@ a great-looking entry zone in a Stage-4 downtrend is still an AVOID.
 ## Decision procedure
 
 1. **Run the script:** `python .agents/skills/research-technical/scripts/ta.py {SYMBOL} [--json]`.
-2. **Read Stage.** Stage 4 (declining) → **AVOID outright.** Stage 3 (topping) → no new entries; tighten
+2. **Read Stage.** Stage 4 (declining) → **AVOID-DOWNTREND.** Stage 3 (topping) → no new entries; tighten
    stops on anything held.
 3. **Locate price vs entry zone / structure** — is price in a base, pulling back to a **rising** MA, or
    extended far above it?
@@ -118,10 +118,10 @@ User: "BTC pulled back to its rising 200-day after a Stage-2 advance — is this
 
 Lens response:
 1. Run `python .agents/skills/research-technical/scripts/ta.py BTC --asset crypto`
-2. **Stage read**: Weekly 30wk-MA is rising, price above 200d MA — confirmed Stage 2 (advancing). No AVOID signal.
+2. **Stage read**: Weekly 30wk-MA is rising, price above 200d MA — confirmed Stage 2 (advancing). No AVOID-DOWNTREND signal.
 3. **Structure**: Price is at a pullback to the rising 200d MA (classic first-test entry zone), not extended. The 200d MA is structural support; a daily close back above the 5-day MA after this touch confirms the pullback ended.
-4. **Confirmation**: RSI(14) daily pulled back toward 50 (neutral, not overbought). MACD histogram turning up from below the signal line — early momentum confirmation. Daily volume on the pullback below average (healthy; sellers not aggressive). OBV holding its trend.
-5. **Verdict**: **BUY-ZONE** — the 200d MA touch in Stage 2 with RSI mid-range and declining-volume pullback meets accumulation criteria.
+4. **Confirmation**: RSI(14) daily pulled back toward 52 (above 50, healthy). MACD histogram turning up from below — early momentum confirmation. Daily volume on the pullback below average (healthy; sellers not aggressive). OBV holding its rising trend — accumulation confirmed.
+5. **Verdict**: **ACCUMULATE** — Stage-2 pullback to rising 200d MA, rsi_w below 70, and OBV rising (confirmation present) → highest-conviction add.
 6. **Entry zone**: current 200d MA level ±2% — accumulate in tranches.
 7. **Invalidation**: daily close meaningfully (>3%) below the 200d MA and MA rolling over → pullback became a Stage 3/4 change → stop and re-evaluate.
 8. Cross-ref `analysis-onchain` for on-chain valuation (MVRV, NUPL) before sizing — this lens is price/volume only.
@@ -129,18 +129,18 @@ Lens response:
 ```
 === ENTRY READ — BTC (crypto) — 2026-06-29 ===
 Horizon:     position/swing — weekly trend gates the daily entry
-Price:       {last from script}
-TREND/STAGE: Weekly Stage 2 advancing | 200d price above, MA rising | 30wk-MA slope up
-STRUCTURE:   support 200d MA / resistance prior ATH | dist rising 50d -8% / 200d +0% | pullback-to-MA
-MOMENTUM:    RSI14 D=52 W=60 (near 50, neutral) | MACD(12,26,9) hist rising, above zero | divergence none
-VOLUME:      OBV rising | last vol 0.7x20avg | neutral (healthy pullback)
+Price:       64210.00
+TREND/STAGE: Weekly Stage 2 (advancing) | 200d above, MA rising | 30wk-MA slope up
+STRUCTURE:   support 63800.00 / resistance 72000.00 | dist 50d -2.6% / 200d 2.1% | in base
+MOMENTUM:    RSI14 D=52.0 W=58.0 (neutral) | MACD(12,26,9) hist rising, above zero | div none
+VOLUME:      OBV rising | last vol 0.7x20avg | accumulation
 CONFLUENCE:  weekly trend AGREES with the daily setup
-VERDICT:     BUY-ZONE
-ENTRY ZONE:  {200d MA} – {200d MA +2%}
-INVALIDATION:{daily close >3% below 200d MA with MA rolling over}
-NOTES:       crypto: funding +0.01%/8h (neutral), OI stable; cross-ref analysis-onchain for MVRV/NUPL
+VERDICT:     ACCUMULATE 63800.00
+ENTRY ZONE:  63200.00–64800.00
+INVALIDATION:62400.00 — sustained close beyond = thesis wrong
+NOTES:       funding +0.01%/8h, OI rising
 HONESTY:     Lens, not gospel. TA evidence base is weak/mixed; validate via analyst-systematic-trading before sizing.
-DATA:        yfinance+ccxt asof 2026-06-29 | LIVE
+DATA:        coinbase/ccxt | asof 2026-06-29
 ```
 </example>
 
@@ -152,18 +152,25 @@ Emit EXACTLY this schema (reproduce character-for-character, including spacing a
 === ENTRY READ — {SYMBOL} ({stock|crypto}) — {YYYY-MM-DD} ===
 Horizon:     position/swing — weekly trend gates the daily entry
 Price:       {last}
-TREND/STAGE: Weekly Stage {1 basing|2 advancing|3 topping|4 declining} | 200d {price above/below, MA rising/falling} | 30wk-MA slope {up/flat/down}
-STRUCTURE:   support {level} / resistance {level} | dist rising 50d {x%} / 200d {x%} | {in base|breakout|extended}
-MOMENTUM:    RSI14 D={} W={} ({vs 50}, {OB/OS/neutral}) | MACD(12,26,9) hist {rising/falling}, {above/below zero} | divergence {none|bullish|bearish}
-VOLUME:      OBV {rising/falling/flat} | last vol {x}x20avg | {accumulation|distribution|neutral}
+TREND/STAGE: Weekly Stage {n} ({basing|advancing|topping|declining}) | 200d {above|below}, MA {rising|falling} | 30wk-MA slope {up|flat|down}
+STRUCTURE:   support {} / resistance {} | dist 50d {x%} / 200d {x%} | {in base|breakout|extended}
+MOMENTUM:    RSI14 D={} W={} ({label}) | MACD(12,26,9) hist {rising|falling}, {above|below} zero | div {none|bullish|bearish}
+VOLUME:      OBV {rising|falling|flat} | last vol {x}x20avg | {accumulation|distribution|neutral}
 CONFLUENCE:  weekly trend {AGREES|CONFLICTS} with the daily setup
-VERDICT:     {ACCUMULATE|BUY-ZONE|WAIT-PULLBACK {level}|WAIT-BREAKOUT {level}|AVOID-DOWNTREND}
-ENTRY ZONE:  {low}-{high}
-INVALIDATION:{level — sustained close beyond = thesis wrong}
-NOTES:       {crypto: funding {x%}, OI {trend}; stock: rel-strength vs SPX}
+VERDICT:     {verdict} {level}
+ENTRY ZONE:  {low}–{high}
+INVALIDATION:{level} — sustained close beyond = thesis wrong
+NOTES:       {crypto: funding {x%}, OI ...; stock: rel-str vs SPY ...}
 HONESTY:     Lens, not gospel. TA evidence base is weak/mixed; validate via analyst-systematic-trading before sizing.
-DATA:        {source + asof | DEGRADED: which fields}
+DATA:        {yfinance | coinbase/ccxt | ...} | asof {YYYY-MM-DD}{ | DEGRADED: ...}
 ```
+
+`{verdict}` is exactly one of the engine's five: **`ACCUMULATE`** (Stage 2, near support, RSI_W < 70,
+OBV rising or bullish divergence) · **`BUY-ZONE`** (same, confirmation mixed/absent) ·
+**`WAIT-PULLBACK {level}`** (Stage 3, or Stage 2 extended >15% above the rising 50d, or Stage 2
+RSI_W ≥ 70 — `{level}` = the 50d/support to wait for) · **`WAIT-BREAKOUT {level}`** (Stage 1 — `{level}`
+= resistance) · **`AVOID-DOWNTREND`** (Stage 4). `{level}` on the VERDICT line is the engine's
+numeric `level` field.
 
 ## Honesty rules (non-negotiable)
 

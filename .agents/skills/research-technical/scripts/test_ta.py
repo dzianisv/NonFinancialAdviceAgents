@@ -31,10 +31,13 @@ def test_rsi_falling_series():
     assert result.iloc[-1] < 30
 
 def test_rsi_neutral():
+    # Random walk with equal up/down steps — RSI should be in a reasonable mid-range.
+    # Bounds are 20–80: true Wilder is more responsive so a series that drifted
+    # slightly up can legitimately read ~72 (still not extreme OB/OS territory).
     np.random.seed(42)
     close = pd.Series(100 + np.cumsum(np.random.choice([-1, 1], 100)))
     result = rsi(close, 14)
-    assert 30 < result.iloc[-1] < 70
+    assert 20 < result.iloc[-1] < 80
 
 def test_macd_hist_positive_on_accel():
     t = np.arange(200)
@@ -176,3 +179,51 @@ def test_resolve_symbol():
     assert resolve_symbol('BTC', 'okx') == 'BTC/USDT'
     assert resolve_symbol('ETH', 'coinbase') == 'ETH/USD'
     assert resolve_symbol('ETH', 'kucoin') == 'ETH/USDT'
+
+def test_rsi_wilder_alpha_regression():
+    """Locks in true Wilder alpha=1/period. FAILS if reverted to slow alpha=1/(2*period)."""
+    # 20 rising bars (+1), then 5 falling bars (-2) — produces meaningful gain/loss mix
+    close = pd.Series([100.0 + i for i in range(20)] + [119.0 - 2*i for i in range(5)])
+    result = rsi(close, 14)
+    # Expected: computed with true Wilder alpha=1/14 directly
+    delta = close.diff()
+    gain = delta.clip(lower=0)
+    loss = (-delta).clip(lower=0)
+    avg_gain = gain.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
+    avg_loss = loss.ewm(alpha=1/14, adjust=False, min_periods=14).mean()
+    expected = (100 - 100 / (1 + avg_gain / avg_loss)).iloc[-1]
+    assert abs(result.iloc[-1] - expected) < 1e-9, \
+        f"RSI mismatch: got {result.iloc[-1]:.4f}, expected {expected:.4f}"
+    # Slow alpha would give a materially higher RSI — they must differ by > 5 pts
+    avg_gain_slow = gain.ewm(alpha=1/28, adjust=False, min_periods=14).mean()
+    avg_loss_slow = loss.ewm(alpha=1/28, adjust=False, min_periods=14).mean()
+    slow_val = (100 - 100 / (1 + avg_gain_slow / avg_loss_slow)).iloc[-1]
+    assert abs(result.iloc[-1] - slow_val) > 5, \
+        "True Wilder and slow Wilder RSI should differ by >5 pts on this series"
+
+def test_verdict_stage3_wait_pullback():
+    f = {'stage': 3, 'price': 100, 'dist_50d': 5, 'dist_200d': 8,
+         'rsi_w': 65, 'obv_trend': 'flat', 'div': 'none',
+         'support': 90, 'resistance': 110, 'ma50': 95, 'ma200': 90}
+    v = verdict(f)
+    assert v['verdict'] == 'WAIT-PULLBACK'
+
+def test_verdict_stage2_overbought_wait_pullback():
+    """Stage 2 but weekly RSI >= 70 → explicit WAIT-PULLBACK (not silent fallback)."""
+    f = {'stage': 2, 'price': 110, 'dist_50d': 10, 'dist_200d': 15,
+         'rsi_w': 75, 'obv_trend': 'rising', 'div': 'none',
+         'support': 100, 'resistance': 120, 'ma50': 100, 'ma200': 95}
+    v = verdict(f)
+    assert v['verdict'] == 'WAIT-PULLBACK'
+
+def test_degraded_verdict():
+    """When price is NaN (fully degraded data), verdict must be [UNAVAILABLE]."""
+    from ta import compute_features
+    empty = pd.DataFrame(
+        {'Open': [np.nan], 'High': [np.nan], 'Low': [np.nan], 'Close': [np.nan], 'Volume': [np.nan]},
+        index=[pd.Timestamp('2024-01-01')]
+    )
+    feats = compute_features(empty, empty.copy(), 'stock')
+    vd = feats.get('verdict_dict', {})
+    assert vd.get('verdict') == '[UNAVAILABLE]', \
+        f"Expected [UNAVAILABLE] on degraded data, got {vd.get('verdict')}"

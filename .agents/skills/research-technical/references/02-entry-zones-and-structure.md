@@ -79,7 +79,7 @@ immediately if you are wrong, and you exit there.
 
 - **Multi-timeframe confluence — weekly GATES daily (the most critical rule)**
   - The weekly chart is the higher timeframe. It GATES whether a daily setup is tradeable.
-  - **WEEKLY AGREES** (Stage 2 on weekly, rising 40-week MA, price above MA):
+  - **WEEKLY AGREES** (Stage 2 on weekly, rising 30-week MA, price above MA):
     Daily pullback setups and daily breakouts are valid long entries at full size.
   - **WEEKLY MIXED** (Stage 1 late or Stage 2 early, MA just turning up, price near MA):
     Daily setups are valid but reduce size; require stronger confirmation (volume breakout,
@@ -89,27 +89,23 @@ immediately if you are wrong, and you exit there.
   - This rule applies first, before any daily-chart analysis. If weekly conflicts, stop.
   - Repeat: if the WEEKLY and DAILY conflict → defer to the WEEKLY → stand aside or wait.
 
-- **Entry-zone taxonomy (five classifications)**
-  - **ACCUMULATE** — Price is in a Stage 1 base: range-bound, quiet volume, below resistance,
-    200d MA flat or just turning up. Appropriate for small starter position ahead of the breakout.
-    Primary trigger is the breakout on volume.
-  - **BUY-ZONE** — Price is at a pullback to a rising 50d or 200d MA (Stage 2 uptrend),
-    OR at a polarity retest of broken resistance. Primary long entry. Weekly must agree.
-  - **WAIT-PULLBACK** — Price is extended (>10–15% above rising 50d MA). No new entries.
-    Wait for price to pull back to the 50d MA support zone before entering.
-  - **WAIT-BREAKOUT** — Price is coiling below unbroken resistance with narrowing range and
-    declining volume (compression). Wait for a confirmed volume breakout before entering.
-  - **AVOID-DOWNTREND** — Stage 4: declining 200d MA, price below MA. No long positions.
+- **Entry-zone taxonomy (five verdicts)**
+  - **ACCUMULATE {support}** — Stage 2, price near support, `rsi_w` < 70, confirmation present (`obv_trend` = 'rising' OR `divergence` = 'bullish'). Highest-conviction add. Level = support.
+  - **BUY-ZONE {support}** — Stage 2, price near support, `rsi_w` < 70, confirmation mixed or absent. Proceed at normal sizing. Level = support.
+  - **WAIT-PULLBACK {level}** — Fires in three cases: (1) Stage 3 topping [level = support]; (2) Stage 2 but extended (`dist_50d_pct` > 15 — price >15% above rising 50d MA) [level = the 50d MA]; (3) Stage 2 but weekly overbought (`rsi_w` ≥ 70) [level = the 50d MA]. Wait to buy the pullback to that level.
+  - **WAIT-BREAKOUT {resistance}** — Stage 1 (basing). Price range-bound below unbroken resistance. Wait for a daily close above resistance = level.
+  - **AVOID-DOWNTREND** — Stage 4 (declining). Level = resistance. No long positions.
 
 - **Extension check**
-  - If price is >10–15% above its rising 50d MA, it is *extended*.
+  - If price is >15% above its rising 50d MA (`dist_50d_pct` > 15), it is *extended*.
   - Chasing extended price means: wide stop (invalidation is far), poor risk/reward, high
     probability of mean reversion back to the MA before any further advance.
-  - Correct action: classify WAIT-PULLBACK and wait.
+  - Correct action: classify WAIT-PULLBACK {50d MA} and wait.
   - The script `python .agents/skills/research-technical/scripts/ta.py {SYMBOL}` computes
-    extension percentage (distance from price to 50d MA and 200d MA) along with structural
-    distances to support/resistance zones and base/breakout flags.
-    All distance-based rules below reference these script outputs — do not eyeball.
+    `dist_50d_pct` and `dist_200d_pct` (percentage distance of price from the 50d MA and
+    200d MA respectively), along with structural distances to support/resistance zones.
+    Derive base/breakout/extended from `stage`, `dist_50d_pct` (>15 = extended), and price
+    vs `resistance` (price ≥ resistance·0.99 = breakout). Do not eyeball.
 
 - **Structural invalidation levels**
   - Invalidation is ALWAYS structure-based — never an arbitrary dollar amount or fixed percentage.
@@ -128,12 +124,13 @@ immediately if you are wrong, and you exit there.
 
 1. **Run the structural script first.**
    Execute `python .agents/skills/research-technical/scripts/ta.py {SYMBOL}`.
-   Capture: `extension_50d_pct`, `extension_200d_pct`, `support_below_pct`, `resistance_above_pct`,
-   `base_flag`, `breakout_flag`, `volume_ratio_on_breakout`.
+   Capture: `dist_50d_pct`, `dist_200d_pct`, `support`, `resistance`, `vol_ratio`.
+   Derive base/breakout/extended from `stage`, `dist_50d_pct` (>15 = extended), and
+   price vs `resistance` (price ≥ resistance·0.99 = breakout).
    All numeric thresholds in rules 2–10 reference these outputs.
 
 2. **Apply the weekly gate — this is the FIRST and MANDATORY filter.**
-   Determine the weekly stage from the 40-week MA direction and price position:
+   Determine the weekly stage from the 30-week MA direction and price position:
    - Weekly Stage 4 (MA declining, price below MA) → **AVOID-DOWNTREND**. STOP. Output this.
    - Weekly Stage 3 (MA flattening, price churning near highs) → **AVOID-DOWNTREND**. STOP.
    - Weekly Stage 2 (MA rising, price above MA) → proceed to step 3 with `WEEKLY_AGREES`.
@@ -141,17 +138,15 @@ immediately if you are wrong, and you exit there.
      (reduced conviction; require stronger daily confirmation).
 
 3. **Check for extension (step 2 of daily classification).**
-   If `extension_50d_pct > 12%` → classify **WAIT-PULLBACK**. Stop daily analysis.
+   If `dist_50d_pct > 15` → classify **WAIT-PULLBACK {50d MA}**. Stop daily analysis.
    Log: "Price is [X]% above rising 50d MA — extended. Wait for pullback to MA support."
 
 4. **Classify the daily entry zone using the taxonomy.**
    Apply checks in this order (first match wins):
-   a. `base_flag=True` AND `resistance_above_pct < 5%` AND volume quiet → **ACCUMULATE**.
-   b. `extension_50d_pct < 5%` AND 50d MA rising AND weekly agrees → **BUY-ZONE** (MA pullback).
-   c. Price within 3% above prior broken resistance (polarity zone) AND holding on close → **BUY-ZONE** (polarity retest).
-   d. Price pressing resistance, range narrowing, volume declining → **WAIT-BREAKOUT**.
-   e. Weekly Stage 2 but `extension_200d_pct < 5%` AND 200d MA rising → **BUY-ZONE** (200d pullback).
-   f. Default if none of the above resolve cleanly → **WAIT-PULLBACK** (ambiguous; stay cautious).
+   a. Stage 2, near support, `rsi_w` < 70, `obv_trend == 'rising'` OR `divergence == 'bullish'` → **ACCUMULATE {support}**.
+   b. Stage 2, near support, `rsi_w` < 70, confirmation mixed or absent → **BUY-ZONE {support}**.
+   c. Stage 1 (price range-bound, 30-week MA flat/curling) → **WAIT-BREAKOUT {resistance}**.
+   d. Default if none of the above resolve cleanly → **WAIT-PULLBACK {50d MA}** (ambiguous; stay cautious).
 
 5. **Confirm weekly-daily alignment and log it explicitly.**
    Output exactly one of:
@@ -196,8 +191,8 @@ immediately if you are wrong, and you exit there.
     regime:            RISK_ON | RISK_OFF | NEUTRAL (from regime-detection)
     key_level_below:   $[price] — [structure name]
     invalidation:      Sustained close below $[price]; threshold >3% or 2 consecutive closes
-    extension_50d_pct: [X]% (from ta.py)
-    extension_200d_pct:[X]% (from ta.py)
+    dist_50d_pct: [X]% (from ta.py)
+    dist_200d_pct:[X]% (from ta.py)
     structural_notes:  [1 paragraph plain-English interpretation]
     ```
 

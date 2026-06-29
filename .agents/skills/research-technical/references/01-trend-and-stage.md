@@ -56,7 +56,7 @@ Technical analysis is **the measurement of crowd behavior over time** — not fu
   - **Honest assessment:** Naive MA crossovers are **weak as standalone triggers**. They lag severely (the move is often 10–30% complete before the cross fires) and whipsaw painfully in range-bound markets. Use them as *context* — a Golden Cross on a Stage 2 breakout confirms structural alignment; a Death Cross during a Stage 4 decline confirms you should stay out. **Never use a cross alone as an entry trigger.** Route any rule using MA crosses to `analyst-systematic-trading` for backtesting before use.
 
 - **MA Slope Measurement — how to quantify "rising" vs "flat"**
-  - Slope = (MA_today − MA_N_periods_ago) / MA_N_periods_ago. Suggested lookback: 4 weeks for the 30-week MA, 8 weeks for the 200d MA.
+  - Slope = (MA_today − MA_N_periods_ago) / MA_N_periods_ago. Lookback: 10 bars for both (the 30-week MA and the 200-day MA), with a ±0.5% flat band.
   - **Rising:** slope > +0.5% over the lookback period. **Flat:** slope between −0.5% and +0.5%. **Falling:** slope < −0.5%.
   - These thresholds are adjustable; the script `ta.py` uses them as defaults. The key point is that "flat" is a *range*, not a point — small oscillations around zero are noise.
   - Do not call a MA "rising" on a single week's uptick after a long decline. Require *consecutive* rising readings (≥3 weeks) to confirm a slope change.
@@ -79,7 +79,7 @@ Technical analysis is **the measurement of crowd behavior over time** — not fu
 
 1. **Determine the Stage FIRST.** Run `python .agents/skills/research-technical/scripts/ta.py {SYMBOL}` to get the computed 200d MA, 30-week MA, 50d MA, their slopes, and the auto-labeled Weinstein Stage. Do not skip this step.
 
-2. **Stage 4 → STOP. Do not proceed.** If the 30-week MA is falling AND price is below it, output `AVOID` and terminate analysis for this symbol. No fundamental case, no "it's cheap" argument overrides a Stage 4 verdict for a long entry.
+2. **Stage 4 → STOP. Do not proceed.** If the 30-week MA is falling AND price is below it, output `AVOID-DOWNTREND` and terminate analysis for this symbol. No fundamental case, no "it's cheap" argument overrides a Stage 4 verdict for a long entry.
 
 3. **Stage 3 → No new entries; manage exits only.** If already long, tighten stop to just below the base of the Stage 3 range. Flag for `risk-management` to review position sizing.
 
@@ -94,37 +94,23 @@ Technical analysis is **the measurement of crowd behavior over time** — not fu
    - *Mid Stage 2 (pullback to rising MA):* price retraced to the 30-week MA or 50d MA on low volume. Valid secondary entry. Stop below the MA.
    - *Late Stage 2 (extended):* price is far above both MAs (>20% extension from 30-week MA). Do NOT chase. Wait for the next pullback or reduce target size.
 
-8. **Volume confirmation is mandatory on breakouts.** A Stage 2 breakout on below-average volume is a false signal until volume confirms. Flag as `WATCH_CONFIRM` rather than `ENTRY_NOW`.
+8. **Volume confirmation is mandatory on breakouts.** A Stage 2 breakout on below-average volume is a false signal until volume confirms. Flag it as unconfirmed and wait for volume to expand before entering.
 
 9. **For crypto assets: layer on the halving-cycle prior.** If the halving-cycle clock suggests Stage 1–early Stage 2 (12–30 months post-ATH trough), raise confidence. If it suggests late Stage 3 (18+ months into a bull run, MAs already flattening), cut size and add on-chain distribution check via `analysis-onchain`.
 
 10. **Golden/Death cross — treat as context only.** If a Golden Cross fired recently AND Stage 2 structural criteria pass → add as a confirming signal (+1 to conviction score). If a Death Cross fired AND Stage 4 criteria hold → adds confirmation to AVOID. Never use a cross as the *sole* trigger.
 
-11. **Output a structured verdict block for every symbol analyzed:**
-    ```
-    SYMBOL:      {SYMBOL}
-    Stage:       {1|2|3|4}
-    30wk_MA_slope: {rising|flat|falling}
-    200d_regime: {bullish|neutral|bearish}
-    50d_vs_200d: {above|below}
-    Entry_quality: {breakout|pullback|extended|none}
-    Volume_confirm: {yes|no|pending}
-    Verdict:     {BUY_NOW|ADD_ON_PULLBACK|WATCH|NO_NEW_ENTRY|AVOID}
-    Stop_zone:   {price level or "n/a"}
-    Cross_ref:   {any flags for analysis-onchain, regime-detection, risk-management}
-    ```
+11. **The stage→verdict mapping (engine rules):**
+    - Stage 4 (declining) → **AVOID-DOWNTREND**; level = resistance.
+    - Stage 3 (topping) → **WAIT-PULLBACK {support}**; no new entries.
+    - Stage 1 (basing) → **WAIT-BREAKOUT {resistance}**; wait for a daily close above resistance.
+    - Stage 2 + `dist_50d_pct` > 15 (price >15% above rising 50d MA, extended) → **WAIT-PULLBACK {50d MA level}**.
+    - Stage 2 + `rsi_w` ≥ 70 (weekly overbought) → **WAIT-PULLBACK {50d MA level}**.
+    - Stage 2, near support, `rsi_w` < 70, confirmation present (`obv_trend == 'rising'` OR `divergence == 'bullish'`) → **ACCUMULATE {support}** — highest-conviction add.
+    - Stage 2, near support, `rsi_w` < 70, confirmation mixed or absent → **BUY-ZONE {support}**.
+    Run `ta.py` — it emits `verdict`, `level`, `entry_low`, `entry_high`, and `invalidation` directly.
 
-12. **Score conviction across dimensions before sizing.** Before passing a verdict to `risk-management`, compute a quick conviction score:
-    - Stage 2 confirmed: +2
-    - 200d MA rising and price above: +1
-    - 50d above 200d: +1
-    - Volume confirmed on breakout: +1
-    - Relative strength ≥ 70th percentile: +1
-    - Halving-cycle Stage 2 prior (crypto only): +1
-    - Conviction ≥ 5: full-size entry candidate. 3–4: half-size. < 3: WATCH only.
-    - This is a heuristic scoring aid, not a mechanical system. Route to `analyst-systematic-trading` to validate thresholds before hardcoding.
-
-13. **Route decisions downstream correctly:**
+12. **Route decisions downstream correctly:**
     - Sizing and drawdown limits → `risk-management`
     - Risk-on / risk-off macro overlay → `regime-detection`
     - Intraday execution timing (entry price, order type) → `investor-bernstein-intraday`
