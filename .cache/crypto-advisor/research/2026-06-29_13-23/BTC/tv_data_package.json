@@ -1,0 +1,46 @@
+{
+  "token": "BTC",
+  "symbol": "BINANCE:BTCUSDT",
+  "price_usd": 60432,
+  "daily": {
+    "ohlcv_summary": {"bar_count": 210, "open": 86286, "close": 60432, "high": 97924, "low": 58115, "change_pct": "-29.96%"},
+    "last_5_bars": [
+      {"date": "2026-06-25", "close": 59794},
+      {"date": "2026-06-26", "close": 60097},
+      {"date": "2026-06-27", "close": 60029},
+      {"date": "2026-06-28", "close": 59577},
+      {"date": "2026-06-29", "close": 60432}
+    ]
+  },
+  "weekly": {
+    "bar_count": 210,
+    "weekly_closes_count": 210,
+    "ohlcv_summary": {"open": 21038, "close": 60434, "high": 126199, "low": 15476, "change_pct": "+187.26%"}
+  },
+  "indicators": {
+    "rsi": 35.29,
+    "macd_hist": 16.68,
+    "macd_line": -2285.82,
+    "macd_signal": -2302.50,
+    "bb_upper": null,
+    "bb_lower": null
+  },
+  "moving_averages": {
+    "ema20": 62860.56,
+    "sma50": 69033.35,
+    "sma200": 75558.27,
+    "ma200w": 62645.16
+  },
+  "derived": {
+    "death_cross": true,
+    "golden_cross": false,
+    "pct_from_52w_high": -38.3,
+    "below_200wma": true,
+    "below_ema20": true,
+    "below_sma50": true,
+    "below_sma200": true,
+    "weekly_closes_count": 210
+  },
+  "screenshot_path": "/Users/engineer/workspace/tradingview-mcp/screenshots/BTC_chart.png",
+  "screenshot_url": "https://chat.quantarena.xyz/tv-charts/BTC_chart.png"
+}
