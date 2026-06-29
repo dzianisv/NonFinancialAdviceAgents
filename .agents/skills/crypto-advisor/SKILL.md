@@ -523,37 +523,99 @@ SOL   | BUY (small) | cheap     | SPLIT  | 3 / 1
 ```
 
 ### Block 2 — Plain-English verdict per token
-For every token write 3–5 sentences a non-expert can understand. Cover:
-- **Why this signal**: the 1–2 facts that drove the decision (price vs 200w MA, RSI, death cross, on-chain zone).
-- **News catalyst** (if any): state the headline fact **and** append `[source: https://exact-article-url]` inline — no URL = do not mention it.
-- **Main risk**: the single biggest thing that could make this call wrong.
-- **What to watch**: the one trigger that would change the signal (e.g. "close above SMA50" → HOLD flips to BUY).
+
+For every token write the following **four mandatory sections** — no exceptions, no token skipped:
+
+**1. Verdict (2–4 sentences, plain English)**
+Cover: why this signal (1–2 key facts), news catalyst with `[source: https://...]` inline if any, main risk, what to watch (trigger to change signal). No jargon — write what the data means, not the code names.
+
+**2. Research Desk recap (1 sentence per researcher, always present)**
+Summarise what each Phase 1 researcher found. Pull directly from their briefs — do not invent.
+
+```
+Research Desk:
+  Technical:   {1 sentence — price vs MAs, RSI, death/golden cross, MACD direction}
+  On-Chain:    {1 sentence — MVRV-Z/NUPL/realized price/Puell; cycle position}
+  DeFi:        {1 sentence — TVL/fees/revenue accrual; key protocol mechanic (or "n/a — L1" for BTC/ETH/SOL/TON)}
+  Macro:       {1 sentence — GLI/M2/DXY/ETF flows; dominant macro driver}
+  Smart Money: {1 sentence — exchange inflows/outflows, whale flows, OTC/positioning}
+```
+
+If a researcher returned INSUFFICIENT DATA, write that verbatim — never omit the line.
+
+**3. Panel votes (1 line per investor)**
+```
+Panel:
+  Graham (Value):          BULLISH|NEUTRAL|BEARISH — {reason citing briefing number}
+  Buffett (Quality):       BULLISH|NEUTRAL|BEARISH — {reason}
+  Dalio (Cycle):           BULLISH|NEUTRAL|BEARISH — {reason}
+  Druckenmiller (Trend):   BULLISH|NEUTRAL|BEARISH — {reason}
+  Burniske (On-chain):     BULLISH|NEUTRAL|BEARISH — {reason}
+```
+
+**4. Bull / Bear**
+```
+Bull: {1 sentence}
+Bear: {1 sentence}
+```
 
 **⛔ HARD RULE for Block 2:** Every claim from a fetched article, data feed, or external source carries an inline `[source: https://...]` immediately after it. Technical indicators (RSI, MACD, death cross) computed from price data do NOT need a source; narrative facts (headlines, TVL, fund flows, institutional events) DO. A claim with no `[source:]` tag is unverified — remove it.
 
 Example:
 ```
-BTC — HOLD
+### BTC — HOLD
+
 BTC is down 42% from its all-time high and sits on the 200-week moving average
 (~$62k), the historical long-term floor. RSI has recovered to neutral (42.6)
 and MACD is turning up. However a death cross is active (50-day below 200-day),
 macro is hostile (Fed holding rates, strong dollar), and ETF flows are still
 negative [source: https://www.coindesk.com/markets/2026/06/21/btc-etf-outflows].
 Not cheap enough on-chain to force a buy, not broken enough to sell.
-Watch for a daily close above SMA50 ($71.9k) to upgrade to BUY,
-or a weekly close below $60k to reassess.
+Watch for a daily close above SMA50 ($71.9k) to upgrade to BUY.
 
-ETH — BUY (small)
-ETH has crashed 63% from its 52-week high and is now 30% below its 200-week
+Research Desk:
+  Technical:   Price $62k, EMA20 $63.5k overhead, SMA50 $69.9k, death cross active; RSI 42.6 neutral; MACD hist +400 turning positive.
+  On-Chain:    MVRV-Z 1.8 (neutral), realized price ~$47k — BTC trading at 1.3× realized price, not cheap but not bubble territory.
+  DeFi:        n/a — L1 (no protocol revenue accrual).
+  Macro:       Fed held rates 3.5–3.75%, Warsh hawkish, real yields rising, DXY strengthening — debasement trade unwinding [source: https://www.theblock.co/post/405152/crypto-markets-wobble-hawkish-fed].
+  Smart Money: ETF outflows $1.79B last week (2nd worst ever) [source: https://www.theblock.co/post/406451/ibit-second-worst-week]; exchange inflows neutral.
+
+Panel:
+  Graham (Value):          NEUTRAL — FAIR_VALUE zone; 42% below ATH qualifies for margin-of-safety watch, not deep-value buy.
+  Buffett (Quality):       BULLISH — 21M hard cap, undisputed monetary network moat; Saylor accumulation ongoing.
+  Dalio (Cycle):           BULLISH — F&G 18 (Extreme Fear) triggers contrarian signal; historically strong entry region.
+  Druckenmiller (Trend):   BEARISH — death cross active, RSI < 45, MACD still negative; all bearish conditions met.
+  Burniske (On-chain):     BULLISH — RSI 30 proxies MVRV undervaluation; realized price likely above spot.
+
+Bull: Extreme Fear at RSI 30 historically marks major BTC cycle bottoms; institutional floor from Saylor accumulation.
+Bear: Death cross + sustained ETF outflows + hawkish Fed — macro headwinds can keep price suppressed for months.
+
+---
+
+### ETH — BUY (small)
+
+ETH has crashed 63% from its 52-week high and is now 36% below its 200-week
 moving average — a level historically associated with cycle bottoms. The
-Ethereum Foundation cut 20% of its workforce today as part of a restructuring
-[source: https://www.theblock.co/post/405809/ethereum-foundation-cuts-20-of-its-workforce-as-new-5-cluster-structure-takes-shape],
-adding organizational risk on top of the macro headwinds. One panel seat is
-bullish (on-chain deep value), two are bearish (macro + EF uncertainty).
-The split verdict with extreme undervaluation triggers the "small position"
-rule: start a toe-hold, don't go large.
-Key risk: ETH/BTC continues compressing if L2 fee erosion persists.
-Upgrade to BUY if price reclaims the 200-week MA (~$2,472).
+Ethereum Foundation cut 20% of its workforce [source: https://www.theblock.co/post/405809/ethereum-foundation-cuts-20-staff],
+adding organizational risk, but chain revenue holds at $3.1M/day [source: https://defillama.com/chain/ethereum].
+Four of five panel seats bullish. Start a small tranche; upgrade to BUY on 200wMA reclaim.
+
+Research Desk:
+  Technical:   Death cross absent; RSI 31 (oversold); MACD hist barely negative (-1.8); EMA20 $1,698 overhead resistance.
+  On-Chain:    NUPL negative (capitulation zone); 36% below 200wMA ($2,472) — historically rare discount; staking yield ~3-4%.
+  DeFi:        Chain revenue $3.1M/day, TVL $37.6B stable [source: https://defillama.com/chain/ethereum]; EIP-4844 reduced L2 fees but base layer burn still positive.
+  Macro:       EF restructuring adds FUD; EthLabs launch by 50+ stakeholders a counterweight; global risk-off depresses all alts.
+  Smart Money: Corporate buyers active — Bitmine +$92M, Sharplink accumulating; one whale sold 33k ETH at $1,560 [source: https://www.theblock.co/post/406342/ethereum-og-wallets-sell].
+
+Panel:
+  Graham (Value):          BULLISH — DEEP_VALUE zone; 63% below 52w high, substantial margin of safety.
+  Buffett (Quality):       BULLISH — dominant smart-contract layer, staking yield, deflationary burn, deep dev moat.
+  Dalio (Cycle):           BULLISH — F&G 18 (Extreme Fear); ETH ended Q2 red, classic capitulation setup.
+  Druckenmiller (Trend):   NEUTRAL — no death cross (positive), but RSI < 40 and MACD still negative; bullish condition not met.
+  Burniske (On-chain):     BULLISH — NUPL capitulation + 36% below 200wMA = staking yield at relative high vs price.
+
+Bull: Spot ETF flows, staking yield, and deep-value zone converge at a historically rare oversold RSI.
+Bear: MACD still negative; broader bear trend could extend toward $1,200–$1,400.
 ```
 
 ### Block 3 — News & sources used by the Research Desk
@@ -578,6 +640,8 @@ BTC research sources:
 Self-check before printing:
 - Every token has `status='done'` in `token_analysis`
 - `seats_bull + seats_bear <= 5` for each token
+- **Block 2 researcher recap present for every token** — 5 lines (Technical/On-Chain/DeFi/Macro/Smart Money), no line omitted
+- **Block 2 panel votes present for every token** — 5 lines (Graham/Buffett/Dalio/Druckenmiller/Burniske)
 - Every research source entry starts with `https://` followed by the **specific article URL** (not a listing/search page) — else remove it and mark INSUFFICIENT DATA
 - **Two-step verified**: news citations point to the article URL you fetched (step 2), not the listing page (step 1)
 - **Block 2 inline links**: every news-based claim has `[source: https://...]` — scan each verdict; remove any fact with no source tag
