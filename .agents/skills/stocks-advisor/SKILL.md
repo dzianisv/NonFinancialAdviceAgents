@@ -156,29 +156,6 @@ ETF-allocation answer to `tradfi-portfolio-manager` — do not improvise sleeve 
 
 ---
 
-## Step 0.3 — Load prior memory
-
-**HARD RULE: NEVER read `.agents/memory/positions.md` directly with `view` or `grep`.
-Always call `recall.ts` — it merges the canonical tier with episodic dated logs AND emits the
-`source=` degradation flag. Direct file reads silently skip both.**
-
-Before seeding the todo list, pull prior verdicts and user preferences for this run's tickers:
-
-```bash
-bun .agents/skills/portfolio-memory/recall.ts --desk stocks \
-  --tickers "AVGO MRVL COIN PYPL"
-```
-
-Inject the printed `<prior_context>` block into EVERY seat's data package. It has two parts: the
-**canonical** current stance per ticker (the latest verdict, which physically overwrote any older one — you
-cannot follow a stale call) and **episodic** dated history newest-first. If there is no prior memory the
-script prints `[no prior memory for this run]` — continue normally. See `portfolio-memory` for the model.
-
-Inspect the printed `source=` attribute. If `source="grep-fallback"` (the structured store was missed and it
-fell back to grepping daily logs), set **MEMORY_DEGRADED** and print: "Memory: DEGRADED (grep-fallback) — no
-canonical per-ticker stance; treat any recalled verdict as low-confidence, not an authoritative supersede."
-Continue the run, but do not present a grep-fallback stance as the canonical current call.
-
 ---
 
 ## Step 0.5 — Load holdings from Google Sheet (if provided)
@@ -630,7 +607,7 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       EDGAR, capitoltrades), or returned `NEUTRAL — INSUFFICIENT DATA`; no filing is fabricated.
 - [ ] Portfolio sizing/concentration was deferred to `stock-chair`; ETF allocation to
       `tradfi-portfolio-manager`. This skill stayed on individual-stock entries only.
-- [ ] **recall.ts was called** (not `view`/`grep` on positions.md directly); `source=` checked; if `grep-fallback`, run tagged MEMORY_DEGRADED and recalled
+- [ ] Prior research reports in `.cache/stocks-advisor/research/` checked for context if relevant (human-readable history, not verdict inputs)
       stances flagged low-confidence.
 - [ ] A consolidated **SOURCES & DATA** appendix is printed (Step 3.5) listing every web_fetched news/filing
       URL, every feed-script record, and the market-data provenance — required in normal AND DEGRADED mode.

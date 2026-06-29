@@ -14,8 +14,6 @@ Input: user-supplied ticker list, a Google Sheet of holdings, or stocks discover
 flowchart TD
     USER(["User prompt"])
 
-    MEM["Step -1 · Load prior memory
-bun portfolio-memory/recall.ts"]
     SHEET["Step 0 · Load Google Sheet (optional)
 gws sheets +read
 ticker, qty, cost_basis, pnl_pct"]
@@ -121,10 +119,7 @@ Required for every BUY / ADD"]
             SKEP --> CIO --> RISK
         end
 
-        PERSIST["bun portfolio-memory/remember.ts"]
-
         SF_OUT & ST_OUT & SN_OUT & SS_OUT & SM_OUT --> SKEP
-        RISK --> PERSIST
     end
 
     EXEC["Step 3.6 · P0/P1/P2/P3 Execution Table
@@ -145,8 +140,8 @@ Ticker · Decision · Conv · Entry · Trigger · Theme"]
     CHAIR[["stock-chair
 sizing · concentration"]]
 
-    USER --> MEM --> SHEET --> EDGE --> MACRO --> SEED --> SEQ
-    PERSIST --> EXEC --> SYNTH --> SIGNAL --> CHAIR
+    USER --> SHEET --> EDGE --> MACRO --> SEED --> SEQ
+    RISK --> EXEC --> SYNTH --> SIGNAL --> CHAIR
 ```
 
 ## Two input modes

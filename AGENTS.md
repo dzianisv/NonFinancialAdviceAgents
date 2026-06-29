@@ -104,27 +104,6 @@ Skills publish to Notion **only when their own config enables it.** Check `.cach
 
 Title format: `YYYY-MM-DD-{narrative}` (e.g. `2026-06-26-xfear-aave-buy`). Always write `research/` too — git is the backup, Notion is the readable view.
 
-## Memory model — two-tier, ranked (reuses OpenClaw memory-core)
-
-Two surfaces, mirroring OpenClaw's evergreen-vs-dated split (`temporal-decay.ts:71-95`):
-- **Canonical / evergreen** — `.agents/memory/positions.md`: one line per `<desk>:<TICKER>`,
-  **overwritten on every new verdict** so the latest stance physically replaces the old one (no stale
-  call can out-rank the current one). Never decays.
-- **Episodic / dated** — `.agents/memory/YYYY-MM-DD.md`: full notes, **decays by the date in the
-  filename** (newer outranks older on recall).
-
-**Recall** (before any portfolio/research run):
-```bash
-bun .agents/skills/portfolio-memory/recall.ts --desk stocks --tickers "AVGO MRVL COIN"
-```
-Tries `openclaw memory search` (hybrid BM25+vector+temporal-decay+MMR) when the CLI is built and
-`memorySearch.extraPaths` includes `.agents/memory`; else greps (canonical always shown + dated
-newest-first). Inject the printed `<prior_context>` block into the run.
-
-**Write** (per verdict): `bun .agents/skills/portfolio-memory/remember.ts --desk stocks --ticker COIN
---verdict TRIM --date <date> --conviction 2 --body "..."` — upserts the canonical line + appends the
-dated log. The CIO prose summary above is still appended for narrative history.
-
 ## Skill evaluation — how to run + where results live
 
 Run the hyperagent improvement loop on any skill with `/hyperagent-eval-skill`. Point it at the skill and it runs actor/judge/archive/holdout automatically.
