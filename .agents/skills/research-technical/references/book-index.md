@@ -1,17 +1,23 @@
-# Book Index & Provenance — Technical-Analysis Lens
+# Book Index & Provenance — Long-Term Entry-Timing (Technical Analysis)
 
-> Source: Jacob Bernstein, *The Ultimate Day Trader: How to Achieve Consistent Day Trading Profits in Stocks, Forex, and Commodities* (2009, F+W Media) — the primary, distilled source for this skill. The canonical TA reference texts below are named honestly as **NOT yet distilled** (provenance only). Distilled 2026-06-07.
+> Provenance: the frameworks below are **summarized from widely-known PUBLIC technical-analysis knowledge** — attributed to their originators by NAME. **No verbatim quotes, page numbers, or precise statistics are fabricated**, and the actual books have **NOT** been ingested verbatim into this skill. Standard public numeric conventions (RSI 70/30, MACD 12/26/9, the 200-day MA) are common-knowledge TA and are used freely; book-specific quotations are not.
 
-## Primary source — DISTILLED
-- **Jacob Bernstein — *The Ultimate Day Trader* (2009, F+W Media).** Present in this repo's `books/`. The entire skill (philosophy, STF framework, the ~7 set-ups with exact parameters, triggers/stops/exits, risk and money management, psychology, and the honest assessment) is distilled from this book. All quotes and indicator parameters in `references/01`–`05` trace to it. Coverage: intraday/day-trading methods for stocks, forex, and commodities; mechanical entries with discretionary Follow-Through; strong on risk discipline, deliberately weak on backtestability.
+## Frameworks summarized in this skill — NAMED, NOT verbatim-distilled
 
-## Canonical TA reference texts — NAMED, NOT yet distilled
-These are the standard works of the field. They are listed for provenance and future distillation; **this skill has not yet ingested them**, so do not attribute specific claims to them.
-- **John J. Murphy — *Technical Analysis of the Financial Markets* (1999, NYIF).** *The standard reference / the basis for much of the CMT (Chartered Market Technician) body of knowledge.* Comprehensive coverage of charting, trend, indicators, intermarket analysis. The default citation when someone says "the TA textbook."
-- **Robert D. Edwards & John Magee — *Technical Analysis of Stock Trends* (1st ed. 1948).** *The 1948 ur-text* that codified classical chart patterns (head-and-shoulders, triangles, trendlines, support/resistance). The historical foundation of pattern-based TA.
-- **Charles D. Kirkpatrick II & Julie R. Dahlquist — *Technical Analysis: The Complete Resource for Financial Market Technicians*.** *The evidence-tested CMT text* — notable for actually surveying the academic/empirical record on which techniques have measurable support and which do not. The right reference when the question is "does this technique actually have evidence?"
+These frameworks are the backbone of this skill. They are attributed by originator and summarized from widely-known PUBLIC knowledge. **This skill has NOT ingested the actual books verbatim** — do not attribute specific quotes, page numbers, or precise statistics to any of them.
+
+- **Stan Weinstein — *Secrets for Profiting in Bull and Bear Markets*** — Weinstein stage analysis (Stage 1–4, the 30-week MA, buying Stage-2 breakouts); the spine of `references/01-trend-and-stage.md`.
+- **Adam Grimes — *The Art and Science of Technical Analysis*** — the evidence-based, statistically-honest modern reference; what-to-measure vs what-to-discard; grounds the honesty overlay throughout.
+- **John J. Murphy — *Technical Analysis of the Financial Markets*** — the canonical CMT reference; comprehensive coverage of trend, indicators, intermarket analysis.
+- **Charles Kirkpatrick & Julie Dahlquist — *Technical Analysis: The Complete Resource for Financial Market Technicians*** — the CMT text that surveys the empirical record; the right reference when "does this technique have evidence?"
+
+## Bernstein's intraday day-trading method
+
+**Bernstein's intraday day-trading method lives in the `investor-bernstein-intraday` skill, not here.** That skill covers: Set-Up→Trigger→Follow-Through, the 10/8 MAC, 28-period Momentum, 9/18 MACD line, 9-period stochastic POP, 16-bar breakout, gap/Oops, and 30-min opening-range setups — all intraday. Route intraday / day-trading questions there.
 
 ## How to use this index
-1. For any **load-bearing claim, quote, or parameter**, cite **Bernstein** and the relevant `references/0X` file — that is the only distilled source here.
-2. When asked for **the authoritative TA reference** (definitions, the CMT canon, classical patterns, or the empirical record), **name** Murphy / Edwards & Magee / Kirkpatrick & Dahlquist as above, but **flag that they are not yet distilled** into this skill — do not fabricate quotes or specifics from them.
-3. For **validation** of any Bernstein setup, route to `analyst-systematic-trading` (walk-forward, full costs); `trend-following` is the empirically durable TA family; pair with `regime-detection` and `risk-management`.
+
+1. **All frameworks here are summarized from PUBLIC TA knowledge** — cite them by originator name (e.g., "Weinstein stage analysis") without inventing quotes, page numbers, or precise statistics.
+2. **For validation** of any entry rule derived from these frameworks, route to `analyst-systematic-trading` (walk-forward, full costs). `trend-following` is the empirically durable TA family; pair with `regime-detection` and `risk-management`.
+3. **For on-chain VALUATION** (MVRV, NUPL, realized price, Puell multiple), route to `analysis-onchain` — that is not covered here.
+4. **For intraday / day-trading execution**, route to `investor-bernstein-intraday` — that is not covered here.
