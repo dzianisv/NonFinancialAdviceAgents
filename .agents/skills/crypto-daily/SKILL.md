@@ -152,11 +152,12 @@ Save the returned `id` as `PAGE_ID` and `url` as `NOTION_PAGE_URL`.
 ```
 📊 Crypto Daily — {TODAY} | F&G {VALUE} {EMOJI} {LABEL}
 
-{SIGNAL TABLE — compact, one token per line, format: EMOJI TICKER $PRICE — SIGNAL}
+{SIGNAL TABLE — one token per line}
+{EMOJI} {TICKER} ${PRICE} — {SIGNAL}: {1-sentence reason — key fact + why it drives this signal}
 
 🔴 HOLD:             {space-separated tokens, e.g. BTC · PUMP}
 🟡 BUY(small) WATCH: {governor-downgraded tokens, e.g. ETH · SOL · LINK}
-⭐ BUY(small) ACTIVE: {top N governor picks WITH price, e.g. AERO $0.47 · JUP $0.22 · HYPE $62}
+⭐ BUY ACTIVE: {top N governor picks WITH price, e.g. AERO $0.47 · JUP $0.22 · HYPE $62}
 
 ⚙️ Governor: F&G {VALUE} → max {N} active buys
 {1-line macro context, e.g. "ETF -$1.79B week — Warsh hawkish, debasement trade unwinding"}
@@ -167,9 +168,25 @@ Save the returned `id` as `PAGE_ID` and `url` as `NOTION_PAGE_URL`.
 DYOR. Educational only. Not financial advice. #Bitcoin #DeFi #Crypto
 ```
 
+**Signal table example:**
+```
+🔴 BTC $59,298 — HOLD: death cross active, ETF outflows $1.79B/wk, 3/5 analysts cautious
+🟢 ETH $1,563 — BUY: 36% below 4yr avg, RSI 31 oversold, no death cross — 4/5 analysts bullish
+🟢 SOL $70.84 — BUY: 34% below 4yr avg, MACD turning, ecosystem revenue solid — 4/5 analysts bullish
+🔴 TON $1.593 — HOLD: split verdict, Durov legal risk unresolved
+🔴 HYPE $61.34 — HOLD: only 1/5 analysts bullish, FAIR_VALUE zone
+🟢 AAVE $90.93 — BUY: $40M/30d protocol fees, 36% below 4yr avg — 4/5 analysts bullish
+🔴 JUP $0.2102 — HOLD: BUY signal but governor cap — 3/5 bullish, downgraded by Extreme Fear limit
+🔴 UNI $2.914 — HOLD: fee switch live but split verdict, 2/5 analysts bullish
+🔴 AERO $0.481 — HOLD: 3/5 bullish but downgraded by governor cap
+🔴 PUMP $0.00145 — HOLD: 1/5 bullish, no clear value accrual to token
+🟢 LINK $7.287 — BUY: RSI 32 oversold, RWA oracle moat, 42% below 4yr avg — 4/5 analysts bullish
+```
+
 Rules:
-- Signal table: one line per token — format exactly `EMOJI TICKER $PRICE — SIGNAL`
-- Group summary: three lines — HOLD / BUY(small) WATCH / BUY(small) ACTIVE. **Never shorten labels** (🟡 WATCH: is wrong; must be 🟡 BUY(small) WATCH:)
+- Signal table: one line per token — **reason is mandatory** — format exactly `EMOJI TICKER $PRICE — SIGNAL: {why}`
+- The reason must be plain English: key indicator or fact + analyst count (e.g. "4/5 analysts bullish") — no jargon codes
+- Group summary: three lines — HOLD / BUY(small) WATCH / BUY ACTIVE. **Never shorten labels** (🟡 WATCH: is wrong; must be 🟡 BUY(small) WATCH:)
 - **ACTIVE line MUST include price for every token** — `AERO $0.47 · JUP $0.22 · HYPE $62` not just tickers. This is the only actionable line; price is mandatory.
 - Macro context: ONE sentence max — the single most important driver today
 - No raw URLs inline — the Notion link is the ONLY URL in the message
