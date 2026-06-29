@@ -158,6 +158,10 @@ ETF-allocation answer to `tradfi-portfolio-manager` — do not improvise sleeve 
 
 ## Step 0.3 — Load prior memory
 
+**HARD RULE: NEVER read `.agents/memory/positions.md` directly with `view` or `grep`.
+Always call `recall.ts` — it merges the canonical tier with episodic dated logs AND emits the
+`source=` degradation flag. Direct file reads silently skip both.**
+
 Before seeding the todo list, pull prior verdicts and user preferences for this run's tickers:
 
 ```bash
@@ -626,7 +630,7 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       EDGAR, capitoltrades), or returned `NEUTRAL — INSUFFICIENT DATA`; no filing is fabricated.
 - [ ] Portfolio sizing/concentration was deferred to `stock-chair`; ETF allocation to
       `tradfi-portfolio-manager`. This skill stayed on individual-stock entries only.
-- [ ] recall.ts `source` was checked; if `grep-fallback`, the run is tagged MEMORY_DEGRADED and recalled
+- [ ] **recall.ts was called** (not `view`/`grep` on positions.md directly); `source=` checked; if `grep-fallback`, run tagged MEMORY_DEGRADED and recalled
       stances flagged low-confidence.
 - [ ] A consolidated **SOURCES & DATA** appendix is printed (Step 3.5) listing every web_fetched news/filing
       URL, every feed-script record, and the market-data provenance — required in normal AND DEGRADED mode.
