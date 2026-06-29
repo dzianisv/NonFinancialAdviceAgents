@@ -156,11 +156,11 @@ Each token block includes **1 sentence from each of the 5 researchers** (pulled 
 
 ━━━━━━━━━━━━━━━━━━━━━━
 {EMOJI} {TICKER} ${PRICE} — {SIGNAL}
-  📈 Technical:   {1 sentence — price vs MAs, RSI, death/golden cross, MACD direction}
-  ⛓ On-Chain:    {1 sentence — MVRV-Z/NUPL/realized price/cycle position; or "n/a — L1" for applicable tokens}
-  🏛 DeFi:        {1 sentence — TVL/fees/revenue accrual/protocol mechanic; or "n/a — L1"}
-  🌍 Macro:       {1 sentence — GLI/M2/DXY/ETF flows; dominant driver for this token}
-  🐋 Smart Money: {1 sentence — exchange inflows/outflows, whale flows, positioning}
+  📈 Technical:   {1 sentence — key chart indicator (plain explanation in parens)}
+  ⛓ On-Chain:    {1 sentence — on-chain metric (plain explanation in parens)}
+  🏛 DeFi:        {1 sentence — protocol revenue/TVL (plain explanation in parens); or "n/a — base layer asset"}
+  🌍 Macro:       {1 sentence — macro driver (plain explanation in parens)}
+  🐋 Smart Money: {1 sentence — exchange flows/whale activity (plain explanation in parens)}
 ━━━━━━━━━━━━━━━━━━━━━━
 ...repeat for each token...
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -178,24 +178,24 @@ DYOR. Educational only. Not financial advice. #Bitcoin #DeFi #Crypto
 **Concrete token block example:**
 ```
 🟢 AAVE $90.93 — BUY
-  📈 Chart:       Price above short-term average, momentum turning up, not overbought.
-  ⛓ Value:       36% below its long-term price floor — historically cheap territory.
-  🏛 Protocol:   Earns $40M/month in fees, $27B locked, profits go back to token holders.
-  🌍 Market:     Extreme Fear reading — investors panicking, which historically marks bottoms.
-  🐋 Flows:      More tokens leaving exchanges than entering — holders not selling.
+  📈 Technical:   RSI 65 (not overbought), above EMA20 (short-term avg $78), no death cross (trend intact) — momentum positive.
+  ⛓ On-Chain:    36% below 4yr avg (long-term price floor $140) — historically cheap territory.
+  🏛 DeFi:        $40M/month in fees (protocol earns real money), $27B TVL (total locked), profits returned to holders.
+  🌍 Macro:       Extreme Fear reading (F&G 18) — investors panicking, which historically marks bottoms.
+  🐋 Smart Money: Net exchange outflows (more leaving than entering) — holders not selling.
 
 🟡 BTC $59,298 — HOLD
-  📈 Chart:       Short-term average crossed below long-term average (bearish signal), momentum weak.
-  ⛓ Value:       Slipped below its 4-year price floor for the first time since 2022 — not cheap yet.
-  🏛 Protocol:   n/a — base layer asset, no protocol revenue.
-  🌍 Market:     $1.79B pulled from Bitcoin ETFs last week — institutions reducing exposure.
-  🐋 Flows:      One large buyer (Saylor) still accumulating, but fund outflows dominate.
+  📈 Technical:   Death cross active (short avg crossed below long avg — bearish), RSI 30 (oversold), momentum weak.
+  ⛓ On-Chain:    Below 4yr avg (long-term floor $62k, first break since 2022) — not cheap yet.
+  🏛 DeFi:        n/a — base layer asset, no protocol revenue.
+  🌍 Macro:       $1.79B pulled from Bitcoin ETFs last week (2nd worst week ever) — institutions reducing exposure.
+  🐋 Smart Money: One large buyer (Saylor) accumulating, but fund outflows dominate.
 ```
 
 **⛔ Rules:**
 - Every researcher line is **mandatory** — never omit a seat, never collapse to a single summary line
-- Write like you're explaining to a friend — no ticker codes, no internal labels (`DEEP_VALUE`, `BULLISH`, `MVRV-Z`, `NUPL`, `seats_bull`, etc.)
-- Use concrete numbers where available ($, %, days) — a number says more than an adjective
+- Keep the technical term, but follow each one with `(plain explanation)` in parentheses — write for someone who doesn't know crypto
+- Use concrete numbers where available ($, %, days)
 - HOLD tokens use 🟡 (not 🔴) — red is reserved for SELL only
 - Signal emoji: 🟢 BUY · 🟡 BUY(small) / WATCH / HOLD · 🔴 SELL
 - If a researcher returned no data, write "no data this run" — do not invent
