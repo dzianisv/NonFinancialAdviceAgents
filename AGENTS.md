@@ -257,6 +257,13 @@ import { $ } from "bun";
 - Telegraph token: `.telegraph_token`. Paths: `.telegraph_path` (v1) / `.telegraph_path_v2` (v2).
 - Publishers: `backtests/publish_report.py` (v1), `backtests/publish_report_v2.py` (v2).
 
+## Infrastructure
+
+See [`docs/infra.md`](docs/infra.md) for the full runbook on deployed services:
+- **mkt daemon** at `https://mkt.agentlabs.cc` (GCP e2-micro, Cloudflare Tunnel)
+- GCP project `mkt-daemon-alerts` — account `bisonte.amigable@gmail.com`
+- Cloudflare (agentlabs.cc) — account `bisonte.amigable@gmail.com`
+
 ## Secrets
 
 - `.telegraph_token` — do not commit.

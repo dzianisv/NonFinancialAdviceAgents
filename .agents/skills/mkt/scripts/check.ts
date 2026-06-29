@@ -192,6 +192,23 @@ async function notify(channel: string, message: string): Promise<void> {
     });
     return;
   }
+  // telegram-bot: uses the Bot API directly (no Telethon session required).
+  // Needs TELEGRAM_BOT_TOKEN env var. Works from any server.
+  if (channel.startsWith("telegram-bot:")) {
+    const chatId = channel.slice("telegram-bot:".length);
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    if (!token) {
+      console.error("telegram-bot: TELEGRAM_BOT_TOKEN not set, falling back to stdout");
+      console.log(message);
+      return;
+    }
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: message }),
+    });
+    return;
+  }
   if (channel.startsWith("email:")) {
     const to = channel.slice("email:".length);
     const apiKey = process.env.RESEND_API_KEY;
