@@ -141,7 +141,7 @@ INGEST (yfinance+FRED) → REGIME (exposure dial) → ANALYZE (context + backtes
 | Role | Skill |
 |---|---|
 | Regime analyst | `regime-detection` |
-| Research analyst | `fundamental-analysis` (sources + mandatory backtest gate) |
+| Research analyst | `analyse-fundamental` (sources + mandatory backtest gate) |
 | Signal analyst | `trend-following` |
 | Portfolio manager | `portfolio-construction` + `rebalancing` |
 | Risk manager (veto) | `risk-management` |

@@ -29,9 +29,9 @@ It reads the day's accumulated pools (whichever exist):
 |--------|-----------|------------|
 | `dip` | `.cache/dip-scanner/dip_candidates.jsonl` (≤5d) | dip-scanner (07:45, `--emit-pool`) |
 | `journalism` | `~/.openclaw/workspace/investor/pools/narrative.jsonl` (≤5d) | mention_velocity (08:10) |
-| `13f` | 13F dedup ledger (last 14d) | analyst-smartmoney-13f |
-| `congress` | congress dedup ledger (last 14d) | analyst-smartmoney-ptr |
-| `13d` | 13D activist dedup ledger (last 14d) | analyst-smartmoney-13d |
+| `13f` | 13F dedup ledger (last 14d) | analyse-smartmoney-13f |
+| `congress` | congress dedup ledger (last 14d) | analyse-smartmoney-ptr |
+| `13d` | 13D activist dedup ledger (last 14d) | analyse-smartmoney-13d |
 
 **A. Local backend (Python present):**
 ```bash

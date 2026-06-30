@@ -28,10 +28,10 @@ npx --yes skills add dzianisv/backtest \
 
 Or install individual skills by adding `--skill <name>`:
 ```bash
-npx -y skills add dzianisv/backtest --skill analyst-smartmoney-13f --agent claude-code
-npx -y skills add dzianisv/backtest --skill analyst-smartmoney-13d --agent claude-code
-npx -y skills add dzianisv/backtest --skill analyst-smartmoney-ptr --agent opencode
-npx -y skills add dzianisv/backtest --skill analyst-smartmoney-form4 --agent claude-code
+npx -y skills add dzianisv/backtest --skill analyse-smartmoney-13f --agent claude-code
+npx -y skills add dzianisv/backtest --skill analyse-smartmoney-13d --agent claude-code
+npx -y skills add dzianisv/backtest --skill analyse-smartmoney-ptr --agent opencode
+npx -y skills add dzianisv/backtest --skill analyse-smartmoney-form4 --agent claude-code
 ```
 
 > The `skills` npm package (v1.5+) supports all agents above. If `npx` isn't available, install once:
@@ -41,8 +41,8 @@ npx -y skills add dzianisv/backtest --skill analyst-smartmoney-form4 --agent cla
 
 ```bash
 # Install individual skills by raw URL
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyst-smartmoney-13f/SKILL.md
-hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyst-smartmoney-ptr/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyse-smartmoney-13f/SKILL.md
+hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/analyse-smartmoney-ptr/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/stocks-trend-screener/SKILL.md
 hermes skills install https://raw.githubusercontent.com/dzianisv/backtest/main/.agents/skills/hedge-fund-manager/SKILL.md
 ```
@@ -92,7 +92,7 @@ USER QUESTION
      │        → regime-detection (weighted signal ensemble → exposure dial)
      │
      ├── "manage my crypto/DeFi book"
-     │        → crypto-advisor (orchestrates research-onchain + regime + dip + risk)
+     │        → crypto-advisor (orchestrates analyse-onchain + regime + dip + risk)
      │        → defi-portfolio-manager (DeFi-native: yield + risk + protocol audit)
      │
      └── "find trending stocks / any convergence?"
@@ -168,13 +168,13 @@ USER QUESTION + PORTFOLIO + DATE
      │                  GATHER (parallel)                │
      │                                                   │
      │  CRYPTO path:              EQUITY path:           │
-     │  ├── crypto-onchain-data   ├── fundamental-analysis│
+     │  ├── crypto-onchain-data   ├── analyse-fundamental│
      │  ├── crypto-liquidity-data ├── trend-following     │
      │  ├── narrative-news        ├── dip-screener       │
      │  │   └── read-news         ├── feed-fomc          │
      │  │       (9 feeds)         └── portfolio-monitor   │
      │  ├── analyst-derivatives-positioning              │
-     │  ├── analyst-smartmoney-polymarket                       │
+     │  ├── analyse-smartmoney-polymarket                       │
      │  └── regime-detection                             │
      └────┬──────────────────────────────────────────────┘
           │
@@ -202,12 +202,12 @@ USER QUESTION + PORTFOLIO + DATE
 
 ### 3. crypto-advisor (the crypto desk orchestrator)
 
-Routes any crypto buy/sell/allocation question through the right sub-skills. Loads `research-onchain` internally — do NOT run both in parallel (redundant).
+Routes any crypto buy/sell/allocation question through the right sub-skills. Loads `analyse-onchain` internally — do NOT run both in parallel (redundant).
 
 ```
 USER → crypto-advisor (classifier + invariant enforcer)
        │
-       ├── research-onchain (brain — 4-pillar methodology)
+       ├── analyse-onchain (brain — 4-pillar methodology)
        │   ├── pillar 1: global liquidity (Howell, Capital Wars)
        │   ├── pillar 2: on-chain valuation (MVRV-Z, realized price, NUPL, Puell)
        │   ├── pillar 3: sentiment/cycle (Fear & Greed, 4-phase cycle)
@@ -226,7 +226,7 @@ USER → crypto-advisor (classifier + invariant enforcer)
 ```
 
 **Efficient run pattern:** `crypto-advisor` + `macro-panel` = 2 calls, zero redundancy.
-Running `research-onchain` separately alongside `crypto-advisor` double-counts the same lens.
+Running `analyse-onchain` separately alongside `crypto-advisor` double-counts the same lens.
 
 ---
 
@@ -263,7 +263,7 @@ The GENERAL method for any buy/hold/sell/size call. Distinct from macro-panel (w
 multi-lens-quorum (method — not a fixed roster)
 │
 │  For a CRYPTO question, might convene:
-│  ├── research-onchain
+│  ├── analyse-onchain
 │  ├── investor-lyn-alden
 │  ├── investor-stanley-druckenmiller
 │  └── analyst-derivatives-positioning
@@ -271,11 +271,11 @@ multi-lens-quorum (method — not a fixed roster)
 │  For an EQUITY question, might convene:
 │  ├── investor-warren-buffett
 │  ├── investor-benjamin-graham
-│  ├── analyst-systematic-trading
-│  └── fundamental-analysis
+│  ├── analyse-systematic-trading
+│  └── analyse-fundamental
 │
 │  For a TIMING question, might convene:
-│  ├── research-technical
+│  ├── analyse-technical
 │  ├── analyst-derivatives-positioning
 │  ├── regime-detection
 │  └── trend-following
@@ -303,8 +303,8 @@ hedge-fund-committee.workflow.js
 ├── 1. COLLECT (x6 parallel fan-out)
 │      ├── regime-detection
 │      ├── feed-fomc
-│      ├── analyst-smartmoney-13f + analyst-smartmoney-13d
-│      ├── analyst-smartmoney-ptr
+│      ├── analyse-smartmoney-13f + analyse-smartmoney-13d
+│      ├── analyse-smartmoney-ptr
 │      ├── narrative-news (via feed-* adapters)
 │      └── dip-screener + crypto-dip-scanner
 │
@@ -334,9 +334,9 @@ Silent unless something fires. Each scanner runs independently; convergence cros
                     │
     ┌───────────────┼───────────────┬──────────────────┐
     │               │               │                  │
-dip-screener   crypto-dip-     analyst-smartmoney-13f          trend-stock-
+dip-screener   crypto-dip-     analyse-smartmoney-13f          trend-stock-
 (S&P 100,      scanner         (weekly 13F)       research
-≥-20% from     (BTC/ETH/SOL    analyst-smartmoney-13d          (journalism →
+≥-20% from     (BTC/ETH/SOL    analyse-smartmoney-13d          (journalism →
 52w high)      /BNB/AVAX,      (real-time          mention velocity)
                F&G < 25)       activist >5%)
     │               │               │                  │
@@ -382,7 +382,7 @@ and keeps cross-run state. The narrative-news skill reads those events and tags 
     │    └── emits EVENTS (not articles) — "what's new since last" │
     └─────────────────────────────────────────────────────────────┘
                                    │
-                          narrative-news / analysis-narrative
+                          narrative-news / analyse-narrative
                           ├── reads NEW/updated events
                           └── tags PRICED_IN vs ACTIONABLE_CONTEXT vs NEW_CATALYST
                                    │
@@ -397,7 +397,7 @@ and keeps cross-run state. The narrative-news skill reads those events and tags 
 ```
 superforecasting (Tetlock methodology)
 ├── constructs reference class
-├── anchors to analyst-smartmoney-polymarket
+├── anchors to analyse-smartmoney-polymarket
 │   ├── Polymarket (Gamma API)
 │   ├── Kalshi
 │   └── CME FedWatch / ZQ-futures-implied
@@ -513,12 +513,12 @@ defi-portfolio-manager (PM — delegates to subagent team)
 
 ```
 ANALYTICAL LENSES (methodology-based):
-├── research-onchain ──────── 4-pillar: liquidity + on-chain + sentiment + execution
-├── analyst-systematic-trading  Carver: vol-target, forecast scalars, cost speed limit
-├── research-technical  long-term entry timing: Weinstein stage, 200d/30wk, RSI/MACD/vol confirm (scripts/ta.py)
+├── analyse-onchain ──────── 4-pillar: liquidity + on-chain + sentiment + execution
+├── analyse-systematic-trading  Carver: vol-target, forecast scalars, cost speed limit
+├── analyse-technical  long-term entry timing: Weinstein stage, 200d/30wk, RSI/MACD/vol confirm (scripts/ta.py)
 ├── investor-bernstein-intraday  Bernstein day-trading: set-up→trigger→follow-through (intraday only)
 ├── analyst-derivatives-positioning  funding, basis, OI, skew, gamma, VIX, COT, max pain
-└── fundamental-analysis ── value/quality/FCF screens + backtest gate
+└── analyse-fundamental ── value/quality/FCF screens + backtest gate
 
 THINKER-PERSONA LENSES (worldview-based):
 ├── investor-lyn-alden ─── fiscal dominance / debasement / BTC-as-hurdle
@@ -578,11 +578,11 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 
 | Skill | Role | Cadence |
 |-------|------|---------|
-| [research-smartmoney](research-smartmoney/SKILL.md) | Smart-money family orchestrator — runs all spokes and consolidates signals | on-demand |
-| [analyst-smartmoney-13f](analyst-smartmoney-13f/SKILL.md) | Pull new institutional 13F buys; dedupe ledger | weekly |
-| [analyst-smartmoney-13d](analyst-smartmoney-13d/SKILL.md) | Real-time SEC 13D/13G activist filings (>5% stake) | weekly |
-| [analyst-smartmoney-ptr](analyst-smartmoney-ptr/SKILL.md) | Pull STOCK Act purchase disclosures; dedupe ledger | weekly |
-| [analyst-smartmoney-form4](analyst-smartmoney-form4/SKILL.md) | Pull insider Form 4 buy disclosures; dedupe ledger | weekly |
+| [analyse-smartmoney](analyse-smartmoney/SKILL.md) | Smart-money family orchestrator — runs all spokes and consolidates signals | on-demand |
+| [analyse-smartmoney-13f](analyse-smartmoney-13f/SKILL.md) | Pull new institutional 13F buys; dedupe ledger | weekly |
+| [analyse-smartmoney-13d](analyse-smartmoney-13d/SKILL.md) | Real-time SEC 13D/13G activist filings (>5% stake) | weekly |
+| [analyse-smartmoney-ptr](analyse-smartmoney-ptr/SKILL.md) | Pull STOCK Act purchase disclosures; dedupe ledger | weekly |
+| [analyse-smartmoney-form4](analyse-smartmoney-form4/SKILL.md) | Pull insider Form 4 buy disclosures; dedupe ledger | weekly |
 | [stocks-trend-screener](stocks-trend-screener/SKILL.md) | Read financial journalism; surface emerging tickers | weekly |
 | [hedge-fund-13f-analysis](hedge-fund-13f-analysis/SKILL.md) | Deep-read a single 13F filing (EDGAR) | on-demand |
 | [signal-convergence-alert](signal-convergence-alert/SKILL.md) | Cross-reference ≥2 source pools → elevated conviction | daily |
@@ -593,10 +593,10 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 |-------|------|
 | [multi-lens-quorum](multi-lens-quorum/SKILL.md) | Convene 4-7 lenses → verdict without averaging away dissent |
 | [superforecasting](superforecasting/SKILL.md) | Dated market-outcome → scored probability + falsifiable triggers |
-| [analyst-smartmoney-polymarket](analyst-smartmoney-polymarket/SKILL.md) | Polymarket / Kalshi / FedWatch crowd odds |
-| [analyst-smartmoney-positioning](analyst-smartmoney-positioning/SKILL.md) | Futures + options positioning, OI, skew, funding, COT |
-| [analyst-smartmoney-options](analyst-smartmoney-options/SKILL.md) | Options flow, unusual activity, dark-pool prints, GEX |
-| [analyst-smartmoney-darkpool](analyst-smartmoney-darkpool/SKILL.md) | Dark-pool / block-print analysis; institutional accumulation |
+| [analyse-smartmoney-polymarket](analyse-smartmoney-polymarket/SKILL.md) | Polymarket / Kalshi / FedWatch crowd odds |
+| [analyse-smartmoney-positioning](analyse-smartmoney-positioning/SKILL.md) | Futures + options positioning, OI, skew, funding, COT |
+| [analyse-smartmoney-options](analyse-smartmoney-options/SKILL.md) | Options flow, unusual activity, dark-pool prints, GEX |
+| [analyse-smartmoney-darkpool](analyse-smartmoney-darkpool/SKILL.md) | Dark-pool / block-print analysis; institutional accumulation |
 | [analyst-derivatives-positioning](analyst-derivatives-positioning/SKILL.md) | Futures + options positioning, OI, skew |
 | [forecast-ledger](forecast-ledger/SKILL.md) | Brier + calibration scoring loop (ledger.py) |
 
@@ -612,7 +612,7 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 | [rebalancing](rebalancing/SKILL.md) | Calendar-check / threshold-act, tax-aware |
 | [dip-tranches-strategy](dip-tranches-strategy/SKILL.md) | Tiered dip-buying of dry powder |
 | [tax-loss-harvesting](tax-loss-harvesting/SKILL.md) | Harvest losses without wash-sale trips |
-| [fundamental-analysis](fundamental-analysis/SKILL.md) | Valuation research + backtest gate |
+| [analyse-fundamental](analyse-fundamental/SKILL.md) | Valuation research + backtest gate |
 | [trend-following](trend-following/SKILL.md) | 200d-MA / dual-momentum / managed-futures signals |
 | [portfolio-monitor](portfolio-monitor/SKILL.md) | Discipline: triggers fired? euphoria? concentration? |
 
@@ -643,16 +643,16 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 
 | Skill | Source |
 |-------|--------|
-| [analyst-systematic-trading](analyst-systematic-trading/SKILL.md) | Robert Carver *Systematic Trading* |
-| [research-technical](research-technical/SKILL.md) | Weinstein stage analysis + Grimes + Murphy (public TA frameworks) |
+| [analyse-systematic-trading](analyse-systematic-trading/SKILL.md) | Robert Carver *Systematic Trading* |
+| [analyse-technical](analyse-technical/SKILL.md) | Weinstein stage analysis + Grimes + Murphy (public TA frameworks) |
 | [investor-bernstein-intraday](investor-bernstein-intraday/SKILL.md) | Jacob Bernstein *The Ultimate Day Trader* |
-| [research-onchain](research-onchain/SKILL.md) | Michael Howell *Capital Wars* + on-chain |
+| [analyse-onchain](analyse-onchain/SKILL.md) | Michael Howell *Capital Wars* + on-chain |
 
 ### Crypto desk
 
 | Skill | Role |
 |-------|------|
-| [crypto-advisor](crypto-advisor/SKILL.md) | Crypto buy-the-dip / DCA orchestrator (loads research-onchain internally) |
+| [crypto-advisor](crypto-advisor/SKILL.md) | Crypto buy-the-dip / DCA orchestrator (loads analyse-onchain internally) |
 | [crypto-chair](crypto-chair/SKILL.md) | Final crypto decision synthesis (brief + panel → recommendation) |
 | [crypto-research-desk](crypto-research-desk/SKILL.md) | Consolidate crypto gather seats → one sourced brief |
 | [crypto-token-screener](crypto-token-screener/SKILL.md) | 6-point value-accrual filter + BTC hurdle rate |
@@ -705,8 +705,8 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 
 ## Runnable helpers
 
-- `analyst-smartmoney-13f/watch.py` — dedup ledger + roster for institutional filings.
-- `analyst-smartmoney-ptr/watch.py` — STOCK Act fetch + dedup ledger.
+- `analyse-smartmoney-13f/watch.py` — dedup ledger + roster for institutional filings.
+- `analyse-smartmoney-ptr/watch.py` — STOCK Act fetch + dedup ledger.
 - `forecast-ledger/ledger.py` — Brier/calibration scoring for dated forecasts.
 - `regime-detection/regime_monitor.py` — daily regime score → exposure multiplier.
 - `dip-tranches-strategy/check_drawdown.py` — drawdown-from-52w-high → which tranche fires.

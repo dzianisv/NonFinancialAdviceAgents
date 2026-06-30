@@ -30,7 +30,7 @@ The consolidated brief MUST cover every category below. A missing category is a 
 Fan-out data retrieval (incl. FR1.8) → one sourced brief → multi-lens panel debate → chair decision → log to ledger.
 
 ### FR3 — Panel composition
-Voting seats that can actually price crypto: research-onchain, derivatives, Druckenmiller, Alden, **Hunt (bear
+Voting seats that can actually price crypto: analyse-onchain, derivatives, Druckenmiller, Alden, **Hunt (bear
 dissent)**, Napier. Housel = **non-voting** behavioral guardrail. **No seat whose verdict is predetermined**
 (e.g. Buffett can't value a cashless asset → excluded).
 

@@ -13,11 +13,11 @@ flowchart TD
     CIO -->|"token + price_usd"| RESEARCH
 
     subgraph RESEARCH["① Research Desk — parallel, each analyst owns its data"]
-        TA["research-technical\n📊 TradingView MCP\nOHLCV · RSI · BB · MACD · MAs"]
-        FUND["research-onchain\n🌐 MVRV-Z · realized price · NUPL\nBTC valuation · sentiment · cycle"]
-        OC["research-defi\n🌐 DeFiLlama\nTVL · fee distribution · accrual"]
-        MACRO["research-macro\n🌐 GLI · M2 · DXY · ETF flows\nmacro headlines · halving cycle"]
-        SM["research-smartmoney\n🌐 whale flows · exchange inflows\nOTC · positioning"]
+        TA["analyse-technical\n📊 TradingView MCP\nOHLCV · RSI · BB · MACD · MAs"]
+        FUND["analyse-onchain\n🌐 MVRV-Z · realized price · NUPL\nBTC valuation · sentiment · cycle"]
+        OC["analyse-defi\n🌐 DeFiLlama\nTVL · fee distribution · accrual"]
+        MACRO["analyse-macro\n🌐 GLI · M2 · DXY · ETF flows\nmacro headlines · halving cycle"]
+        SM["analyse-smartmoney\n🌐 whale flows · exchange inflows\nOTC · positioning"]
     end
 
     BRIEF["📄 CIO consolidates\none briefing package per token"]
@@ -35,7 +35,7 @@ flowchart TD
         B["investor-warren-buffett\nQuality school\nBuffett / Fisher"]
         D["investor-ray-dalio\nCycle school\nDalio / Templeton"]
         DR["investor-stanley-druckenmiller\nTrend school\nDruckenmiller / Carver"]
-        BU["research-defi\nOn-chain school\nBurniske"]
+        BU["analyse-defi\nOn-chain school\nBurniske"]
     end
 
     G -->|"BULLISH / NEUTRAL / BEARISH + reason"| QUORUM
@@ -56,21 +56,21 @@ flowchart TD
 
 | Analyst | Skill | Data source |
 |---|---|---|
-| Technical | `research-technical` | TradingView MCP — OHLCV, RSI, BB, MACD, MAs |
-| BTC valuation | `research-onchain` | MVRV-Z, realized price, NUPL, Puell, 200wMA, sentiment/cycle |
-| On-chain DeFi | `research-defi` | DeFiLlama: TVL, fee distribution, protocol accrual |
-| Macro | `research-macro` | GLI, M2, DXY, ETF flows, halving cycle, macro headlines |
-| Smart money | `research-smartmoney` | Whale flows, exchange inflows/outflows, OTC desk, positioning |
+| Technical | [`analyse-technical`](../analyse-technical/SKILL.md) | TradingView MCP — OHLCV, RSI, BB, MACD, MAs |
+| BTC valuation | [`analyse-onchain`](../analyse-onchain/SKILL.md) | MVRV-Z, realized price, NUPL, Puell, 200wMA, sentiment/cycle |
+| On-chain DeFi | [`analyse-defi`](../analyse-defi/SKILL.md) | DeFiLlama: TVL, fee distribution, protocol accrual |
+| Macro | [`analyse-macro`](../analyse-macro/SKILL.md) | GLI, M2, DXY, ETF flows, halving cycle, macro headlines |
+| Smart money | [`analyse-smartmoney`](../analyse-smartmoney/SKILL.md) | Whale flows, exchange inflows/outflows, OTC desk, positioning |
 
 ### Layer 2 — Investment Panel (read briefing, vote per school)
 
 | Seat | Skill | School |
 |---|---|---|
-| Value | `investor-benjamin-graham` | Graham (*The Intelligent Investor* ch.20) / Klarman |
-| Quality | `investor-warren-buffett` | Buffett / Fisher (*Common Stocks and Uncommon Profits*) |
-| Cycle | `investor-ray-dalio` | Dalio / Templeton ("maximum pessimism") |
-| Trend | `investor-stanley-druckenmiller` | Druckenmiller / Carver (*Systematic Trading*) |
-| On-chain | `research-defi` | Burniske (*Cryptoassets* value-accrual) |
+| Value | [`investor-benjamin-graham`](../investor-benjamin-graham/SKILL.md) | Graham (*The Intelligent Investor* ch.20) / Klarman |
+| Quality | [`investor-warren-buffett`](../investor-warren-buffett/SKILL.md) | Buffett / Fisher (*Common Stocks and Uncommon Profits*) |
+| Cycle | [`investor-ray-dalio`](../investor-ray-dalio/SKILL.md) | Dalio / Templeton ("maximum pessimism") |
+| Trend | [`investor-stanley-druckenmiller`](../investor-stanley-druckenmiller/SKILL.md) | Druckenmiller / Carver (*Systematic Trading*) |
+| On-chain | [`analyse-defi`](../analyse-defi/SKILL.md) | Burniske (*Cryptoassets* value-accrual) — dual role: research + vote |
 
 ### Layer 3 — CIO (vote count → signal → governor → report)
 

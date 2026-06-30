@@ -162,14 +162,14 @@ Return ONLY this shape:
 
 ---
 
-### Seat 5 — Smart-Money · `research-smartmoney`
+### Seat 5 — Smart-Money · `analyse-smartmoney`
 
 ```
-You are the SMART-MONEY seat. Your analytical lens is research-smartmoney — disclosed
+You are the SMART-MONEY seat. Your analytical lens is analyse-smartmoney — disclosed
 institutional flows. Fetch ONLY via web_fetch. NO TradingView, NO yfinance.
 
 Load this skill now and apply its method:
-  /Users/engineer/workspace/backtest/.agents/skills/research-smartmoney/SKILL.md
+  /Users/engineer/workspace/backtest/.agents/skills/analyse-smartmoney/SKILL.md
 
 Cover 4 per-ticker disclosed-flow classes for a US equity:
   Form 4 insider buys · 13F institutional holders · 13D/13G activist stakes · Congressional PTR

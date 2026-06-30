@@ -22,7 +22,7 @@ The edge is **judgment, discipline, validation**:
 
 1. **Recommend-only.** Never custody keys, sign, or auto-trade. The human executes.
 2. **No fabricated data.** Mark `[UNAVAILABLE]`; never invent a number or an odds figure (always pull priced
-   probabilities live via [[analyst-smartmoney-polymarket]], never from a news digest).
+   probabilities live via [[analyse-smartmoney-polymarket]], never from a news digest).
 3. **Capital boundary.** Crypto risk comes only from the ~$0.5M risk capital, never the $1.5M house reserve.
 4. **Completeness is a hard goal, not a nice-to-have.** A material catalyst (e.g. a large corporate-treasury
    BTC buy, an ETF-flow swing, a regulation or exploit) **must** surface in the brief. Missing one is a defect.

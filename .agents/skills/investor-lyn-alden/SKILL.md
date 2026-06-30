@@ -118,7 +118,7 @@ timing."
   not a cached stance. Date every "current view" claim.
 - **Ground load-bearing claims** in a specific reference/article (via `article-index.md`), not this
   summary. If a number can't be verified, say so.
-- This skill **complements** `fundamental-analysis` (the valuation/backtest gate) and feeds
+- This skill **complements** `analyse-fundamental` (the valuation/backtest gate) and feeds
   `regime-detection` / `portfolio-construction`; it does not replace your own analysis or the backtest gate.
 
 ## Done when

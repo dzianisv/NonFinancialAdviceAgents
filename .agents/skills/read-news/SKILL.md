@@ -1,6 +1,6 @@
 ---
 name: read-news
-description: The ONE front door for the financial-news pipeline — fetch + normalize + dedup + store + query, in a single Bun/TypeScript stack. Pulls every wired RSS feed (CoinDesk, Decrypt, CoinTelegraph, The Block, Bitcoin Magazine, Coinbase, FT, WSJ, Bloomberg) via `read_news.ts`, collapses multi-outlet coverage of the same story into ONE event (SQLite + FTS5 BM25 + near-dup Jaccard clustering), keeps cross-run state so the panel never re-reads news it already saw, and answers ranked hybrid queries. Use when gathering the crypto/macro news feed, when narrative-news / analysis-narrative needs deduped events, when an advisor needs FT/WSJ headlines on demand, or when asked to "get the news", "what's new since last run", "dedup crypto news", "cluster multi-outlet coverage", "query the news store", "FT headlines", "WSJ markets news", or "what is the news saying about X". Keyless, no API key, no embedding model required. NEVER fabricates a headline or body.
+description: The ONE front door for the financial-news pipeline — fetch + normalize + dedup + store + query, in a single Bun/TypeScript stack. Pulls every wired RSS feed (CoinDesk, Decrypt, CoinTelegraph, The Block, Bitcoin Magazine, Coinbase, FT, WSJ, Bloomberg) via `read_news.ts`, collapses multi-outlet coverage of the same story into ONE event (SQLite + FTS5 BM25 + near-dup Jaccard clustering), keeps cross-run state so the panel never re-reads news it already saw, and answers ranked hybrid queries. Use when gathering the crypto/macro news feed, when narrative-news / analyse-narrative needs deduped events, when an advisor needs FT/WSJ headlines on demand, or when asked to "get the news", "what's new since last run", "dedup crypto news", "cluster multi-outlet coverage", "query the news store", "FT headlines", "WSJ markets news", or "what is the news saying about X". Keyless, no API key, no embedding model required. NEVER fabricates a headline or body.
 license: MIT
 compatibility: opencode
 metadata:
@@ -11,11 +11,11 @@ metadata:
 
 # Read News (fetch → dedup → store → query — events, not articles, and never twice)
 
-The single news pipeline the [[narrative-news]] and [[analysis-narrative]] gather seats read. It
+The single news pipeline the [[narrative-news]] and [[analyse-narrative]] gather seats read. It
 **fetches** every wired feed, **normalizes** each article into the common record, **collapses
 multi-outlet coverage of the same event into ONE event** carrying a `source_count` (crowdedness), and
 **keeps state across runs** so the panel never re-reads news it already saw — the same "no re-alert"
-discipline as [[analyst-smartmoney-13f]] / [[dip-scanner]].
+discipline as [[analyse-smartmoney-13f]] / [[dip-scanner]].
 
 This skill replaces the old `feed-*` per-source adapters and the `crypto-news-store` Python store: one
 Bun/TypeScript stack, one SQLite file, one front door.
@@ -161,7 +161,7 @@ bun test ./.agents/skills/read-news/scripts/
 ## Fit
 
 `read_news.ts` (fetch + normalize via `feeds/`) → **`ingest`** (dedup + cluster) → **`new-since` / `query`**
-→ [[narrative-news]] / [[analysis-narrative]] emit the NEW/updated events to the panel and own the
+→ [[narrative-news]] / [[analyse-narrative]] emit the NEW/updated events to the panel and own the
 priced-in judgment. This skill owns fetch + dedup + recency + cross-run state; it does not judge.
 
 > Educational, not advice. Events are context + disconfirmation, never a trigger.

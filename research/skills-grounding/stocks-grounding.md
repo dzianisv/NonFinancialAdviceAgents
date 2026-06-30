@@ -9,11 +9,11 @@ targets *as they exist on disk today* are:
 
 | Brief name | Actual file on disk |
 |---|---|
-| `.agents/skills/strategy-discovery-backtest/SKILL.md` (backtest gate) | The gate lives inside `.agents/skills/fundamental-analysis/SKILL.md` ("The backtest gate") and `.agents/skills/agentic-fund-orchestration/SKILL.md` ("Pitfalls to design against"). There is **no standalone discovery-backtest skill** — see Gap G0. |
+| `.agents/skills/strategy-discovery-backtest/SKILL.md` (backtest gate) | The gate lives inside `.agents/skills/analyse-fundamental/SKILL.md` ("The backtest gate") and `.agents/skills/agentic-fund-orchestration/SKILL.md` ("Pitfalls to design against"). There is **no standalone discovery-backtest skill** — see Gap G0. |
 | `.agents/skills/stock-daytrading/SKILL.md` | **Does not exist.** GOAL.md workstream B calls for it; only `backtests/daytrade/*.py` scripts exist. See Gap G0. |
 | `.agents/skills/hedge-fund-manager/SKILL.md` | Renamed → `.agents/skills/agentic-fund-orchestration/SKILL.md` (team orchestration) |
 | `.agents/skills/tradfi-portfolio-manager/SKILL.md` | **Removed.** No tradfi PM skill on disk; `.agents/skills/defi-portfolio-manager/SKILL.md` is the crypto analogue. See Gap G0. |
-| desk sub-skills | `.agents/skills/{regime-detection, trend-following, portfolio-construction, risk-management, rebalancing, tax-loss-harvesting, fundamental-analysis}` + `.agents/skills/dip-tranches-strategy` — all present. |
+| desk sub-skills | `.agents/skills/{regime-detection, trend-following, portfolio-construction, risk-management, rebalancing, tax-loss-harvesting, analyse-fundamental}` + `.agents/skills/dip-tranches-strategy` — all present. |
 
 GOAL.md (`<context-foundation>`) and AGENTS.md still reference `hedge-fund-manager` and
 `tradfi-portfolio-manager` as if present — a **doc-vs-disk drift** flagged as Gap G0.
@@ -35,15 +35,15 @@ in a systematic skill.
 | P6 | **Diversification is the only free lunch — diversify across *return drivers*, not just names**; combine asset classes with low/negative correlation. | Swensen, *Unconventional Success* [3]; Markowitz via Swensen | `portfolio-construction` diversifies across sleeves; make the *effective-number-of-bets* and *cross-sleeve correlation* an explicit construction check, not just a count of tickers. |
 | P7 | **Disciplined rebalancing back to target weights** captures the diversification premium and enforces buy-low/sell-high. | Swensen [3]; Bernstein/Ferri | `rebalancing` already encodes calendar-check/threshold-act — good; tie it to a *rebalancing bonus* rationale and contrarian framing. |
 | P8 | **Risk parity / balance across the four economic environments** (rising & falling growth × rising & falling inflation): allocate by *risk contribution*, not dollars, so no single environment dominates. | Dalio, *Principles* / All Weather [4] | `portfolio-construction` names the four regimes — strengthen by adding an explicit **risk-contribution check** (what % of portfolio *variance* comes from equities?) not just a dollar weight. Flag "equity with a bond sidecar." |
-| P9 | **Harvest multiple, lowly-correlated factor premia** (value, momentum, carry, defensive, trend): diversifying across factors can ~halve vol and ~double Sharpe vs cap-weight. | Ilmanen, *Expected Returns* [5] | `fundamental-analysis` + `trend-following` cover value/momentum/trend; make *factor diversification* a first-class construction goal and document expected-return decomposition per sleeve. |
-| P10 | **Value + momentum are negatively correlated (~−0.49)** — combining them is portfolio construction's "holy grail," higher Sharpe than either alone. | Asness/Moskowitz/Pedersen, *Value and Momentum Everywhere* (JF 2013) [6] | `fundamental-analysis` should pair its value screens with the momentum sleeve *deliberately* (not as separate bets), citing the negative correlation as the reason. |
+| P9 | **Harvest multiple, lowly-correlated factor premia** (value, momentum, carry, defensive, trend): diversifying across factors can ~halve vol and ~double Sharpe vs cap-weight. | Ilmanen, *Expected Returns* [5] | `analyse-fundamental` + `trend-following` cover value/momentum/trend; make *factor diversification* a first-class construction goal and document expected-return decomposition per sleeve. |
+| P10 | **Value + momentum are negatively correlated (~−0.49)** — combining them is portfolio construction's "holy grail," higher Sharpe than either alone. | Asness/Moskowitz/Pedersen, *Value and Momentum Everywhere* (JF 2013) [6] | `analyse-fundamental` should pair its value screens with the momentum sleeve *deliberately* (not as separate bets), citing the negative correlation as the reason. |
 | P11 | **Risk = probability of *permanent* loss of capital, and it lives where it's least perceived**; practice defensive investing; outcome ≠ probability. | Marks, *The Most Important Thing* [7] | `risk-management` is vol/drawdown-based — add the *permanent-impairment* lens: distinguish recoverable drawdown (index) from permanent loss (single-name blowup, leverage wipeout). Risk is highest when complacency is highest. |
-| P12 | **Second-level thinking**: edge comes from a *non-consensus, correct* view; the consensus is already in the price. | Marks [7]; semi-strong EMH (Bogle/Malkiel) | `fundamental-analysis` already says public ratings are in the price — generalize: any signal must articulate *what the market is missing* or default to beta. |
+| P12 | **Second-level thinking**: edge comes from a *non-consensus, correct* view; the consensus is already in the price. | Marks [7]; semi-strong EMH (Bogle/Malkiel) | `analyse-fundamental` already says public ratings are in the price — generalize: any signal must articulate *what the market is missing* or default to beta. |
 | P13 | **Cycles are dependable; calibrate aggressiveness to where the pendulum sits** (euphoria → caution, panic → aggression). | Marks [7] | This is exactly `regime-detection`'s job — add a *sentiment/positioning* leg (the pendulum) to complement the price/credit/vol legs. |
 | P14 | **Barbell**: combine very safe assets with a small, capped, convex tail bet; avoid the fragile "medium-risk" middle; **via negativa** (remove fragility first). | Taleb, *Antifragile* [8] | `portfolio-construction`'s dry-powder + optional TAIL/BTAL sleeve is a soft barbell — make the *convex tail sleeve* and the *avoid-the-fragile-middle* logic explicit; `risk-management` should think in *fragility removal* (kill leverage, caps) before optimization. |
 | P15 | **Behavioral guardrails**: loss aversion (~2× pain), overconfidence / illusion of skill, anchoring to entry price, narrow framing. Pre-commit to rules to neutralize them. | Kahneman, *Thinking, Fast and Slow* [9] | Every discretionary judgment call in a skill ("pause the last sub-tranche", "insist on stock-picking") should carry a *bias warning* and a pre-committed rule. Decide the rule *before* the drawdown. |
-| P16 | **Valuation is a *range*, not a point**; don't bury uncertainty in the discount rate; average/normalize inputs; market price is a check on your bias. | Damodaran, *Valuation* / 10 Rules for Uncertainty [10] | `fundamental-analysis` already says DCF fair value is a range (Damodaran-cited) — extend: any intrinsic-value output must be an interval with a confidence, normalized inputs, and a stated bias check. |
-| P17 | **Magic Formula**: rank by earnings yield (EBIT/EV) + return on capital, buy a basket of the top names; mechanical, unemotional value+quality. | Greenblatt, *The Little Book That Beats the Market* [11] | Already listed as a candidate screen in `fundamental-analysis` — keep it *gated* by the backtest gate (it must clear net-of-cost vs the index before allocating). |
+| P16 | **Valuation is a *range*, not a point**; don't bury uncertainty in the discount rate; average/normalize inputs; market price is a check on your bias. | Damodaran, *Valuation* / 10 Rules for Uncertainty [10] | `analyse-fundamental` already says DCF fair value is a range (Damodaran-cited) — extend: any intrinsic-value output must be an interval with a confidence, normalized inputs, and a stated bias check. |
+| P17 | **Magic Formula**: rank by earnings yield (EBIT/EV) + return on capital, buy a basket of the top names; mechanical, unemotional value+quality. | Greenblatt, *The Little Book That Beats the Market* [11] | Already listed as a candidate screen in `analyse-fundamental` — keep it *gated* by the backtest gate (it must clear net-of-cost vs the index before allocating). |
 | P18 | **Trend-following / time-series momentum is "crisis alpha"** — positive in 8 of 10 largest 60/40 drawdowns over 137 yrs; the alpha is largely from vol-scaling. | AQR (Hurst/Ooi/Pedersen); cited in `trend-following` | Already well-encoded; keep the known-weakness honesty (V-crashes, whipsaw). |
 | P19 | **Skin in the game / honest reporting**: forecasts with no downside accountability are noise; report failures and "no edge found" as first-class results. | Taleb [8]; repo GOAL invariant 4 | Already a GOAL invariant — ensure each skill's contract surfaces honest net-of-cost edge and crisis drawdown, never the green PnL alone. |
 
@@ -123,7 +123,7 @@ replacement tagged with the principle/book.
 - **E-TF1 (P10 Asness).** Add to "Hand-offs":
   > **Pair with value, deliberately.** Time-series/cross-sectional momentum is *negatively correlated
   > (~−0.49) with value* (Asness/Moskowitz/Pedersen, *Value and Momentum Everywhere*, JF 2013) — combining
-  > the trend sleeve with the value screens in `fundamental-analysis` raises Sharpe more than either
+  > the trend sleeve with the value screens in `analyse-fundamental` raises Sharpe more than either
   > alone. Construct them as one paired bet, not two independent ones.
 
 ### 2.4 `.agents/skills/risk-management/SKILL.md`
@@ -179,7 +179,7 @@ replacement tagged with the principle/book.
   > the Cost Matters Hypothesis says minimizing them is a *certain* edge where alpha is uncertain. TLH is
   > one of the few reliably positive-expected-value levers in a taxable book.
 
-### 2.7 `.agents/skills/fundamental-analysis/SKILL.md`
+### 2.7 `.agents/skills/analyse-fundamental/SKILL.md`
 
 | | |
 |---|---|
@@ -259,7 +259,7 @@ central the gap is to the AI-bubble-defense mission.
    risk layer around *permanent* impairment, not just drawdown %; the cleanest way to keep the LLM from
    treating a single-name blowup like an index dip.
 
-3. **E-FA1 — Margin-of-safety sizing rule in `fundamental-analysis`.** *(Graham [1])* The most-cited rule in
+3. **E-FA1 — Margin-of-safety sizing rule in `analyse-fundamental`.** *(Graham [1])* The most-cited rule in
    investing is currently absent as an explicit gate on the discretionary sleeve. Closes the "value screens
    but no margin of safety" gap.
 
@@ -342,7 +342,7 @@ central the gap is to the AI-bubble-defense mission.
     (https://blogs.cfainstitute.org/investor/2012/12/19/addressing-uncertainty-in-investment-valuations/);
     Damodaran, "DCF Myth 3" (https://aswathdamodaran.blogspot.com/2016/05/dcf-myth-3-you-cannot-do-valuation-when.html).
 11. Joel Greenblatt, *The Little Book That Beats the Market* — Magic Formula (rank by earnings yield EBIT/EV
-    + return on capital, buy a basket). Referenced via `fundamental-analysis` SKILL.md and standard
+    + return on capital, buy a basket). Referenced via `analyse-fundamental` SKILL.md and standard
     descriptions of the formula.
 
 *Educational analysis, not advice; you place the orders.*

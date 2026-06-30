@@ -23,7 +23,7 @@ Phase 4 DECIDE (manager-selected chair) → Phase 5 WRITE → Phase 6 LEDGER
 ### Phase 1 — Gather seats (one agent each, structured-output schema, no opinions)
 | Seat | Skill / source |
 |---|---|
-| odds | [[analyst-smartmoney-polymarket]] → Polymarket Gamma, Kalshi |
+| odds | [[analyse-smartmoney-polymarket]] → Polymarket Gamma, Kalshi |
 | price + on-chain | yfinance + checkonchain/lookintobitcoin/newhedge |
 | derivatives | [[analyst-derivatives-positioning]] → Deribit, Coinglass |
 | macro | [[feed-fomc]] → federalreserve.gov, BLS |
@@ -48,7 +48,7 @@ Phase 4 DECIDE (manager-selected chair) → Phase 5 WRITE → Phase 6 LEDGER
 **`etf-flows`** (one Gather agent): pull Farside / SoSoValue spot BTC/ETH ETF net daily flow + multi-day trend; structured hard-data record, no narrative. *(TODO: build.)*
 
 ### Hybrid news store (the ingestion/store layer `feed-*` points at)
-**Goal:** the panel receives **EVENTS, not articles**; never re-read/re-surface the same news; **keep state across runs** (mirrors the dedup-ledger pattern in [[analyst-smartmoney-13f]] / [[analyst-smartmoney-ptr]] / [[crypto-dip-scanner]] — "never re-propose / no re-alert same week").
+**Goal:** the panel receives **EVENTS, not articles**; never re-read/re-surface the same news; **keep state across runs** (mirrors the dedup-ledger pattern in [[analyse-smartmoney-13f]] / [[analyse-smartmoney-ptr]] / [[crypto-dip-scanner]] — "never re-propose / no re-alert same week").
 - **Two-layer dedup:**
   1. **Exact** — canonical URL + SHA hash of normalized `title+body`.
   2. **Semantic** — embed the article, cluster by **cosine ≥ ~0.85** within a time window → collapse multi-outlet coverage into one event + `source_count` (NFR2).

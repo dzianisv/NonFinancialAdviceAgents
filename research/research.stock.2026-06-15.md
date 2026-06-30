@@ -138,7 +138,7 @@ Source: yfinance/dip_screener.py, 2026-06-15.
 - **NVDA:** $212.45 > 50d ($207.41) > 200d ($189.19), +12.3% above 200d; uptrend structure intact. RSI(14) 51.4 (neutral). **MACD 9/18 below signal** — near-term momentum softening. Stop ref: 20-bar swing low $199.34.
 - **AMD:** fresh 52w high, +113.9% above 200d — **most extended**; RSI 65.2; early **negative MACD divergence at the high**.
 - **AVGO:** only one of the three **below its 50d MA** ($408.04), above 200d (+10.1%); **lowest RSI 45.3**; only one with **negative Bernstein 28-momentum (−33.42)** — weakest short-term posture but cheapest vs its own recent high.
-Source: research-technical (Bernstein lens), yfinance daily close 2026-06-15. Caveat: TA is hypothesis-generation, weak empirical base.
+Source: analyse-technical (Bernstein lens), yfinance daily close 2026-06-15. Caveat: TA is hypothesis-generation, weak empirical base.
 
 ## 5. INSTITUTIONAL CONVICTION (13F, Q1'26, ~45-day lag, long-only)
 - **NVDA — contested/two-sided:** ADDS H&H/Duan +91%, Tiger +9%, Maverick +6%, Davis, Patient Capital; **TRIMS** Loeb −94%, Kahn sold 100%, Jensen −28%, Polen −23%, Tepper −13%. 18 super-investors hold; aggregate Q4'25 flow net-positive (2,920 buyers vs 2,375 sellers). Not a clean add or trim.

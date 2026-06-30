@@ -49,12 +49,12 @@ must end by logging a heartbeat so a silent outage is detectable:
       Run python3 $S/liveness-monitor/liveness.py check --expect dip-screener,crypto-dip-scanner,signal-convergence,narrative-velocity --max-age-hours 26.
       If STALE, DM me "⚠️ advisor jobs stale:" + the list. If ALL_FRESH, NO_REPLY.
   • "Weekly hedge-fund committee"  30 9 * * 1 :  (the main decision engine — find next buys)
-      Run the WEEKLY HEDGE-FUND COMMITTEE: (1) ANALYSTS gather (regime+fomc, analyst-smartmoney-13f new buys,
-      analyst-smartmoney-ptr 90d, trend-stock-research themes, dip_screener.py --json, crypto-dip-scanner
+      Run the WEEKLY HEDGE-FUND COMMITTEE: (1) ANALYSTS gather (regime+fomc, analyse-smartmoney-13f new buys,
+      analyse-smartmoney-ptr 90d, trend-stock-research themes, dip_screener.py --json, crypto-dip-scanner
       --json) — real evidence, mark [unverified], never fabricate. (2) AGGREGATE by ticker; n_sources =
       crowdedness NOT independence; flag flow_only (13F/congress-only = 30-45d lagged, down-weight); top 5.
       (3) PANEL: each top-5 gets an INDEPENDENT verdict from investor-warren-buffett,
-      investor-stanley-druckenmiller, research-lacy-hunt (deflation/dissent), fundamental-analysis (verdict+conviction+
+      investor-stanley-druckenmiller, research-lacy-hunt (deflation/dissent), analyse-fundamental (verdict+conviction+
       reason+invalidation; no anchoring). (4) DISSENT: quote the strongest opposing vote per name verbatim;
       never average it away; unanimous = a flag. (5) RISK: risk-management VETO if RISK_OFF or >10% book;
       else PASS with a size CEILING (no portfolio supplied → never invent existing weights). (6) DM a RANKED

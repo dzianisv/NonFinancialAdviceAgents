@@ -36,7 +36,7 @@ answer is worth it.
 **Do NOT convene — answer directly — when:**
 - It's a **fact, lookup, definition, or arithmetic** ("what's the 200d MA", "what does MVRV mean").
 - It's a **code fix, data pull, or mechanical task**.
-- **One lens clearly owns the domain** (a position-sizing question → just `analyst-systematic-trading`;
+- **One lens clearly owns the domain** (a position-sizing question → just `analyse-systematic-trading`;
   a backtest-validity question → that lens alone). Convening a quorum to rubber-stamp the obvious owner
   is theater.
 - The lenses would all say the same thing (no live disagreement = no signal).
@@ -56,10 +56,10 @@ method/conductor skills. The repo's available lens menu (`.agents/skills/`):
 
 | Lens skill | Brings (the seat) | Natural role in a quorum |
 |---|---|---|
-| `analyst-systematic-trading` | Carver — rules, vol-target, Half-Kelly, cost speed limit, overfit gate | The discipline/sizing seat; kills the narrative trade |
-| `research-technical` | Bernstein — setup→trigger→follow-through, "no trigger, no trade" | The timing/trigger seat (weak evidence — carry as hypothesis) |
-| `research-onchain` | Howell — global liquidity → on-chain → sentiment → tilted-DCA | The liquidity-tide seat (often the WAIT/dissent) |
-| `analyst-smartmoney-positioning` | Funding/OI/basis + options skew/IV/max-pain/gamma; options-implied distribution (crypto + equities) | The positioning / market-implied seat — what leverage & options price |
+| `analyse-systematic-trading` | Carver — rules, vol-target, Half-Kelly, cost speed limit, overfit gate | The discipline/sizing seat; kills the narrative trade |
+| `analyse-technical` | Bernstein — setup→trigger→follow-through, "no trigger, no trade" | The timing/trigger seat (weak evidence — carry as hypothesis) |
+| `analyse-onchain` | Howell — global liquidity → on-chain → sentiment → tilted-DCA | The liquidity-tide seat (often the WAIT/dissent) |
+| `analyse-smartmoney-positioning` | Funding/OI/basis + options skew/IV/max-pain/gamma; options-implied distribution (crypto + equities) | The positioning / market-implied seat — what leverage & options price |
 | `investor-benjamin-graham` | Margin of safety, intrinsic value, Mr. Market | The value/"is this even an investment" dissent seat |
 | `research-morgan-housel` | Behavior > intelligence, tails, enough, room for error | The behavioral guardrail / "don't blow up" seat |
 | `investor-warren-buffett` | Moats, circle of competence, cash-as-option, bubble-discipline | The quality/discipline / hold-cash seat |
@@ -151,12 +151,12 @@ cadence should the $6k be deployed?*
 
 | Lens | Verdict | Conviction | One-line reasoning |
 |---|---|---|---|
-| `analyst-systematic-trading` (Carver) | Fewer, bigger clips | med | Cost speed limit — many tiny buys waste the budget on fees/spread; size to keep costs ≤⅓ of edge |
-| `research-technical` (Bernstein) | Calendar DCA, no timed entry | low | No trigger yet (below trend); "no trigger, no trade" — so don't time, just space it |
+| `analyse-systematic-trading` (Carver) | Fewer, bigger clips | med | Cost speed limit — many tiny buys waste the budget on fees/spread; size to keep costs ≤⅓ of edge |
+| `analyse-technical` (Bernstein) | Calendar DCA, no timed entry | low | No trigger yet (below trend); "no trigger, no trade" — so don't time, just space it |
 | `investor-benjamin-graham` | Slow, small, quarantined | high | No intrinsic value → no margin of safety; deploy slowly and cap exposure regardless |
 | `investor-lyn-alden` | Steady DCA, don't overthink | high | Structural debasement; idle cash is the risk — get invested on a calendar, hold cycles |
 | `research-morgan-housel` | Automate it, remove yourself | med | Behavior is the weak link; a fixed schedule beats discretion under Extreme Fear |
-| `research-onchain` (Howell) | Deploy ~half now, gate the rest | med | Liquidity tide still out; commit a base, condition the remainder on liquidity turning |
+| `analyse-onchain` (Howell) | Deploy ~half now, gate the rest | med | Liquidity tide still out; commit a base, condition the remainder on liquidity turning |
 
 **Consensus (the overlap, not the average):** **$1,000/week × 6 weeks, on the calendar.** Six lenses
 that barely share a vocabulary all land on *spaced, calendar-based, removed-from-emotion* deployment.

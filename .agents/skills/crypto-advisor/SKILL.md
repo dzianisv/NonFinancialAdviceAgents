@@ -20,11 +20,11 @@ Loop through the token universe **one token at a time** (TradingView has a singl
 **Three-layer hedge-fund pipeline.** Research Desk gathers data; CIO consolidates into a briefing package; Investment Panel reads the briefing and votes.
 
 **Layer 1 — Research Desk** (data gatherers, no votes):
-- `research-technical` → TradingView MCP — OHLCV, RSI, BB, MACD, MAs
-- `research-onchain` → MVRV-Z, realized price, NUPL, Puell, 200wMA, sentiment/cycle
-- `research-defi` → DeFiLlama: TVL, fee distribution, protocol accrual
-- `research-macro` → GLI, M2, DXY, ETF flows, halving cycle, macro headlines
-- `research-smartmoney` → Whale flows, exchange inflows/outflows, OTC desk, positioning
+- `analyse-technical` → TradingView MCP — OHLCV, RSI, BB, MACD, MAs
+- `analyse-onchain` → MVRV-Z, realized price, NUPL, Puell, 200wMA, sentiment/cycle
+- `analyse-defi` → DeFiLlama: TVL, fee distribution, protocol accrual
+- `analyse-macro` → GLI, M2, DXY, ETF flows, halving cycle, macro headlines
+- `analyse-smartmoney` → Whale flows, exchange inflows/outflows, OTC desk, positioning
 
 **Layer 2 — CIO** consolidates → one briefing package per token
 
@@ -33,44 +33,10 @@ Loop through the token universe **one token at a time** (TradingView has a singl
 - `investor-warren-buffett` → Quality school (Buffett/Fisher)
 - `investor-ray-dalio` → Cycle school (Dalio/Templeton)
 - `investor-stanley-druckenmiller` → Trend school (Druckenmiller/Carver)
-- `research-defi` → On-chain school (Burniske) — dual role: research + vote
+- `analyse-defi` → On-chain school (Burniske) — dual role: research + vote
 
 **Why tokens loop sequentially:** TradingView has a single chart slot (`chart_set_symbol` is a global mutation). CIO pulls TV data for one token at a time. The Research Desk and Investment Panel for a given token each run in parallel within their phase, but the per-token pipeline is strictly sequential.
 
-```mermaid
-flowchart TD
-    CIO["🎯 CIO\n11 tokens · one at a time (chart slot)"]
-    CIO -->|"token + price_usd"| RESEARCH
-    subgraph RESEARCH["① Research Desk — parallel, each analyst owns its data"]
-        TA["research-technical\n📊 TradingView MCP\nOHLCV · RSI · BB · MACD · MAs"]
-        FUND["research-onchain\n🌐 MVRV-Z · realized price · NUPL\nBTC valuation · sentiment · cycle"]
-        OC["research-defi\n🌐 DeFiLlama\nTVL · fee distribution · accrual"]
-        MACRO["research-macro\n🌐 GLI · M2 · DXY · ETF flows\nmacro headlines · halving cycle"]
-        SM["research-smartmoney\n🌐 whale flows · exchange inflows\nOTC · positioning"]
-    end
-    BRIEF["📄 CIO consolidates\none briefing package per token"]
-    TA -->|"technical brief"| BRIEF
-    FUND -->|"fundamental brief"| BRIEF
-    OC -->|"on-chain brief"| BRIEF
-    MACRO -->|"macro brief"| BRIEF
-    SM -->|"smart money brief"| BRIEF
-    BRIEF -->|"briefing"| PANEL
-    subgraph PANEL["② Investment Panel — parallel, each seat reads the brief + votes"]
-        G["investor-benjamin-graham\nValue school\nGraham / Klarman"]
-        B["investor-warren-buffett\nQuality school\nBuffett / Fisher"]
-        D["investor-ray-dalio\nCycle school\nDalio / Templeton"]
-        DR["investor-stanley-druckenmiller\nTrend school\nDruckenmiller / Carver"]
-        BU["research-defi\nOn-chain school\nBurniske"]
-    end
-    G -->|"BULLISH / NEUTRAL / BEARISH + reason"| QUORUM
-    B -->|"vote"| QUORUM
-    D -->|"vote"| QUORUM
-    DR -->|"vote"| QUORUM
-    BU -->|"vote"| QUORUM
-    QUORUM["③ CIO counts votes\nseats_bull ≥ 4 → BUY\n≥ 3 → BUY(small)\nbear ≥ 4 → SELL\nelse → HOLD"]
-    QUORUM --> GOV["F&G Governor Cap\nExtreme Fear → max 3\nFear → max 5"]
-    GOV --> OUT["📋 Final Report\nper-token: analyst briefs + panel reasoning + signal\nACTIVE / WATCH / HOLD / SELL"]
-```
 
 ## Quickstart
 
@@ -130,7 +96,7 @@ Educational, not financial advice.
 
 ## Hard constraints — read before running (these dictate the whole design)
 
-1. **TradingView MCP tools live ONLY in the orchestrator (you).** Subagents get a fresh toolset with **no** `tradingview-*` tools, so YOU pull every chart datum. Never tell a subagent to "pull TradingView data" — it cannot. The `research-technical` subagent *receives* the pre-assembled TV data package from CIO and formats the technical brief from it (no MCP access of its own). All other research subagents fetch their own data sources via `web_fetch`.
+1. **TradingView MCP tools live ONLY in the orchestrator (you).** Subagents get a fresh toolset with **no** `tradingview-*` tools, so YOU pull every chart datum. Never tell a subagent to "pull TradingView data" — it cannot. The `analyse-technical` subagent *receives* the pre-assembled TV data package from CIO and formats the technical brief from it (no MCP access of its own). All other research subagents fetch their own data sources via `web_fetch`.
 2. **The chart is a single shared symbol slot.** `chart_set_symbol` mutates the one global chart — two tokens cannot be pulled at once. **The per-token data loop is strictly sequential, one token at a time.** Track progress in `todos` so a `/loop` or interrupted run resumes cleanly.
 3. **Read every indicator from TradingView — don't recompute it.** `data_get_study_values` returns RSI(14), Bollinger(20,2), MACD(12,26,9), Volume at standard lengths — use them verbatim. The only gap is moving averages: `chart_manage_indicator` ignores the MA `length` input and has no `update` action. So EMA20 / SMA50 / SMA200 / 200-week-MA — and only those — are computed by `scripts/indicators.py` from the MCP's **own** returned closes (the data source stays 100% TradingView).
 
@@ -184,11 +150,11 @@ echo "Artifacts: $RUN_DIR"
 
 Pick the next `pending` todo, `UPDATE todos SET status='in_progress'`, then for that token:
 
-> **Why sequential:** TradingView has a single shared chart slot. CIO must pull TV data before spawning Phase 1 subagents (the `research-technical` brief depends on it). Only one token can occupy the chart at a time. Within each phase, all subagents for the current token run in parallel.
+> **Why sequential:** TradingView has a single shared chart slot. CIO must pull TV data before spawning Phase 1 subagents (the `analyse-technical` brief depends on it). Only one token can occupy the chart at a time. Within each phase, all subagents for the current token run in parallel.
 
 ### 1a. CIO pulls TradingView data (orchestrator-only, sequential)
 
-CIO executes the full TradingView data pull for this token **before** spawning any subagents. This produces the data package for `research-technical`.
+CIO executes the full TradingView data pull for this token **before** spawning any subagents. This produces the data package for `analyse-technical`.
 
 ```
 chart_get_state → dedup indicators → chart_set_symbol(BINANCE:{TOKEN}USDT) →
@@ -222,13 +188,13 @@ Spawn all five research subagents in parallel. Each returns a structured brief (
 
 | Researcher | Skill | Data source |
 |---|---|---|
-| `research-technical` | `research-technical` | Receives `tv_data_package` from CIO — formats technical brief from pre-pulled data; no MCP access |
-| `research-onchain` | `research-onchain` | Fetches MVRV-Z, realized price, NUPL, Puell multiple from glassnode / lookintobitcoin / cryptoquant |
-| `research-defi` | `research-defi` | Fetches DeFiLlama: TVL, fee distribution, protocol revenue accrual |
-| `research-macro` | `research-macro` | Fetches GLI/M2/DXY, ETF flows, halving cycle context, macro headlines |
-| `research-smartmoney` | `research-smartmoney` | Fetches exchange inflows/outflows, whale wallet movements, OTC desk data, positioning |
+| `analyse-technical` | `analyse-technical` | Receives `tv_data_package` from CIO — formats technical brief from pre-pulled data; no MCP access |
+| `analyse-onchain` | `analyse-onchain` | Fetches MVRV-Z, realized price, NUPL, Puell multiple from glassnode / lookintobitcoin / cryptoquant |
+| `analyse-defi` | `analyse-defi` | Fetches DeFiLlama: TVL, fee distribution, protocol revenue accrual |
+| `analyse-macro` | `analyse-macro` | Fetches GLI/M2/DXY, ETF flows, halving cycle context, macro headlines |
+| `analyse-smartmoney` | `analyse-smartmoney` | Fetches exchange inflows/outflows, whale wallet movements, OTC desk data, positioning |
 
-Pass to each researcher: `{ token: "{TOKEN}", price_usd: {PRICE}, tv_data_package: <json> }`. Only `research-technical` uses `tv_data_package`; the others fetch their own data sources.
+Pass to each researcher: `{ token: "{TOKEN}", price_usd: {PRICE}, tv_data_package: <json> }`. Only `analyse-technical` uses `tv_data_package`; the others fetch their own data sources.
 
 **Researcher brief format** (returned by each, no vote):
 ```
@@ -245,7 +211,7 @@ Invalidation anchor: <what data change would flip this picture>
 
 Technical researcher brief format (no fetching — receives TV package from CIO):
 ```
-research-technical — {TOKEN}
+analyse-technical — {TOKEN}
 Data source: TradingView MCP (pre-pulled by CIO)
 Brief:
   - Price: ${price_usd} | EMA20: {x} | SMA50: {x} | SMA200: {x} | 200wMA: {x}
@@ -265,7 +231,7 @@ Brief:
 > - `cryptopanic.com/news/...` — returns only the page title, no articles.
 > Use the **two-step pattern**: (1) fetch a listing page for current article URLs, (2) fetch the article URL for the quote.
 
-**`web_fetch` ≥3 of these starting URLs** per token (applies to `research-macro`, `research-smartmoney`, and `research-defi` where applicable):
+**`web_fetch` ≥3 of these starting URLs** per token (applies to `analyse-macro`, `analyse-smartmoney`, and `analyse-defi` where applicable):
 
 **On-chain data (T1 — try first):**
 - Fear & Greed: `https://api.alternative.me/fng/?limit=1` (JSON)
@@ -295,7 +261,7 @@ On error or no relevant content, write `[FETCH FAILED: <url>]` — do not count 
 
 A descriptive summary ("protocol revenue confirmed", "GHO expansion ongoing") is a paraphrase and **FAILS** this check. If no quotable metric string exists, write `[FETCH FAILED: no parseable metric found]`.
 
-**On-chain seat — tokenomics live check (DeFi tokens).** For any non-L1 token (not BTC/ETH/SOL/TON), `research-defi` must verify protocol mechanics via live fetch before writing the DeFi brief. **NEVER state a tokenomics claim (fee switch, buyback, burn, staking yield, revenue accrual) from memory — governance votes change protocol economics at any time.**
+**On-chain seat — tokenomics live check (DeFi tokens).** For any non-L1 token (not BTC/ETH/SOL/TON), `analyse-defi` must verify protocol mechanics via live fetch before writing the DeFi brief. **NEVER state a tokenomics claim (fee switch, buyback, burn, staking yield, revenue accrual) from memory — governance votes change protocol economics at any time.**
 
 1. `web_fetch https://defillama.com/protocol/{slug}` — check the **Protocol Revenue** row and the description for burns, buybacks, revenue distribution.
 2. If DeFiLlama shows non-zero revenue AND recall says "no accrual" → **you are stale**. Fetch the governance forum: `web_fetch https://www.theblock.co/search?query={TOKEN}+fee+switch` and `web_fetch https://gov.uniswap.org`.
@@ -356,9 +322,9 @@ Spawn all five investor subagents in parallel. Each reads the **full briefing pa
 | `investor-warren-buffett` | `investor-warren-buffett` | Quality — moat, revenue quality, sustainable competitive advantage (Buffett/Fisher) |
 | `investor-ray-dalio` | `investor-ray-dalio` | Cycle — macro regime, liquidity cycle, risk parity perspective (Dalio/Templeton) |
 | `investor-stanley-druckenmiller` | `investor-stanley-druckenmiller` | Trend — price structure, momentum, entry/exit timing (Druckenmiller/Carver) |
-| `research-defi` (Burniske) | `research-defi` | On-chain — fee capture, token velocity, protocol cash flows (Burniske lens) |
+| `analyse-defi` (Burniske) | `analyse-defi` | On-chain — fee capture, token velocity, protocol cash flows (Burniske lens) |
 
-> **`research-defi` dual role:** In Phase 1, `research-defi` gathered DeFiLlama data (TVL/fees) and returned a data brief. In Phase 2, it reads the full briefing package and votes from Chris Burniske's on-chain value accrual lens — same skill, separate role.
+> **`analyse-defi` dual role:** In Phase 1, `analyse-defi` gathered DeFiLlama data (TVL/fees) and returned a data brief. In Phase 2, it reads the full briefing package and votes from Chris Burniske's on-chain value accrual lens — same skill, separate role.
 
 Pass to each investor: `{ token: "{TOKEN}", price_usd: {PRICE}, briefing_package: "<full markdown>" }`.
 

@@ -1,6 +1,6 @@
 ---
 name: investor-bernstein-intraday
-description: Execute intraday day-trades in stocks, forex, and commodities using Jacob Bernstein's *The Ultimate Day Trader* (2009) method — classify the Set-Up, wait for the bar-close Trigger, manage Follow-Through. Exact non-standard params: 10/8 Moving Average Channel (SMA of highs/lows), 28-period Momentum, MACD 9/18 line-only, 9-period slow stochastic 30/70, 16-bar breakout, gap/Oops, 30-min opening-range breakout, volume spikes (4×). Strictly SHORT-TERM execution — not for long-term or swing entry timing (use `research-technical` for that). Use when the user asks "where do I put my stop", "day trading setup", "momentum divergence", "should I buy this breakout", "what's the trigger", "how do I size and scale out". Fetches live OHLCV from TradingView MCP and computes Bernstein's exact params, then emits a structured set-up/trigger/stop/target/size read. Educational, not advice; a lens, not gospel — TA has a weak/mixed empirical base, validate with backtests.
+description: Execute intraday day-trades in stocks, forex, and commodities using Jacob Bernstein's *The Ultimate Day Trader* (2009) method — classify the Set-Up, wait for the bar-close Trigger, manage Follow-Through. Exact non-standard params: 10/8 Moving Average Channel (SMA of highs/lows), 28-period Momentum, MACD 9/18 line-only, 9-period slow stochastic 30/70, 16-bar breakout, gap/Oops, 30-min opening-range breakout, volume spikes (4×). Strictly SHORT-TERM execution — not for long-term or swing entry timing (use `analyse-technical` for that). Use when the user asks "where do I put my stop", "day trading setup", "momentum divergence", "should I buy this breakout", "what's the trigger", "how do I size and scale out". Fetches live OHLCV from TradingView MCP and computes Bernstein's exact params, then emits a structured set-up/trigger/stop/target/size read. Educational, not advice; a lens, not gospel — TA has a weak/mixed empirical base, validate with backtests.
 license: MIT
 compatibility: opencode
 metadata:
@@ -17,16 +17,16 @@ Trader* (2009)**. This skill is the **short-term execution seat** — the synthe
 *when and how to enter and exit a day-trade*, not long-term valuation or position timing. It classifies
 the Set-Up, waits for the bar-close Trigger, places a market-based stop, and manages Follow-Through
 across multiple units. The detail and exact indicator parameters live in `references/`; load them before
-any load-bearing claim, and route all validation to `analyst-systematic-trading`.
+any load-bearing claim, and route all validation to `analyse-systematic-trading`.
 
 > **⚠ SCOPE: INTRADAY / SHORT-TERM EXECUTION ONLY.**
-> For **long-term / swing / position entry timing on daily/weekly charts**, use **`research-technical`**
+> For **long-term / swing / position entry timing on daily/weekly charts**, use **`analyse-technical`**
 > instead. This skill is strictly intraday day-trading execution — Set-Up→Trigger→Follow-Through on
 > sub-daily bars.
 >
 > **⚠ REPO HONESTY:** The fund's house finding is that **hold / mid-risk beats day-trading after
 > costs**. Use this lens for **idea generation and hypothesis formation**, not as validated alpha. Any
-> setup must clear `analyst-systematic-trading` (walk-forward, full costs) before real capital is
+> setup must clear `analyse-systematic-trading` (walk-forward, full costs) before real capital is
 > risked.
 
 ## The unifying worldview (everything connects to this)
@@ -245,7 +245,7 @@ opening-range read on a 24/7 market.
 6. **Manage Follow-Through (the hard part).** Hit first target → take a partial, move the stop to
    break-even (the **free trade**), ride the remainder with a trailing stop. Big money is in the big move.
 7. **Apply the honesty overlay.** State that this is a *hypothesis*, not validated alpha; flag costs,
-   overfitting, and that net of costs most day traders lose. Route to `analyst-systematic-trading` to
+   overfitting, and that net of costs most day traders lose. Route to `analyse-systematic-trading` to
    backtest before risking capital.
 
 ## Routing table
@@ -275,7 +275,7 @@ amount. **Targets/exit**: trade 3 units; first target ≈ half the range from th
 there, move the rest to break-even (the **free trade**), trail the remainder. **Honesty**: divergence
 appears at only 'about 60 to 70 percent of meaningful tops and bottoms' — it misses, and it isn't a
 backtested edge here. Treat this as a *hypothesis*: validate it with full costs in
-`analyst-systematic-trading` before trading, because net of costs most day traders lose."
+`analyse-systematic-trading` before trading, because net of costs most day traders lose."
 </example>
 
 ## Output format
@@ -298,7 +298,7 @@ SIZE:        {units, sized so a stop-out risks ≤ X% of capital; capital must s
 CONFLUENCE:  {higher-TF trend up/down/flat — AGREES / CONFLICTS with the set-up}
 SETUP(L2):   MAC[10/8]={up}/{lo}  Mom28={}  Mom28MA={}  MACD(9,18)line={}  %K9slow={}  16bar hi/lo={}/{}  vol-spike={}
 HONESTY:     Hypothesis only — {e.g. divergence hits ~60–70% of turns; params untested for overfit/costs}.
-             Backtest in analyst-systematic-trading before risking capital.
+             Backtest in analyse-systematic-trading before risking capital.
 DATA:        {LIVE (TradingView MCP) | DEGRADED — {which fields [UNAVAILABLE] and why}}
 ```
 
@@ -313,7 +313,7 @@ DATA:        {LIVE (TradingView MCP) | DEGRADED — {which fields [UNAVAILABLE] 
 - **Parameters risk overfitting.** The exact settings (10/8 MAC, 28 Momentum, MACD 9/18, 9-stochastic
   30/70, 16-bar breakout) are shown without out-of-sample, cost, or significance testing — ironic next
   to his own anti-optimization warning. Present them precisely; never claim demonstrated profitability.
-- **Validate, then trade.** TA setups are **hypothesis generation**. Route to `analyst-systematic-trading`
+- **Validate, then trade.** TA setups are **hypothesis generation**. Route to `analyse-systematic-trading`
   for rigorous walk-forward validation with full costs; **`trend-following`** is the one TA family that
   survives backtesting. Pair with `regime-detection` and `risk-management`. The repo's house finding is
   that **hold / mid-risk beat day-trading after costs** — so treat TA day-trading as a lens for ideas,
@@ -327,4 +327,4 @@ without fabricating), (1) **reads Layer-1 context** (RSI/MACD-12-26-9/Volume/OBV
 won't act before it, and checks Layer 1 doesn't contradict it, (4) places a **market-based stop** and
 sizes on risk with capital-adequacy (survive-6-losses), (5) lays out the **multi-unit / free-trade
 Follow-Through**, and (6) emits the **structured output block** and flags it as an unvalidated hypothesis
-to be backtested in `analyst-systematic-trading`, net of costs.
+to be backtested in `analyse-systematic-trading`, net of costs.

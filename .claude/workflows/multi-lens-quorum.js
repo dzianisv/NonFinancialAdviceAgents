@@ -22,7 +22,7 @@ const date = A.date || 'undated'
 
 // Default 5-lens set chosen to DISAGREE across return-drivers, incl. a value-dissent seat (Graham).
 const DEFAULT_LENSES = [
-  'analyst-systematic-trading', // Carver — discipline/sizing/cost speed limit
+  'analyse-systematic-trading', // Carver — discipline/sizing/cost speed limit
   'investor-benjamin-graham',  // value / "is this even an investment" DISSENT seat
   'investor-lyn-alden',        // structural-inflation / scarce-asset bull
   'research-morgan-housel',    // behavioral guardrail / don't-blow-up

@@ -7,7 +7,7 @@ metadata:
   audience: equity-allocators
   domain: equity-portfolio-management
   role: portfolio-manager
-  source: "Architecture mirrors crypto-advisor (2026); seats grounded in fundamental-analysis + research-technical (Bernstein 2009)"
+  source: "Architecture mirrors crypto-advisor (2026); seats grounded in analyse-fundamental + analyse-technical (Bernstein 2009)"
 ---
 
 # Stocks Portfolio Manager
@@ -95,7 +95,7 @@ empty, **skip publishing silently** and finish the run; absence is not an error.
 
 ## The honest base rate (state this every run)
 
-From the `fundamental-analysis` skill, on full-history backtests of the investable stock-selection methods
+From the `analyse-fundamental` skill, on full-history backtests of the investable stock-selection methods
 vs SPY: **only 1 of 10 methods beat SPY on return (momentum); 0 of 10 beat it on Sharpe — including the ETF
 that implements Morningstar's own stock-picking.** Single-stock selection is a low-base-rate bet. So:
 - Single names are **satellites**, the index is the **core and the bar**.

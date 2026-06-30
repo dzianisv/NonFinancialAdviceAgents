@@ -154,11 +154,11 @@ The orchestrator does NOT interpret or summarize reasons. It passes them verbati
 | BEARISH trigger | `death_cross = true` AND `rsi_14 < 40` |
 | NEUTRAL trigger | MAs are null (`weekly_closes < 200`), or MA alignment and RSI conflict |
 
-### Seat 5 — `analysis-onchain`
+### Seat 5 — `analyse-onchain-lens`
 
 | Attribute | Value |
 |---|---|
-| Skill path | `.agents/skills/analysis-onchain/SKILL.md` |
+| Skill path | `.agents/skills/analyse-onchain-lens/SKILL.md` |
 | School anchoring | Chris Burniske & Jack Tatar (*Cryptoassets* — value-accrual framework); DeFiLlama methodology |
 | Primary signals | `defi_llama.tvl`, `defi_llama.protocol_revenue_30d`, `defi_llama.fee_distribution` |
 | BULLISH trigger | Value accrual verified: `fee_distribution` confirms buyback or burn mechanism AND `tvl` growing AND `protocol_revenue_30d > 0` |
@@ -275,7 +275,7 @@ SEAT_SKILLS = {
     "quality": "investor-warren-buffett",         # reuse existing
     "cycle":   "investor-ray-dalio",              # reuse existing
     "trend":   "investor-stanley-druckenmiller",  # reuse existing
-    "onchain": "research-defi",            # new — DeFiLlama value-accrual
+    "onchain": "analyse-defi",            # new — DeFiLlama value-accrual
 }
 
 MODEL_MAP = {
@@ -310,7 +310,7 @@ SEAT_PLUGINS = {
     "quality": "investor-warren-buffett",
     "cycle":   "investor-ray-dalio",
     "trend":   "investor-stanley-druckenmiller",
-    "onchain": "research-defi",
+    "onchain": "analyse-defi",
 }
 
 MODEL_MAP = {
@@ -352,7 +352,7 @@ Both adapters return to core:
 ## 8. File Layout
 
 Four seats reuse existing analytics skills — no new files needed. Only the onchain seat is new
-(the existing `analysis-onchain` is Bitcoin MVRV-Z only; not applicable to multi-token DeFiLlama data).
+(the existing `analyse-onchain-lens` is Bitcoin MVRV-Z only; not applicable to multi-token DeFiLlama data).
 
 ```
 .agents/skills/
@@ -361,7 +361,7 @@ Four seats reuse existing analytics skills — no new files needed. Only the onc
   investor-warren-buffett/        ← REUSE as Quality seat (exists)
   investor-ray-dalio/             ← REUSE as Cycle seat (exists)
   investor-stanley-druckenmiller/ ← REUSE as Trend seat (exists)
-  research-defi/SKILL.md   ← NEW — Burniske DeFiLlama value-accrual (not BTC MVRV-Z)
+  analyse-defi/SKILL.md   ← NEW — Burniske DeFiLlama value-accrual (not BTC MVRV-Z)
 ```
 
 Do not embed seat skills inside `crypto-advisor/`. They are panel-agnostic and reusable by `hedge-fund-committee` and other quorum skills.

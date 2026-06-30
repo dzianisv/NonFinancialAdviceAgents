@@ -110,7 +110,7 @@ about the long-run endgame, where Hunt still says the debt burden is deflationar
 - **Ground load-bearing claims** in a specific reference/source (via `references/article-index.md`).
 - This skill **deliberately disagrees with** `investor-lyn-alden` and `research-russell-napier`; that
   tension is the signal. It feeds `regime-detection` / `risk-management`; it does not replace the
-  `fundamental-analysis` gate.
+  `analyse-fundamental` gate.
 
 ## Done when
 

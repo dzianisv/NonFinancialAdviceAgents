@@ -106,7 +106,7 @@ a regime map, not a near-term trade trigger."
 - **Ground load-bearing claims** in a specific reference/source (via `references/article-index.md`).
 - This skill **complements** `investor-lyn-alden` (shares the debasement endgame) and the rest of the
   macro panel; it feeds `portfolio-construction` / `regime-detection`. It does not replace the
-  `fundamental-analysis` valuation gate or your own analysis.
+  `analyse-fundamental` valuation gate or your own analysis.
 
 ## Done when
 

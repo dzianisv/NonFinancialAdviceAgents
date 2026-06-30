@@ -102,7 +102,7 @@ reaction speed — it's dangerous to copy the size without the discipline."
 - **Current positioning decays fast.** Date every current-view claim; re-check his latest interview.
 - **Ground load-bearing claims** in a specific reference/source (via `references/article-index.md`).
 - This skill **complements** the macro panel (it executes the others' views) and feeds
-  `regime-detection` / `risk-management`; it does not replace the `fundamental-analysis` gate.
+  `regime-detection` / `risk-management`; it does not replace the `analyse-fundamental` gate.
 
 ## Done when
 

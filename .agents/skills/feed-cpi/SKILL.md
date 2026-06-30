@@ -1,6 +1,6 @@
 ---
 name: feed-cpi
-description: "Source adapter for US CPI data — fetches the latest BLS Consumer Price Index release and normalizes into a structured record: headline YoY, MoM, core YoY, release date, and source URL. Pure fetch + normalize only — no hot/cold judgment, no Fed implication. Interpretation lives in research-macro. Use when gathering macro data, when research-macro needs CPI inputs, or when asked for the latest CPI number. Degrades gracefully; never fabricates."
+description: "Source adapter for US CPI data — fetches the latest BLS Consumer Price Index release and normalizes into a structured record: headline YoY, MoM, core YoY, release date, and source URL. Pure fetch + normalize only — no hot/cold judgment, no Fed implication. Interpretation lives in analyse-macro. Use when gathering macro data, when analyse-macro needs CPI inputs, or when asked for the latest CPI number. Degrades gracefully; never fabricates."
 license: MIT
 compatibility: opencode
 metadata:
@@ -13,7 +13,7 @@ metadata:
 # feed-cpi (BLS CPI data adapter)
 
 Pure **fetch + normalize** adapter for US CPI data. Emits a structured record consumed downstream by
-`research-macro`. No judgment — "is this hot or cold vs expectations?" lives in `research-macro`.
+`analyse-macro`. No judgment — "is this hot or cold vs expectations?" lives in `analyse-macro`.
 
 ## Citation rule — no URL = not a source
 
@@ -58,7 +58,7 @@ BLS CPI table:   https://www.bls.gov/news.release/cpi.t01.htm
 ## Hard rules
 
 - **Never fabricate.** On fetch failure → `[FETCH FAILED: url]` in the affected field.
-- **Data only.** No "this is hot", no "Fed will cut". Interpretation lives in `research-macro`.
+- **Data only.** No "this is hot", no "Fed will cut". Interpretation lives in `analyse-macro`.
 
 ## Done when
 

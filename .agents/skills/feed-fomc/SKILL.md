@@ -1,6 +1,6 @@
 ---
 name: feed-fomc
-description: "Source adapter for Federal Reserve FOMC data — fetches official federalreserve.gov calendar, most recent statement/minutes, and computes rate-path probabilities from ZQ Fed Funds futures. Emits a normalized data record consumed by research-macro and macro-panel. Pure fetch + normalize only — no market-impact judgment. Use when gathering Fed policy data, when research-macro needs FOMC inputs, or when asked for the latest FOMC statement, meeting date, or rate-path odds. Degrades gracefully; never fabricates."
+description: "Source adapter for Federal Reserve FOMC data — fetches official federalreserve.gov calendar, most recent statement/minutes, and computes rate-path probabilities from ZQ Fed Funds futures. Emits a normalized data record consumed by analyse-macro and macro-panel. Pure fetch + normalize only — no market-impact judgment. Use when gathering Fed policy data, when analyse-macro needs FOMC inputs, or when asked for the latest FOMC statement, meeting date, or rate-path odds. Degrades gracefully; never fabricates."
 license: MIT
 compatibility: opencode
 metadata:
@@ -13,7 +13,7 @@ metadata:
 # feed-fomc (Federal Reserve data adapter)
 
 Pure **fetch + normalize** adapter for Fed policy data. Emits a structured record consumed downstream by
-`research-macro`, `macro-panel`, and `superforecasting`. No market-impact judgment — interpretation lives
+`analyse-macro`, `macro-panel`, and `superforecasting`. No market-impact judgment — interpretation lives
 in those downstream skills.
 
 ## Citation rule — no URL = not a source
@@ -83,7 +83,7 @@ Pulls current target range + EFFR from NY Fed markets API and ZQ futures from Ya
 
 - **Never fabricate.** On fetch failure → `[FETCH FAILED: url]` in the affected field.
 - **Never quote CME FedWatch page or WebSearch summaries** for rate probabilities — use `fedwatch_zq.py` only.
-- **Data only.** No "this is hawkish", no "this implies rate cuts". Interpretation lives in `research-macro`.
+- **Data only.** No "this is hawkish", no "this implies rate cuts". Interpretation lives in `analyse-macro`.
 
 ## Done when
 

@@ -19,8 +19,8 @@ prompt must be self-contained. Emit [SILENT] when a job has nothing to report.
 STEP 1 — INSTALL SKILLS (include the .py helpers, not just SKILL.md):
   npx -y skills add dzianisv/backtest --agent hermes-agent --copy
   Then: hermes skills list  — confirm dip-screener, crypto-dip-scanner, signal-convergence-alert,
-  liveness-monitor, trend-stock-research, regime-detection, feed-fomc, analyst-smartmoney-13f,
-  analyst-smartmoney-ptr, multi-lens-quorum, risk-management, forecast-ledger appear.
+  liveness-monitor, trend-stock-research, regime-detection, feed-fomc, analyse-smartmoney-13f,
+  analyse-smartmoney-ptr, multi-lens-quorum, risk-management, forecast-ledger appear.
   Create a durable pool dir: mkdir -p ~/.openclaw/workspace/investor/pools
   (or set $DIP_POOL/$NARRATIVE_POOL env to a persistent path your cron sessions share — NOT /tmp).
 
@@ -37,7 +37,7 @@ STEP 3 — REGISTER CRON (all UTC; each daily job ends by logging liveness; [SIL
     (sources may be correlated); else [SILENT]; liveness log --job signal-convergence.
   • health "0 9 * * 1-5":  liveness.py check --expect dip-screener,crypto-dip-scanner,signal-convergence,narrative-velocity --max-age-hours 26; alert only if STALE.
   • weekly committee "30 9 * * 1":  run the WEEKLY HEDGE-FUND COMMITTEE — analysts gather (regime+fomc,
-    analyst-smartmoney-13f, analyst-smartmoney-ptr 90d, trend-stock-research, dip + crypto scanners) → aggregate by
+    analyse-smartmoney-13f, analyse-smartmoney-ptr 90d, trend-stock-research, dip + crypto scanners) → aggregate by
     ticker (n_sources=crowdedness; flag flow_only 13F/congress as 30-45d lagged) → top 5 → each gets an
     INDEPENDENT verdict from buffett/druckenmiller/lacy-hunt(dissent)/fundamental → quote the strongest
     opposing vote verbatim → risk-management VETO (RISK_OFF or >10% book) else size CEILING (never invent

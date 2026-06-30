@@ -49,7 +49,7 @@ unsurfaced events only
 news_store.ts:445-458"]
 
     CONSUMERS["Consumers
-narrative-news · analysis-narrative
+narrative-news · analyse-narrative
 crypto-advisor · stocks-trend-screener"]
 
     F9 --> FETCH
@@ -143,7 +143,7 @@ Output JSON: `{ fetched, feeds_ok, unavailable, events }`.
 ## Consumers
 
 - **`narrative-news`** — primary crypto panel gather seat; calls `read_news.ts` and emits the new/updated events for the consolidated brief (narrative-news/SKILL.md:18)
-- **`analysis-narrative`** — interpretation layer; runs `read_news.ts` first as single entry point for all news sources, then classifies events PRICED_IN vs ACTIONABLE_CONTEXT (analysis-narrative/SKILL.md:65)
+- **`analyse-narrative`** — interpretation layer; runs `read_news.ts` first as single entry point for all news sources, then classifies events PRICED_IN vs ACTIONABLE_CONTEXT (analyse-narrative/SKILL.md:65)
 - **`crypto-advisor`** — cites feed-script records (FT/WSJ/read_news.ts) as source-of-truth; hard rule against fabricating headlines (crypto-advisor/SKILL.md:170)
 - **`stocks-trend-screener`** — uses `read_news.ts` for a deterministic firm-wide macro feed (stocks-trend-screener/SKILL.md:126)
 

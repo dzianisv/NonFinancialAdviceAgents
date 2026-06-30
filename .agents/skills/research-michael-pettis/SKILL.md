@@ -108,7 +108,7 @@ losses."
 - **Current positioning decays.** Date every current-view claim; re-check his latest Carnegie post / X.
 - **Ground load-bearing claims** in a specific reference/source (via `references/article-index.md`).
 - This skill **complements** the panel (it covers trade/China/FX the others skip) and informs
-  `regime-detection`; it does not replace the `fundamental-analysis` gate.
+  `regime-detection`; it does not replace the `analyse-fundamental` gate.
 
 ## Done when
 

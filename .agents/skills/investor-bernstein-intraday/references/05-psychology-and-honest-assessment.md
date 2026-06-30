@@ -37,7 +37,7 @@
 1. Lead with discipline: written rules, bar-close entries, no hope-holding, no overnight losers, no chat rooms, one time frame.
 2. Run the **capital-adequacy / six-loss** check before any trade.
 3. **Always attach the honesty overlay**: name the setup as a *hypothesis*, flag costs and overfitting, and state that most day traders lose net of costs.
-4. **Route every setup to validation** in `analyst-systematic-trading` (walk-forward, full costs); treat `trend-following` as the one TA family that survives backtesting; pair with `regime-detection` and `risk-management`.
+4. **Route every setup to validation** in `analyse-systematic-trading` (walk-forward, full costs); treat `trend-following` as the one TA family that survives backtesting; pair with `regime-detection` and `risk-management`.
 5. Defer to the repo's house finding: **hold / mid-risk beat day-trading after costs** — TA day-trading is for **idea generation**, not as a proven edge.
 
 ## Caveats / where he hedges

@@ -6,7 +6,7 @@
 > **Desk focus:** AI supply chain equities — networking silicon, EDA, optical interconnects, PCB chemicals; names with valuation gap and upcoming catalysts
 > **Portfolio:** NO PORTFOLIO PROVIDED — answer at market/asset level; do NOT assume, invent, or carry over any holdings.
 > **As-of:** 2026-06-20
-> **Seats that returned data:** trend-stock-research, fundamental-analysis, congressman-stock-watch
+> **Seats that returned data:** trend-stock-research, analyse-fundamental, congressman-stock-watch
 
 ---
 
@@ -157,7 +157,7 @@ Relevant factors not populated: Fed rate path, 10Y UST yield, liquidity backdrop
 
 | Conflict | Source A | Source B | Comment |
 |---|---|---|---|
-| 52-week high | $92.42 (trend-stock-research seat) | $94.75 (fundamental-analysis seat) | Same stock, different reported high. Likely reflects different data vendor or date of pull. Not reconciled — use with caution for exact ATH stop placement. |
+| 52-week high | $92.42 (trend-stock-research seat) | $94.75 (analyse-fundamental seat) | Same stock, different reported high. Likely reflects different data vendor or date of pull. Not reconciled — use with caution for exact ATH stop placement. |
 | Forward P/E basis | 32.02× on $2.75 non-GAAP consensus (fundamental seat) | 97.94× TTM P/E (both seats) | Not a conflict per se — GAAP vs non-GAAP distinction. GAAP TTM EPS $0.94 inflated by charges; non-GAAP $2.40 FY2025 actual and $2.75 FY2026E are the operative numbers. Requires that GAAP charges remain non-recurring. |
 | "Already priced" assessment | Trend seat: "LATE/BORDERLINE — not a clean kill (148% < 150% hard-kill threshold)" | Fundamental seat: BHE "does NOT fit the networking silicon / EDA / optical / PCB chemical sub-sectors" and is categorically in the "already moved" bucket | Conflict on threshold framing (late vs. disqualified). Fundamental seat frames it as a sector mismatch; trend seat frames it as a price threshold near-miss. Both reach the same practical conclusion. |
 | Analyst price target | Median $78 (–15% vs current) with 3 analysts | High end: Lake Street raised to $92 | Current price ($92.17) is at or above even the highest analyst target. Analyst coverage is thin (3 analysts) — targets stale relative to HPE award and current price. |
@@ -181,4 +181,4 @@ Relevant factors not populated: Fed rate path, 10Y UST yield, liquidity backdrop
 
 ---
 
-*Brief produced by stock-research-desk consolidation skill. Evidence only — no buy/sell recommendation. Re-pull before acting. Seats: trend-stock-research, fundamental-analysis, congressman-stock-watch. Date: 2026-06-20.*
+*Brief produced by stock-research-desk consolidation skill. Evidence only — no buy/sell recommendation. Re-pull before acting. Seats: trend-stock-research, analyse-fundamental, congressman-stock-watch. Date: 2026-06-20.*

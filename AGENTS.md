@@ -54,7 +54,7 @@ Never pass `assets: [...]` — the screener is CIO-directed and always runs. Use
 
 ```js
 Skill({ skill: "dip-scanner" })
-Skill({ skill: "analyst-smartmoney-13f" })
+Skill({ skill: "analyse-smartmoney-13f" })
 Skill({ skill: "multi-lens-quorum" })
 Skill({ skill: "superforecasting" })
 Skill({ skill: "regime-detection" })
@@ -173,7 +173,7 @@ All in `.agents/skills/`. Full architecture diagrams: `.agents/skills/README.md`
 | `rebalancing` | calendar-check / threshold-act, tax-aware |
 | `dip-tranches-strategy` | tiered dip-buying (`check_drawdown.py`) |
 | `tax-loss-harvesting` | harvest losses, no wash-sale trips |
-| `fundamental-analysis` | valuation context, data sources, backtest gate |
+| `analyse-fundamental` | valuation context, data sources, backtest gate |
 
 Skill frontmatter: keep `compatibility: opencode`.
 

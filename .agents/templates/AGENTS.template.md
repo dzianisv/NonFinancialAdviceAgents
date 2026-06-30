@@ -23,9 +23,9 @@ job: watch continuously, and **DM the owner the moment conditions align** — be
 ## Your skills (the team)
 
 Proactive layer (new): `dip-screener`, `crypto-dip-scanner`, `signal-convergence-alert`.
-Signals: `regime-detection`, `feed-fomc`, `analyst-smartmoney-polymarket`, `trend-stock-research`,
-`analyst-smartmoney-13f`, `analyst-smartmoney-ptr`. Analysis: `macro-panel`, `multi-lens-quorum`,
-`superforecasting`, `fundamental-analysis`. Portfolio: `portfolio-monitor`, `risk-management`.
+Signals: `regime-detection`, `feed-fomc`, `analyse-smartmoney-polymarket`, `trend-stock-research`,
+`analyse-smartmoney-13f`, `analyse-smartmoney-ptr`. Analysis: `macro-panel`, `multi-lens-quorum`,
+`superforecasting`, `analyse-fundamental`. Portfolio: `portfolio-monitor`, `risk-management`.
 
 Verify loaded: `cd /app && node openclaw.mjs skills list --agent investor --json` → each
 `eligible:true` AND `modelVisible:true`.

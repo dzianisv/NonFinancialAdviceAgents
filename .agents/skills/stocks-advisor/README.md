@@ -90,7 +90,7 @@ EXTREME"]
             end
 
             subgraph SM ["Seat 5 · Smart-Money
-research-smartmoney"]
+analyse-smartmoney"]
                 direction TB
                 SM_FETCH["web_fetch per-ticker:
 openinsider.com Form 4
@@ -161,7 +161,7 @@ Each seat is grounded in a named investor skill from `.agents/skills/`. The skil
 | **Technical** | `investor-stanley-druckenmiller` | STF: Set-Up → Trigger → Follow-Through. Liquidity + momentum + timing. Named setup + bar-close trigger + market-based stop. No trigger = no trade. | Injected — TradingView MCP | SETUP_NAMED / NO_SETUP / BROKEN |
 | **Narrative / Macro** | `investor-lyn-alden` | Fiscal dominance + broad-money cycle + theme phase. `read_news.ts` for discovery; feed scripts for verbatim citation. No fabrication. | Injected — `macro_regime.txt` + live news | EARLY / MID / LATE / FADING |
 | **Cycle / Regime** | `investor-ray-dalio` | Debt-cycle quadrant (growth/inflation rising/falling). Contrarian positioning read: short%, institutional%, analyst consensus. All-Weather regime context. | Injected — `fundamentals.py` (yfinance) | QUIET_ACCUM / NEUTRAL / CROWDED / EXTREME |
-| **Smart-Money** | `research-smartmoney` | Disclosed institutional flows: Form 4 (openinsider), 13F (13f.info), 13D (EDGAR), PTR (capitoltrades). ≥2 classes agreeing → verdict. | Live `web_fetch` | ACCUMULATING / DISTRIBUTING / NEUTRAL |
+| **Smart-Money** | `analyse-smartmoney` | Disclosed institutional flows: Form 4 (openinsider), 13F (13f.info), 13D (EDGAR), PTR (capitoltrades). ≥2 classes agreeing → verdict. | Live `web_fetch` | ACCUMULATING / DISTRIBUTING / NEUTRAL |
 
 **BSC Hierarchy — additional named seats after the 5-seat panel:**
 

@@ -14,4 +14,4 @@ These are the standard works of the field. They are listed for provenance and fu
 ## How to use this index
 1. For any **load-bearing claim, quote, or parameter**, cite **Bernstein** and the relevant `references/0X` file — that is the only distilled source here.
 2. When asked for **the authoritative TA reference** (definitions, the CMT canon, classical patterns, or the empirical record), **name** Murphy / Edwards & Magee / Kirkpatrick & Dahlquist as above, but **flag that they are not yet distilled** into this skill — do not fabricate quotes or specifics from them.
-3. For **validation** of any Bernstein setup, route to `analyst-systematic-trading` (walk-forward, full costs); `trend-following` is the empirically durable TA family; pair with `regime-detection` and `risk-management`.
+3. For **validation** of any Bernstein setup, route to `analyse-systematic-trading` (walk-forward, full costs); `trend-following` is the empirically durable TA family; pair with `regime-detection` and `risk-management`.

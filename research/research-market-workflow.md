@@ -59,8 +59,8 @@ flowchart TD
         P3[investor-stanley-druckenmiller]
         P4[research-lacy-hunt]
         P5[research-russell-napier]
-        P6[fundamental-analysis]
-        P7[research-technical]
+        P6[analyse-fundamental]
+        P7[analyse-technical]
         P8[investor-warren-buffett]
         GRD["`**guardrail**
         *(non-voting)*

@@ -44,7 +44,7 @@ crypto book (`crypto/`) is a **separate track** — never mix it in.
 | Analyst (subagent) | Sub-skill it runs | You task it with | It returns |
 |---|---|---|---|
 | **Regime Analyst** | `regime-detection` | "score the regime as of DATE; is a flip confirmed?" | exposure multiplier, risk-on/off, session-persistence |
-| **Research Analyst** | `fundamental-analysis` | "valuation/thesis context; vet any new idea through the backtest gate" | context memo, idea verdicts (gated), thesis-change flags |
+| **Research Analyst** | `analyse-fundamental` | "valuation/thesis context; vet any new idea through the backtest gate" | context memo, idea verdicts (gated), thesis-change flags |
 | **Signal Analyst** | `trend-following` | "per-sleeve trend in/out as of DATE" | signals, managed-futures crisis-alpha read |
 | **Portfolio Manager** | `portfolio-construction` | "target weights given regime exposure" | target weights × exposure |
 | **Risk Manager** | `risk-management` | "vet the proposed targets/ticket; vol, drawdown, caps" | **verdict: approve / scale / veto** + risk_scale |

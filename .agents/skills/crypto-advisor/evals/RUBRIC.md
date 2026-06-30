@@ -59,17 +59,20 @@ Stop condition: mean holdout ≥ 4.2 AND no dimension below 3.0, OR 3 rounds com
 
 **What it tests:** zone guard enforced before signal; BUY blocked when zone=ELEVATED/EXTREME/UNKNOWN; BUY(small) blocked when zone≠DEEP_VALUE.
 
-**Key rules from SKILL.md:**
-- zone=UNKNOWN **blocks** BUY and BUY(small); signal must be HOLD
-- zone=ELEVATED/EXTREME → downgrade BULLISH to HOLD with the named note
-- BUY(small) requires zone=DEEP_VALUE (not FAIR_VALUE, not ELEVATED, not UNKNOWN)
+**Key rules from SKILL.md (Step 2 signal table — authoritative):**
+- Full BUY requires zone ∈ {DEEP_VALUE, FAIR_VALUE} — FAIR_VALUE qualifies for a full BUY
+- zone=ELEVATED → downgrade BULLISH to HOLD with note "await pullback"
+- zone=EXTREME → downgrade BULLISH to HOLD with note "extended, avoid"
+- zone=UNKNOWN → HOLD (BUY and BUY(small) both blocked)
+- BUY(small) is for: (BULLISH + weekly_closes < 200) OR (SPLIT + zone=DEEP_VALUE)
+  — NOT for FAIR_VALUE tokens with sufficient weekly history (those get full BUY or HOLD)
 
 **Anchors:**
 
 - **5** — zone checked before signal; all guards enforced; correct note printed ("await pullback" / "extended, avoid" / "data gate: UNKNOWN")
 - **4** — zone guard applied correctly; named note slightly different from SKILL.md wording
-- **3** — zone guard applied but only for the obvious case (e.g. UNKNOWN blocks BUY), misses BUY(small) restriction or ELEVATED downgrade note
-- **2** — zone mentioned but guard not applied; or guard inverted (e.g., BUY(small) issued in FAIR_VALUE zone)
+- **3** — zone guard applied but only for the obvious case (e.g. UNKNOWN blocks BUY), misses ELEVATED/EXTREME downgrade note
+- **2** — zone mentioned but guard not applied; or guard inverted (e.g., FAIR_VALUE token incorrectly downgraded to BUY(small) when weekly_closes ≥ 200)
 - **1** — zone computed but ignored in signal decision
 - **0** — zone not checked; signal issued without zone validation
 

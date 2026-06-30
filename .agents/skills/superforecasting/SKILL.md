@@ -39,8 +39,8 @@ or a domain lens; or there's **no observable resolution** to score (then it's st
    convene/synthesize mechanics (independent context-firewall subagents, one lens each, identical facts,
    preserve dissent). Prefer **real subagents** over inline role-play — independence is the point.
 3. **Anchor to market-implied odds — first-class input, not a footnote.**
-   - **REQUIRED: `analyst-smartmoney-polymarket`** — discrete dated events (Fed cut? CPI bucket? ETF approval?).
-   - **REQUIRED: `analyst-smartmoney-positioning`** — the **continuous** options-implied distribution +
+   - **REQUIRED: `analyse-smartmoney-polymarket`** — discrete dated events (Fed cut? CPI bucket? ETF approval?).
+   - **REQUIRED: `analyse-smartmoney-positioning`** — the **continuous** options-implied distribution +
      positioning (implied move, skew, max-pain, gamma; funding/OI/COT). 
    Anchor your probabilities to these; deviate only with a **stated reason** (you know something the
    market is slow on). This is the step a naive analyst skips.
@@ -56,7 +56,7 @@ or a domain lens; or there's **no observable resolution** to score (then it's st
 
 Pick **outcome-relevant** seats — ones with a view on *where price goes by the date*:
 
-- **Crypto:** technical, macro/liquidity (`research-onchain`), on-chain/regime, derivatives-positioning,
+- **Crypto:** technical, macro/liquidity (`analyse-onchain`), on-chain/regime, derivatives-positioning,
   prediction-market, reflexivity, risk/skeptic.
 - **Equities/index:** technical, macro/liquidity (`macro-panel`), derivatives-positioning (COT/VIX/GEX),
   prediction-market, reflexivity, risk/skeptic.

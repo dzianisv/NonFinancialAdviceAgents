@@ -79,7 +79,7 @@ Four layers. Data flows up, decision down, alert out.
                         live web: yfinance / FRED / alternative.me / SEC EDGAR / FT-WSJ / Polymarket
 ```
 
-- (a) Data: scripted skills (`.py`, `--json` contract, exceptions → skip/empty, never invent) AND prompt-only skills that fetch via the agent's `web_fetch`/browser (e.g. feed-fomc, trend-stock-research, analyst-smartmoney-13f). Mixed by design.
+- (a) Data: scripted skills (`.py`, `--json` contract, exceptions → skip/empty, never invent) AND prompt-only skills that fetch via the agent's `web_fetch`/browser (e.g. feed-fomc, trend-stock-research, analyse-smartmoney-13f). Mixed by design.
 - (b) Skill: the judgment layer. Runs its script or web tools, checks gates, writes pools or emits a result.
 - (c) Scheduler: the backend's NATIVE cron fires the agent (§3). Heartbeat is NOT the scheduler — it only nudges a stuck/overdue task.
 - (d) Notify: agent-native delivery on the job's configured target; non-`SILENT` output → owner channel. DM = something real fired.
@@ -87,7 +87,7 @@ Four layers. Data flows up, decision down, alert out.
 ### 1a. Complete wiring — DAILY (every skill, where it plugs in)
 
 The backend's NATIVE CRON fires the agent on each slot. The agent runs the skill (a `.py` script for
-the scanners, OR pure `web_fetch`/agent tools for feed-fomc / trend-stock-research / analyst-smartmoney-13f — not
+the scanners, OR pure `web_fetch`/agent tools for feed-fomc / trend-stock-research / analyse-smartmoney-13f — not
 all skills are python), applies the gate, then either DMs the owner or writes a pool row. Cron state
 persists in the backend's own store (openclaw SQLite / hermes `jobs.json`) — no separate state file.
 
@@ -122,9 +122,9 @@ persists in the backend's own store (openclaw SQLite / hermes `jobs.json`) — n
                           13f ledger, congress ledger  ──► read by convergence (08:30) + weekly brief
 ```
 
-Reused signal skills feeding the pools/brief: `analyst-smartmoney-13f` + `analyst-smartmoney-ptr` (write their
+Reused signal skills feeding the pools/brief: `analyse-smartmoney-13f` + `analyse-smartmoney-ptr` (write their
 dedup ledgers, deduped, weekly), `portfolio-monitor` (holdings triggers → PRIORITY ACTIONS in brief),
-`analyst-smartmoney-polymarket` (Fed/Polymarket odds, consumed by fomc + weekly macro context).
+`analyse-smartmoney-polymarket` (Fed/Polymarket odds, consumed by fomc + weekly macro context).
 
 ### 1b. Complete wiring — WEEKLY brief (the dynamic workflow)
 
@@ -138,7 +138,7 @@ same pipeline serially in-agent). Parallelism is the design: independent lenses 
  09:30 Mon  ──►  hedge-fund-committee.workflow.js   (3 phases, fan-out/fan-in)
  ───────────────────────────────────────────────────────────────────────────────────────
  PHASE 1  COLLECT          parallel() × 6 agents — one skill each
-   regime-detection ┐ feed-fomc ┐ analyst-smartmoney-13f ┐ analyst-smartmoney-ptr ┐ trend(narrative) ┐ dips ┐
+   regime-detection ┐ feed-fomc ┐ analyse-smartmoney-13f ┐ analyse-smartmoney-ptr ┐ trend(narrative) ┐ dips ┐
         each → CAND_SCHEMA {candidates[], summary}                                                  │
         cross-ref:  bySources[ticker] → Set(source)   ──►  rank by n_sources  ──►  TOP 5            │
                     (ticker in ≥2 sources = elevated conviction)                                    ▼
@@ -146,7 +146,7 @@ same pipeline serially in-agent). Parallelism is the design: independent lenses 
    ┌ investor-warren-buffett ┐                                                                     │
    ┤ investor-stanley-druckenmiller ├ each → VERDICT {verdict, conviction1-5, reason,              │
    ┤ investor-lyn-alden            │              invalidation, dissent}                           │
-   └ fundamental-analysis ──────────┘   (macro-panel = macro backdrop; dissent preserved)           ▼
+   └ analyse-fundamental ──────────┘   (macro-panel = macro backdrop; dissent preserved)           ▼
  PHASE 3  SYNTHESIZE       per candidate → risk-management VETO  (name>10% book OR RISK_OFF → VETO)  │
         final agent writes INVESTMENT BRIEF:                                                        │
         header(REGIME/FED) · PRIORITY ACTIONS · NEW BUY IDEAS(risk=PASS only) · HOLDS · CANT VERIFY ▼
@@ -163,14 +163,14 @@ same pipeline serially in-agent). Parallelism is the design: independent lenses 
 | `feed-fomc` | daily 08:00 + weekly P1 | Fed tone delta |
 | `trend-stock-research` | daily 08:15 + weekly P1 | narrative pool (catches SanDisk buildup) |
 | `signal-convergence-alert` | daily 08:30 | ≥2-source DM (the SanDisk pattern) |
-| `analyst-smartmoney-13f` | weekly P1 | new institutional buys → ledger → convergence |
-| `analyst-smartmoney-ptr` | weekly P1 | STOCK Act buys → ledger → convergence |
+| `analyse-smartmoney-13f` | weekly P1 | new institutional buys → ledger → convergence |
+| `analyse-smartmoney-ptr` | weekly P1 | STOCK Act buys → ledger → convergence |
 | `multi-lens-quorum` | weekly P2 | buy/sell/hold verdict engine |
 | `macro-panel` + `investor-*`/`research-*` | weekly P2 | the quorum lenses + macro backdrop |
-| `fundamental-analysis` | weekly P2 | valuation lens |
+| `analyse-fundamental` | weekly P2 | valuation lens |
 | `risk-management` | weekly P3 (+ daily gate) | VETO authority |
 | `portfolio-monitor` | weekly P3 | holdings triggers → PRIORITY ACTIONS |
-| `analyst-smartmoney-polymarket` | weekly P1 (via fomc) | crowd odds for Fed/macro |
+| `analyse-smartmoney-polymarket` | weekly P1 (via fomc) | crowd odds for Fed/macro |
 | `forecast-ledger` | weekly committee cron (logs each DM'd buy, scores 30/60/90d) | the feedback loop — WIRED, but no scored cycles yet |
 | `superforecasting` | roster — not yet wired | dated probability/timing; future per-candidate use |
 | `mention_velocity.py` (in trend-stock-research) | daily 08:10 | narrative-velocity counter → feeds convergence pool (BUILT) |
@@ -275,7 +275,7 @@ anti-groupthink protocol.
 
 ## 6. Known Limitations / Failure Modes
 
-- **Capitol Trades (analyst-smartmoney-ptr):** 403/429 from pod network (Cloudflare/Vercel bot-block) → degrades to `[SIGNAL UNAVAILABLE]`, no fabrication. Convergence simply loses that pool.
+- **Capitol Trades (analyse-smartmoney-ptr):** 403/429 from pod network (Cloudflare/Vercel bot-block) → degrades to `[SIGNAL UNAVAILABLE]`, no fabrication. Convergence simply loses that pool.
 - **Binance funding (`fapi.binance.com`):** geo-blocked 451 from US/pod → crypto scanner omits funding line. Alert logic does NOT require funding — dip+F&G is primary trigger.
 - **regime-detection single point of failure:** lost stooq fallback → now Yahoo `query2`/yfinance single source. Robustness regression. FRED CSV verified working.
 - **yfinance multi-download drops a ticker** (e.g. MMC "delisted") → handled gracefully (`if col not in data.columns: skip`), no crash, that name silently absent.
@@ -306,7 +306,7 @@ manager), FinRobot (Director-over-specialists), Anthropic orchestrator-workers, 
 ### The org chart (existing skills = employees)
 | Desk | Employees (skills) | Owns | Decides? |
 |------|--------------------|------|:--------:|
-| Research analysts | analyst-smartmoney-13f, analyst-smartmoney-ptr, trend-stock-research, regime-detection, feed-fomc, analyst-smartmoney-polymarket, dip-screener, crypto-dip-scanner, fundamental-analysis | gather a structured report | NO |
+| Research analysts | analyse-smartmoney-13f, analyse-smartmoney-ptr, trend-stock-research, regime-detection, feed-fomc, analyse-smartmoney-polymarket, dip-screener, crypto-dip-scanner, analyse-fundamental | gather a structured report | NO |
 | Chief of staff | signal-convergence-alert + the workflow aggregator | cluster by ticker, build ONE briefing packet | NO |
 | Investment committee | multi-lens-quorum lenses (Buffett/Graham/Druckenmiller/Lyn-Alden/**Lacy-Hunt dissent seat**), macro-panel, superforecasting | debate the packet, vote independently | advise |
 | CRO | risk-management | binding VETO + sizing | gate |

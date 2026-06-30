@@ -127,6 +127,6 @@ Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
 ## Fit
 
 Phase-1 Gather seat in `research-crypto-market`. Feeds the consolidate step the deduped event list; the panel
-(research-onchain, derivatives, Druckenmiller, Alden, Hunt, Napier) reads the brief, not this seat directly.
+(analyse-onchain, derivatives, Druckenmiller, Alden, Hunt, Napier) reads the brief, not this seat directly.
 
 > Educational, not advice. Events are context + disconfirmation, never a trigger.

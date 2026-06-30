@@ -377,7 +377,7 @@ These will be Brier-scored on their resolution dates. Probabilities are delibera
 ## GAPS vs FULL WORKFLOW
 The `research-market.workflow.js` would additionally:
 1. Run `research-manager` intake agent to dynamically discover all available skills and assemble the optimal desk
-2. Fan out parallel gather seats (regime-detection, fundamental-analysis, analyst-derivatives-positioning, narrative-news + feed-* pipeline)
+2. Fan out parallel gather seats (regime-detection, analyse-fundamental, analyst-derivatives-positioning, narrative-news + feed-* pipeline)
 3. Run full deduped news store via `crypto-news-store` (for equities adaptation)
 4. Convene independent panel lenses as separate subagents (each reads ONE skill, judges independently)
 5. Apply `research-morgan-housel` behavioral guardrail (non-voting)

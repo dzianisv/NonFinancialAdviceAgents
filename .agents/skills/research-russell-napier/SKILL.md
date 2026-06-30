@@ -110,7 +110,7 @@ years before flipping in 2020-21, so his regime calls can be early — size acco
 - **Ground load-bearing claims** in a specific reference/source (via `references/article-index.md`).
 - This skill **complements** `investor-lyn-alden` (shares the repression/inflation endgame) and is the
   structural counter to `research-lacy-hunt`; it feeds `regime-detection` / `portfolio-construction`.
-  It does not replace the `fundamental-analysis` gate.
+  It does not replace the `analyse-fundamental` gate.
 
 ## Done when
 

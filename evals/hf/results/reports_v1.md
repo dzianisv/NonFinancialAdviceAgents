@@ -16,7 +16,7 @@ Team convened:
 - **Risk Manager** (risk-management): Current drawdown -0.02, well above -0.05 threshold. risk_scale=1.0. Returned: verdict=APPROVE, no caps breached, kill_switch=false.
 - **Rebalancer** (rebalancing): Quarterly check triggered. Holdings vs targets at $1,000,000 NAV analyzed. Multiple breaches detected — RSP +6% abs overweight, SGOV +6% abs overweight, AVUV/USMV/DBMF/TLT/SCHP/BTAL absent. Returned: rebalance_breach=true, sell RSP+SGOV, buy missing sleeves.
 - **Tax Agent** (tax-loss-harvesting): GLD at $88K vs $100K cost basis = $12K unrealized loss. Harvest opportunity identified. RSP at $240K vs $200K cost = $40K gain (do not harvest). Returned: harvest GLD -> IAU same-day, partially offsets RSP gain realization.
-- **Research Analyst** (fundamental-analysis): Quarterly thesis review. No new ideas. No thesis-change flags. Regime 0.63 consistent with ongoing bubble-aware stance. Returned: all-clear, no gate triggered.
+- **Research Analyst** (analyse-fundamental): Quarterly thesis review. No new ideas. No thesis-change flags. Regime 0.63 consistent with ongoing bubble-aware stance. Returned: all-clear, no gate triggered.
 </desk>
 
 <regime>
@@ -452,7 +452,7 @@ Analyst note received: "Research analyst proposes rotating 10% of the book into 
 
 Team convened:
 - **Regime Analyst** (regime-detection): S&P 5850 vs 200d MA 5560 — price 5.2% above MA, risk-on. Score 0.64 -> 1.0x exposure. Drawdown -0.85%. Returned: exposure_multiplier=1.0, regime=risk-on, calm.
-- **Research Analyst** (fundamental-analysis) + backtest gate: New idea received. Gate evaluation executed. Returned: BLOCKED — no backtest run, idea routed to research; cannot appear in orders.
+- **Research Analyst** (analyse-fundamental) + backtest gate: New idea received. Gate evaluation executed. Returned: BLOCKED — no backtest run, idea routed to research; cannot appear in orders.
 - **Cash Deployer** (dip-tranches-strategy): Drawdown -0.85%. No tier active. Returned: no deployment, all-clear.
 - **Risk Manager** (risk-management): Current drawdown -0.01. risk_scale=1.0. Returned: verdict=APPROVE on existing v3 targets. New idea not submitted to risk vetting (correctly blocked at gate before reaching risk).
 - **Weekly-note desk** (tradfi-portfolio-manager): Monday weekly review delegated. New idea gate event noted; weekly review otherwise all-clear.

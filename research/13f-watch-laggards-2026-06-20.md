@@ -148,7 +148,7 @@ Prior ledger entries (VICR, RMBS, ONTO, PLAB, AEHR from prior session): none of 
 
 | Ticker | Routing | Rationale |
 |---|---|---|
-| AXTI | **Watchlist** — monitor, route to fundamental-analysis | Partial discount, micro add, InP capacity doubling story; sub-threshold but differentiated |
+| AXTI | **Watchlist** — monitor, route to analyse-fundamental | Partial discount, micro add, InP capacity doubling story; sub-threshold but differentiated |
 | COHU | **Watchlist** — revisit on 20%+ pullback | First Eagle add valid; but stock near ATH after +102% LTM; no discount today |
 | DIOD | **Fundamental-analysis route** | No 13F signal; AI server power mgmt story is real; needs valuation gate |
 | FORM | **Anti-signal logged** | Trim by smart money + 94% of 52w high; watch for technical reset |
@@ -169,7 +169,7 @@ No T1/T2 candidates. No routing to multi-lens-quorum or superforecasting from th
 
 **WTS** is not an AI supply chain name — thermal/flow industrial with datacenter as one vertical. Screening error to include — flagged.
 
-> DATA-ONLY seat. No position sizing. No trade recommendation. Route AXTI to fundamental-analysis + multi-lens-quorum for valuation gate before any action.
+> DATA-ONLY seat. No position sizing. No trade recommendation. Route AXTI to analyse-fundamental + multi-lens-quorum for valuation gate before any action.
 
 ---
 
