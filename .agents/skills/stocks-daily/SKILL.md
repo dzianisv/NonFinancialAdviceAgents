@@ -1,14 +1,16 @@
 ---
 name: stocks-daily
 description: >
-  Weekly stocks publishing workflow. Reads the user's cached positions
+  Daily portfolio accumulation monitor. Reads the user's cached positions
   (.cache/stocks-daily/positions.csv), runs the stocks-advisor 5-seat holdings panel,
-  then publishes three outputs: (1) a dated Notion page (via stocks-advisor), (2) a
-  per-stock recap to the configured Telegram channel (target read from
-  .cache/stocks-daily/telegram.yaml at runtime, never hardcoded), and (3) optionally a
-  short X.com tweet. Despite the `daily` name the cadence is WEEKLY. Triggers on:
-  "/stocks-daily", "run weekly stocks report", "publish stocks weekly report",
-  "post stocks to telegram". Educational, not financial advice.
+  ranks which holdings are undervalued enough to BUY MORE of today, and emits a SWAP
+  table where every buy is paired with a funding SELL (the user is fully invested, so
+  buys are sourced from broken/no-catalyst non-crypto-beta names). Publishes three
+  outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap + swap
+  to the configured Telegram channel (target read from .cache/stocks-daily/telegram.yaml
+  at runtime, never hardcoded), and (3) optionally a short X.com tweet. Triggers on:
+  "/stocks-daily", "what should I buy more of", "what's undervalued now", "post stocks
+  to telegram". Educational, not financial advice.
 license: MIT
 compatibility: opencode
 metadata:
@@ -18,9 +20,9 @@ metadata:
 
 # stocks-daily
 
-**One-liner:** Weekly portfolio review. Reads cached positions, runs the stocks-advisor 5-seat panel, then publishes the result to three outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap to the **Telegram channel** (config-driven target), and (3) optionally a short X.com tweet. Despite the `daily` name, the cadence is WEEKLY (user chose the command name). Educational, not investment advice.
+**One-liner:** A DAILY monitor of the user's book answering one question — *"what that I own (or want) is undervalued enough to buy MORE of today, and what do I sell to fund it?"* Reads cached positions, runs the stocks-advisor 5-seat panel, ranks accumulate-on-weakness candidates, and emits a **SWAP table** (every buy paired with a funding sell). Publishes to three outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap + swap to the **Telegram channel** (config-driven target), and (3) optionally a short X.com tweet. Educational, not investment advice.
 
-**Triggers:** `/stocks-daily`, "run weekly stocks report", "publish stocks weekly report", "post stocks to telegram"
+**Triggers:** `/stocks-daily`, "run the daily stocks monitor", "what should I buy more of / what's undervalued", "publish stocks report", "post stocks to telegram"
 
 ---
 
@@ -44,7 +46,27 @@ NOTION_YAML    = /Users/engineer/workspace/backtest/.cache/stocks-advisor/notion
 
 ---
 
-## Step 1 — Load positions
+## Core purpose & funding discipline (READ FIRST — this shapes every output)
+
+**Purpose:** a DAILY monitor of the user's book for the question *"what do I already own (or want to own)
+that is UNDERVALUED enough to buy MORE of today?"* — accumulation-of-quality-on-weakness, not churn.
+
+**Funding discipline (the hard rule):** the user is ~fully invested — there is little idle cash. So **every
+BUY/ADD recommendation MUST be paired with an explicit funding SELL** (the source of the dollars). A naked
+"buy more X" with no "sell Y to pay for it" is incomplete and must not be emitted. The only exceptions:
+- a `cash_to_deploy` amount is explicitly provided (then the buy is funded from cash), or
+- the buy is a TRIM-and-rotate within the same name (stated as such).
+
+This makes the core output a **SWAP table**: *Sell $N of {overvalued / broken / no-catalyst name} →
+Buy $N of {more-undervalued, better-catalyst name}*, each row carrying the one-line reason the buy-side is a
+better hold than the sell-side over the 1–2yr horizon. Tax-loss harvest is only recommended when the SWAP
+names a concrete redeploy target — a sell with no "buy this instead" is not an action, it is just raising
+cash and must be labelled as such.
+
+**Crypto-beta names stay HOLD-ONLY** (Step 1) — they are never the funding SELL, because the user is
+crypto-bullish. Fund buys from broken/extended NON-crypto-beta names instead.
+
+---
 
 1. Read `POSITIONS_CSV`. Schema: `Position,Quantity,Type,Unrealized_PnL`.
 2. If the file is missing or empty, stop immediately. Tell the user:
@@ -58,15 +80,22 @@ NOTION_YAML    = /Users/engineer/workspace/backtest/.cache/stocks-advisor/notion
 
 ## Step 2 — Run the analysis (delegate to stocks-advisor; do NOT reimplement)
 
-1. Read the project daily log (`.agents/memory/YYYY-MM-DD.md`) to extract any prior weekly context for these tickers — pass it as `prior_context` to bias the run toward changed names.
+1. Read the project daily log (`.agents/memory/YYYY-MM-DD.md`) to extract any prior context for these
+   tickers — pass it as `prior_context` to bias the run toward changed names and known watch levels.
 2. Invoke the `stocks-advisor` skill in **holdings-review mode** on the parsed positions list.
    stocks-advisor handles: Step -1 memory recall, Step 0.7 TradingView health check (DEGRADED fallback = MA-only, WATCH-only verdicts), Step 0.8 triage (N>12 → full-panel top K≈10, one-line screen the rest), 5-seat panel analysis, Step 3.5 SOURCES & DATA appendix, Step 3.6 high-confidence RECAP + SETUP ALERTS.
 3. Do NOT pull TradingView data, yfinance, or fundamentals yourself — stocks-advisor's orchestrator does that.
-4. Collect stocks-advisor's full output for assembly in Step 3.
+4. **Rank for accumulation.** From the panel output, rank holdings by *undervaluation + intact thesis +
+   near-term catalyst* — the names worth buying MORE of today. A cheap name with NO catalyst is a value trap,
+   not an accumulate candidate; say so. This ranked list feeds the SWAP table (Step 3c).
+5. **Pair each accumulate candidate with a funding SELL.** For every ADD, name the NON-crypto-beta holding to
+   sell to fund it (broken/below-200d/no-catalyst/extended names are the funding pool), and state in one line
+   why the buy-side is the better 1–2yr hold than the sell-side. Never emit a naked buy (Core funding rule).
+6. Collect stocks-advisor's full output for assembly in Step 3.
 
 ---
 
-## Step 3 — Assemble the weekly report
+## Step 3 — Assemble the report
 
 Compose a single Markdown document in this order:
 
@@ -80,20 +109,25 @@ Compose a single Markdown document in this order:
 - Sourced narrative from stocks-advisor's narrative seat.
 - Every factual claim MUST include a URL citation. Reuse stocks-advisor's narrative output verbatim where possible.
 
-### (c) High-Confidence RECAP Table
-- Source: stocks-advisor Step 3.6 output.
-- Only verdicts with conviction ≥ 4.
-- Columns: Asset | Action (ADD/TRIM/EXIT) | One-line reason.
-- HOLD-ONLY names: show as HOLD regardless of analysis output.
+### (c) SWAP TABLE — the headline output (accumulate-on-weakness, funded by a sell)
+The most important section. One row per paired action. **No naked buys** (Core funding discipline).
+Columns: `SELL (source) | $ | → | BUY (accumulate) | $ | Why buy-side is the better 1–2yr hold`.
+- Buy-side = the highest-ranked undervalued-with-catalyst names from Step 2.4.
+- Sell-side = NON-crypto-beta broken/extended/no-catalyst funding names. Never a HOLD-ONLY crypto name.
+- If `cash_to_deploy` was provided, add cash-funded buy rows (SELL column = "CASH $N").
+- If a name is cheap but has NO catalyst, it goes in the DROP list (e) as raise-cash, NOT here as a buy —
+  and it may only be SOLD if its dollars are assigned to a specific BUY row (else label it "raise cash, no
+  redeploy target yet").
 
-### (d) SETUP ALERTS Table
-- Source: stocks-advisor Step 3.6 setup alerts.
-- Columns: Asset | Exact condition | Then-do | Thesis.
+### (d) ACCUMULATE WATCH — undervalued, buy MORE only when a condition fires
+- Names that are undervalued but not buy-today (need a level/indicator trigger). Source: stocks-advisor
+  Step 3.6 SETUP ALERTS. Columns: Asset | Exact condition | Then buy $N (funded by → SELL Y) | Thesis.
 - After the table, add: "Register these alerts via the `mkt` skill."
 
-### (e) DROP List
-- Non-crypto-beta EXIT and TRIM candidates with one-line reasoning.
-- Never include HOLD-ONLY names here.
+### (e) DROP / FUNDING POOL List
+- Non-crypto-beta EXIT and TRIM candidates with one-line reasoning — these are the SELL side of the swaps.
+- For each, state whether its dollars are assigned to a BUY row (c) or are "raise cash, no redeploy target".
+- Never include HOLD-ONLY crypto names here.
 
 ### (f) ETF Section
 - Which ETFs in the portfolio are fair/undervalued vs extended, per stocks-advisor ETF analysis.
@@ -129,7 +163,7 @@ stocks-advisor seat labels — Fundamental / Technical / Narrative / Sentiment /
 seats.
 
 ```
-📊 Stocks Weekly — {TODAY} | Regime: {one phrase, e.g. "risk-off, debasement unwind"}
+📊 Stocks Daily — {TODAY} | Regime: {one phrase, e.g. "risk-off, debasement unwind"}
 {1-sentence macro context — the single dominant driver this week}
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -146,6 +180,10 @@ seats.
 🟢 BUY/ADD:  {space-separated tickers WITH price, e.g. META $562 · HOOD $102}
 🟡 HOLD:     {space-separated tickers}
 🔴 TRIM/EXIT:{space-separated tickers}
+
+🔁 TODAY'S SWAPS (every buy funded by a sell):
+  SELL {Y} ${N} → BUY {X} ${N}  — {≤10-word why X is the better hold}
+  ...one line per swap...
 
 📋 Full 5-seat report (Notion):
 {NOTION_PUBLIC_URL}
@@ -216,23 +254,25 @@ Append to `.agents/memory/$(date +%F).md` using the standard workflow_memory_for
 
 ```markdown
 ## stocks-daily — YYYY-MM-DD
-**Query:** Weekly portfolio review
+**Query:** Daily accumulation monitor (what to buy more of, funded by what)
 **Assets found:** [comma-separated tickers reviewed]
+**Swaps:**
+- SELL {Y} $N → BUY {X} $N | why: [one line]
 **Verdicts:**
 - TICKER: [T1/T2/T3/AVOID] [ACCUMULATE/WAIT/AVOID/HOLD] | entry: [price zone or condition] | catalyst: [trigger] | invalidation: [kill condition]
-**Key delta:** [what changed vs prior week — one sentence]
+**Key delta:** [what changed vs prior run — one sentence]
 **Report:** [Notion page URL returned by stocks-advisor, or "inline" if unpublished]
 ```
 
-stocks-advisor writes per-ticker detail memory; this step adds the weekly roll-up. Do not skip.
+stocks-advisor writes per-ticker detail memory; this step adds the daily roll-up + the swap decisions. Do not skip.
 
 ---
 
 ## Scheduling (document only; do not auto-create)
 
-To automate: use the `schedule` skill or configure a cron that fires `/stocks-daily` once a week (e.g., Sunday evening).
+To automate: use the `schedule` skill or configure a cron that fires `/stocks-daily` once a day (e.g., before the US open or after the close).
 
-The skill is **idempotent per week** — re-running creates another dated Notion page; no harm done.
+The skill is **idempotent per run** — re-running creates another dated Notion page; no harm done.
 
 ---
 
@@ -240,10 +280,13 @@ The skill is **idempotent per week** — re-running creates another dated Notion
 
 - [ ] `positions.csv` read and parsed without inventing data
 - [ ] stocks-advisor analysis completed (holdings-review mode)
-- [ ] Weekly report assembled: narrative + RECAP table + SETUP ALERTS + DROP list + ETF section + SOURCES appendix
+- [ ] Holdings ranked for accumulation; cheap-but-no-catalyst names labelled value traps, not buys
+- [ ] **SWAP table emitted — every BUY/ADD paired with a funding SELL** (no naked buys); tax-loss harvest
+      only recommended with a named redeploy target, else labelled "raise cash, no target yet"
+- [ ] Report assembled: narrative + SWAP table + ACCUMULATE WATCH + DROP/funding pool + ETF section + SOURCES appendix
 - [ ] Notion publishing left to stocks-advisor (no duplicate publish here); captured the returned page URL if one was produced
 - [ ] **Telegram recap posted to the channel** (id from `telegram.yaml`, read at runtime) with every stock's
-      5 seat lines, correct signal emoji (🟢/🟡/🔴), multi-part split ≤4096 bytes, Notion link only in the
-      final part — or skipped silently if `telegram.yaml` is absent
-- [ ] Memory entry appended to daily log
+      5 seat lines, the SWAP lines, correct signal emoji (🟢/🟡/🔴), multi-part split ≤4096 bytes, Notion link
+      only in the final part — or skipped silently if `telegram.yaml` is absent
+- [ ] Memory entry appended to daily log (including the swaps)
 - [ ] Response to user flags output as educational, not advice
