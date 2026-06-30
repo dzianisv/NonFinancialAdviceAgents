@@ -191,6 +191,7 @@ Follow https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/
 - **Self-check instruction.** Append "Before finishing, verify your answer satisfies [criteria]" — catches errors in reasoning-heavy skills.
 - **Never self-grade.** The agent that writes a skill cannot score it. Use `skill-supervisor` (blind proposer + separate scorer).
 - **Eval before ship.** Re-run `evals/pm` and `evals/hf` before merging any SKILL.md edit. Reject if score drops or invariant trips.
+- **Keep advisor READMEs in lockstep.** `crypto-advisor/README.md` and `stocks-advisor/README.md` document each skill's architecture (mermaid flowchart + seat/layer reference tables), distinct from the agent-facing `SKILL.md`. Whenever you change an advisor's seats, sub-skill wiring, layer structure, or a seat's data-source scope, update its `README.md` in the SAME commit — a README describing the old wiring is worse than none because it silently misleads. Verify the mermaid nodes and the seat tables match the live `SKILL.md` before committing.
 
 ## Hard invariants
 
