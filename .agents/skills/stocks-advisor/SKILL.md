@@ -258,6 +258,48 @@ name does not scale (a 50-80 name book = thousands of MCP calls). So TradingView
 
 ---
 
+## Step 0.82 — Deterministic verdict engine (MANDATORY — the ACTION comes from here, not from prose)
+
+**Why this exists.** The 5-seat panel and the decision hierarchies aggregate *prose opinions*, which makes
+the final label depend on how the question was framed: "build the bear case" yields EXIT and "build the bull
+case" yields ADD on the identical stock. That flip-flop is a structural defect, not a one-off mistake. The
+fix is a deterministic scorecard: **same numbers → same action, every run, regardless of who is arguing or
+how the prompt is worded.** The seats add color, conviction, and invalidation conditions — they do **not**
+set the ACTION. The ACTION is the scorecard's output. This is non-negotiable; it is the whole point.
+
+Run it on the full book (every name screened in Step 0.8) before any seat work:
+
+```bash
+# positions.csv columns: Position,MarketValue,Unrealized_PnL  (ticker + MV used; MV gives concentration weights)
+python3 .agents/skills/stocks-advisor/scripts/scorecard.py <dir-of-fundamentals-out-jsons> --positions <positions.csv>
+```
+
+**Decision spine = VALUE × TREND** (academically backed: value alone catches falling knives; value + trend
+confirmation does not). Sub-scores from `fundamentals.py` fields only — valuation (FCF yield), trend (vs 50d
+& 200d MA), quality (op margin / ROE / EPS-growth; declining EPS = value-trap signature), growth (rev). The
+tree, first match wins:
+
+| # | Condition | Action | Meaning |
+|---|---|---|---|
+| 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (crypto-beta: rotate to BTC, don't go to cash) |
+| 1 | downtrend + deteriorating EPS + not cheap | **EXIT** | thesis broken — genuine dead money |
+| 2 | val ≥ 1 AND trend ≥ 1 AND qual ≥ 0 | **ADD** | cheap with the wind at its back |
+| 3 | uptrend + expensive | **TRIM** | extended winner — take partial, let rest run |
+| 4 | val ≥ 1 AND trend ≤ 0 | **WAIT** | cheap but falling — do NOT add to a knife; buy only on 200d reclaim or dated catalyst |
+| 5 | shrinking + not cheap + no trend | **EXIT** | no reason to own it |
+| 6 | default | **HOLD** | fair / in-trend / no decisive edge (mega-cap → "index-like, consider RSP/VOO") |
+
+**Rule 4 (WAIT) is the flip-flop killer.** A cheap-but-downtrending value name (EPAM, ESTC, FIS, ACN, ADBE,
+PYPL…) lands here *stably*: never ADD (trend is against), never panic-EXIT (still cheap, not deteriorating).
+That answer does not move when the user pushes back, because it is computed, not argued.
+
+The seats (Step 2 hierarchy) then run on the deep-dive subset to supply **conviction, entry zone, trigger,
+stop, and invalidation** — but a seat may NOT overturn the scorecard ACTION. If a seat strongly disagrees,
+it records the disagreement as the DISSENT field; it does not change the label. Print the scorecard ACTION
+and BASIS verbatim in each output block.
+
+---
+
 ## Step 2 — Decision Hierarchy (pluggable)
 
 The decision chain (how per-stock panel verdicts get turned into a final call) is **pluggable** — load the appropriate module based on the user's `--hierarchy` flag:

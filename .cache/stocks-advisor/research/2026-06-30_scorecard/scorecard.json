@@ -1,0 +1,1653 @@
+[
+ {
+  "symbol": "BRK-B",
+  "price": 499.99,
+  "action": "ADD",
+  "basis": "cheap AND trend confirms (above 200d) AND not deteriorating \u2014 value with the wind at its back",
+  "composite": 4,
+  "weight": 0.8146469932384882,
+  "pnl": 85.97,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 5.7%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+2% vs 200d, +4% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 14%, ROE 10%, EPS growth 120%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +4%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "KHC",
+  "price": 23.85,
+  "action": "ADD",
+  "basis": "cheap AND trend confirms (above 200d) AND not deteriorating \u2014 value with the wind at its back",
+  "composite": 4,
+  "weight": 0.7729496884401333,
+  "pnl": -197.7,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 11.4%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+3% vs 200d, +4% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 21%, ROE -13%, EPS growth 14%)"
+   ],
+   "growth": [
+    -1,
+    "growth: stalling (rev +1%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "KVUE",
+  "price": 19.12,
+  "action": "ADD",
+  "basis": "cheap AND trend confirms (above 200d) AND not deteriorating \u2014 value with the wind at its back",
+  "composite": 5,
+  "weight": 0.3480555031535618,
+  "pnl": 401.0,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 5.1%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+13% vs 200d, +8% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 22%, ROE 16%, EPS growth 47%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +4%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "BMY",
+  "price": 57.84,
+  "action": "ADD",
+  "basis": "cheap AND trend confirms (above 200d) AND not deteriorating \u2014 value with the wind at its back",
+  "composite": 5,
+  "weight": 0.26706461195041914,
+  "pnl": 373.31,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 8.3%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+9% vs 200d, +1% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 33%, ROE 39%, EPS growth 9%)"
+   ],
+   "growth": [
+    -1,
+    "growth: stalling (rev +3%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "COIN",
+  "price": 146.03,
+  "action": "TRIM",
+  "basis": "single-name concentration 23% > 15% cap \u2014 trim to manage risk, independent of thesis \u2014 rotate proceeds into BTC/cleaner crypto exposure to keep the sector bet",
+  "composite": -5,
+  "weight": 22.716708445494696,
+  "pnl": -95879.43,
+  "crypto_beta": true,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 6.3%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-37% vs 200d, -19% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -7%, ROE 7%)"
+   ],
+   "growth": [
+    -2,
+    "growth: SHRINKING (rev -31%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -67% from 52w high",
+   "\u26a0 CONCENTRATION 23% of book"
+  ]
+ },
+ {
+  "symbol": "MRVL",
+  "price": 296.6,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 2,
+  "weight": 3.802556563490873,
+  "pnl": 14341.17,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.9%, fwd P/E 48)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+146% vs 200d, +35% vs 50d)"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 14%, ROE 16%, EPS growth -80%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +28%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "TSLA",
+  "price": 421.54,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 3,
+  "weight": 3.4994726785738286,
+  "pnl": 5093.43,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.3%, fwd P/E 168)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+1% vs 200d, +4% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 4%, ROE 5%, EPS growth 8%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +16%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "GOOG",
+  "price": 353.57,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 2.75414476247101,
+  "pnl": 7420.2,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.7%, fwd P/E 24)"
+   ],
+   "trend": [
+    1,
+    "trend: uptrend, pulling back (-4% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 36%, ROE 39%, EPS growth 82%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +22%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "AVGO",
+  "price": 378.31,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 1.160428363424408,
+  "pnl": 603.43,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 1.5%, fwd P/E 20)"
+   ],
+   "trend": [
+    1,
+    "trend: uptrend, pulling back (-8% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 49%, ROE 37%, EPS growth 85%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +48%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "OUST",
+  "price": 61.95,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 0,
+  "weight": 0.7719641091443656,
+  "pnl": 2300.0,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -2,
+    "valuation: NEGATIVE FCF yield -1.2% \u2014 burning cash"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+125% vs 200d, +69% vs 50d)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -40%, ROE -25%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +49%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "AMZN",
+  "price": 238.71,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 2,
+  "weight": 0.7017324585866882,
+  "pnl": 465.59,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.4%, fwd P/E 24)"
+   ],
+   "trend": [
+    1,
+    "trend: uptrend, pulling back (-7% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 13%, ROE 24%, EPS growth 75%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +17%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "ASML",
+  "price": 1978.66,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 0.6937018124730245,
+  "pnl": 2184.42,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 1.1%, fwd P/E 40)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+52% vs 200d, +21% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 36%, ROE 52%, EPS growth 19%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +13%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "INTC",
+  "price": 140.33,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 1,
+  "weight": 0.47939307004884396,
+  "pnl": 1900.95,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -2,
+    "valuation: NEGATIVE FCF yield -1.2% \u2014 burning cash"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+136% vs 200d, +26% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 7%, ROE -3%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +7%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "HIMS",
+  "price": 34.16,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": -1,
+  "weight": 0.3015142586311925,
+  "pnl": -341.35,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 2.2%, fwd P/E 38)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+4% vs 200d, +22% vs 50d)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -8%, ROE -3%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +4%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 high short interest 34%",
+   "\u26a0 -52% from 52w high"
+  ]
+ },
+ {
+  "symbol": "TXN",
+  "price": 299.29,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 0.2602294370195849,
+  "pnl": 551.25,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.4%, fwd P/E 31)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+41% vs 200d, +2% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 38%, ROE 32%, EPS growth 31%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +19%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "XOM",
+  "price": 136.68,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": -2,
+  "weight": 0.24790969582248715,
+  "pnl": 237.8,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 2.0%, fwd P/E 13)"
+   ],
+   "trend": [
+    1,
+    "trend: uptrend, pulling back (-8% vs 50d)"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 6%, ROE 10%, EPS growth -43%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    -1,
+    "growth: stalling (rev +3%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "KO",
+  "price": 81.39,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 0.22640946599999653,
+  "pnl": 228.9,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.9%, fwd P/E 23)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+11% vs 200d, +3% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 35%, ROE 43%, EPS growth 18%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +12%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "DDOG",
+  "price": 260.19,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 0.2263182086577958,
+  "pnl": 434.1,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 1.0%, fwd P/E 91)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+68% vs 200d, +28% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 1%, ROE 4%, EPS growth 104%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +32%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "AMD",
+  "price": 583.63,
+  "action": "TRIM",
+  "basis": "extended winner (expensive + uptrend) \u2014 take partial profit, let rest run",
+  "composite": 4,
+  "weight": 0.09803776272623792,
+  "pnl": 381.27,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.8%, fwd P/E 44)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+113% vs 200d, +30% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 14%, ROE 8%, EPS growth 91%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +38%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "CRCL",
+  "price": 63.26,
+  "action": "EXIT",
+  "basis": "downtrend + deteriorating earnings + not cheap \u2014 thesis broken, genuine dead money",
+  "composite": -3,
+  "weight": 0.955008086130578,
+  "pnl": -46.9,
+  "crypto_beta": true,
+  "scores": {
+   "valuation": [
+    -2,
+    "valuation: NEGATIVE FCF yield -0.8% \u2014 burning cash"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-35% vs 200d, -35% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 6%, ROE -3%, EPS growth -81%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +20%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -76% from 52w high"
+  ]
+ },
+ {
+  "symbol": "NKE",
+  "price": 41.31,
+  "action": "EXIT",
+  "basis": "downtrend + deteriorating earnings + not cheap \u2014 thesis broken, genuine dead money",
+  "composite": -5,
+  "weight": 0.8731502501765284,
+  "pnl": -2990.66,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 2.1%, fwd P/E 23)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-27% vs 200d, -6% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 7%, ROE 16%, EPS growth -35%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    -1,
+    "growth: stalling (rev +0%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "CMCSA",
+  "price": 24.4,
+  "action": "EXIT",
+  "basis": "downtrend + deteriorating earnings + not cheap \u2014 thesis broken, genuine dead money",
+  "composite": -3,
+  "weight": 0.6652660246432789,
+  "pnl": -481.11,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 4.6%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-10% vs 200d, -3% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 13%, ROE 21%, EPS growth -33%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +5%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "TONX",
+  "price": 2.6,
+  "action": "EXIT",
+  "basis": "downtrend + deteriorating earnings + not cheap \u2014 thesis broken, genuine dead money",
+  "composite": -3,
+  "weight": 0.6335084695574269,
+  "pnl": -5462.28,
+  "crypto_beta": true,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.3%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-21% vs 200d, -16% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -74%, ROE -143%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +302%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -91% from 52w high"
+  ]
+ },
+ {
+  "symbol": "CVX",
+  "price": 166.59,
+  "action": "EXIT",
+  "basis": "downtrend + deteriorating earnings + not cheap \u2014 thesis broken, genuine dead money",
+  "composite": -4,
+  "weight": 0.46075832077145606,
+  "pnl": 160.55,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 3.5%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-2% vs 200d, -10% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 7%, ROE 7%, EPS growth -44%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    -1,
+    "growth: stalling (rev +2%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "ORCL",
+  "price": 146.94,
+  "action": "EXIT",
+  "basis": "burning cash in a downtrend \u2014 cut it",
+  "composite": 0,
+  "weight": 0.354503746953465,
+  "pnl": -823.89,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -2,
+    "valuation: NEGATIVE FCF yield -5.8% \u2014 burning cash"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-27% vs 200d, -22% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 36%, ROE 53%, EPS growth 22%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +21%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -58% from 52w high"
+  ]
+ },
+ {
+  "symbol": "JACK",
+  "price": 15.83,
+  "action": "EXIT",
+  "basis": "shrinking, not cheap, no trend \u2014 no reason to own it",
+  "composite": -3,
+  "weight": 0.26778554495380485,
+  "pnl": 437.44,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -2,
+    "valuation: NEGATIVE FCF yield -0.1% \u2014 burning cash"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-3%) but reclaimed 50d (+26%)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 14%)"
+   ],
+   "growth": [
+    -2,
+    "growth: SHRINKING (rev -4%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 high short interest 36%"
+  ]
+ },
+ {
+  "symbol": "NEM",
+  "price": 93.64,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 4,
+  "weight": 8.475191655019799,
+  "pnl": 25350.25,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 9.8%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-9% vs 200d, -13% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 61%, ROE 26%, EPS growth 79%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +46%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "PYPL",
+  "price": 43.16,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": -1,
+  "weight": 1.4924225743506423,
+  "pnl": -3836.39,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 10.7%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-20% vs 200d, -4% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 18%, ROE 25%, EPS growth -6%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +7%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "ADBE",
+  "price": 204.78,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 3,
+  "weight": 1.0528469078508182,
+  "pnl": -2997.55,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 11.3%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-29% vs 200d, -13% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 35%, ROE 63%, EPS growth 8%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +13%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "PFE",
+  "price": 24.12,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": -1,
+  "weight": 0.8903066305102645,
+  "pnl": 69.75,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 9.0%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-4% vs 200d, -6% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 32%, ROE 8%, EPS growth -10%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +5%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "ACN",
+  "price": 124.9,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 1,
+  "weight": 0.8875524839226466,
+  "pnl": -4699.74,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 15.8%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-43% vs 200d, -26% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 17%, ROE 24%, EPS growth 9%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +6%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -59% from 52w high"
+  ]
+ },
+ {
+  "symbol": "CAG",
+  "price": 13.46,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": -1,
+  "weight": 0.5125012337992667,
+  "pnl": -915.14,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 10.2%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-16% vs 200d, -1% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 11%, ROE -0%, EPS growth 39%)"
+   ],
+   "growth": [
+    -2,
+    "growth: SHRINKING (rev -2%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "LYFT",
+  "price": 14.69,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 1,
+  "weight": 0.4164072524619042,
+  "pnl": -791.25,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 21.8%)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-14%) but reclaimed 50d (+5%)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -0%, ROE 148%, EPS growth 489%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +14%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 high short interest 25%"
+  ]
+ },
+ {
+  "symbol": "ARE",
+  "price": 53.19,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 1,
+  "weight": 0.30180628212623484,
+  "pnl": -900.6,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 15.2%)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-2%) but reclaimed 50d (+10%)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 16%, ROE -4%)"
+   ],
+   "growth": [
+    -2,
+    "growth: SHRINKING (rev -12%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "CRM",
+  "price": 157.21,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 3,
+  "weight": 0.2883549498858481,
+  "pnl": 11.1,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 12.9%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-26% vs 200d, -10% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 22%, ROE 17%, EPS growth 52%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +13%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "ESTC",
+  "price": 57.03,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 0,
+  "weight": 0.20788422553324956,
+  "pnl": -575.4,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 7.7%)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-15%) but reclaimed 50d (+4%)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -4%, ROE 33%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +16%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "GIS",
+  "price": 35.03,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 0,
+  "weight": 0.20051063228343102,
+  "pnl": -331.2,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 12.1%)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-16%) but reclaimed 50d (+2%)"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 19%, ROE 24%, EPS growth -14%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    -1,
+    "growth: stalling (rev +2%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "EPAM",
+  "price": 80.0,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 1,
+  "weight": 0.14606650192647902,
+  "pnl": -671.2,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 16.6%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-47% vs 200d, -20% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 10%, ROE 11%, EPS growth 19%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +8%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 high short interest 28%",
+   "\u26a0 -64% from 52w high"
+  ]
+ },
+ {
+  "symbol": "DLB",
+  "price": 52.76,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 0,
+  "weight": 0.14268998026505222,
+  "pnl": -287.4,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 5.8%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-16% vs 200d, -6% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 29%, ROE 9%, EPS growth 5%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +7%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "FIS",
+  "price": 38.76,
+  "action": "WAIT",
+  "basis": "cheap but downtrending \u2014 do NOT add to a falling knife; hold small, buy only once 200d reclaims OR a dated catalyst confirms",
+  "composite": 3,
+  "weight": 0.14122986278984065,
+  "pnl": -601.4,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    2,
+    "valuation: cheap (FCF yield 12.2%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-28% vs 200d, -8% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 16%, ROE 17%, EPS growth 3041%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +30%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -53% from 52w high"
+  ]
+ },
+ {
+  "symbol": "MSFT",
+  "price": 371.29,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add \u2014 index-like mega-cap, no edge stated; consider RSP/VOO instead of single-name risk",
+  "composite": 0,
+  "weight": 2.226697401166109,
+  "pnl": -1154.47,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 1.3%, fwd P/E 19)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-17% vs 200d, -9% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 46%, ROE 34%, EPS growth 23%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +18%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "HOOD",
+  "price": 100.94,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 3,
+  "weight": 2.009417319679873,
+  "pnl": 2459.92,
+  "crypto_beta": true,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: no FCF data (neutral)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-1%) but reclaimed 50d (+18%)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 38%, ROE 22%, EPS growth 3%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +15%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "META",
+  "price": 561.03,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add \u2014 index-like mega-cap, no edge stated; consider RSP/VOO instead of single-name risk",
+  "composite": 1,
+  "weight": 1.8488153482876621,
+  "pnl": -1095.46,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 1.8%, fwd P/E 15)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-13% vs 200d, -8% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 41%, ROE 33%, EPS growth 62%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +33%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "QCOM",
+  "price": 185.75,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 1,
+  "weight": 1.3524338114147314,
+  "pnl": 1028.91,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 4.9%)"
+   ],
+   "trend": [
+    1,
+    "trend: uptrend, pulling back (-7% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 22%, ROE 36%, EPS growth 173%)"
+   ],
+   "growth": [
+    -2,
+    "growth: SHRINKING (rev -4%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "PEP",
+  "price": 136.03,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": -1,
+  "weight": 1.0875155721528733,
+  "pnl": -354.81,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 4.7%)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-8% vs 200d, -7% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 17%, ROE 44%, EPS growth 28%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +8%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "RDDT",
+  "price": 173.48,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 3,
+  "weight": 0.9549168287883772,
+  "pnl": 1104.0,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 1.7%, fwd P/E 19)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-6%) but reclaimed 50d (+6%)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 28%, ROE 26%, EPS growth 675%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +69%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "COUR",
+  "price": 5.67,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": -2,
+  "weight": 0.6220100444401356,
+  "pnl": -972.01,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 4.3%)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-21%) but reclaimed 50d (+1%)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -13%, ROE -10%)"
+   ],
+   "growth": [
+    0,
+    "growth: slow (rev +9%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 -58% from 52w high"
+  ]
+ },
+ {
+  "symbol": "MSCI",
+  "price": 560.95,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": -1,
+  "weight": 0.5092159694800406,
+  "pnl": -34.0,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 3.0%, fwd P/E 25)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-1% vs 200d, -5% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 54%, EPS growth 49%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +14%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "HRMY",
+  "price": 36.07,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 3,
+  "weight": 0.4535489907375989,
+  "pnl": 568.5,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 7.2%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+12% vs 200d, +12% vs 50d)"
+   ],
+   "quality": [
+    -1,
+    "quality: earnings DECLINING (op margin 17%, ROE 18%, EPS growth -30%) \u2014 value-trap signature"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +17%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "AAL",
+  "price": 18.23,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 2,
+  "weight": 0.32542368228778223,
+  "pnl": 548.23,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    1,
+    "valuation: reasonable (FCF yield 7.1%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+37% vs 200d, +32% vs 50d)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -0%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +11%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "SOFI",
+  "price": 18.04,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 3,
+  "weight": 0.24885877218137467,
+  "pnl": -0.89,
+  "crypto_beta": true,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: no FCF data (neutral)"
+   ],
+   "trend": [
+    0,
+    "trend: basing \u2014 below 200d (-20%) but reclaimed 50d (+7%)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 18%, ROE 7%, EPS growth 101%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +42%)"
+   ]
+  },
+  "flags": [
+   "\u26a0 high short interest 15%"
+  ]
+ },
+ {
+  "symbol": "VTR",
+  "price": 89.09,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 5,
+  "weight": 0.24305480521740863,
+  "pnl": 301.44,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 3.4%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+12% vs 200d, +4% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 14%, ROE 2%, EPS growth 10%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +22%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "O",
+  "price": 62.49,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 4,
+  "weight": 0.2288734142394161,
+  "pnl": 121.26,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 3.1%)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+5% vs 200d, +1% vs 50d)"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 46%, ROE 3%, EPS growth 18%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +12%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "LNG",
+  "price": 240.44,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 1,
+  "weight": 0.2217553415477596,
+  "pnl": 186.59,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: fair (FCF yield 3.4%)"
+   ],
+   "trend": [
+    1,
+    "trend: uptrend, pulling back (-2% vs 50d)"
+   ],
+   "quality": [
+    -2,
+    "quality: unprofitable (op margin -54%, ROE 29%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +24%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "CVNA",
+  "price": 65.11,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 0,
+  "weight": 0.1745570441615451,
+  "pnl": -246.12,
+  "crypto_beta": false,
+  "scores": {
+   "valuation": [
+    -1,
+    "valuation: rich (FCF yield 0.3%, fwd P/E 30)"
+   ],
+   "trend": [
+    -2,
+    "trend: DOWNTREND (-11% vs 200d, -9% vs 50d) \u2014 falling knife"
+   ],
+   "quality": [
+    1,
+    "quality: profitable (op margin 9%, ROE 60%, EPS growth 12%)"
+   ],
+   "growth": [
+    2,
+    "growth: strong (rev +52%)"
+   ]
+  },
+  "flags": []
+ },
+ {
+  "symbol": "IBKR",
+  "price": 88.17,
+  "action": "HOLD",
+  "basis": "fair value / in-trend / no decisive edge \u2014 hold, do not add",
+  "composite": 5,
+  "weight": 0.04642991056488442,
+  "pnl": 197.46,
+  "crypto_beta": true,
+  "scores": {
+   "valuation": [
+    0,
+    "valuation: no FCF data (neutral)"
+   ],
+   "trend": [
+    2,
+    "trend: UPTREND (+21% vs 200d, +3% vs 50d)"
+   ],
+   "quality": [
+    2,
+    "quality: strong (op margin 77%, ROE 24%, EPS growth 23%)"
+   ],
+   "growth": [
+    1,
+    "growth: solid (rev +17%)"
+   ]
+  },
+  "flags": []
+ }
+]
