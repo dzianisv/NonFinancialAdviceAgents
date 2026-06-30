@@ -126,11 +126,15 @@ gcloud compute scp .cache/mkt/agent-alerts.json \
 
 ## Security
 
-- **No open ports on VM** — GCP firewall has no rules for 8080. Only cloudflared (outbound QUIC to CF edge).
+- **No open ports on VM** — GCP firewall has no rules for port 9999. Only cloudflared (outbound QUIC to CF edge).
 - **HTTPS only** — Cloudflare terminates TLS at edge; VM sees plain HTTP on loopback.
-- **No API auth** — acceptable for read-only metrics/quotes on a personal tool. Add `--listen-token` to `mkt-http.service` `ExecStart` if exposure grows.
-- **Secrets in env file** — `/home/engineer/.mkt.env` (mode 600). Not in systemd unit or repo.
-- **GH token for repo clone** — used once at deploy time, not stored on VM.
+- **No API auth** — read-only metrics/quotes. Add `--listen-token` flag to `ExecStart` if needed.
+- **Secrets in Bitwarden** (dev collection) — deploy.sh reads them at deploy time, writes to `/etc/mkt-daemon.env` (mode 600) on VM. Never in repo.
+
+| Bitwarden item | Content |
+|---|---|
+| `mkt-daemon/cf-tunnel-token` | Cloudflare Tunnel token (tunnel ID: `160e0def-...`) |
+| `mkt-daemon/telegram-bot-token` | Telegram bot token for alert notifications |
 
 ---
 

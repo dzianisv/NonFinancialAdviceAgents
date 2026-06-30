@@ -1,350 +1,202 @@
 #!/usr/bin/env bash
-# deploy.sh — provisions a free-tier GCP e2-micro VM running mkt daemon
-# behind a Cloudflare Tunnel at mkt.agentlabs.cc.
+# deploy.sh — redeploy mkt daemon on GCP e2-micro behind Cloudflare Tunnel
 #
-# Usage:  bash infra/mkt-daemon/deploy.sh
+# Usage:
+#   bash infra/mkt-daemon/deploy.sh
 #
-# Idempotent: safe to re-run. Skips steps that are already done.
-# Prereqs (local): gcloud (bisonte config), cloudflared, bun, python3, openssl
+# Prereqs (local):
+#   - gcloud with 'bisonte' named config authenticated
+#   - bitwarden CLI (bw) unlocked: source ~/.env.d/bitwarden.env
+#   - curl, python3, openssl
+#
+# Idempotent — safe to re-run. Skips already-done steps.
 set -euo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # ── Config ────────────────────────────────────────────────────────────────────
-GCLOUD_CONFIG="bisonte"
-GCP_BILLING="01BFB1-83821D-942EE8"   # bisonte billing account
-GCP_REGION="us-central1"              # only free-tier e2-micro region
-GCP_ZONE="us-central1-a"
+GCP_CONFIG="bisonte"
 GCP_PROJECT="mkt-daemon-alerts"
+GCP_ZONE="us-central1-a"
 VM_NAME="mkt-daemon"
 VM_TYPE="e2-micro"
-VM_IMAGE_FAMILY="debian-12"
-VM_IMAGE_PROJECT="debian-cloud"
 
-CF_ZONE_ID="5fbeec0aa0dca842ab3b62fafb948fe9"
 CF_ACCOUNT_ID="c52033a95d560a9a183b016ceb1c107a"
+CF_ZONE_ID="5fbeec0aa0dca842ab3b62fafb948fe9"
 TUNNEL_NAME="mkt-daemon"
 TUNNEL_HOST="mkt.agentlabs.cc"
-
-MKT_COMMIT="0207dda"
 MKT_LISTEN="127.0.0.1:9999"
+MKT_COMMIT="0207dda"
+
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SKILLS_DIR="$REPO_ROOT/.agents/skills/mkt/scripts"
-ALERTS_JSON="$REPO_ROOT/.cache/mkt/agent-alerts.json"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
-G() { gcloud --configuration="$GCLOUD_CONFIG" "$@"; }
-
 log()  { echo "▶ $*"; }
 ok()   { echo "  ✓ $*"; }
-fail() { echo "  ✗ $*" >&2; exit 1; }
+die()  { echo "  ✗ $*" >&2; exit 1; }
 
-cf_api() {
-  local method="$1" path="$2"; shift 2
-  curl -sf -X "$method" \
-    "https://api.cloudflare.com/client/v4$path" \
-    -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-    -H "Content-Type: application/json" \
-    "$@"
-}
+G()      { gcloud --configuration="$GCP_CONFIG" "$@"; }
+SSH()    { G compute ssh "$VM_NAME" --zone="$GCP_ZONE" --project="$GCP_PROJECT" \
+             --ssh-flag="-o ConnectTimeout=30 -o StrictHostKeyChecking=no" \
+             --command="$1" 2>&1; }
+SCP()    { G compute scp "$1" "$VM_NAME:$2" --zone="$GCP_ZONE" --project="$GCP_PROJECT" 2>&1; }
+CF_API() { local m="$1" p="$2"; shift 2
+           curl -sf -X "$m" "https://api.cloudflare.com/client/v4$p" \
+             -H "Authorization: Bearer $CF_TOKEN" \
+             -H "Content-Type: application/json" "$@"; }
 
-# ── Phase 0: Secrets ──────────────────────────────────────────────────────────
-log "Phase 0: loading secrets"
+# ── Phase 0: Secrets (from Bitwarden) ─────────────────────────────────────────
+log "Phase 0: secrets"
 
-# Cloudflare API token
-if [[ -f ~/.env.d/cloudflare.env ]]; then
-  # shellcheck source=/dev/null
-  source ~/.env.d/cloudflare.env
-fi
-[[ -n "${CLOUDFLARE_API_TOKEN:-}" ]] || fail "CLOUDFLARE_API_TOKEN not set (check ~/.env.d/cloudflare.env)"
+source ~/.env.d/bitwarden.env 2>/dev/null || true
+[[ "$(bw status 2>/dev/null | python3 -c 'import sys,json; print(json.load(sys.stdin)["status"])')" == "unlocked" ]] \
+  || die "Bitwarden locked — run: source ~/.env.d/bitwarden.env"
 
-# Telegram bot token (optional; falls back to ntfy if missing)
-TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
-if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
-  # Try bitwarden
-  if command -v bw &>/dev/null; then
-    source ~/.env.d/bitwarden.env 2>/dev/null || true
-    TELEGRAM_BOT_TOKEN=$(bw get password "telegram-bot-token" 2>/dev/null || true)
-  fi
-fi
-if [[ -z "$TELEGRAM_BOT_TOKEN" ]]; then
-  log "  ⚠ TELEGRAM_BOT_TOKEN not found — alerts will use ntfy:mkt-agentlabs as fallback"
-  NOTIFY_CHANNEL="ntfy:mkt-agentlabs"
-else
-  ok "Telegram bot token loaded"
-  NOTIFY_CHANNEL="telegram-bot:@CryptoAiInvestor"
-fi
+source ~/.env.d/cloudflare.env 2>/dev/null || true
+[[ -n "${CLOUDFLARE_API_TOKEN:-}" ]] || die "CLOUDFLARE_API_TOKEN not set"
+CF_TOKEN="$CLOUDFLARE_API_TOKEN"
 
-# ── Phase 1: GCP Project ──────────────────────────────────────────────────────
-log "Phase 1: GCP project $GCP_PROJECT"
+TELEGRAM_BOT_TOKEN=$(bw get password "mkt-daemon/telegram-bot-token" 2>/dev/null) \
+  || die "mkt-daemon/telegram-bot-token not found in Bitwarden"
+CF_TUNNEL_TOKEN=$(bw get password "mkt-daemon/cf-tunnel-token" 2>/dev/null) \
+  || die "mkt-daemon/cf-tunnel-token not found in Bitwarden"
 
-if ! G projects describe "$GCP_PROJECT" &>/dev/null; then
-  G projects create "$GCP_PROJECT" --name="mkt-daemon"
-  G billing projects link "$GCP_PROJECT" --billing-account="$GCP_BILLING"
-  ok "project created"
-else
-  ok "project exists"
-fi
-G config set project "$GCP_PROJECT" --configuration="$GCLOUD_CONFIG"
+ok "secrets loaded from Bitwarden"
 
-log "  enabling Compute API"
-G services enable compute.googleapis.com --project="$GCP_PROJECT" --quiet
+# ── Phase 1: GCP VM ───────────────────────────────────────────────────────────
+log "Phase 1: VM ($VM_NAME, $VM_TYPE, $GCP_ZONE)"
 
-# ── Phase 2: VM ───────────────────────────────────────────────────────────────
-log "Phase 2: VM $VM_NAME ($VM_TYPE, $GCP_ZONE)"
-
-if ! G compute instances describe "$VM_NAME" --zone="$GCP_ZONE" --project="$GCP_PROJECT" &>/dev/null; then
-  G compute instances create "$VM_NAME" \
-    --project="$GCP_PROJECT" \
-    --zone="$GCP_ZONE" \
-    --machine-type="$VM_TYPE" \
-    --image-family="$VM_IMAGE_FAMILY" \
-    --image-project="$VM_IMAGE_PROJECT" \
-    --boot-disk-size=20GB \
-    --boot-disk-type=pd-standard \
-    --tags=mkt-daemon \
-    --metadata=serial-port-enable=false
-  log "  waiting 25s for boot..."
-  sleep 25
-  ok "VM created"
-else
-  # Start if terminated (free-tier VMs are sometimes stopped)
-  STATUS=$(G compute instances describe "$VM_NAME" \
-    --zone="$GCP_ZONE" --project="$GCP_PROJECT" \
-    --format="value(status)")
-  if [[ "$STATUS" == "TERMINATED" || "$STATUS" == "STOPPED" ]]; then
-    G compute instances start "$VM_NAME" --zone="$GCP_ZONE" --project="$GCP_PROJECT"
-    sleep 20
-    ok "VM started (was $STATUS)"
-  else
-    ok "VM exists ($STATUS)"
-  fi
-fi
-
-VM_IP=$(G compute instances describe "$VM_NAME" \
+STATUS=$(G compute instances describe "$VM_NAME" \
   --zone="$GCP_ZONE" --project="$GCP_PROJECT" \
-  --format="value(networkInterfaces[0].accessConfigs[0].natIP)")
-ok "VM external IP: $VM_IP"
+  --format="value(status)" 2>/dev/null || echo "ABSENT")
 
-SSH() {
-  G compute ssh "$VM_NAME" \
-    --zone="$GCP_ZONE" --project="$GCP_PROJECT" \
-    --ssh-flag="-o ConnectTimeout=30 -o StrictHostKeyChecking=no" \
-    --command="$1" 2>&1
-}
-SCP() {
-  G compute scp "$1" "$VM_NAME:$2" \
-    --zone="$GCP_ZONE" --project="$GCP_PROJECT" 2>&1
-}
+case "$STATUS" in
+  RUNNING)   ok "VM running" ;;
+  TERMINATED|STOPPED)
+    G compute instances start "$VM_NAME" --zone="$GCP_ZONE" --project="$GCP_PROJECT"
+    sleep 20; ok "VM started (was $STATUS)" ;;
+  ABSENT)
+    G compute instances create "$VM_NAME" \
+      --project="$GCP_PROJECT" --zone="$GCP_ZONE" \
+      --machine-type="$VM_TYPE" \
+      --image-family=debian-12 --image-project=debian-cloud \
+      --boot-disk-size=20GB --boot-disk-type=pd-standard
+    sleep 30; ok "VM created" ;;
+esac
 
-# ── Phase 3: Cloudflare Tunnel ────────────────────────────────────────────────
-log "Phase 3: Cloudflare Tunnel $TUNNEL_NAME → $TUNNEL_HOST"
+# ── Phase 2: Cloudflare DNS ───────────────────────────────────────────────────
+log "Phase 2: DNS ($TUNNEL_HOST)"
 
-# Check for existing tunnel
-TUNNEL_ID=$(cf_api GET \
-  "/accounts/$CF_ACCOUNT_ID/cfd_tunnel?name=$TUNNEL_NAME&is_deleted=false" | \
-  python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-r=d.get('result',[])
-print(r[0]['id'] if r else '')
-" 2>/dev/null || true)
+# Decode tunnel ID from token
+TUNNEL_ID=$(echo "$CF_TUNNEL_TOKEN" | base64 -d 2>/dev/null \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['t'])")
+ok "Tunnel ID: $TUNNEL_ID"
 
-if [[ -z "$TUNNEL_ID" ]]; then
-  TUNNEL_SECRET=$(openssl rand -base64 32)
-  RESP=$(cf_api POST "/accounts/$CF_ACCOUNT_ID/cfd_tunnel" \
-    -d "{\"name\":\"$TUNNEL_NAME\",\"tunnel_secret\":\"$(echo -n "$TUNNEL_SECRET" | base64 | tr -d '\n')\"}")
-  TUNNEL_ID=$(echo "$RESP" | python3 -c "import json,sys; print(json.load(sys.stdin)['result']['id'])")
-  ok "Tunnel created: $TUNNEL_ID"
+# Upsert CNAME
+EXISTING=$(CF_API GET "/zones/$CF_ZONE_ID/dns_records?type=CNAME&name=$TUNNEL_HOST" \
+  | python3 -c "import sys,json; r=json.load(sys.stdin)['result']; print(r[0]['id'] if r else '')" 2>/dev/null || true)
+DNS_BODY="{\"type\":\"CNAME\",\"name\":\"mkt\",\"content\":\"$TUNNEL_ID.cfargotunnel.com\",\"proxied\":true,\"ttl\":1}"
+if [[ -z "$EXISTING" ]]; then
+  CF_API POST "/zones/$CF_ZONE_ID/dns_records" -d "$DNS_BODY" > /dev/null
+  ok "DNS created"
 else
-  ok "Tunnel exists: $TUNNEL_ID"
+  CF_API PUT "/zones/$CF_ZONE_ID/dns_records/$EXISTING" -d "$DNS_BODY" > /dev/null
+  ok "DNS updated"
 fi
 
-# Configure tunnel ingress via API (no config file needed on VM)
-cf_api PUT \
-  "/accounts/$CF_ACCOUNT_ID/cfd_tunnel/$TUNNEL_ID/configurations" \
-  -d "{
-    \"config\": {
-      \"ingress\": [
-        {\"hostname\": \"$TUNNEL_HOST\", \"service\": \"http://$MKT_LISTEN\"},
-        {\"service\": \"http_status:404\"}
-      ]
-    }
-  }" > /dev/null
-ok "Tunnel ingress configured: $TUNNEL_HOST → $MKT_LISTEN"
+# ── Phase 3: Remote setup ─────────────────────────────────────────────────────
+log "Phase 3: remote setup (Go, Bun, mkt, systemd)"
 
-# Get run token (used by cloudflared on the VM — no credentials file needed)
-TUNNEL_TOKEN=$(cf_api GET \
-  "/accounts/$CF_ACCOUNT_ID/cfd_tunnel/$TUNNEL_ID/token" | \
-  python3 -c "import json,sys; print(json.load(sys.stdin)['result'])")
-ok "Tunnel token retrieved"
-
-# Create/update DNS CNAME
-EXISTING_DNS=$(cf_api GET \
-  "/zones/$CF_ZONE_ID/dns_records?type=CNAME&name=mkt.agentlabs.cc" | \
-  python3 -c "
-import json,sys
-r=json.load(sys.stdin).get('result',[])
-print(r[0]['id'] if r else '')
-" 2>/dev/null || true)
-
-DNS_PAYLOAD="{\"type\":\"CNAME\",\"name\":\"mkt\",\"content\":\"$TUNNEL_ID.cfargotunnel.com\",\"proxied\":true,\"ttl\":1}"
-if [[ -z "$EXISTING_DNS" ]]; then
-  cf_api POST "/zones/$CF_ZONE_ID/dns_records" -d "$DNS_PAYLOAD" > /dev/null
-  ok "DNS created: $TUNNEL_HOST → $TUNNEL_ID.cfargotunnel.com"
-else
-  cf_api PUT "/zones/$CF_ZONE_ID/dns_records/$EXISTING_DNS" -d "$DNS_PAYLOAD" > /dev/null
-  ok "DNS updated: $TUNNEL_HOST → $TUNNEL_ID.cfargotunnel.com"
-fi
-
-# ── Phase 4: Upload files to VM ───────────────────────────────────────────────
-log "Phase 4: uploading files"
-
-# Prepare alerts JSON with correct channel
-TMP_ALERTS="/tmp/agent-alerts-vm.json"
-python3 - "$ALERTS_JSON" "$NOTIFY_CHANNEL" > "$TMP_ALERTS" << 'PYEOF'
-import json, sys
-path, channel = sys.argv[1], sys.argv[2]
-with open(path) as f:
-    jobs = json.load(f)
-for j in jobs:
-    # keep existing channel if it's already a supported non-Telethon channel
-    ch = j.get("channel", "stdout")
-    if ch.startswith("telegram:"):
-        j["channel"] = channel  # rewrite to bot or ntfy
-out = [j for j in jobs if not j.get("fired")]  # only active jobs
-print(json.dumps(out, indent=2))
-PYEOF
-ok "alerts JSON prepared ($(python3 -c "import json; print(len(json.load(open('$TMP_ALERTS'))))" ) active jobs)"
-
-# Write env file for the VM
-TMP_ENV="/tmp/mkt-daemon.env"
-cat > "$TMP_ENV" << EOF
+# Write tmp env file (never committed)
+TMP_ENV=$(mktemp)
+cat > "$TMP_ENV" <<EOF
 TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-NTFY_TOPIC=mkt-agentlabs
+TELEGRAM_CHAT_ID=@CryptoAiInvestor
 EOF
 
-# Upload
-SCP "$TMP_ALERTS" "/tmp/agent-alerts.json"
-SCP "$TMP_ENV"    "/tmp/mkt-daemon.env"
-SCP "$SKILLS_DIR/check.ts"      "/tmp/check.ts"
-SCP "$SKILLS_DIR/store.ts"      "/tmp/store.ts"
-SCP "$SKILLS_DIR/indicators.ts" "/tmp/indicators.ts"
-SCP "$SKILLS_DIR/mkt-alert.ts"  "/tmp/mkt-alert.ts"
-ok "files uploaded"
+SCP "$TMP_ENV" "/tmp/mkt-daemon.env"
+rm -f "$TMP_ENV"
 
-# ── Phase 5: Remote setup ─────────────────────────────────────────────────────
-log "Phase 5: remote setup"
+# Upload skill scripts
+for f in check.ts store.ts indicators.ts mkt-alert.ts; do
+  SCP "$SKILLS_DIR/$f" "/tmp/$f"
+done
 
-SSH "bash -s" << REMOTE
+SSH "$(cat << REMOTE
 set -euo pipefail
+export PATH=\$PATH:/usr/local/go/bin:\$HOME/.local/bin:\$HOME/.bun/bin
+
+# ── apt deps ─────────────────────────────────────────────────────────────────
+sudo apt-get install -y -qq unzip git curl 2>/dev/null
 
 # ── Go ────────────────────────────────────────────────────────────────────────
-if ! command -v go &>/dev/null || [[ "\$(go version 2>/dev/null | grep -oP '[\d]+\.[\d]+' | head -1)" < "1.24" ]]; then
-  echo "  installing Go 1.24..."
-  wget -q https://go.dev/dl/go1.24.4.linux-amd64.tar.gz -O /tmp/go.tar.gz
-  sudo tar -C /usr/local -xzf /tmp/go.tar.gz
-  echo 'export PATH=\$PATH:/usr/local/go/bin:\$HOME/.local/bin:\$HOME/.bun/bin' >> ~/.bashrc
+if ! command -v go &>/dev/null; then
+  curl -fsSL https://go.dev/dl/go1.22.4.linux-amd64.tar.gz | sudo tar -C /usr/local -xz
+  echo 'export PATH=\$PATH:/usr/local/go/bin' | sudo tee /etc/profile.d/go.sh > /dev/null
 fi
-export PATH=\$PATH:/usr/local/go/bin:\$HOME/.local/bin:\$HOME/.bun/bin
-go version
+export PATH=\$PATH:/usr/local/go/bin
 
 # ── mkt binary ────────────────────────────────────────────────────────────────
-mkdir -p ~/.local/bin ~/.local/src
-if [[ ! -f ~/.local/bin/mkt ]]; then
-  echo "  building mkt..."
-  git clone --quiet https://github.com/stxkxs/mkt ~/.local/src/mkt
-  cd ~/.local/src/mkt && git checkout ${MKT_COMMIT} -q
-  go build -o ~/.local/bin/mkt . && echo "  mkt built: \$(~/.local/bin/mkt version)"
-else
-  echo "  mkt exists: \$(~/.local/bin/mkt version)"
+mkdir -p \$HOME/.local/bin \$HOME/.local/src
+if [[ ! -f \$HOME/.local/bin/mkt ]]; then
+  git clone --quiet https://github.com/stxkxs/mkt \$HOME/.local/src/mkt
+  cd \$HOME/.local/src/mkt && git checkout ${MKT_COMMIT} -q
+  go build -o \$HOME/.local/bin/mkt .
 fi
+echo "  mkt: \$(\$HOME/.local/bin/mkt version)"
 
 # ── Bun ───────────────────────────────────────────────────────────────────────
-if ! command -v bun &>/dev/null && [[ ! -f ~/.bun/bin/bun ]]; then
-  echo "  installing Bun..."
+if [[ ! -f \$HOME/.bun/bin/bun ]]; then
   curl -fsSL https://bun.sh/install | bash -s -- --no-modify-path 2>/dev/null
 fi
 export PATH=\$PATH:\$HOME/.bun/bin
-bun --version
+echo "  bun: \$(bun --version)"
 
-# ── mkt skill scripts ─────────────────────────────────────────────────────────
-MKT_DIR="\$HOME/.agents/skills/mkt/scripts"
-CACHE_DIR="\$HOME/.cache/mkt"
-mkdir -p "\$MKT_DIR" "\$CACHE_DIR"
-cp /tmp/check.ts /tmp/store.ts /tmp/indicators.ts /tmp/mkt-alert.ts "\$MKT_DIR/"
-cp /tmp/agent-alerts.json "\$CACHE_DIR/agent-alerts.json"
-echo "  skill scripts installed"
+# ── skill scripts ─────────────────────────────────────────────────────────────
+MKT_SCRIPTS=\$HOME/.agents/skills/mkt/scripts
+mkdir -p "\$MKT_SCRIPTS"
+cp /tmp/check.ts /tmp/store.ts /tmp/indicators.ts /tmp/mkt-alert.ts "\$MKT_SCRIPTS/"
 
-# ── mkt config ────────────────────────────────────────────────────────────────
-mkdir -p ~/.config/mkt
-cat > ~/.config/mkt/config.yaml << 'CFG'
-watchlist:
-  - BTC-USD
-  - ETH-USD
-  - CRM
-  - META
-  - NVDA
-  - MSFT
-
-poll_interval: 30s
-sparkline_len: 20
-CFG
-
-# ── env file ─────────────────────────────────────────────────────────────────
+# ── env / secrets ─────────────────────────────────────────────────────────────
 sudo cp /tmp/mkt-daemon.env /etc/mkt-daemon.env
 sudo chmod 600 /etc/mkt-daemon.env
 
-# ── systemd: mkt daemon ───────────────────────────────────────────────────────
-CURRENT_USER=\$(whoami)
-cat > /tmp/mkt-daemon.service << SVC
+# ── systemd: mkt-daemon ───────────────────────────────────────────────────────
+U=\$(whoami)
+sudo tee /etc/systemd/system/mkt-daemon.service > /dev/null << SVC
 [Unit]
 Description=mkt price daemon
 After=network-online.target
-Wants=network-online.target
 
 [Service]
 Type=simple
-User=\${CURRENT_USER}
+User=\$U
 EnvironmentFile=/etc/mkt-daemon.env
-Environment=PATH=/usr/local/go/bin:/home/\${CURRENT_USER}/.local/bin:/home/\${CURRENT_USER}/.bun/bin:/usr/bin:/bin
-ExecStart=/home/\${CURRENT_USER}/.local/bin/mkt daemon --listen ${MKT_LISTEN}
+Environment=HOME=/home/\$U
+Environment=PATH=/usr/local/go/bin:/home/\$U/.local/bin:/home/\$U/.bun/bin:/usr/bin:/bin
+ExecStart=/home/\$U/.local/bin/mkt daemon --listen ${MKT_LISTEN}
 Restart=on-failure
-RestartSec=15s
-StandardOutput=journal
-StandardError=journal
+RestartSec=15
 
 [Install]
 WantedBy=multi-user.target
 SVC
 
-sudo cp /tmp/mkt-daemon.service /etc/systemd/system/mkt-daemon.service
-sudo sed -i "s/\\\${CURRENT_USER}/\$CURRENT_USER/g" /etc/systemd/system/mkt-daemon.service
-sudo systemctl daemon-reload
-sudo systemctl enable mkt-daemon
-sudo systemctl restart mkt-daemon
-sleep 3
-sudo systemctl is-active mkt-daemon && echo "  ✓ mkt-daemon running"
-
-# ── systemd: check.ts cron (every 15 min) ─────────────────────────────────────
-CURRENT_USER=\$(whoami)
-cat > /tmp/mkt-check.service << SVC
+# ── systemd: mkt-check timer (every 15 min) ───────────────────────────────────
+sudo tee /etc/systemd/system/mkt-check.service > /dev/null << SVC
 [Unit]
-Description=mkt alert check (one-shot)
-After=network-online.target
+Description=mkt alert check
 
 [Service]
 Type=oneshot
-User=\${CURRENT_USER}
+User=\$U
 EnvironmentFile=/etc/mkt-daemon.env
-Environment=PATH=/usr/local/go/bin:/home/\${CURRENT_USER}/.local/bin:/home/\${CURRENT_USER}/.bun/bin:/usr/bin:/bin
-WorkingDirectory=/home/\${CURRENT_USER}/.agents/skills/mkt/scripts
-ExecStart=/home/\${CURRENT_USER}/.bun/bin/bun check.ts
-StandardOutput=journal
-StandardError=journal
+Environment=HOME=/home/\$U
+Environment=PATH=/usr/local/go/bin:/home/\$U/.local/bin:/home/\$U/.bun/bin:/usr/bin:/bin
+WorkingDirectory=/home/\$U/.agents/skills/mkt/scripts
+ExecStart=/home/\$U/.bun/bin/bun check.ts
 SVC
 
-cat > /tmp/mkt-check.timer << TMR
+sudo tee /etc/systemd/system/mkt-check.timer > /dev/null << SVC
 [Unit]
 Description=mkt alert check every 15 min
 
@@ -355,68 +207,47 @@ Unit=mkt-check.service
 
 [Install]
 WantedBy=timers.target
-TMR
+SVC
 
-sudo cp /tmp/mkt-check.service /etc/systemd/system/mkt-check.service
-sudo cp /tmp/mkt-check.timer   /etc/systemd/system/mkt-check.timer
-sudo sed -i "s/\\\${CURRENT_USER}/\$CURRENT_USER/g" /etc/systemd/system/mkt-check.service
 sudo systemctl daemon-reload
-sudo systemctl enable --now mkt-check.timer
-sudo systemctl list-timers mkt-check.timer --no-pager | head -3
+sudo systemctl enable --now mkt-daemon mkt-check.timer
+sudo systemctl restart mkt-daemon
+sleep 3
+sudo systemctl is-active mkt-daemon && echo "  ✓ mkt-daemon active"
 
 # ── cloudflared ───────────────────────────────────────────────────────────────
 if ! command -v cloudflared &>/dev/null; then
-  echo "  installing cloudflared..."
-  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | \
-    sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-main.gpg
-  echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared bookworm main" | \
-    sudo tee /etc/apt/sources.list.d/cloudflared.list
+  curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg \
+    | sudo tee /usr/share/keyrings/cloudflare-main.gpg > /dev/null
+  echo 'deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared bookworm main' \
+    | sudo tee /etc/apt/sources.list.d/cloudflared.list
   sudo apt-get update -qq && sudo apt-get install -y -qq cloudflared
 fi
-cloudflared --version
 
-# Install tunnel as system service using token (no credentials file needed)
-sudo cloudflared service install ${TUNNEL_TOKEN}
-sudo systemctl restart cloudflared || sudo systemctl start cloudflared
+# Reinstall service with current token (idempotent)
+sudo cloudflared service install ${CF_TUNNEL_TOKEN} 2>/dev/null || true
+sudo systemctl restart cloudflared
 sleep 3
-sudo systemctl is-active cloudflared && echo "  ✓ cloudflared running"
-
-echo "=== remote setup complete ==="
+sudo systemctl is-active cloudflared && echo "  ✓ cloudflared active"
+echo "=== done ==="
 REMOTE
+)"
 
-ok "remote setup done"
+ok "remote setup complete"
 
-# ── Phase 6: Verify ───────────────────────────────────────────────────────────
-log "Phase 6: verify"
-
-# Check services on VM
-SSH "sudo systemctl is-active mkt-daemon mkt-check.timer cloudflared 2>&1"
-
-# Check tunnel is healthy via Cloudflare API
+# ── Phase 4: Verify ───────────────────────────────────────────────────────────
+log "Phase 4: verify"
 sleep 5
-TUNNEL_STATUS=$(cf_api GET \
-  "/accounts/$CF_ACCOUNT_ID/cfd_tunnel/$TUNNEL_ID" | \
-  python3 -c "import json,sys; print(json.load(sys.stdin)['result']['status'])" 2>/dev/null || echo "unknown")
-ok "Tunnel status: $TUNNEL_STATUS"
+if curl -sf "https://$TUNNEL_HOST/metrics" | grep -q "mkt_uptime"; then
+  ok "https://$TUNNEL_HOST/metrics — OK"
+else
+  echo "  ⚠ tunnel not yet reachable — check: sudo journalctl -u cloudflared -n 20"
+fi
 
 echo ""
-echo "═══════════════════════════════════════════════"
-echo "  ✅  mkt daemon deployed"
-echo ""
-echo "  API:    https://$TUNNEL_HOST"
-echo "  Health: https://$TUNNEL_HOST/metrics"
-echo "  Alerts: https://$TUNNEL_HOST/alerts"
-echo ""
-echo "  Services on VM:"
-echo "    mkt-daemon      — mkt price feed + REST API"
-echo "    mkt-check.timer — alert evaluation every 15 min"
-echo "    cloudflared     — tunnel to $TUNNEL_HOST"
-echo ""
-echo "  To check logs:"
-echo "    gcloud --configuration=bisonte compute ssh $VM_NAME \\"
-echo "      --zone=$GCP_ZONE --project=$GCP_PROJECT \\"
-echo "      --command='sudo journalctl -u mkt-daemon -n 50 --no-pager'"
-echo "═══════════════════════════════════════════════"
-
-# Cleanup
-rm -f "$TMP_ALERTS" "$TMP_ENV"
+echo "═══════════════════════════════════════════════════════"
+echo "  ✅  https://$TUNNEL_HOST"
+echo "  SSH: gcloud --configuration=bisonte compute ssh $VM_NAME --zone=$GCP_ZONE --project=$GCP_PROJECT"
+echo "  Logs: sudo journalctl -u mkt-daemon -f"
+echo "  Alerts: bun mkt-alert.ts list   (from ~/agents/.agents/skills/mkt/scripts)"
+echo "═══════════════════════════════════════════════════════"
