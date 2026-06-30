@@ -1,118 +1,163 @@
-# Infrastructure — mkt daemon
+# infra: mkt daemon
 
-## Overview
+## What
 
-`mkt daemon` runs on a free-tier GCP e2-micro VM, exposed publicly at
-`https://mkt.agentlabs.cc` via a Cloudflare Tunnel (no open firewall ports needed).
+`mkt daemon` — headless price + alert engine. Watches 160+ symbols, evaluates alert jobs every 5 min, sends Telegram notifications.
+
+Public API: `https://mkt.agentlabs.cc` (Cloudflare Tunnel — no open VM ports).
 
 ---
 
 ## Accounts
 
-| Resource | Account | Notes |
-|---|---|---|
-| Cloudflare (agentlabs.cc) | bisonte.amigable@gmail.com | zone `5fbeec0aa0dca842ab3b62fafb948fe9`, account `c52033a95d560a9a183b016ceb1c107a` |
-| GCP project | bisonte.amigable@gmail.com | project `mkt-daemon-alerts`, billing `01BFB1-83821D-942EE8` |
+Both GCP and Cloudflare use **bisonte.amigable@gmail.com** (separate from primary vibeteaichnologies@gmail.com).
 
-**Important:** these are separate from the primary dev accounts (`vibeteaichnologies@gmail.com` GCP). Use `--configuration=bisonte` on all `gcloud` commands.
+| Resource | Account | ID |
+|---|---|---|
+| GCP project | bisonte.amigable@gmail.com | `mkt-daemon-alerts` |
+| Cloudflare zone | bisonte.amigable@gmail.com | zone `5fbeec0aa0dca842ab3b62fafb948fe9`, account `c52033a95d560a9a183b016ceb1c107a` |
 
 ---
 
-## GCP VM
+## VM
 
 | Field | Value |
 |---|---|
 | Name | `mkt-daemon` |
 | Zone | `us-central1-a` |
-| Machine | `e2-micro` (free tier — us-central1 only) |
-| OS | Debian 12 (Bookworm) |
+| Type | `e2-micro` (free tier) |
+| OS | Debian 12 |
 | External IP | `8.34.215.229` (ephemeral) |
-| SSH | `gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte` |
+
+---
+
+## SSH access
+
+No separate SSH keys. gcloud manages keys automatically.
+
+```bash
+gcloud compute ssh mkt-daemon \
+  --zone=us-central1-a \
+  --project=mkt-daemon-alerts \
+  --configuration=bisonte
+```
+
+`--configuration=bisonte` is required — isolates from the default gcloud account.
 
 ---
 
 ## Cloudflare Tunnel
 
-| Field | Value |
-|---|---|
-| Tunnel name | `mkt-daemon` |
-| Tunnel ID | `160e0def-c30f-40d6-9528-49dc9f23b7c3` |
-| Public URL | `https://mkt.agentlabs.cc` |
-| DNS record | `mkt.agentlabs.cc CNAME 160e0def-c30f-40d6-9528-49dc9f23b7c3.cfargotunnel.com` (proxied) |
-| Ingress | `mkt.agentlabs.cc → http://localhost:8080` |
-
-Token stored in Bitwarden under `dev` collection (name: `mkt-daemon-cf-tunnel-token`).
+- Tunnel name: `mkt-daemon`  
+- Tunnel ID: `160e0def-c30f-40d6-9528-49dc9f23b7c3`  
+- DNS: `mkt.agentlabs.cc CNAME → 160e0def-...cfargotunnel.com` (proxied)  
+- Ingress: all traffic to `mkt.agentlabs.cc` → `http://localhost:8080` on VM  
+- Token: in Bitwarden dev collection as `mkt-daemon-cf-tunnel-token`
 
 ---
 
 ## Services on VM
 
-| Service | Description |
-|---|---|
-| `cloudflared.service` | Cloudflare Tunnel daemon — routes `mkt.agentlabs.cc` → `:8080` |
-| `mkt-http.service` | `mkt --listen :8080 daemon` — price engine + HTTP API |
-| `mkt-check.timer` | Every 5 min: `bun run check.ts` — evaluates alert jobs, fires notifications |
+| Unit | Command | Role |
+|---|---|---|
+| `cloudflared.service` | `cloudflared tunnel run --token ...` | Tunnel to Cloudflare edge |
+| `mkt-http.service` | `mkt --listen :8080 daemon` | Price engine + HTTP API |
+| `mkt-check.timer` | `bun run check.ts` every 5 min | Evaluate alerts, send notifications |
+
+Env/secrets: `/home/engineer/.mkt.env` (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).
 
 ```bash
-# Check status
+# Check all three
 gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte \
   --command="sudo systemctl status cloudflared mkt-http mkt-check.timer --no-pager"
 ```
 
 ---
 
-## mkt HTTP API (internal + public)
+## API endpoints
+
+No auth — Cloudflare proxies all traffic (HTTPS termination at CF edge). VM port 8080 is NOT exposed externally (no GCP firewall rule).
 
 | Endpoint | Description |
 |---|---|
-| `GET /metrics` | Prometheus metrics (uptime, symbols cached, alert rules) |
+| `GET /metrics` | Prometheus: uptime, symbols cached, alert count |
 | `GET /quotes` | All cached quotes |
-| `GET /quotes/{sym}` | Single symbol quote |
-| `GET /alerts` | Current alert rules |
-| `POST /webhook/tradingview` | TradingView webhook receiver |
-
-Verify: `curl https://mkt.agentlabs.cc/metrics`
-
----
-
-## File layout on VM
-
-```
-~/agents/                     # financial-advisor-agents repo (git pull to update)
-  .agents/skills/mkt/scripts/
-    check.ts                  # alert checker (run by mkt-check.timer)
-    store.ts                  # AlertJob store
-    mkt-alert.ts              # CLI to add/list/remove alert jobs
-~/mkt/                        # mkt source (stxkxs/mkt@0207dda)
-~/.local/bin/mkt              # compiled binary
-~/.mkt.env                    # secrets (TELEGRAM_BOT_TOKEN, etc.)
-```
-
----
-
-## Deploy / Redeploy
+| `GET /quotes/{sym}` | Single symbol (e.g. `/quotes/BTC-USD`) |
+| `GET /alerts` | Current mkt-native alert rules |
 
 ```bash
-bash infra/mkt-daemon/deploy.sh
+curl https://mkt.agentlabs.cc/metrics
+curl https://mkt.agentlabs.cc/quotes/BTC-USD
 ```
-
-Script is idempotent — skips already-created resources.  
-Source: `infra/mkt-daemon/deploy.sh`
 
 ---
 
-## Alert jobs
+## Managing alerts (add / list / remove)
 
-Stored in `~/.config/mkt/agent-alerts.json` on the VM (and locally in `.cache/mkt/agent-alerts.json`).  
-To sync local jobs to VM:
+Alert jobs live in `~/.config/mkt/agent-alerts.json` on the VM.  
+Use `mkt-alert.ts` from the agents repo:
 
 ```bash
-gcloud compute scp .cache/mkt/agent-alerts.json mkt-daemon:~/.config/mkt/agent-alerts.json \
+# SSH and run directly
+gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte \
+  --command="cd ~/agents/.agents/skills/mkt/scripts && bun mkt-alert.ts list"
+
+# Add alert
+gcloud compute ssh mkt-daemon ... \
+  --command="cd ~/agents/.agents/skills/mkt/scripts && \
+    bun mkt-alert.ts add \
+      --symbol BTC-USD \
+      --condition below \
+      --threshold 90000 \
+      --channel telegram-bot:@CryptoAiInvestor \
+      --reasoning 'Support break — exit signal'"
+
+# Remove alert by ID
+gcloud compute ssh mkt-daemon ... \
+  --command="cd ~/agents/.agents/skills/mkt/scripts && bun mkt-alert.ts remove <id>"
+
+# Sync local alert jobs → VM
+gcloud compute scp .cache/mkt/agent-alerts.json \
+  mkt-daemon:~/.config/mkt/agent-alerts.json \
   --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte
 ```
 
-To add a new alert from the VM:
+---
+
+## Security
+
+- **No open ports on VM** — GCP firewall has no rules for 8080. Only cloudflared (outbound QUIC to CF edge).
+- **HTTPS only** — Cloudflare terminates TLS at edge; VM sees plain HTTP on loopback.
+- **No API auth** — acceptable for read-only metrics/quotes on a personal tool. Add `--listen-token` to `mkt-http.service` `ExecStart` if exposure grows.
+- **Secrets in env file** — `/home/engineer/.mkt.env` (mode 600). Not in systemd unit or repo.
+- **GH token for repo clone** — used once at deploy time, not stored on VM.
+
+---
+
+## Files on VM
+
+```
+~/.mkt.env                              secrets (600)
+~/.local/bin/mkt                        binary (stxkxs/mkt@0207dda)
+~/.local/src/mkt/                       source
+~/agents/                               financial-advisor-agents (git pull to update)
+  .agents/skills/mkt/scripts/check.ts   alert checker
+~/.config/mkt/agent-alerts.json        active alert jobs
+/etc/cloudflared/config.yml            tunnel ingress rules
+/etc/systemd/system/mkt-http.service
+/etc/systemd/system/mkt-check.service
+/etc/systemd/system/mkt-check.timer
+```
+
+---
+
+## Update / redeploy
+
 ```bash
+# Pull latest agents code
 gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte \
-  --command="cd ~/agents/.agents/skills/mkt/scripts && bun mkt-alert.ts add --symbol BTC-USD ..."
+  --command="cd ~/agents && git pull && sudo systemctl restart mkt-http"
+
+# Full redeploy from scratch
+bash infra/mkt-daemon/deploy.sh
 ```
