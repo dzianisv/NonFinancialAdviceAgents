@@ -1,20 +1,23 @@
 ---
 name: investor-lyn-alden
-description: Analyze any macro, market, or asset question through Lyn Alden's investment framework — fiscal dominance, currency debasement, the long-term debt cycle, broad-money inflation, the eurodollar system, energy/EROI, Bitcoin-as-hurdle, and scarce-asset portfolio construction. Use when the user asks "what would Lyn Alden think", "apply the Lyn Alden / macro lens", "is this fiscal dominance / debasement / a liquidity-driven move", invokes her concepts (nothing stops this train, broad money, eurodollar short squeeze, price it in BTC, bond bubble, area under the curve), or wants a macro-grounded view on inflation, rates, the dollar, gold, Bitcoin/crypto, energy, equity valuation (CAPE), or how to position a portfolio for debasement. Distilled from ~100 lynalden.com articles + her monthly newsletters (references/). Educational, not advice; her views are a lens, not gospel — she can be and has been wrong.
+description: Analyze any macro, market, or asset question through Lyn Alden's investment framework — fiscal dominance, currency debasement, the long-term debt cycle, broad-money inflation, the eurodollar system, energy/EROI, Bitcoin-as-hurdle, and scarce-asset portfolio construction. Use when the user asks "what would Lyn Alden think", "apply the Lyn Alden / macro lens", "is this fiscal dominance / debasement / a liquidity-driven move", invokes her concepts (nothing stops this train, broad money, eurodollar short squeeze, price it in BTC, bond bubble, area under the curve), or wants a macro-grounded view on inflation, rates, the dollar, gold, Bitcoin/crypto, energy, equity valuation (CAPE), or how to position a portfolio for debasement. Grounded in a full archive of her writing (kb/, 76 articles), distilled theme files (references/), and live feeds for her current views — recent X tweets/reposts, Nostr notes, and blog posts (scripts/current_context.ts). Educational, not advice; her views are a lens, not gospel — she can be and has been wrong.
 license: MIT
 compatibility: opencode
 metadata:
   audience: macro-investors
   domain: macro-and-asset-strategy
   role: macro-analyst-lens
-  source: lynalden.com (distilled 2026-06-07)
+  source: lynalden.com — references/ distilled 2026-06-07; kb/ full archive (76 articles) + live X/Nostr/blog feeds added 2026-06-29
 ---
 
 # Analytics: The Lyn Alden Lens
 
-Apply Lyn Alden's macro framework to a question. This skill is the **synthesis + router**; the
-detailed reasoning lives in `references/` (one file per theme). Load the relevant reference before
-making a substantive claim in that area — don't reason from this summary alone for anything load-bearing.
+Apply Lyn Alden's macro framework to a question. This skill is the **synthesis + router**: the
+distilled reasoning lives in `references/` (one file per theme), the full article archive in `kb/`
+(76 articles, full text), and her **current views** come from live feeds via
+`scripts/current_context.ts`. Load the relevant reference (or a `kb/` article for a primary source)
+before making a load-bearing claim — don't reason from this summary alone. For anything
+tactical/current, pull the live feeds first.
 
 ## The unifying worldview (everything connects to this)
 
@@ -72,10 +75,48 @@ When asked to analyze something "through Lyn Alden's framework":
    US equity forward returns).
 4. **Give the debasement-aware conclusion AND her hedges.** She is probabilistic, not certain — always
    surface where she'd be wrong (the caveats section of each reference).
-5. **Separate durable framework from dated tactical view.** The evergreen articles are the framework;
-   the monthly newsletters are time-stamped opinions that decay — for "what does she think *now*",
-   read `references/10-newsletter-arc.md` and re-fetch the latest newsletter (don't quote a 2024 stance
-   as current).
+5. **Separate durable framework from dated tactical view.** The evergreen articles (`kb/`,
+   `references/`) are the framework; her newsletters and social posts are time-stamped opinions that
+   decay — for "what does she think *now*", run `scripts/current_context.ts` (live X/Nostr/blog) and
+   read `references/10-newsletter-arc.md`. Don't quote a 2024–2025 stance as current.
+
+## Current context — what she's saying *now* (live feeds)
+
+`references/` and `kb/` capture her **durable framework**. For anything tactical — "what does Alden
+think about X *right now*", current positioning, her latest macro read — pull her live output first,
+because her views update and a cached stance goes stale. Run the orchestrator (default: last 30 days):
+
+```bash
+bun .agents/skills/investor-lyn-alden/scripts/current_context.ts --days 30   # add --json for structured output
+```
+
+It returns a dated brief from three sources, each degrading to a loud `[UNAVAILABLE]` line so one
+dead source never blocks the others:
+
+| Source | Script | What it gives | Notes |
+|---|---|---|---|
+| Blog | `fetch_blog.ts` | public articles/newsletters (RSS) | live site WAF-blocks datacenter IPs → auto-falls back to the Internet Archive; the public feed is sparse (recent writing is members-only, announced on Nostr/X) |
+| X / Twitter | `fetch_x.ts` | recent tweets **and reposts** (@LynAldenContact) | keyless syndication endpoint; intermittently 429-rate-limited — just re-run |
+| Nostr | `fetch_nostr.ts` | recent notes **and reposts** (lyn@primal.net) | most reliable + freshest (often same-day); relay `wss://relay.primal.net` |
+
+Each fetcher also runs standalone with `--days N` (and `--json`); `fetch_blog.ts --full` additionally
+downloads article bodies.
+
+**Filter for macro signal.** Her Nostr/X feeds mix macro takes with personal/book posts — keep the
+monetary/market-relevant items (e.g. *"private debt bubble peaks are more disinflationary than people
+think… money-printing offsets debt destruction"*) and ignore the noise. When a live post states a
+current view, cite it with its date and link, and flag it as time-stamped.
+
+## Knowledge base — full archive (`kb/`)
+
+`kb/` holds the **full text of all 76 lynalden.com articles** (one `<slug>.md` per article with
+`title / url / date` front-matter), indexed in [`kb/INDEX.md`](kb/INDEX.md) (date-sorted, one-line
+summaries). It is the primary-source store; `references/01`–`10` are the **distilled themes** layered
+on top, and `references/article-index.md` is the curated topic map.
+
+- Quote or verify a load-bearing claim → open the specific `kb/<slug>.md` (full prose).
+- Want the framework / a theme overview → use `references/`.
+- Rebuild the archive after she publishes new pieces → `bun .agents/skills/investor-lyn-alden/scripts/build_kb.ts`.
 
 ## Routing table
 
@@ -90,7 +131,8 @@ When asked to analyze something "through Lyn Alden's framework":
 | Stock valuation, CAPE, DCF, buybacks, surviving a crash, bubbles | `08-equities-valuation.md` |
 | Asset allocation, gold sizing, bond/duration risk, rebalancing, contrarian | `09-asset-allocation-metals.md` |
 | What is money, money creation, Fed balance sheet, bearer assets | `01-monetary-system.md` |
-| "What does she think now", current positioning, view evolution | `10-newsletter-arc.md` |
+| "What does she think now", current positioning, view evolution | `10-newsletter-arc.md` **+ run `scripts/current_context.ts`** (live X/Nostr/blog) |
+| Verifying/quoting a specific claim with full primary text | `kb/<slug>.md` (see `kb/INDEX.md`) |
 
 ## Example
 
@@ -114,16 +156,16 @@ timing."
   mainstream/other views differ when it matters.
 - **She can be and has been wrong** (e.g. timing calls, the renewables piece she retracted). Don't
   launder her conviction into certainty; always carry the caveats.
-- **Newsletters decay.** Anything tactical/current must be re-grounded against the newest newsletter,
-  not a cached stance. Date every "current view" claim.
-- **Ground load-bearing claims** in a specific reference/article (via `article-index.md`), not this
-  summary. If a number can't be verified, say so.
+- **Newsletters decay.** Anything tactical/current must be re-grounded against her live feeds
+  (`scripts/current_context.ts`), not a cached stance. Date every "current view" claim.
+- **Ground load-bearing claims** in a specific source — a `kb/<slug>.md` article (full text) or a
+  `references/` theme file (via `article-index.md`), not this summary. If a number can't be verified, say so.
 - This skill **complements** `analyse-fundamental` (the valuation/backtest gate) and feeds
   `regime-detection` / `portfolio-construction`; it does not replace your own analysis or the backtest gate.
 
 ## Done when
 
 The analysis (1) names the monetary/macro regime, (2) is grounded in the right reference file(s) with
-a primary-source pointer for load-bearing claims, (3) frames the asset against the correct hurdle,
-(4) states the debasement-aware conclusion *and* her hedges, and (5) flags any current/tactical claim
-as time-stamped (re-checked against the latest newsletter).
+a primary-source pointer for load-bearing claims (`kb/` or `references/`), (3) frames the asset against
+the correct hurdle, (4) states the debasement-aware conclusion *and* her hedges, and (5) flags any
+current/tactical claim as time-stamped (re-checked via `scripts/current_context.ts`).

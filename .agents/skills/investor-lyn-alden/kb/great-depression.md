@@ -1,0 +1,141 @@
+---
+title: Why This is Unlike the Great Depression (Better &#038; Worse)
+url: https://www.lynalden.com/great-depression/
+date: 2020-03-27
+---
+
+# Why This is Unlike the Great Depression (Better &#038; Worse)
+
+**Originally published: March 2020*
+Many comparisons are being made between the current predicament that the United States and the rest of the world finds itself in, and the Great Depression of the 1930’s. This current time will certainly be a period that historians in the future will have a lot to write about, culturally, geopolitically, and economically.
+The fastest fall from all-time stock market highs into bear market territory on record, combined with a seven-figure burst of unemployment in one week and an expected Q2 GDP figure that may reach into the negative double digits, certainly seems like a depression. Global PMIs in multiple affected countries already fell off a cliff into depression-like levels as well.
+For example, here is Japan’s composite PMI:
+
+*Chart Source:**Trading Economics*
+And here is the U.S. weekly initial jobless claims number compared to over 50 years of history. It looks like a typo but is not:
+
+*Chart Source:**St. Louis Fed*
+Adding onto that, we’re likely in the “popping” phase, or at least the "letting the air out" phase, of the largest global debt bubble as a percentage of GDP in world history, which is a topic that few people are discussing, and is part of what made liquidity so horrendous in the markets over the past month. The economic impact of the virus, as bad as it is on its own, also laid bare the leverage that was already there.
+Here is the total debt, public and private, as a percentage of GDP in the United States:
+
+*Chart Source: St. Louis Fed*
+The leverage in the 2000’s crisis was generally pushed up to the banking and housing sector. When that unwound in 2007/2008, the leverage there was generally pushed up to the sovereign level, as the federal debt/GDP ratio quickly went from 60% to 100% in a handful of years. We’re now entering this 2020 recession with record or near-record leverage at the sovereign level, globally.
+Unfortunately, I can’t say it won’t be bad. I don’t have that kind of knowledge; it depends in part on how long it takes for the virus to be controlled with social distancing, seasonality, and vaccines. And then from there, it depends on how quickly the world economy, along with various fiscal and monetary stimulus, will be able to put the pieces back together again while leverage unwinds.
+However, I can say that there a few key things that are likely to be very *different* than the Great Depression this time around, and it’s important to factor those differences into investment expectations. We’re better and worse off in some ways than the Great Depression, but mainly just different. This also applies to how the U.S. will likely be different than what we’ve seen in Japan over the past few decades.
+The good news is that the bulk of the lost service sector jobs should be able to return very quickly once restaurants, hotels, and airlines are no longer under this lockdown. We have basically “pulled forward” a lot of the job losses that occur throughout a typical recession into the first few weeks of this recession. Even during deep recessions, restaurant traffic remains rather robust, so all they need is the all clear to get a big portion of that industry functioning again. Yum China (YUMC) already has most of its stores re-opened in China, as a leading indicator.
+Jobs in other sectors may take a lot longer, or not come back to the same level, however. The less economic half of U.S. shale oil production, for example, may be disrupted for the long run by Saudi Arabia and Russia’s decisions to try to take back some market share of global oil production. In many industries more broadly, capital investments are delayed, corporate deleveraging is happening, and companies will use this as a time to “get lean” and cut expenses to reduce the losses.
+In other words, many analysts are focused on the impacts of the virus itself, which should hopefully be quite temporary. However, the end to the cyclical business credit cycle and the secular sovereign debt cycle that the virus triggered are more lingering effects that the economy will need to sort through with time. Corporate leverage more broadly, and unprofitable investments in speculative growth (i.e. Uber and WeWork) more specifically, were maximized up to this peak, and now the market needs, yet again as it does in every business cycle, to re-adjust to a more normalized baseline of leverage and more prudent investment.
+## Difference 1) Inflation vs Deflation
+
+One of the common debates is whether all of this debt, counteracted by a tremendous monetary expansion by the Federal Reserve in response, will cause a deflationary bust or an inflationary problem.
+Fundamentally, evidence points to a period of deflation due to this global shutdown and demand destruction shock, likely followed in the coming years by rising inflation. If so, this would differ from the Great Depression’s period of several years of deflation. Let’s look at a key reason why.
+In the 1930’s, the U.S. dollar was backed by gold, with each dollar being worth about 1/20th of an ounce of gold. Plus, there was no FDIC insurance protecting customers’ money from bank failures.
+When the economy had a massive collapse, more than a third of banks went out of business. Physical currency in circulation remained relatively flat at $4 billion to $5 billion in total, but the broad money supply (which includes currency plus checking and savings accounts) fell by about 30%. In 1929, the broad money supply in the United States was nearly $47 billion, and it fell to a little over $32 billion by 1933.
+
+*Data Source:**San Jose State University Department of Economics*
+So, people and businesses had their money destroyed by nearly a third. The economic and monetary situations kept spiraling down and down, with lower GDP and less money, bottoming in 1933.
+In addition, during the lead up to the Great Depression, the United States built up a lot of debt relative to GDP. And when the economy fell into recession and depression starting in 1929, GDP fell and debts still piled up, so debt-to-GDP hit a high of about 300% by 1933.
+
+This is why it was a deflationary depression. Prices of everything fell, GDP went down, money was destroyed, and debt as a percentage of GDP and as a percentage of money supply rose and rose. It created a doom loop; there was no way to pay back that much debt when prices and wages kept falling and money vanished.
+So what happened in 1933 that turned the corner? How did debt as a percentage of GDP suddenly turn around and fall so quickly in the chart above? What made the money supply start growing again?
+In 1933, United States put forth an executive order saying that all citizens must turn in their gold for payment at the prevailing rate, other than jewelry, and they made it illegal to own gold in bulk for the next few decades. Once they collected a lot of gold, in early 1934 they redefined the dollar from about 1/20th of an ounce of gold to 1/35th an ounce of gold. In other words, they devalued the dollar by a little over 40% of its previous purchasing power.
+Then, they printed a ton of money, sent checks to some people, and funded big projects. More specifically, they started this spending in 1932, front-running their official currency devaluation of 1933/1934. A few years later, they put that newly-collected gold in the (then newly-built) bullion vault of Fort Knox.
+This chart shows the U.S. monetary base going back over a century in log form, which provides clarity to an otherwise exponential chart that would make past data look vanishingly small:
+
+*Chart Source: St. Louis Fed*
+The monetary base grew exponentially over the long run, but the Great Depression and the Great Recession are the two periods that stand out even on a log chart, where the monetary base grew extremely rapidly, increasing many times over within a handful of years.
+However, it took about 3 years for them to do it from late 1929 to 1933. There was a sizable lag. So, they had a few years of a deflationary doom loop, until they decided to just devalue currency and print more of it.
+The stock market jumped substantially when they eventually did that. Stock prices hit deep bottoms in 1932 and again in 1933, and then rebounded sharply, not to all-time highs, but to levels 60%+ over the bottoms in a matter of months, and then chopped sideways for a long time. Prices of many things quickly re-aligned upwards against a weaker dollar. A period of inflation returned.
+And yet debts were fixed; their bonds and contracts were defined as being owed a number of dollars, whether private debt or public debt. So, debts were paid back in devalued dollars, and debt as a percentage of GDP decreased. Creditors were basically defaulted on in real purchasing power terms, but paid back in nominal face value terms.
+They expanded the monetary base significantly for years, but then slumped into the 1937 recession. That started the next exponential leg up in the monetary base during the second recession, and that rapid monetary expansion didn’t stop until a few years after World War II.
+We’re in a similar situation today. Our first big monetary base expansion went from 2008-2014, which mirrored the 1932-onward monetary expansion. Then we flatlined for a few years from 2014-2019, and began expanding it in late 2019, with an acceleration due to the COVID-19 impact in 2020. This period mirrors the 1937 moment; the next exponential leg up in the monetary base.
+There are common debates about how much governments and central banks should or should not intervene to get the private economy out of a slump. Should they debase their currency and default in real terms without defaulting nominally, or allow major nominal debt defaults across the economy, even at the sovereign level, and then rebuild from there?
+From a strictly investment research perspective, I tend to be interested not in what they “should” do, but in what history shows they almost always actually do. And that’s the first option- regimes almost always choose to devalue their currency and reset debt in real terms, rather than nominally let things collapse to start over, especially when the debt problem gets up to the sovereign level.
+**The Cavalry’s Response Time**
+How can investors know what the timing will be for monetary debasement and intervention? After all, if it took several years to happen in the 1930’s (from 1929 to 1932/1933, with a multi-year deflationary doom loop in the middle), why wouldn’t that type of multi-year delay happen again?
+The main answer to that question relates to sovereign debt solvency.
+Private debt (and consequently total debt) as a percentage of GDP was very high in the 1930’s, but one thing that they had going for them was that federal government debt (sovereign) as a percentage of GDP was quite low:
+
+*Chart Source:**CBO*
+The one thing that regimes will almost never let default at face value in their own currencies, is sovereign debt. Emerging market sovereigns sometimes default on debt that is denominated in foreign currencies, like dollars. But countries rarely default, nominally at face value, in sovereign debt that they themselves can print. This is simply because it’s politically easier to print and unofficially default in purchasing power terms than to actually default nominally at face value terms. Especially for a major nation like the United States of America.
+The U.S. government was quite lean back during the Great Depression, and with low debt. So, their risk of nominal default was low without much intervention. They could go years without defaulting from diminished revenue, and without “printing” to buy their own debt. They spent years figuring out what to do with the rest of the economy during the depression, and changed administrations from Hoover to Roosevelt with different solutions.
+Fast-forward to 2020, we have a sovereign debt problem, with total federal government debt equal to over 100% of GDP (the chart above only shows the portion held by the public). This high level of sovereign debt relative to GDP is unlike the 1930’s.
+The only other time in history where we had this problem was during World War II. And what we did in World War II was that we capped treasury yields at 2.5%, let the inflation rate run up to over 10%, and thus inflated away that debt as a percentage of GDP. When a sovereign hits debt levels of over 100% of GDP, there’s almost no mathematical way to service that debt in real terms. They either default or print. Usually, they print.
+So, we find ourselves more in a 1940’s situation than a 1930’s situation. Except instead of World War II, we have COVID-19.
+Normally during economic expansions, the U.S. government reduces its deficits, and then during recessions it increases its deficits to stimulate its way out of recessions. However, this time around, the U.S. government went into a crisis after an 11-year economic expansion with deficits expanding to $1 trillion per year and rising, to the tune of 5% of GDP at the top of the business cycle. We never cut down our deficit despite the supposed economic boom, and instead grew it during the peak of the business cycle. This is unprecedented outside of active warfare:
+
+*Chart Source: Goldman Sachs, Retrieved from CNBC*
+Fiscal stimulus this year, on top of the normal spending pattern, will be over $2 trillion. It remains to be seen if they will do more later this year; this might only be round one. And tax revenue will likely be lower this year, as fewer people work and corporations sell fewer products and services. So, the federal deficit will likely hit $3 trillion as a minimum, meaning 15% of GDP or more. If that’s correct, this would be the biggest annual deficit as a percentage of GDP since World War II, including far larger than the roughly 10% of GDP deficit that the U.S. ran at the heart of the 2008/2009 Great Recession.
+And who will buy the debt to fund that deficit? The U.S. Federal Reserve.
+The Fed went into this crisis with a balance sheet of approximately $4.5 trillion, never having normalized it after the 2008 crisis. They will likely need to monetize (print and buy) all of the net new U.S. Treasury debt issued this year. They are currently buying $75 billion per day of treasuries and $50 billion per day of mortgage-backed securities with an unlimited cap. This is $125 billion per business day, or about $2.5 trillion monthly if sustained at this rate. Next week they plan to reduce that a bit to $60 billion per day in treasuries and $40 billion in mortgage-backed securities, which comes out to $100 billion per day, or about $2.0 trillion monthly.
+They are also funding municipal bonds, corporate bonds, and providing repo loans.
+Here's the latest Federal Reserve balance sheet statement, as of last Wednesday for which official data is available:
+
+*Data Source: U.S. Federal Reserve*
+The Fed is trying to backstop everything- federal debt, corporate debt, and municipal debt. Because if things collapse, federal tax revenue collapses and federal expenditures increase, and that widening deficit needs to be bought, or it defaults up to the sovereign level. There were severe liquidity issues in the treasury market earlier this month as forced-selling hit all of Wall street and foreign holders.
+So, with FDIC insurance in place and along with an awareness of history and a sovereign debt bubble, this time around, broad money supply will not decrease by a third as it did during the Great Depression, and instead will continue to increase.
+Here is an updated chart that shows the value of the U.S. stock market, the U.S. GDP, and U.S. broad money supply:
+
+*Chart Source: St. Louis Fed*
+Broad money supply will continue up and to the right, by decree. The GDP will likely experience a deep dip, and then nominally increase up and to the right eventually. The stock market will have a bumpier time, and its precise path is uncertain, but it won’t be nominally as bad as it would be if the broad money supply were to *decrease* by 30% over the next few years rather than continue to increase.
+Since the inception of the Dow Jones Industrial Average, most investors measure it in dollar terms. It used to be under 100, and now is in the ballpark of 20,000. Here is the century chart, not counting dividends:
+
+*Chart Source: Macrotrends*
+However, it’s important to keep in mind what the denominator is: dollars. When the Dow was created, a dollar was worth about 1/20th of an ounce of gold. The dollar was later redefined to 1/35th of an ounce of gold. Then, the dollar was decoupled from gold entirely, and is now worth less than 1/1600th of an ounce of gold. The Dow, therefore, is measured by a unit of value that itself is depreciating in value.
+If we keep it consistent, and look at the Dow priced in gold over that century, it looks a lot less exponential:
+
+*Chart Source: Macrotrends*
+Stocks outperform gold by a lot over the multi-decade long term when dividends are included and reinvested. But, over several years or up to a few decades at a time, gold outperforms the Dow from tops of the cycle, when the Dow is overvalued and overbought.
+From the first peak in 1929, it took the Dow until 1959 (30 years) to reach a new high as priced in gold.
+From the second peak in 1965, it took the Dow until 1997 (32 years) to reach a new high as priced in gold.
+From the third peak in 1999, The Dow still hasn’t reached a new as high priced in gold, over 20 years later.
+The most recent local peak for the Dow-to-gold ratio was in September 2018, and we’ve been lower since then.  There is a good chance in my view that we’ll see a Dow-to-gold ratio of below 10x before we see a new high.
+Over the next several years, here are two similarities and differences I see vs the Great Depression for stock prices, given the massive amount of debt offset by the definition of what money is.
+
+Stocks will likely do better, as priced in dollars, than they did during the Great Depression. They likely won’t fall to the same depths, or take as long to hit new nominal highs, as priced in increasingly devalued units of measurement.
+Stocks may however do similarly poor, as priced in gold, as they did during the Great Depression. They will likely fail to reach new highs at any time in the near future, as priced in hard money.
+
+From a multi-year perspective going forward, I like stocks over bonds, but I like gold and silver over stocks. Is that bullish or bearish? I’ll let the reader decide.
+## Difference 2) Creditor Nation vs Debtor Nation
+
+The previous section covered why a multi-year deflationary cycle is unlikely. As a recap, the government and central bank mathematically can’t allow that scenario due to sovereign debt issues today that didn’t’ exist in the 1930’s, and broad money is unlikely to be destroyed on a nominal basis due to changes in banking, and instead will grow due to all of the monetary expansion by central banks.
+However, there is another key difference between now and then, and this time the comparison is unfavorable.
+After World War I, the United States became the world’s largest creditor nation. Britain, France, and other nations owed us for our financing of the war effort in Europe. We had the most positive net international investment position in the world, meaning that we owned more foreign assets than foreigners owned of our assets.
+We kept this creditor status for quite a while, including through the Great Depression. That was another thing that buffered us from collapse, along with low government debt. We still had streams of interest and monies flowing to us from abroad. We eventually lost that status in the 1980's, and it has worsened since then.
+**Japan's Creditor Status Example**
+I often see commentators refer to the “Japanification” of the United States in the coming years, meaning that we may be gearing up for a long malaise of zero interest rates, tons of disinflation, and sluggish growth.
+Afterall, Japan “printed” a comically large amount of money to buy government debt and other assets, including stocks, and yet has had constantly low inflation. People also tend to point out that Japan’s stock market is currently below where it was over 30 years ago when it peaked.
+However, timing is important to note. The balance sheet of the Bank of Japan started growing at an enormous rate in Q4 2012, and is now over 100% the size of Japan’s GDP. That is when they began really printing money to buy bonds and other assets at an extremely large scale:
+
+*Chart Source: Trading Economics*
+That quarter, Q4 2012, is also when their stock market hit a big local bottom and then sharply rose:
+
+*Chart Source: Google Finance*
+However, it’s not as though the Nikkei gained a lot of purchasing power. Because at that same time, the yen devalued rapidly vs the dollar (and many other currencies):
+
+*Chart Source: XE*
+So, Japan’s huge expansion of their balance sheet devalued the yen, and pushed up stock prices in terms of those less valuable yen.
+In other words, central authorities can indeed “print” their way to higher stock markets, as measured in currency units that are less valuable. They can’t create purchasing power out of nothing, but they can divide that purchasing power into more units, and thus increase the stock market in terms of the number of those units.
+And yet, inflation in Japan has been elusive for decades; barely even positive. This is likely the case for a few reasons.
+One reason is that commodity explorations reached a massive peak in 2011, so for several years countries around the world have been able to source cheap commodities due to prior years’ worth of over-investment. Japan is a major importer of commodities, as they have very little in the way of domestic sources for them. Cheap commodities, all else being equal, generally keep inflation low.
+A second reason is that in today's financialized environment, inflation finds its way more into financial assets than in daily consumer purchases. Technology and outsourcing continue to drive down the cost of consumer goods, but Japan's urban real estate remains among the most expensive in the world.
+A third reason is due to Japan's elderly demographics, and the fact that their fiscal approach has not been reckless. They haven't done helicopter money or any of the more intense printing schemes that countries can do.
+However, another main reason is likely Japan’s creditor nation status. Much like how the United Stated was the world’s largest creditor nation after World War I, Japan has been the world’s largest creditor nation for the past few decades.
+After years and years of current account surpluses, Japan’s net international investment position is around +60% of their GDP, meaning they own a ton more foreign assets than foreigners own of their assets. Dividends and interest from abroad flow into Japan each year on net from their investments around the world.
+So, due to hard work for several decades through the 1980’s, they built up a giant stockpile, and have been able to live off of that investment for decades since then.
+**The United States' Debtor Status**
+The United States is in no such shape. After becoming the world’s largest creditor nation after World War I, we gradually lost that honor after many years of current account deficits, and by 1985 we were a debtor nation. This means that foreigners own more of our assets than we own of their assets. They own more of our sovereign debt, corporate debt, stocks, and real estate, than we own of their sovereign debt, corporate debt, stocks, and real estate. Specifically, they own $39 trillion of our assets and we own $28 trillion of their assets, for a negative position of about $11 trillion, according to the U.S. BEA.
+During the 2008 recession, our net international investment position was -10% of U.S. GDP, which is fairly small. It continued to worsen since then, and is now more than -50% of GDP. We are entering a recession as the world’s largest debtor nation. We’ve never entered a recession with a net international investment position at this negative of a level relative to GDP. Not in the Great Depression, and not in the Great Recession.
+
+*Chart Source: St. Louis Fed*
+So, when analysts propose that the risk is that the United States will face “Japanification”, I find that to be optimistic, even though they normally mean it in a negative way. Most economic analysis does not take into account this metric, as it's a long-term secular backdrop rather than a cyclical thing that comes up every few years.
+The United States does not have the decades of surplus that Japan had when they entered their demographic malaise from the 1990’s to the present. The United States will not be retiring into a demographically-aged economic slump and draw from our foreign investments. Instead, we have a deficit, not just fiscally but also in terms of trade and ownership. We are entering this debt bubble while owing foreigners more than they owe us.
+Many people ask, “why is the U.S. government debt to GDP a problem at over 100%, when Japan’s is even higher? Why can’t our bonds go zero/negative for decades like Japan?” And the key answer, the key difference, is that we don’t have the privilege of being a creditor nation like Japan.
+We are a debtor nation, not a creditor nation. More interest and dividends leave our country each year, than enter it. We are reliant on borrowing from foreign nations, both allies and even antagonists, more so than we lend to foreign nations. Foreigners own more of our assets than we own of foreign assets. Creditor nations can more easily face deflation; debtor nations more often face inflation.
+In the coming years, the United States will be effectively printing money to fund large fiscal deficits, while also having a large current account deficit and negative net international investment position. This is one of the main variables for my view that the dollar will likely decrease in value relative to a basket of foreign currencies in the coming years, which may then help the U.S. close the investment gap.
+## Summary Conclusions
+
+The Great Depression in the 1930’s was a long deflationary economic downturn with an unwinding of a large debt bubble, and the United States was the largest creditor nation in the world at that time. The depression encompassed an early 1930’s recession, and then a late 1930’s recession, and then a massive fiscal funding effort for World War II with belt-tightening at home. Wealth concentration reached an extreme level during the early phases of it, and populism began to rise in the political scene.
+In this era, we suddenly face a similar scenario. The Great Recession in 2008 was a massive downturn with total debts as a percentage of GDP at all time highs, and over a decade later, many people have not recovered. Wealth concentration hit an extreme level only matched by 1929, and populism is on the rise again. This time, we're the world's largest debtor nation. We now find ourselves in a likely second recession in 2020, along with a massive fiscal funding effort to counteract the negative effects of COVID-19 on the economy.
+As I’ve said before, separating nominal return expectations from real return expectations is likely going to be important over the next decade, as inflation may return in earnest in the years following this deflationary shock.
+Gold and silver remain attractive assets in my view for portfolio diversification. High-quality foreign companies, as well as U.S. domestic companies with high returns on invested capital and strong balance sheets, also continue to be attractive assets to own within the framework of a diversified portfolio.*Tweet[**Share](https://www.linkedin.com/cws/share?url=https%3A%2F%2Fwww.lynalden.com%2Fgreat-depression%2F)[**Share](https://www.facebook.com/share.php?u=https%3A%2F%2Fwww.lynalden.com%2Fgreat-depression%2F)
