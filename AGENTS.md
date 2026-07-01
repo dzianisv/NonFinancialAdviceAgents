@@ -202,6 +202,7 @@ Follow https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/
 3. **Hard caps in deterministic code** — size, drawdown, per-trade loss, leverage. Outside the LLM.
 4. **Honest reporting** — net-of-cost, drawdowns shown, "no edge found" is valid.
 5. **Separate ledgers** — tradfi $1M vs crypto ~$177k. Never conflate.
+6. **Skeptic gate before presenting analysis** — Before presenting any response that contains price levels (support, resistance, entry zones, targets), protocol mechanics (fee switch, buyback, revenue), or macro claims (ETF flows, news events), invoke the `skeptic` skill. The response is only presented after SKEPTIC returns PASS or all challenges are resolved with fetched data. This is not optional — an unverified claim presented to the user is as bad as a hallucinated order. The `skeptic` is a subagent spawn, not a self-check.
 
 ## Workflow runtime (OpenCode vs Claude Code)
 
