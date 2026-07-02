@@ -63,6 +63,7 @@ gcloud compute ssh mkt-daemon \
 | `cloudflared.service` | `cloudflared tunnel run --token ...` | Tunnel to Cloudflare edge |
 | `mkt-http.service` | `mkt --listen :8080 daemon` | Price engine + HTTP API |
 | `mkt-check.timer` | `bun run check.ts` every 5 min | Evaluate alerts, send notifications |
+| `intraday-bot.service` | `/opt/intraday-bot/.venv/bin/python3 bot/runner.py --config bot/config.yaml` | Shadow forward-test, notify mode — see [intraday-bot section](#intraday-bot-shadow-notify-mode) |
 
 Env/secrets: `/home/engineer/.mkt.env` (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID).
 
@@ -165,3 +166,64 @@ gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts -
 # Full redeploy from scratch
 bash infra/mkt-daemon/deploy.sh
 ```
+
+---
+
+## intraday-bot (shadow, notify mode)
+
+**IMPORTANT: this strategy FAILED its backtest gate.** It runs here ONLY as a forward
+shadow/paper-free test — it fetches public market data, computes a signal, and LOGS a
+proposed order to a local jsonl file. It holds no broker credentials and never contacts
+a broker API. It must never be flipped to `mode: paper` or `mode: live` without a fresh
+gate PASS and explicit human sign-off.
+
+It shares the `mkt-daemon` VM (see [VM](#vm) above) but is a fully separate systemd unit,
+separate service user, separate deploy path. It does not touch `cloudflared`, `mkt-http`,
+`mkt-daemon`, `mkt-api`, or any of their config/timers.
+
+| Field | Value |
+|---|---|
+| Unit | `intraday-bot.service` |
+| Service user | `intraday-bot` (dedicated, `nologin` shell, least-privilege) |
+| Deploy path | `/opt/intraday-bot` (`connectors/` and `intraday-bot/` as siblings — required by `bot/caps.py` / `bot/executor.py` path resolution) |
+| Venv | `/opt/intraday-bot/.venv` |
+| Mode | `notify` (market-data read + local log only, no broker calls) |
+| Strategy | `regime_sma_maker`, `sma_window: 50`, symbols `[BTC/USD]` only |
+| Cadence | `interval: 1d`, `poll_seconds: 3600` |
+| Kill switch | `/opt/intraday-bot/intraday-bot/.KILL` (any file at that path — content ignored) |
+| Drop-in | `/etc/systemd/system/intraday-bot.service.d/10-unbuffered.conf` sets `PYTHONUNBUFFERED=1` so cycle output reaches journalctl in real time (added post-`setup_gcp.sh`; recreate it on any redeploy) |
+
+**ETH-dropped caveat:** `regime_sma_maker` reads `strategy_params` globally (one
+`sma_window` applied to every symbol in the run), it does not support per-symbol
+params. BTC's gate-selected/June-tested window is 50; ETH would need a different
+window and can't coexist in the same config. ETH/USD was dropped from `symbols:`
+rather than run it under BTC's window.
+
+```bash
+gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte \
+  --command="journalctl -u intraday-bot -f"
+```
+
+External IP is ephemeral (see [VM](#vm)) — always connect via `gcloud compute ssh`
+with `--configuration=bisonte`, never a hardcoded IP.
+
+Kill switch usage (halts the next cycle, does not affect `mkt-*` units):
+
+```bash
+gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte \
+  --command="sudo -u intraday-bot touch /opt/intraday-bot/intraday-bot/.KILL"
+
+# resume
+gcloud compute ssh mkt-daemon --zone=us-central1-a --project=mkt-daemon-alerts --configuration=bisonte \
+  --command="sudo rm /opt/intraday-bot/intraday-bot/.KILL"
+```
+
+State/audit trail (both notify-only, no orders sent anywhere):
+
+```
+/opt/intraday-bot/intraday-bot/bot/state/cycles.jsonl   # every cycle's signal + status
+/opt/intraday-bot/connectors/audit_log.jsonl            # only written when an order is proposed
+```
+
+Full deploy details: `intraday-bot/deploy/README-DEPLOY.md` and
+`intraday-bot/deploy/setup_gcp.sh` in the backtest repo.

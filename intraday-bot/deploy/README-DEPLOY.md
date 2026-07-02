@@ -83,6 +83,14 @@ idempotent replay (see `bot/state_store.py`). Back this up or ship it off-instan
 periodically if you care about historical audit continuity; it is not required for
 correctness (the runner reconstructs current state by replaying it on every boot).
 
+## Deployed instances
+
+A live shadow (mode=notify) instance is running on the `mkt-daemon` GCP VM, alongside
+the unrelated production `mkt` daemon service. Canonical operational doc — unit name,
+SSH command, log tailing, kill switch, ETH-dropped caveat — lives in
+[`docs/infra.md`](../../docs/infra.md), section "intraday-bot (shadow, notify mode)".
+Do not stand up a second instance without checking there first.
+
 ## What this deploy does NOT do
 
 - Does not create a GCP project, VM, or firewall rule — provisioning the actual instance
