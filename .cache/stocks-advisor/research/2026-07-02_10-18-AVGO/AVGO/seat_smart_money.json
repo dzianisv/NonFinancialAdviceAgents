@@ -1,0 +1,18 @@
+{
+  "seat": "smart_money",
+  "ticker": "AVGO",
+  "verdict": "DISTRIBUTING",
+  "conviction": "HIGH",
+  "one_line": "Heavy insider selling into strength ($620M sold vs $1.93M bought over 12mo, incl. Samueli ~$250-720M in June 2026) swamps a single token $374k director buy — no evidence of buying into the post-earnings drop.",
+  "citations": [
+    {
+      "url": "https://finviz.com/quote.ashx?t=AVGO",
+      "fact": "June 2026 insider sells: Justine Page (Director) 1,602 sh @ $373.86 (6/29); Henry Samueli (Director/co-founder) 654,241 sh @ $382.13 (6/24), plus affiliated Samueli entities/foundations filing proposed sales totaling ~$400M more (~$720M combined); Mark Brazeal (Chief Legal Officer) ~8,152 sh across 6/17-18 at $381-394; Kirsten Spears (CFO) 2,048 sh @ $381.97 (6/16). Only buy: Harry L. You (Director) 1,000 sh @ $373.57 (6/11)."
+    },
+    {
+      "url": "https://www.marketbeat.com/stocks/NASDAQ/AVGO/insider-trades/",
+      "fact": "Trailing 12 months: 8 insiders selling totaling $620.17M vs 1 insider buying totaling $1.93M (Harry L. You, 1,000 sh @ $373.57 on 6/11/2026); insider ownership 1.90%. Confirms Brazeal sold 4,825 sh @ $394.91 (6/17) and 3,327 sh @ $381.87 (6/16); Page sold 1,602 sh @ $373.86 (6/29)."
+    }
+  ],
+  "notes": "13f.info fetches (search page + a guessed filing URL) did not yield usable Q1/Q2 2026 fund-level 13F add/trim data this run, so the prior memory claim of 'broad new-buy consensus on AVGO in Q1'26' could not be confirmed or refuted with a fetched source and is NOT relied upon here. Verdict rests solely on Form 4 insider activity from finviz + marketbeat, both independently showing the same June 2026 selling cluster."
+}

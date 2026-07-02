@@ -1,0 +1,15 @@
+{
+  "seat": "technical",
+  "ticker": "AVGO",
+  "verdict": "SETUP_NAMED",
+  "setup_name": "200d MA test after blowoff-top distribution — corrective pullback inside a still-intact 2yr uptrend, but short-term momentum is broken",
+  "entry_low": 341,
+  "entry_high": 360,
+  "trigger": "Daily close back above 365 (reclaims today's breakdown range) after price has held the 341-360 zone (weekly EMA52 to 200d MA) for 2+ sessions without a weekly close under 341",
+  "stop": 336,
+  "stop_basis": "Small buffer below weekly EMA52(W) 341.36 — a weekly close under 341 breaks the 2-year trend line that has held the entire +110% advance",
+  "target": 408.85,
+  "risk_reward": "~4:1 (from mid-zone ~350: risk ~14 to 336, reward ~59 to 50d MA/gap-fill 408.85)",
+  "add_zone_grade": "Support-backed, not mid-air: 350-360 sits exactly on the confluence of the 200d MA (360.19) and just above the weekly EMA52 (341.36), the two structural floors of the 2-year uptrend. But it is not a clean trend retest — a blowoff top 4 weeks ago (weekly high 495 to close 385.73 on record 251M-share volume) plus a failed bounce to 411-414 and a fresh weekly MACD bearish cross say distribution, not accumulation. Grade: valid support zone to scale into, not to lump-sum into — require the >365 reclaim before adding size, and treat a weekly close below 341 as a stop-out of the whole thesis.",
+  "one_line": "AVGO is hitting real structural support (200d MA 360 / weekly EMA52 341) after a blowoff-top reversal and failed bounce — trend intact, momentum not: scale into 341-360, confirm over 365, abandon on a weekly close below 341."
+}

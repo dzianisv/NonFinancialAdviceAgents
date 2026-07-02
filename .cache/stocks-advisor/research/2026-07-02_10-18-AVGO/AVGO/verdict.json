@@ -1,0 +1,17 @@
+{
+  "ticker": "AVGO",
+  "decision": "SKIP (cancel the standing 'add 8-10sh at 350-360' plan; keep the 4-share IBKR stub)",
+  "conviction": 1,
+  "scorecard_action": "HOLD (no add) — deterministic",
+  "edge": "ANALYTICAL/TIMING claimed pre-panel (quality de-rated to the 200d) — did NOT survive the Skeptic: PEG story and moat story rest on the same unverified $100B FY27 guidance figure",
+  "entry_zone": "n/a — price-only triggers disqualified by this review",
+  "reopen_conditions": [
+    "insider OPEN-MARKET buy cluster (Form 4, code P) in the 341-360 zone",
+    "daily close >365 held 2+ sessions AND no insider distribution in prior 4 weeks -> scaled add, stop weekly close <341, target 408.85",
+    "earnings: AI guide RAISED above $17.2B street AND backlog quantified as signed/contracted"
+  ],
+  "invalidation": ["weekly close < 341 (weekly EMA52) = drop from watchlist entirely", "second hyperscaler defection beyond Google->MediaTek = hard avoid"],
+  "dissent": "Technical seat: disciplined scale-zone (341-360 confluence, ~4:1 R:R) is sound and the position trivial — overruled by CROWDED-unflushed + insider distribution into the zone",
+  "risk_status": "N/A (no BUY)",
+  "seats": {"fundamental": "GOOD", "technical": "SETUP_NAMED (unconfirmed)", "narrative": "MID", "sentiment": "CROWDED (trapped, not flushed)", "smart_money": "DISTRIBUTING(HIGH)", "skeptic": "SKIP"}
+}
