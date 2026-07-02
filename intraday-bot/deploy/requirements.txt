@@ -1,0 +1,8 @@
+# intraday-bot/bot runner — minimal pinned-floor dependency set for the GCP deploy target.
+# Match versions installed in the dev venv (/Users/engineer/.venv) unless noted.
+pandas>=2.0
+numpy>=1.24
+requests>=2.30
+pyyaml>=6.0
+alpaca-py>=0.43
+ccxt>=4.5

@@ -1,0 +1,29 @@
+Loading candidate universe...
+  loaded 46 / 46 symbols; missing: []
+
+=== Look-ahead canary + shift-collapse check (first grid config) ===
+ canary: {'ok': True, 'note': 'signal at/before the corrupted bar must be unchanged by a same-bar spike'}
+ shift_check: {'ok': True, 'sharpe_base': np.float64(1.0108739543182568), 'sharpe_extra_shift': np.float64(0.7900842971566936), 'note': 'PASS: Sharpe stable under an extra bar of lag (no look-ahead signature)'}
+
+=== Running gate() over declared PARAM_GRID ===
+ verdict=FAIL (no edge found) elapsed=140.8s
+ best_params={'lookback_days': 28, 'top_n': 5}
+ reasons=['OOS Sharpe <= 0 net of costs', 'deflated Sharpe probability 0.00 < 0.95 threshold', 'edge dies under 2x fee stress', 'edge dies under 1-bar delayed-fill stress']
+
+=== N-sensitivity + drop-top-1 ablation (chosen config) ===
+  chosen: params={'lookback_days': 28, 'top_n': 5} sharpe=-0.5735347341142436
+  alt_top_n_3: params={'lookback_days': 28, 'top_n': 3} sharpe=-0.48992063138856323
+  drop_top1: params={'lookback_days': 28, 'top_n': 5, 'drop_top1': True} sharpe=-0.6774470458404108
+
+=== Maker-fill-model simulation (chosen config, OOS, all stress tiers) ===
+  [base] sharpe=-0.460809123080821 fill_rate=0.9964093357271095 skipped=2 adverse_drift=0.001166270792521983 maker_win_is_real=False
+  [stress_2x_fees] sharpe=-0.552799155669608 fill_rate=0.9964093357271095 skipped=2 adverse_drift=0.001166270792521983 maker_win_is_real=False
+  [stress_delay_1bar] sharpe=-0.08522296849209218 fill_rate=0.8665511265164645 skipped=77 adverse_drift=-0.0075852429178685865 maker_win_is_real=True
+  [stress_reduced_fill_prob] sharpe=-0.3820240984719061 fill_rate=0.830155979202773 skipped=98 adverse_drift=0.0013614165133771846 maker_win_is_real=False
+  [stress_worst_vol_slippage] sharpe=-0.4639013577663838 fill_rate=0.9964093357271095 skipped=2 adverse_drift=0.001166270792521983 maker_win_is_real=False
+
+=== Benchmarks (hold-BTC, equal-weight-hold-universe), same OOS window ===
+  hold_btc: 0.4087195048209184
+  equal_weight_hold_universe: -0.25975026033204546
+
+Wrote /Users/engineer/workspace/backtest/intraday-bot/results/xs_momentum.json

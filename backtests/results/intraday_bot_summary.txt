@@ -1,0 +1,147 @@
+intraday-bot gate cycle — 2026-07-01/02
+Full report: intraday-bot/RESULTS.md | Raw artifacts: intraday-bot/results/*.json
+Data: Binance Vision klines, 2020-01-01 -> 2026-07-01 (1d), 2022-01-01 -> 2026-07-01 (5m).
+Cost model: Alpaca Crypto maker 0.15%/side, taker 0.25%/side, $0.01 min-fee floor,
+forced/timeout exits always pay taker. Gate: core/gate.py (IS 2020-01-01..2023-12-31,
+OOS 2024-01-01..2026-07-01), deflated Sharpe (Bailey & Lopez de Prado 2014) required
+>=0.95 to PASS, plus 2x-fee and 1-bar-delayed-fill stress survival. Independently
+verified (subagent verify pass): all 3 reproduced bit-for-bit from committed code+data.
+2026-07-02 re-run: all artifacts regenerated after the June-2026 data backfill, the
+fill-sim P0 fix, and the core/universe.py delisting-staleness fix; all verdicts unchanged.
+
+=== regime_sma_maker (BTC/ETH > N-day SMA, long/flat trend-following) ===
+  Spec: long when prior close > SMA(N), N in {50,200} IS-tuned per symbol -> BTC N=50,
+  ETH N=200. Daily bars. Maker-fill sim (resting limit @ prior close, taker timeout exit).
+
+  OOS 2024-01-01..2026-07-01 (net of costs):
+    BTC (N=50)   Sharpe  0.576  CAGR  19.2%  DD -27.7%  win 27.4%  PF 1.15
+    ETH (N=200)  Sharpe  0.410  CAGR  13.3%  DD -38.9%  win 24.0%  PF 1.11
+  Fill-sim base tier (honest execution, same window):
+    BTC Sharpe 0.650  fill rate 100%   ETH Sharpe 0.428  fill rate 100%
+  STRESS (both tiers survive, both symbols):
+    2x fees:        BTC 0.392  ETH 0.366
+    1-bar delay:     BTC 0.521  ETH 0.371
+  Deflated Sharpe: dsr=0.00 (threshold 0.95) BOTH symbols. z=-14.78 (BTC) / -15.05 (ETH).
+    n_trials=2 (this run) or 5 (cumulative incl. 3 June variants: TSMOM N=30, SMA N=50,
+    REGIME-SMA(BTC>200d) N=50) -- verdict identical at either trial count, gap is an
+    order of magnitude not marginal.
+  Benchmark: hold-BTC OOS Sharpe 0.409/CAGR 12.9%/DD -53.0%. hold-ETH Sharpe 0.064/CAGR -14.2%.
+    regime_sma_maker beats both benchmarks on Sharpe+CAGR and roughly halves BTC's max DD.
+
+  GATE VERDICT: FAIL (no edge -- statistical significance only)
+    Sole binding reason: deflated Sharpe = 0.00 < 0.95. OOS Sharpe positive, survives
+    both stress tiers, real drawdown-control edge on BTC. This is a DSR/multiple-testing
+    fail, NOT a cost or fill fragility fail.
+  VERIFIER OVERRIDE NOTE: verifier confirmed the FAIL verdict (CONFIRMED_FAIL) but found
+    a P0 bug in the fill-sim script (scripts/run_regime_sma_maker_fillsim.py): the
+    simulated fill PRICE was never used in P&L (only fee/timing), proven by offset_5bp
+    tier producing byte-identical returns to base tier. The report's claim that "fill
+    economics were genuinely modeled bar-by-bar" was overstated -- only fill/no-fill
+    timing + fee-rate substitution was modeled, on top of close-to-close return math.
+    Did not flip the verdict (DSR fails regardless).
+  P0 FIX (2026-07-02): entry/exit bar P&L now computed from FillResult.fill_price vs the
+    adjacent mark-to-market point, not close-to-close. Base/2x-fees/worst-vol-slippage
+    tiers unchanged by the fix (fill_price == prior_close exactly on this signal's own-bar
+    fills). Offset_5bp now correctly differs from base (BTC 0.650->0.686, ETH 0.428->0.437,
+    proof of fix). 1-bar-delayed-fill tier now FAILS for both symbols (BTC 0.650->-0.023,
+    ETH 0.428->-0.012) -- most consequential change, previously masked. Reduced-fill-prob
+    stays positive but worse than reported (BTC 0.394->0.148, ETH 0.216->0.108). Gate
+    verdict (FAIL, DSR=0.00) unaffected -- uses the separate flat-cost gate stress numbers
+    (0.392/0.521 BTC, 0.366/0.371 ETH), not this fill-sim script's output.
+  DO NOT RE-TEST: further BTC>SMA / trend-following variants on BTC or ETH daily bars
+    without a materially different underlying signal -- each additional trial in this
+    family raises the DSR bar further (already 5 trials cumulative, 2 strategies-worth
+    of prior work: June's daytrade harness + this cycle). A fresh out-of-family symbol
+    set could count as new evidence; re-tuning N again will not.
+
+=== xs_momentum (cross-sectional crypto momentum, weekly rebalance, long-only) ===
+  Spec: top-N equal-weight by trailing K-day momentum, point-in-time top-30-by-volume
+  universe from 46 USDT-major coins (90d listing gate). K,N in {7,14,28}x{3,5} IS-tuned
+  -> K=28,N=5. Weekly rebalance Monday 00:00 UTC. Maker limit @ prior close, taker
+  fallback after 1-bar timeout.
+
+  OOS 2024-01-01..2026-07-01 (913 bars, net of costs):
+    Sharpe -0.574  CAGR -52.0%  DD -91.0%  win 47.0%  PF 0.93
+    Breakeven cost = -9,730bps (NEGATIVE -- loses money even at ZERO cost; gross edge
+    itself is negative, not a cost-model artifact).
+  IS (context only): Sharpe +1.77 CAGR +283% -- complete IS->OOS sign flip (overfitting).
+  STRESS (both fail):
+    2x fees:        Sharpe -0.723
+    1-bar delay:     Sharpe -0.505
+  Deflated Sharpe: dsr=0.00, z=-40.2, n_trials=6.
+  Benchmark: hold-BTC OOS Sharpe +0.41. Equal-weight-hold same 43-coin candidate universe
+    (no ranking) Sharpe -0.26. xs_momentum UNDERPERFORMS BOTH -- worse than naive
+    diversification of its own candidate pool, cleanest signal the ranking/selection step
+    destroys value, not just that costs are too high.
+
+  GATE VERDICT: FAIL (no edge)
+    Decisive on all 4 criteria: OOS Sharpe<=0, DSR<0.95, fails 2x-fee stress, fails
+    1-bar-delay stress. Gross (pre-cost) edge negative.
+  VERIFIER: CONFIRMED_FAIL, fully reproduced live from scratch (not cached), bit-for-bit
+    match on every headline number. Found 2 secondary defects (neither changes verdict):
+    (1) gate cost model is pure-taker throughout despite one doc line calling it
+    "maker/taker-blended" -- conservative-direction inaccuracy only;
+    (2) core/universe.py's point_in_time_universe() 30-day rolling-volume window did
+    NOT correctly zero out a coin's volume after delisting (stale mean persisted up to
+    ~15 days post-delisting, confirmed for SRMUSDT/COCOSUSDT) -- traced through and
+    confirmed this run's P&L was NOT contaminated (momentum's own pct_change/dropna
+    independently excludes delisted names). FIXED 2026-07-02 (membership now gated on
+    each symbol's last observed data date); this summary's numbers come from a re-run
+    that includes the fix.
+  DO NOT RE-TEST: lookback-return cross-sectional momentum on this coin universe/cadence
+    without a fundamentally different ranking signal. OOS Sharpe sits far below even the
+    flat-cost noise floor for 6 trials -- re-tuning K/N within this family will not clear
+    DSR.
+
+=== meanrev_maker (5-minute intraday mean-reversion, maker limit dip-buy) ===
+  Spec: BTC/ETH/SOL 5m bars 2022-01-01..2026-07-01. Buy maker limit when prior-bar
+  z-score <= -k vs rolling mean(lookback); exit maker limit at rolling mean, timeout ->
+  forced taker market exit; hard stop @ 2x entry deviation. $250/order, long-only.
+  27-config grid (lookback in {12,24,48} x k in {1.0,1.5,2.0} x timeout_bars in
+  {6,12,24}), stop_k fixed 2.0. IS-tuned only, maker cost model (0.15%/side legitimate
+  here per the strategy's own thesis).
+
+  OOS 2024-01-01..2026-07-01 (262,944 5m bars, net of maker costs):
+    Sharpe -10.30  CAGR -97.0%  DD -99.98%  win 16.3%  PF 0.83  rt/day 16.5
+    Breakeven cost = -14.3bps (loses money even at zero cost).
+  IS: best-of-27-configs Sharpe -9.33 -- EVERY grid config failed on IS. Not an
+    overfitting story; the whole strategy family is broken from the start.
+  STRESS (both catastrophically worse):
+    2x fees:        Sharpe -20.45  CAGR -99.9%
+    1-bar delay:     Sharpe -17.73  CAGR -99.8%
+  Deflated Sharpe: dsr=0.00, z=-1056.8 (n_trials=27) -- not remotely borderline.
+  Fill-model report (the one useful finding): maker entry mechanism itself works as
+    designed -- 97-99% fill rate, maker_win_is_real=True for all 3 symbols (20bp
+    maker-vs-taker savings > 0.4-0.9bp adverse drift after fill). The EXECUTION layer is
+    NOT the problem. Mean GROSS (pre-fee) return per round trip is already negative
+    (-10 to -17bp across BTC/ETH/SOL) -- the 5-minute mean-reversion signal itself has
+    negative expected value on these assets over 2022-2026. 59% of exits forced to
+    taker via timeout (price doesn't revert fast enough).
+  Benchmark: hold-BTC OOS CAGR +14.8%/Sharpe 0.45. meanrev_maker loses by ~112pp CAGR and
+    10.7 Sharpe points vs. doing nothing.
+
+  GATE VERDICT: FAIL (no edge, catastrophic)
+    All 4 criteria fail decisively. Root cause = genuinely unprofitable 5m mean-reversion
+    signal at this timeframe on these 3 assets, NOT an execution/fill-model artifact --
+    fill-sim vindicates the execution design while confirming the signal is dead.
+  VERIFIER: CONFIRMED_FAIL, byte-for-byte reproduced from a full from-scratch re-run
+    (4m10s, zero cache reuse), 0 differences across every nested metric in the JSON. Only
+    finding: trivial P2 rounding imprecision in one report summary sentence (walk-forward
+    window range stated as "-8.9 to -16.4", true range "-7.18 to -16.37" at the time;
+    post-June-backfill re-run: -7.18 to -13.53) -- no effect on verdict or any headline
+    number.
+  DO NOT RE-TEST: z-score/rolling-mean 5-minute mean-reversion on BTC/ETH/SOL. This
+    specific signal-timeframe combination is a closed line of inquiry. The maker
+    execution/fill design (trade-through-not-touch, timeout-to-taker) is validated and
+    worth REUSING for a different signal -- do not re-derive it from scratch next time.
+
+=== Cross-cycle takeaway ===
+3 strategies, 0 PASS. One (regime_sma_maker) is a real, reproducible, stress-surviving
+positive-Sharpe edge that fails purely on statistical-significance grounds (DSR) given
+current trial count and OOS sample size -- worth revisiting with fresh out-of-family
+evidence, not worth re-tuning further. The other two (xs_momentum, meanrev_maker) have
+genuinely negative gross edge, independently confirmed -- both are dead ends for their
+tested signal/timeframe/universe combination; do not re-test the same idea with different
+knobs. Nothing traded, nothing paper-traded, no capital allocated. Execution bot
+(intraday-bot/bot/) built and tested, defaults to notify mode (zero broker credentials),
+waiting on a PASS strategy before Alpaca paper trading begins.

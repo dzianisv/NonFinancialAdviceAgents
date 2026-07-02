@@ -1,0 +1,30 @@
+# intraday-bot live/paper runner config
+# NOTE: risk caps ($500 book: max order $250, max position $500, no shorts) are NOT
+# configurable here — they are hardcoded in bot/caps.py by house rule, outside any
+# config/LLM override. Setting any max_*/allow_shorts/kill_switch_file key here is a
+# hard ConfigError (see bot/config.py load_config()).
+
+mode: notify                 # notify (default, no creds touched) | paper | live
+
+strategy_key: dummy_flat      # must match intraday-bot/strategies/<key>.py's module name
+strategy_params:
+  target_weight: 0.5
+  lookback: 5
+
+symbols:
+  - BTC/USD
+  - ETH/USD                   # SOL is NOT tradable on Alpaca as of 2026-07 — see README-DEPLOY.md
+
+interval: 5m                  # bar interval for market data fetch + strategy signal
+lookback_bars: 300            # bars of history fetched each cycle to compute the signal
+poll_seconds: 300             # daemon loop cadence (should match interval)
+
+maker_offset_bps: 5.0         # post-only limit offset inside the touch (bps)
+fill_timeout_seconds: 300     # resting-limit timeout before escalating
+allow_timeout_escalation: true  # true = escalate unfilled limit to market at timeout (pays taker)
+
+state_dir: state              # relative to intraday-bot/bot/
+
+# smoke-test hooks (leave unset for normal daemon operation)
+max_loop_iterations: null
+dry_run_once: false

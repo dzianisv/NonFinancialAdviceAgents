@@ -35,6 +35,7 @@ VENUE_CREDS = {
     # env var that must be present for "live" on each venue (user supplies out-of-band)
     "robinhood": "ROBINHOOD_AGENT_CONNECTED",   # set after `claude mcp add robinhood-trading` + onboarding
     "coinbase-cdp": "CDP_API_KEY_JSON",          # path to the CDP API key json
+    "alpaca": "ALPACA_LIVE_KEY",                 # intraday-bot/bot/executor.py live-mode venue
 }
 
 

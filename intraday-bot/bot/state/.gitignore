@@ -1,0 +1,3 @@
+# Runtime order/position/cycle journal (append-only jsonl). Never commit real order
+# history — same convention as connectors/audit_log.jsonl at the repo root.
+*.jsonl
