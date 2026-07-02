@@ -63,7 +63,7 @@
     "verdict": "FAIL (no edge found)",
     "reasons": [
       "OOS Sharpe <= 0 net of costs",
-      "deflated Sharpe probability 0.00 < 0.95 threshold",
+      "deflated Sharpe probability 0.01 < 0.95 threshold",
       "edge dies under 2x fee stress",
       "edge dies under 1-bar delayed-fill stress"
     ],
@@ -758,9 +758,9 @@
       }
     ],
     "deflated_sharpe": {
-      "dsr": 0.0,
-      "expected_max_sharpe_noise": 1.3001407882345641,
-      "z": -40.16093297888474,
+      "dsr": 0.013698945969798704,
+      "expected_max_sharpe_noise": 0.0430386578655593,
+      "z": -2.2058016327023586,
       "n_trials": 6,
       "n_obs": 913
     },
@@ -867,7 +867,7 @@
       }
     }
   },
-  "gate_elapsed_sec": 140.84965991973877,
+  "gate_elapsed_sec": 134.38827896118164,
   "sensitivity": {
     "chosen": {
       "params": {
@@ -955,7 +955,7 @@
       "n_taker_timeout_fills": 5,
       "n_skipped_entries": 2,
       "skipped_entry_opportunity_mean_gross_ret": -0.011716996273682272,
-      "mean_adverse_drift": 0.001166270792521983,
+      "mean_adverse_drift": 0.0011662707925219834,
       "maker_saving_per_side_bps": 10.0,
       "maker_win_is_real": false,
       "total_fees_usd_per_leg_notional": 139.02499999999887,
@@ -985,7 +985,7 @@
       "n_taker_timeout_fills": 5,
       "n_skipped_entries": 2,
       "skipped_entry_opportunity_mean_gross_ret": -0.011716996273682272,
-      "mean_adverse_drift": 0.001166270792521983,
+      "mean_adverse_drift": 0.0011662707925219834,
       "maker_saving_per_side_bps": 10.0,
       "maker_win_is_real": false,
       "total_fees_usd_per_leg_notional": 278.04999999999774,
@@ -1014,7 +1014,7 @@
       "n_maker_fills": 437,
       "n_taker_timeout_fills": 63,
       "n_skipped_entries": 77,
-      "skipped_entry_opportunity_mean_gross_ret": 0.014373014779567587,
+      "skipped_entry_opportunity_mean_gross_ret": 0.014373014779567586,
       "mean_adverse_drift": -0.0075852429178685865,
       "maker_saving_per_side_bps": 10.0,
       "maker_win_is_real": true,
@@ -1075,7 +1075,7 @@
       "n_taker_timeout_fills": 5,
       "n_skipped_entries": 2,
       "skipped_entry_opportunity_mean_gross_ret": -0.011716996273682272,
-      "mean_adverse_drift": 0.001166270792521983,
+      "mean_adverse_drift": 0.0011662707925219834,
       "maker_saving_per_side_bps": 10.0,
       "maker_win_is_real": false,
       "total_fees_usd_per_leg_notional": 139.02499999999887,

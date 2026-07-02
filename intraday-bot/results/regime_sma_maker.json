@@ -19,7 +19,7 @@
       "REGIME-SMA(BTC>200d) N=50"
     ],
     "cumulative_family_n_trials": 5,
-    "note": "DSR verdict is identical (dsr=0.0, FAIL) whether n_trials=2 (this run only) or n_trials=5 (cumulative family) -- the observed OOS Sharpe is far below the threshold the deflated-Sharpe formula requires at either trial count, so the n_trials choice is not the deciding factor here."
+    "note": "P0 #2 fix (2026-07-02): deflated_sharpe_ratio() previously defaulted its noise-Sharpe variance to 1.0 (an annualized-equivalent unit) while sharpe_hat is per-bar, manufacturing spurious |z|~sqrt(n_obs) rejections (BTC z=-14.78, ETH z=-15.05, dsr=0.00 both). Corrected to the moment-adjusted per-bar null variance: BTC z=0.401 dsr=0.656, ETH z=0.135 dsr=0.554 at n_trials=2 (this run). DSR verdict is STILL FAIL either way (0.66/0.55 at N=2, and lower still at the honest cumulative family N=5 -- see reports/research-roadmap-2026-07-02.md Section 2) -- the observed OOS Sharpe (0.576 BTC / 0.410 ETH) is well short of the >=0.95-probability bar even corrected; fixing the units bug makes the gate correct, it does not flip any verdict."
   },
   "look_ahead_checks": {
     "BTCUSDT": {
@@ -51,7 +51,7 @@
     "BTCUSDT": {
       "verdict": "FAIL (no edge found)",
       "reasons": [
-        "deflated Sharpe probability 0.00 < 0.95 threshold"
+        "deflated Sharpe probability 0.66 < 0.95 threshold"
       ],
       "best_params": {
         "sma_window": 50
@@ -684,9 +684,9 @@
         }
       ],
       "deflated_sharpe": {
-        "dsr": 0.0,
-        "expected_max_sharpe_noise": 0.5197553440822881,
-        "z": -14.78243616403421,
+        "dsr": 0.6556139258543394,
+        "expected_max_sharpe_noise": 0.01702338809455846,
+        "z": 0.40052191120871916,
         "n_trials": 2,
         "n_obs": 913
       },
@@ -794,7 +794,7 @@
     "ETHUSDT": {
       "verdict": "FAIL (no edge found)",
       "reasons": [
-        "deflated Sharpe probability 0.00 < 0.95 threshold"
+        "deflated Sharpe probability 0.55 < 0.95 threshold"
       ],
       "best_params": {
         "sma_window": 200
@@ -1427,9 +1427,9 @@
         }
       ],
       "deflated_sharpe": {
-        "dsr": 0.0,
-        "expected_max_sharpe_noise": 0.5197553440822881,
-        "z": -15.045939620489134,
+        "dsr": 0.5536520753374292,
+        "expected_max_sharpe_noise": 0.017049667152313576,
+        "z": 0.13489379026744266,
         "n_trials": 2,
         "n_obs": 913
       },
@@ -1930,6 +1930,6 @@
     "BTCUSDT": "FAIL (no edge found)",
     "ETHUSDT": "FAIL (no edge found)",
     "overall": "FAIL (no edge found)",
-    "reason": "Both symbols FAIL the flat-cost gate's deflated-Sharpe test (dsr=0.00 < 0.95 threshold at n_trials=2 and n_trials=5) despite positive OOS Sharpe and 2x-fee/delayed-fill stress survival. The honest maker-fill simulation confirms the drawdown-control property survives fill friction (fill_rate=1.00 on the base and offset variants -- regime-flip transition bars trade through easily since they occur on momentum days), and 2x fees / delayed fills only mildly compress Sharpe. But under the harness's own strict DSR bar this family does not clear PASS. This is the SAME 'FAIL (retail) but real drawdown-control' result the June run found, now confirmed under an honest fill model rather than flat costs."
+    "reason": "Both symbols FAIL the flat-cost gate's deflated-Sharpe test (corrected: BTC dsr=0.66, ETH dsr=0.55, both < 0.95 threshold at n_trials=2; lower still at the honest cumulative family n_trials=5) despite positive OOS Sharpe and 2x-fee/delayed-fill stress survival. [P0 #2, 2026-07-02: this dsr was previously misreported as 0.00 due to a units bug in core.gate.deflated_sharpe_ratio's variance default; the fix does not flip the verdict -- see RESULTS.md P0 #2 note.] The honest maker-fill simulation confirms the drawdown-control property survives fill friction (fill_rate=1.00 on the base and offset variants -- regime-flip transition bars trade through easily since they occur on momentum days), and 2x fees / delayed fills only mildly compress Sharpe on the flat-cost gate's own (simplified) stress tiers. But under the harness's own strict DSR bar this family does not clear PASS. This is the SAME 'FAIL (retail) but real drawdown-control' result the June run found, now confirmed under both an honest fill model and a corrected significance test."
   }
 }

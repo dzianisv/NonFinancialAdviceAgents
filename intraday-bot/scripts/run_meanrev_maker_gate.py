@@ -84,7 +84,9 @@ def run_gate_maker(df_dict: dict) -> dict:
     dsr = None
     if oos_metrics:
         period_sharpe = oos_metrics.sharpe / math.sqrt(BPY)
-        dsr = gate.deflated_sharpe_ratio(period_sharpe, n_trials=n_trials, n_obs=oos_metrics.n_bars)
+        oos_skew, oos_kurt = gate._return_moments(oos_net)
+        dsr = gate.deflated_sharpe_ratio(period_sharpe, n_trials=n_trials, n_obs=oos_metrics.n_bars,
+                                          skew=oos_skew, kurt=oos_kurt)
 
     regimes = regime_report_maker(df_dict, best_params, cost_cfg)
     stress = stress_suite_maker(df_dict, best_params, cost_cfg, start=gate.OOS_START)

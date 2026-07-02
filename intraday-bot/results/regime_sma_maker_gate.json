@@ -2,7 +2,7 @@
   "BTCUSDT": {
     "verdict": "FAIL (no edge found)",
     "reasons": [
-      "deflated Sharpe probability 0.00 < 0.95 threshold"
+      "deflated Sharpe probability 0.66 < 0.95 threshold"
     ],
     "canary": {
       "ok": true,
@@ -645,9 +645,9 @@
       }
     ],
     "deflated_sharpe": {
-      "dsr": 0.0,
-      "expected_max_sharpe_noise": 0.5197553440822881,
-      "z": -14.78243616403421,
+      "dsr": 0.6556139258543394,
+      "expected_max_sharpe_noise": 0.01702338809455846,
+      "z": 0.40052191120871916,
       "n_trials": 2,
       "n_obs": 913
     },
@@ -757,7 +757,7 @@
   "ETHUSDT": {
     "verdict": "FAIL (no edge found)",
     "reasons": [
-      "deflated Sharpe probability 0.00 < 0.95 threshold"
+      "deflated Sharpe probability 0.55 < 0.95 threshold"
     ],
     "canary": {
       "ok": true,
@@ -1400,9 +1400,9 @@
       }
     ],
     "deflated_sharpe": {
-      "dsr": 0.0,
-      "expected_max_sharpe_noise": 0.5197553440822881,
-      "z": -15.045939620489134,
+      "dsr": 0.5536520753374292,
+      "expected_max_sharpe_noise": 0.017049667152313576,
+      "z": 0.13489379026744266,
       "n_trials": 2,
       "n_obs": 913
     },

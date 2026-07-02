@@ -98,7 +98,7 @@ Strategies tested (all through the gate):
 
 | Strategy | Idea | OOS Sharpe (net of costs) | vs hold-BTC (0.41) | Verdict |
 |---|---|---|---|---|
-| `regime_sma_maker` | Long BTC when yesterday's close > 50-day average, else flat; maker-limit execution | **+0.58**, maxDD −28% vs −53% | beats | **FAIL** — statistical significance only (DSR z ≈ −15); honest delayed-fill sim also goes negative |
+| `regime_sma_maker` | Long BTC when yesterday's close > 50-day average, else flat; maker-limit execution | **+0.58**, maxDD −28% vs −53% | beats | **FAIL** — statistical significance only (DSR prob 0.66 BTC / 0.55 ETH, N=2, vs 0.95 threshold — statistically indistinguishable from picking the best of 2 noise trials); honest delayed-fill sim also goes negative |
 | `xs_momentum` | Weekly: rank point-in-time top-30 coins by 28d return, hold top-5 | −0.57 | loses | **FAIL** — overfit (IS +1.77 → OOS sign flip); loses to holding the same coins |
 | `meanrev_maker` | Rest a limit buy k std-devs below a 5m rolling mean, exit at the mean or timeout | −10.3 | loses catastrophically | **FAIL** — negative edge *before fees*; execution layer itself validated |
 

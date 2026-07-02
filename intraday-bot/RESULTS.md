@@ -35,8 +35,10 @@ what you'd expect from pure luck, given how many variations you tried?" The answ
 - **Deflated Sharpe Ratio (DSR):** a stricter Sharpe that penalizes you for how many
   variants you tried before picking a winner (the "if you flip enough coins, one looks
   like a genius" problem). Our gate requires DSR probability ≥ 0.95 (95% confidence the
-  result isn't luck) to PASS. All three strategies scored DSR = 0.00.
-  the honest, deflated grade you get to be a "PASS" in this pipeline.
+  result isn't luck) to PASS. regime_sma_maker scored DSR 0.66 (BTC) / 0.55 (ETH) —
+  plausible but well short of the bar; xs_momentum and meanrev_maker scored DSR 0.01 and
+  0.00 — statistically indistinguishable from noise regardless of trial count.
+  0.95 is the honest, deflated grade you need to get to be a "PASS" in this pipeline.
 - **Maker vs. taker fees:** a "maker" order rests on the order book and waits to be
   filled (cheaper, 0.15% per trade side); a "taker" order executes immediately against
   the book (more expensive, 0.25% per side, and always the fallback for time-out exits).
@@ -53,9 +55,9 @@ what you'd expect from pure luck, given how many variations you tried?" The answ
 
 | Strategy | Symbol | OOS Sharpe | OOS CAGR | Max Drawdown | DSR | 2x-fee stress | 1-bar-delay stress | Verdict |
 |---|---|---:|---:|---:|---:|---:|---:|---|
-| regime_sma_maker (BTC>SMA, N=50) | BTC | 0.576 | +19.2% | -27.7% | 0.00 | 0.392 (survives) | 0.521 (survives) | **FAIL — DSR only** |
-| regime_sma_maker (BTC>SMA, N=200) | ETH | 0.410 | +13.3% | -38.9% | 0.00 | 0.366 (survives) | 0.371 (survives) | **FAIL — DSR only** |
-| xs_momentum (28d lookback, top-5) | 46-coin universe | -0.574 | -52.0% | -91.0% | 0.00 | -0.723 (fails) | -0.505 (fails) | **FAIL — no edge** |
+| regime_sma_maker (BTC>SMA, N=50) | BTC | 0.576 | +19.2% | -27.7% | 0.66 | 0.392 (survives) | 0.521 (survives) | **FAIL — DSR only** |
+| regime_sma_maker (BTC>SMA, N=200) | ETH | 0.410 | +13.3% | -38.9% | 0.55 | 0.366 (survives) | 0.371 (survives) | **FAIL — DSR only** |
+| xs_momentum (28d lookback, top-5) | 46-coin universe | -0.574 | -52.0% | -91.0% | 0.01 | -0.723 (fails) | -0.505 (fails) | **FAIL — no edge** |
 | meanrev_maker (5m mean-reversion) | BTC/ETH/SOL | -10.30 | -97.0% | -99.98% | 0.00 | -20.45 (fails) | -17.73 (fails) | **FAIL — no edge, catastrophic** |
 
 Benchmarks, same OOS windows, net of one entry fee:
@@ -71,7 +73,9 @@ All numbers above were cross-checked byte-for-byte against
 `results/xs_momentum.json`, and `results/meanrev_maker.json`. No discrepancies found.
 (All four artifacts were regenerated 2026-07-02 after the June-2026 data backfill and the
 `core/universe.py` delisting-staleness fix; every number in this document was re-synced to
-the regenerated artifacts. All verdicts were unchanged by the re-run.)
+the regenerated artifacts. All verdicts were unchanged by the re-run. The DSR column was
+regenerated a second time on 2026-07-02 after a units bug fix in `deflated_sharpe_ratio()`
+— see "P0 #2 (2026-07-02): DSR units bug" below. No verdict changed.)
 
 ---
 
@@ -101,10 +105,14 @@ approximation of delayed fills via a weight-shift, not this bar-by-bar fill sim 
 shows 2x fees BTC 0.392/ETH 0.366 and 1-bar-delay BTC 0.521/ETH 0.371, both survive; that
 number is untouched by this fix and is the one the gate verdict actually uses.)
 
-**Deflated Sharpe:** 0.00 for both symbols (threshold 0.95), z-scores -14.8 (BTC) /
--15.0 (ETH) — roughly 15 standard deviations short. This gap is an order of magnitude, not
-marginal; it holds whether you count 2 trials (this run) or 5 (cumulative, including 3
-prior June variants of the same idea family).
+**Deflated Sharpe (corrected 2026-07-02 — see "P0 #2" note below):** 0.66 (BTC) / 0.55
+(ETH) at n_trials=2 (this run), threshold 0.95, z=+0.40 (BTC) / +0.13 (ETH). Both fail the
+0.95 bar, but this is DSR prob ~0.65 (BTC, N=2) — statistically indistinguishable from
+picking the best of 2 noise trials, i.e. a coin flip's worth of confidence, not a decisive
+rejection. At the honest cumulative family count (n_trials=5, including 3 prior June
+variants of the same idea family) DSR drops to 0.39 (BTC) / 0.30 (ETH), z=-0.27 / -0.54 —
+still short of 0.95 either way. Verdict is unchanged: **FAIL, DSR < 0.95** at both trial
+counts.
 
 **Benchmark:** Beats hold-BTC on both return and risk-adjusted return while roughly
 halving max drawdown (-27.7% vs -53.0%). Beats hold-ETH too, but ETH's own drawdown stays
@@ -138,9 +146,38 @@ script's), but the report's prior claim that "the drawdown-control edge and its 
 both hold up under stress" is downgraded: it holds for 3 of 4 fill-sim stress tiers, not all
 of them, and the delayed-fill tier is now a real fragility, not a survived stress test.
 
-**Final verdict: FAIL.** Sole binding reason: deflated Sharpe = 0.00 (statistical
-significance gate), not fill/cost fragility. Confirms June's finding under an honest cost
-and, as of the P0 fix above, a genuinely fill-price-honest execution model.
+**P0 #2 (2026-07-02): DSR units bug.** `core/gate.py`'s `deflated_sharpe_ratio()` defaulted
+its noise-Sharpe variance (`var_sr`) to a hardcoded `1.0` whenever no explicit override was
+supplied, and its docstring called this "a conservative default per the paper's guidance" —
+that claim was false. `1.0` is an annualized-equivalent unit, but every caller in this repo
+passes `sharpe_hat` as a **per-bar** Sharpe (`oos_metrics.sharpe / sqrt(bars_per_year)`).
+Mixing a per-bar Sharpe against an annualized-unit noise variance inflates the noise
+threshold `E[maxSR]` by a factor of ~sqrt(n_obs) and manufactures a `|z| ~ sqrt(n_obs)`
+false rejection regardless of strategy quality — this is exactly the mechanism behind the
+previously reported z=-14.8 (BTC) / -15.0 (ETH) / -40.2 (xs_momentum) / -1056.8
+(meanrev_maker): those numbers were an artifact of the units mismatch, not evidence of "far
+below the noise floor." **Fix:** `var_sr` now defaults to the moment-adjusted null variance
+of a per-bar SR estimator (Bailey & López de Prado 2014):
+`(1 - skew·sharpe_hat + (kurt-1)/4·sharpe_hat²) / n_obs`, using the OOS net-return series'
+own skew and raw kurtosis (Gaussian: skew=0, kurt=3), which scales correctly as `~1/n_obs`.
+Root-cause fingerprint that confirmed this before any code was written: the reported
+BTC `expected_max_sharpe_noise` (0.5197553) divided by `sqrt(913)` (n_obs) equals
+0.01720 — exactly the corrected per-bar E[maxSR] this fix now produces, proving the old
+number was the *annualized* threshold applied to *per-bar* data. **Corrected numbers:**
+regime_sma_maker BTC dsr 0.00→0.66 (z -14.78→+0.40), ETH dsr 0.00→0.55 (z -15.05→+0.13) at
+n_trials=2; xs_momentum dsr 0.00→0.01 (z -40.2→-2.21) at n_trials=6; meanrev_maker dsr
+stays 0.00 (z -1056.8→-18.53) at n_trials=27. **Fixing a units bug makes the gate more
+correct, not looser — the 0.95 DSR bar itself, the cost model, the fill sim, and the stress
+tiers are all untouched by this change, and no verdict flips: all 4 strategy/symbol
+combinations remain FAIL.** Fixed in `core/gate.py` and its second consumer,
+`scripts/run_meanrev_maker_gate.py` (same latent default, same fix); regression tests added
+in `tests/test_gate.py` lock the corrected math, including the fingerprint case above and a
+cross-bar-frequency invariance check.
+
+**Final verdict: FAIL.** Sole binding reason: deflated Sharpe 0.66 (BTC) / 0.55 (ETH) <
+0.95 (statistical significance gate), not fill/cost fragility. Confirms June's finding
+under an honest cost model, a genuinely fill-price-honest execution model (P0 fix above),
+and a genuinely unit-correct significance test (P0 #2 above).
 
 ---
 
@@ -161,8 +198,12 @@ sign flip from IS to OOS, the textbook overfitting signature.
 **Stress:** Fails both mandatory stress tiers outright: 2x fees → Sharpe -0.72; 1-bar
 delayed fill → Sharpe -0.50. No stress-survival question — the base case already fails.
 
-**Deflated Sharpe:** 0.00, z=-40.2 — the realized Sharpe is far below even the noise
-floor for 6 trials; not a borderline multiple-testing case.
+**Deflated Sharpe (corrected 2026-07-02, see "P0 #2" note in Strategy 1):** 0.01, z=-2.21
+for 6 trials — the realized Sharpe is negative (-0.57), so it sits below even a corrected,
+unit-consistent noise floor. Not a borderline multiple-testing case, but the margin is a
+factor of ~18 smaller than the previously reported z=-40.2 (that number was inflated by
+the same units bug documented in Strategy 1; the negative-Sharpe conclusion itself was
+never in question).
 
 **Benchmark:** Underperforms BOTH hold-BTC (+0.41 Sharpe) and naive equal-weight-hold of
 its own 43-coin candidate pool (-0.26 Sharpe) — the cleanest possible signal that the
@@ -215,8 +256,11 @@ applied — 5-minute mean-reversion has negative expected value on these assets 
 period. 59% of exits are forced to pay taker fees because price doesn't revert to the mean
 fast enough within the timeout window, compounding an already-losing thesis.
 
-**Deflated Sharpe:** 0.00, z=-1056.8 — not a borderline call by any measure; the observed
-Sharpe is over a thousand standard errors below the noise floor for 27 trials.
+**Deflated Sharpe (corrected 2026-07-02, see "P0 #2" note in Strategy 1):** 0.00, z=-18.53
+for 27 trials — still not a borderline call: the observed Sharpe (-10.30) is over 18
+standard errors below the noise floor even under the corrected, unit-consistent variance.
+(The previously reported z=-1056.8 was inflated by the same units bug documented in
+Strategy 1; the catastrophic-failure conclusion itself was never in question.)
 
 **Benchmark:** Loses to buy-and-hold BTC by roughly 112 percentage points of CAGR and 10.7
 Sharpe points over the identical window — decisively worse than doing nothing.

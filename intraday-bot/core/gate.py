@@ -261,23 +261,62 @@ def _norm_ppf(p: float) -> float:
             ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)
 
 
+def _return_moments(net_returns: pd.Series) -> tuple[float, float]:
+    """Skew and RAW kurtosis of a per-period net-return series, for use as
+    deflated_sharpe_ratio()'s skew/kurt args. pandas .kurtosis() is EXCESS kurtosis
+    (normal -> 0.0), so +3 converts to the RAW convention deflated_sharpe_ratio expects
+    (normal -> 3.0). Falls back to Gaussian moments (0.0, 3.0) if the series is too short
+    or degenerate (std=0) for a finite estimate, rather than propagating NaN into the gate."""
+    net = net_returns.dropna()
+    if len(net) < 3 or net.std() == 0:
+        return 0.0, 3.0
+    skew = net.skew()
+    kurt = net.kurtosis() + 3.0
+    if not math.isfinite(skew):
+        skew = 0.0
+    if not math.isfinite(kurt):
+        kurt = 3.0
+    return float(skew), float(kurt)
+
+
 def deflated_sharpe_ratio(sharpe_hat: float, n_trials: int, n_obs: int,
                            skew: float = 0.0, kurt: float = 3.0,
                            sharpe_var_trials: Optional[float] = None) -> dict:
     """Bailey & Lopez de Prado (2014) deflated Sharpe ratio: probability the observed Sharpe
     is genuinely > 0 after accounting for selection bias from `n_trials` configurations tried.
 
-    sharpe_hat: the (non-deflated, per-period) Sharpe of the selected strategy.
+    sharpe_hat: the (non-deflated, PER-PERIOD, i.e. per-bar) Sharpe of the selected strategy
+        -- NOT annualized. E[maxSR] (the noise threshold) and z below are both computed in
+        this same per-period unit, so sharpe_hat, sharpe_var_trials, and the returned z/dsr
+        are only meaningful together if they all share this unit.
     n_trials: number of independent configurations tried during selection.
     n_obs: number of return observations used to estimate sharpe_hat.
-    skew/kurt: skewness/kurtosis of the strategy's per-period returns (default = normal).
-    sharpe_var_trials: variance of Sharpe ratios across trials; if None, assumed 1.0 (a
-        conservative default per the paper's guidance when trial-level distribution is unknown).
+    skew/kurt: skewness/raw kurtosis of the strategy's per-period returns (default = normal,
+        i.e. skew=0, kurt=3 -- kurt is RAW kurtosis, not excess; add 3 to a pandas/scipy
+        excess-kurtosis value before passing it in).
+    sharpe_var_trials: variance of the cross-trial distribution of the PER-PERIOD SR
+        ESTIMATOR under the null. If None, defaults to the moment-adjusted null variance of
+        a per-period SR estimator (Bailey & Lopez de Prado 2014):
+            var_sr = (1 - skew*sharpe_hat + (kurt-1)/4*sharpe_hat**2) / n_obs
+        This scales as ~1/n_obs, so it is intrinsically per-period -- passing a constant like
+        1.0 here (as this function used to do by default) silently assumes noise-Sharpe
+        variance in *annualized-equivalent* units while sharpe_hat is per-period, which
+        inflates E[maxSR] by a factor of ~sqrt(n_obs) and manufactures a |z| ~ sqrt(n_obs)
+        false rejection regardless of the strategy's real quality (formerly a latent
+        unit-mismatch bug -- see RESULTS.md "P0 #2" note, 2026-07-02). Only pass an explicit
+        override here if it is already expressed in the SAME per-period units as sharpe_hat.
     """
     if n_trials < 1:
         n_trials = 1
-    var_sr = sharpe_var_trials if sharpe_var_trials is not None else 1.0
     euler_gamma = 0.5772156649015329
+
+    if sharpe_var_trials is not None:
+        var_sr = sharpe_var_trials
+    elif n_obs > 0:
+        var_sr = max(1e-12, 1 - skew * sharpe_hat + (kurt - 1) / 4 * sharpe_hat ** 2) / n_obs
+    else:
+        var_sr = 0.0
+
     if n_trials > 1:
         e_max_sr = math.sqrt(var_sr) * (
             (1 - euler_gamma) * _norm_ppf(1 - 1.0 / n_trials) +
@@ -286,9 +325,10 @@ def deflated_sharpe_ratio(sharpe_hat: float, n_trials: int, n_obs: int,
     else:
         e_max_sr = 0.0
 
-    denom = math.sqrt(max(1e-12, 1 - skew * sharpe_hat + (kurt - 1) / 4 * sharpe_hat ** 2))
     if n_obs <= 1:
         return {"dsr": float("nan"), "expected_max_sharpe_noise": e_max_sr, "note": "insufficient obs"}
+
+    denom = math.sqrt(max(1e-12, 1 - skew * sharpe_hat + (kurt - 1) / 4 * sharpe_hat ** 2))
     z = (sharpe_hat - e_max_sr) * math.sqrt(n_obs - 1) / denom
     dsr = _norm_cdf(z)
     return {"dsr": dsr, "expected_max_sharpe_noise": e_max_sr, "z": z, "n_trials": n_trials, "n_obs": n_obs}
@@ -512,7 +552,9 @@ def gate(strategy_fn: StrategyFn, df_dict: dict, param_grid: list[dict], interva
     dsr = None
     if oos_metrics:
         period_sharpe = oos_metrics.sharpe / math.sqrt(bars_per_year)  # per-period, not annualized
-        dsr = deflated_sharpe_ratio(period_sharpe, n_trials=n_trials, n_obs=oos_metrics.n_bars)
+        oos_skew, oos_kurt = _return_moments(oos_net)
+        dsr = deflated_sharpe_ratio(period_sharpe, n_trials=n_trials, n_obs=oos_metrics.n_bars,
+                                     skew=oos_skew, kurt=oos_kurt)
 
     regimes = regime_report(strategy_fn, df_dict, best_params, cost_cfg, bars_per_year)
     stress = stress_suite(strategy_fn, df_dict, best_params, cost_cfg, bars_per_year, start=OOS_START)

@@ -692,8 +692,8 @@
     ],
     "deflated_sharpe": {
       "dsr": 0.0,
-      "expected_max_sharpe_noise": 2.0296006399506106,
-      "z": -1056.764306021804,
+      "expected_max_sharpe_noise": 0.0039079174255427125,
+      "z": -18.531552193350155,
       "n_trials": 27,
       "n_obs": 262944
     },
