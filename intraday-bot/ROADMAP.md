@@ -82,6 +82,43 @@ The DSR audit root-caused a units bug in `core/gate.py`. Every DSR number in `re
 
 Standing dead families (firewalled, no retunes, each new trial raises its own DSR bar): BTC/ETH price-above-SMA variants; lookback-return cross-sectional momentum on this coin universe; 5-minute rolling z-score mean-reversion.
 
+### Round-2 kills (2026-07-06, crypto — full arithmetic in `HUNT-ROUND2.md` §3; all firewalled)
+
+1. **btc_hash_ribbon_capitulation_recovery** (P1) — honest Sharpe 0.40 vs 1.04 @N=1; ~1–2 completed OOS trades resolvable; lags price → likely inherits the dead price-SMA firewall. *Sanctioned free follow-up: regime-state correlation vs regime_sma_maker.*
+2. **btc_onchain_fee_pressure_demand_proxy** (P0) — gross-vs-net fee-subtraction error; corrected Sharpe 0.00 at own fees, −0.26 to −1.04 at confirmed costs.
+3. **cme_futures_lead_spot** (P1) — negative under 2x-fee stress at every real venue; assumed 10bp tier doesn't exist; delayed-fill erases a lead-lag arbs close in minutes.
+4. **utc_hour_variance_drag_trim** (P0) — cost 66–330x gross edge; zero-fee ceiling 0.411; target hour measured on OOS (protocol violation).
+5. **forced_deleveraging_reversion** (P1) — net 0.26–0.34 vs 1.37 @N=2; negative at 2x-fee; enters on worst-slippage bars, slippage unmodeled.
+6. **stablecoin_basis_stress_filter** (P0) — zero-fee ceiling 0.495 vs 1.37; 0–1 qualifying depeg events in OOS.
+7. **stablecoin_quotecurrency_routing_arb** (P0) — net −25bp/trade (Sharpe −1.56); triangle parity closed in microseconds vs 5m bars.
+8. **btc_difficulty_adjustment_miner_capitulation_reversion** (P0) — net 0.17–0.36 vs 1.37; same causal story as regime_sma_maker which had a real 0.58 and still died on DSR.
+9. **blue_chip_token_unlock_dip_reversion** (P1) — 4–11x short of 1.37; DOT "unlocks" are linear staking inflation (mechanism absent); realistic ~0–2 trades/yr.
+10. **day-of-week / turn-of-month / session-open / expiry calendar effects (crypto)** (P0) — killed in round-1 addendum screening; entry restored here so the file matches the operative kill list.
+11. **BTC-dominance / ETH-BTC ratio switching** (P0) — killed in round-1 addendum screening; entry restored here so the file matches the operative kill list.
+
+### Round-3 kills (2026-07-06, US-equities pivot — full arithmetic in `HUNT-ROUND3.md` §3; all P0, firewalled)
+
+Round-level finding: *US-equities pivot evaluated 2026-07-06 under repealed-PDT / 1.3–3bp RTH costs — venue strictly better, 0/18 candidates survive; the cost floor is experimentally eliminated as the binding constraint; short-horizon program dormant across both asset classes per HUNT-ROUND3.md §5.*
+
+1. **PED-ON pre-earnings drift, overnight-only** — best-in-round: zero-decay + honest 9bp open-auction cost = 1.05 vs 1.04 (zero margin), then fails 2x-fee stress at 0.99; with McLean–Pontiff ~58% decay → 0.59.
+2. **EAP-NIGHT earnings-jump premium night hold** — own expected 0.85 < 1.04; honest auction cost → 0.63; jump kurtosis raises the effective DSR bar further.
+3. **MOR-X momentum-overnight rotation** — own claim 0.8 < 1.04; 9bp auction cost → 0.22; benchmark is 24h B&H of the same hot name (NVDA +171% in 2024).
+4. **Gap-and-Go ORB on stocks-in-play** — mechanical 2x-fee stress FAIL at its own numbers (stress Sharpe −0.47); honest open cost ≥15bp → 0.06.
+5. **SPY last-half-hour momentum** — gate Sharpe 0.00 once RF=4% is subtracted (claimed 1.15 omitted it); paper-faithful gross → −0.61.
+6. **SPY full-day noise-band momentum (Concretum 1x long)** — self-reported 0.95 < 1.04; RF-corrected 0.23; published 1.33 needs short leg + 4x leverage, unavailable at $500.
+7. **IBS-LowClose reversal (QQQ)** — replication caught 25.8 trades/yr not the claimed 55; gate Sharpe 0.37 on its OWN IS window; effect dead 2014–2019.
+8. **RSI(2)-in-uptrend pullback (SPY)** — replication: 7.5 trades/yr not 17; 3.3%/yr < 4% RF → gate Sharpe −0.11 on its own IS.
+9. **Uptrend gap-down fade (QQQ)** — load-bearing 77% gap-fill statistic measures 58% (IS) / 48% (2014–19); wrong-sign in both windows.
+10. **Earnings-announcement premium carrier** — claimed 1.1 was GROSS; net 0.98 < 1.04 at face value; decayed-honest 0.19.
+11. **Pre-announcement drift in past winners** — √150 treats 3 concurrent ρ≥0.5 AI-cluster names as independent; corrected 0.53–0.89 vs 1.37 @N=2.
+12. **Residual short-term reversal ex-news** — own arithmetic 0.82 GROSS < 1.04; its own citations document the post-2010 decay → 0.16.
+13. **Turn-of-month window (SPY/RSP)** — RF subtraction collapses raw 0.67–0.79 to 0.29–0.68; 33% exposure can't beat SPY OOS B&H (21.4%/yr, Sharpe 1.05).
+14. **TOM ∪ macro-day composite (SGOV cash leg)** — SGOV carry only offsets RF, adds zero gate Sharpe; honest 0.71; delayed fill deletes the announcement-day leg.
+15. **Sequential earnings-announcement premium** — own optimistic 30bp/event → 0.63; published 9.9bp → 0.09; single-bar edge fails delayed-fill by construction.
+16. **VRatio contango gate (SVXY)** — IS best-case 0.71 vs 1.04; claimed 30%/yr refuted by SVXY B&H itself (4.2%/yr OOS while contango ~80% of days).
+17. **Leverage rotation TQQQ/T-bills (Gayed–Bilello)** — own expectation 1.0 < 1.04; exact-spec IS 0.91; OOS benchmark TQQQ B&H +227%; one confirmed ~20% whipsaw (Mar–May 2025).
+18. **Volatility-targeted TQQQ** — claimed margin over bar = 0.01 (inside noise); realized IS uplift +0.07 not +0.15–0.20; leverage cap never binds at 21% OOS vol.
+
 **What the next cycle's ideation must produce:** genuinely new signal families whose *paper* arithmetic clears Section 3 — i.e., a credible path to annualized OOS Sharpe ≥ 1.37 at N=2, which at realistic frequencies means either >100bp/trade net edges (low-k) or a reliably-present ~10–40bp gross-over-cost edge repeated hundreds of times per year with maker fills surviving the delayed-fill tier (high-k). Candidates that can't state that path in one paragraph don't get a backtest.
 
 ---
