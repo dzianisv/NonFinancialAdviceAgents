@@ -133,6 +133,98 @@ Written verbatim; to be applied mechanically after results are in, with no adjus
 > reopening deployment — it only means the frozen rule's real-looking edge on BTC/ETH
 > generalizes to a few more correlated large-cap coins, which is a much weaker claim.
 
+## Results
+
+Run executed 2026-07-06 via `scripts/run_regime_sma_maker_fresh_symbols.py`, all 5
+pre-registered symbols, zero errors, zero substitutions. Full report:
+`results/regime_sma_fresh_symbols.json`. Confirmed data ranges before running (Step 3):
+SOLUSDT 2151 daily bars (2020-08-11 -> 2026-07-01, its actual Binance listing date), XRPUSDT
+/ DOGEUSDT / ADAUSDT / LINKUSDT each 2374 daily bars (2020-01-01 -> 2026-07-01).
+
+Primary OOS window for all 5 symbols: 2024-01-01 -> 2026-07-01 (913 bars each — the actual
+last cached bar, matching the expectation).
+
+### Per-symbol table (primary OOS window, 2024-01-01 -> 2026-07-01)
+
+| Symbol | OOS Sharpe | CAGR | MaxDD | Hold Sharpe | Beats hold (Sharpe)? | 2x-fee stress: gate | 2x-fee stress: fillsim | Delayed-fill stress: gate | Delayed-fill stress: fillsim | DSR@N=5 (informational) | Counts toward majority? |
+|---|---:|---:|---:|---:|:---:|---:|---:|---:|---:|---:|:---:|
+| SOLUSDT  | -0.136 | -16.2% | -58.8% |  0.180 | No  | -0.240 | -0.157 | -0.211 | **-1.257** | 0.080 | **No** |
+| XRPUSDT  |  0.534 |  20.6% | -60.7% |  0.595 | No  |  0.413 |  0.510 |  0.292 | **-0.308** | 0.373 | **No** |
+| DOGEUSDT |  0.413 |   9.8% | -76.3% |  0.309 | Yes |  0.332 |  0.385 |  0.548 | **-0.078** | 0.298 | **No** |
+| ADAUSDT  | -0.470 | -30.1% | -73.9% | -0.192 | No  | -0.602 | -0.539 | -0.361 | -1.600 | 0.027 | **No** |
+| LINKUSDT |  0.081 |  -7.1% | -47.9% |  0.033 | Yes | -0.037 |  0.037 |  0.039 | **-1.005** | 0.144 | **No** |
+
+Bold marks the sign that decides a fail against the majority test. Gate's own internal
+verdict (its full pass/fail logic, including the DSR>=0.95 clause, not just the
+pre-registered majority rule above) is **FAIL** for all 5 symbols independently — see
+`gate_primary.reasons` per symbol in the JSON.
+
+**0 of 5 symbols count toward the majority** (need >=3 of 5): none simultaneously (a) beat
+their own buy-and-hold on OOS Sharpe AND (b) stayed Sharpe-positive under both the 2x-fee and
+delayed-fill stress tiers on BOTH methodologies.
+
+- SOLUSDT, ADAUSDT: fail immediately on (a) — the frozen rule underperforms buy-and-hold on
+  a risk-adjusted basis (and both have negative absolute OOS Sharpe).
+- XRPUSDT: fails on (a) — hold Sharpe (0.595) edges out the frozen rule (0.534); also fails
+  the delayed-fill fillsim tier (-0.308) regardless.
+- DOGEUSDT: the one symbol that beats its own hold benchmark on Sharpe (0.413 vs 0.309) and
+  clears every gate-side stress tier — but the honest fillsim's delayed-fill tier goes
+  negative (-0.078), so it does not clear the "both methodologies" bar.
+- LINKUSDT: beats hold on Sharpe (0.081 vs 0.033) but fails the gate's own 2x-fee stress tier
+  (-0.037) and the fillsim's delayed-fill tier (-1.005).
+
+**Gate-vs-fillsim disagreement, stated explicitly (not smoothed over), exactly as
+pre-registered as a possibility:** the flat-cost gate's analytic delayed-fill tier and the
+honest bar-by-bar fillsim's delayed-fill tier **disagree in sign for 3 of 5 symbols**
+(XRPUSDT: gate +0.292 vs fillsim -0.308; DOGEUSDT: gate +0.548 vs fillsim -0.078; LINKUSDT:
+gate +0.039 vs fillsim -1.005). In every one of these cases the gate's simplified one-bar
+weight-shift approximation reads Sharpe-positive while the honest fill simulator — which
+actually walks the maker-limit-order mechanics bar by bar — reads meaningfully
+Sharpe-negative. This is the same pattern the pre-registration flagged as having occurred for
+BTC in the existing ledger (ROADMAP.md Section 1), and it recurred here on a majority of the
+fresh symbols. This disagreement is reported as-is; the mechanical verdict above already
+requires a symbol to clear BOTH methodologies, so it does not get averaged or waived.
+
+### Secondary (full available history per symbol; NOT used for the verdict)
+
+| Symbol | Full-history Sharpe | Full-history CAGR | Full-history MaxDD | Full-history hold Sharpe |
+|---|---:|---:|---:|---:|
+| SOLUSDT  | 1.278 | 112.7% | -69.7% | 1.001 |
+| XRPUSDT  | 0.441 |  11.7% | -83.5% | 0.706 |
+| DOGEUSDT | 0.796 |  98.2% | -86.5% | 0.789 |
+| ADAUSDT  | 0.851 |  48.8% | -73.9% | 0.683 |
+| LINKUSDT | 0.250 |  -6.3% | -88.0% | 0.696 |
+
+Reported for context only, per the pre-registration: these symbols contributed zero
+information to the original IS tuning (sma_window=50 was chosen using only BTC/ETH), so there
+is no real IS/OOS split here — full-history numbers are descriptive, not confirmatory. Note
+the full-history picture is NOT uniformly better than the OOS picture (XRPUSDT and LINKUSDT
+underperform hold on full history too); this is not evidence being cherry-picked toward a
+pass.
+
+### Overall verdict (applying the pre-registered interpretation rule mechanically)
+
+**FAILED CONFIRMATION.** 0 of 5 pre-registered symbols clear the majority bar (>=3 of 5
+required). Per the pre-registered rule, this is treated as **evidence AGAINST the
+`regime_sma_maker` family**, precisely because zero parameters were changed to produce this
+result — the frozen BTC-winning rule (sma_window=50, identical cost/execution model) was
+applied unmodified to 5 fresh, never-tuned-on symbols and it does not reliably beat
+buy-and-hold on a risk-adjusted, stress-surviving basis on any of them under both cost
+methodologies simultaneously.
+
+**What this does and does not mean, stated plainly:** this FAIL does not by itself prove the
+family has zero edge anywhere — DOGEUSDT and LINKUSDT both individually beat their own hold
+benchmark on OOS Sharpe, and the family's underlying BTC/ETH edge was never in question here
+(that question is already settled, separately, by the DSR<0.95 firewall). What this result
+adds is a modestly-informative, N_eff ~1.2-1.4 falsification check, and it came back negative:
+the frozen rule's apparent edge does not generalize cleanly to this basket of correlated
+large-cap alts once the same honest cost/fill stress bar is applied. Combined with the
+family's pre-existing DSR firewall (0.39 BTC / 0.30 ETH at N=5), there is now no open evidence
+stream pointing toward `regime_sma_maker` other than the forward-calendar-time shadow run
+already in progress (ROADMAP.md Section 5's second sanctioned path). This result does **not**
+change the family's cumulative trial count (stays N=5) and does **not** reopen deployment —
+per the pre-registered rule, even a PASS here would not have done that.
+
 ## Scope of this run (files touched)
 
 This run only writes to: `intraday-bot/preregistrations/` (this file, plus its Results

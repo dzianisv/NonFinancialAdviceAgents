@@ -53,6 +53,50 @@ set (logged as confirmation evidence, not a new config — see roadmap Section 5
 BTC dsr=0.39 (z=-0.27), ETH dsr=0.30 (z=-0.54) — both < 0.95. **FAIL** at the honest
 cumulative count, same verdict as at N=2.
 
+### Confirmation evidence (NOT a new trial): fresh-symbol falsification test, 2026-07-06
+
+Per the sanctioned evidence path (b) above and `ROADMAP.md` Section 5's "Pre-registered
+fresh-symbol confirmation for the trend family (explicitly NOT a retune)" paragraph: a
+zero-parameter-change confirmation run of the frozen BTC-winning config (`sma_window=50`,
+identical `core/gate.py` cost/execution model) on 5 fresh, never-tuned-on symbols. Full
+pre-registration (committed BEFORE any result was known):
+`preregistrations/2026-07-06-regime-sma-fresh-symbols.md`, commit `a00a18f`. Full result
+report: `results/regime_sma_fresh_symbols.json`.
+
+**This run does NOT increment `cumulative_family_n_trials` — it stays 5.** It is confirmation
+evidence per the roadmap, not a new config/trial.
+
+| Symbol | OOS Sharpe | OOS CAGR | OOS MaxDD | Hold Sharpe | Beats hold? | Stress 2x-fee (gate / fillsim) | Stress delayed-fill (gate / fillsim) | DSR@N=5 (informational) | Counts toward majority? |
+|---|---:|---:|---:|---:|:---:|---:|---:|---:|:---:|
+| SOLUSDT  | -0.136 | -16.2% | -58.8% |  0.180 | No  | -0.240 / -0.157 | -0.211 / **-1.257** | 0.080 | No |
+| XRPUSDT  |  0.534 |  20.6% | -60.7% |  0.595 | No  |  0.413 /  0.510 |  0.292 / **-0.308** | 0.373 | No |
+| DOGEUSDT |  0.413 |   9.8% | -76.3% |  0.309 | Yes |  0.332 /  0.385 |  0.548 / **-0.078** | 0.298 | No |
+| ADAUSDT  | -0.470 | -30.1% | -73.9% | -0.192 | No  | -0.602 / -0.539 | -0.361 / -1.600 | 0.027 | No |
+| LINKUSDT |  0.081 |  -7.1% | -47.9% |  0.033 | Yes | -0.037 /  0.037 |  0.039 / **-1.005** | 0.144 | No |
+
+Git commit for this run's code + results: see the commit that adds this ledger entry (git log
+message states pass/fail per symbol and the overall verdict). Symbols verified via
+`core.data.load()` before running: SOLUSDT 2151 bars (2020-08-11 ->
+2026-07-01, its actual listing date), XRPUSDT/DOGEUSDT/ADAUSDT/LINKUSDT each 2374 bars
+(2020-01-01 -> 2026-07-01). Zero symbols errored; zero substituted.
+
+**Verdict per the pre-registered mechanical rule: FAILED CONFIRMATION.** 0 of 5 symbols clear
+the majority bar (>=3 of 5 required: beat hold on OOS Sharpe AND stay Sharpe-positive under
+both stress tiers on both cost methodologies). Treated as evidence AGAINST the family, exactly
+because zero parameters were changed. Notably, the flat-cost gate's analytic delayed-fill
+stress tier and the honest bar-by-bar fillsim's delayed-fill tier disagreed in sign for 3 of 5
+symbols (XRPUSDT, DOGEUSDT, LINKUSDT — gate positive, fillsim negative), the same
+gate-vs-fillsim divergence pattern already on record for BTC (Section 1, `ROADMAP.md`) —
+reported as-is, not smoothed over.
+
+**What this does and does not mean:** this result does not reopen deployment and does not
+raise the family's DSR — a PASS would not have done that either, per the pre-registration's
+N_eff ~1.2-1.4 correlation caveat (crypto majors correlate 0.6-0.85 with BTC/ETH, so 5 more
+symbols are not 5 independent observations). It adds one more, modestly-informative data point
+against the family, on top of the pre-existing DSR firewall. The only evidence stream still
+open for `regime_sma_maker` is forward calendar time via the notify-mode shadow deployment
+(path (a) above).
+
 ---
 
 ## Family: `xs_momentum` (cross-sectional momentum, top-N by trailing K-day return, weekly rebalance)
