@@ -91,7 +91,7 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
   if (opts.asset) {
     events = queryByAsset(db, opts.asset, { days, k });
   } else if (queryStr) {
-    events = query(db, queryStr, { days, k });
+    events = query(db, queryStr, { days, k, sources });
   } else {
     events = newSince(db, days);
   }
@@ -102,12 +102,17 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
   const requestedCount = allSources.length;
   const feedsOk = requestedCount - unavailable.length;
 
-  return {
+  const result: ReadNewsResult = {
     fetched: records.length,
     feeds_ok: Math.max(0, feedsOk),
     unavailable,
     events,
   };
+  if (queryStr && !opts.asset && events.length === 0) {
+    result.note = "INSUFFICIENT_DATA — no article cleared the relevance floor for this query"
+      + (sources?.length ? ` within source(s) ${sources.join(",")}` : "") + "; do not guess.";
+  }
+  return result;
 }
 
 // ── CLI entry point ──────────────────────────────────────────────────────────

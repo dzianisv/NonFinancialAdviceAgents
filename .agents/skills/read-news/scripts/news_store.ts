@@ -17,6 +17,12 @@ const SIMHASH_BITS = 64;
 const DEFAULT_JACCARD = 0.15;
 const SHINGLE = 3;    // token window for SimHash features
 const JAC_NGRAM = 2;  // word + bigram shingles for Jaccard
+// Relevance floor for query(): when no article has an exact FTS (BM25) hit, a bare
+// shingle-Jaccard fallback against the whole candidate pool is unreliable at low scores
+// (coincidental stopword/topic overlap regularly outscores genuinely related articles —
+// e.g. an "Iran oil revenue" headline outscoring a real Nike headline for query "Nike NKE
+// revenue turnaround"). Below this floor we treat the match as noise, not a real result.
+const JACCARD_RELEVANCE_FLOOR = 0.10;
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -350,36 +356,68 @@ export function ingest(db: Database, records: Row[]): IngestResult {
 
 // ── Query ────────────────────────────────────────────────────────────────────
 
+function eventHasAnySource(r: Row, sources: Set<string>): boolean {
+  try {
+    const srcs = JSON.parse(r.sources as string) as string[];
+    return srcs.some((s) => sources.has(s));
+  } catch {
+    return false;
+  }
+}
+
 export function query(
   db: Database,
   q: string,
-  opts: { days?: number; k?: number } = {},
+  opts: { days?: number; k?: number; sources?: string[] } = {},
 ): (EventRecord & { score: number })[] {
   const k = opts.k ?? 10;
   const norm = normalizeText(q);
+  const sourceFilter = opts.sources?.length ? new Set(opts.sources) : null;
 
-  // Rank A: BM25 over articles → map to events (first occurrence per event)
+  // Rank A: BM25 over articles → map to events (first occurrence per event).
+  // When sourceFilter is set, restrict to rows from those outlets only — otherwise a
+  // scoped caller (e.g. "--source ft,wsj") still gets results fuzzy-matched against the
+  // entire shared corpus (crypto feeds, tradingview, etc.).
   const bm25Events: number[] = [];
   const seen = new Set<number>();
   try {
+    const sourceClause = sourceFilter
+      ? ` AND a.source IN (${[...sourceFilter].map(() => "?").join(",")})`
+      : "";
+    const params = [norm || q, ...(sourceFilter ? [...sourceFilter] : [])];
     const rows = db.prepare(
       "SELECT a.event_id AS eid FROM articles_fts f JOIN articles a ON a.id=f.rowid"
-      + " WHERE articles_fts MATCH ? ORDER BY bm25(articles_fts) LIMIT 200",
-    ).all(norm || q) as { eid: number }[];
+      + " WHERE articles_fts MATCH ?" + sourceClause
+      + " ORDER BY bm25(articles_fts) LIMIT 200",
+    ).all(...params) as { eid: number }[];
     for (const r of rows) {
       if (!seen.has(r.eid)) { seen.add(r.eid); bm25Events.push(r.eid); }
     }
   } catch { /* FTS error → empty list */ }
 
-  // Rank B: shingle-Jaccard similarity to each event's rep_norm
+  // Rank B: shingle-Jaccard similarity to each event's rep_norm, scoped to sourceFilter.
   const qsh = shingles(norm);
-  const evRows = db.prepare("SELECT * FROM events").all() as Row[];
-  const simRank = [...evRows]
-    .sort((a, b) =>
-      jaccard(qsh, shingles(b.rep_norm as string)) -
-      jaccard(qsh, shingles(a.rep_norm as string)),
-    )
-    .map((r) => r.event_cluster_id as number);
+  let evRows = db.prepare("SELECT * FROM events").all() as Row[];
+  if (sourceFilter) {
+    evRows = evRows.filter((r) => eventHasAnySource(r, sourceFilter));
+  }
+  const jacScored = evRows
+    .map((r) => ({ r, j: jaccard(qsh, shingles(r.rep_norm as string)) }))
+    .sort((a, b) => b.j - a.j);
+
+  // Relevance floor: an exact BM25 hit is a real signal (query terms co-occur in an
+  // actual article) so Jaccard is just used to help rank around it. But when BM25 finds
+  // NOTHING, Jaccard alone is the sole ranking signal — and at low magnitudes it is not
+  // reliable evidence of relevance (see JACCARD_RELEVANCE_FLOOR comment above). In that
+  // case, only keep candidates that clear the floor; if none do, return no results
+  // (INSUFFICIENT_DATA) rather than silently returning the corpus' "least dissimilar" junk.
+  const simRank = bm25Events.length > 0
+    ? jacScored.map((x) => x.r.event_cluster_id as number)
+    : jacScored.filter((x) => x.j >= JACCARD_RELEVANCE_FLOOR).map((x) => x.r.event_cluster_id as number);
+
+  if (bm25Events.length === 0 && simRank.length === 0) {
+    return [];
+  }
 
   // RRF fusion
   const KK = 60;
@@ -562,9 +600,11 @@ if (import.meta.main) {
     if (!q) { console.error("--q required"); process.exit(1); }
     const daysArg = getArg("--days");
     const kArg = getArg("--k");
+    const sourceArg = getArg("--source") ?? getArg("--sources");
     console.log(JSON.stringify(query(db, q, {
       days: daysArg ? parseInt(daysArg) : undefined,
       k: kArg ? parseInt(kArg) : 10,
+      sources: sourceArg ? sourceArg.split(",").map((s) => s.trim()).filter(Boolean) : undefined,
     }), null, 2));
 
   } else if (cmd === "new-since") {
