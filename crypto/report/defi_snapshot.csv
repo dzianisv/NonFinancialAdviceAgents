@@ -1,0 +1,80 @@
+Wallet,Protocol,Type,Pool,Asset,Balance,USD Value
+L1,Wallet tokens,—,—,USDC,4291.193598,4291.33
+L1,Wallet tokens,—,—,eUSD,2842.017131,2840.51
+L1,Merkl,Rewards,Merkl Rewards,eUSD,97.557565,97.51
+L1,Merkl,Rewards,Merkl Rewards,USDC,12.725714,12.73
+L1,Wallet tokens,—,—,OP,71.307558,7.56
+L1,Wallet tokens,—,—,ETH,0.002128,3.76
+L1,Merkl,Rewards,Merkl Rewards,MORPHO,1.820239,3.59
+L1,Wallet tokens,—,—,ETH,0.001604,2.84
+L1,Wallet tokens,—,—,AVAX,0.267095,1.80
+L3,Wallet tokens,—,—,USDC,44637.078953,44638.49
+L3,Morpho Blue,Deposit,Morpho Yield: USDC Pool (Extrafi XLend USDC),USDC,10223.854435,10224.18
+L3,Maple,Deposit,Maple Yield: USDC Pool (Syrup USDC),USDC,9220.570162,9220.86
+L3,Wallet tokens,—,—,syrupUSDC,7865.339592,9219.20
+L3,Wallet tokens,—,—,eUSD,6356.60013,6353.23
+L3,Wallet tokens,—,—,sUSDe,2376.837987,2938.27
+L3,Wallet tokens,—,—,stETH,1.416023,2505.51
+L3,Wallet tokens,—,—,cbETH,0.102864,206.60
+L3,Wallet tokens,—,—,MORPHO,11.391016,22.49
+L3,Wallet tokens,—,—,ETH,0.012139,21.48
+L3,Wallet tokens,—,—,EXTRA,3036.001031,14.83
+L3,Wallet tokens,—,—,PENDLE,10.19278,14.36
+L3,Wallet tokens,—,—,OP,40.073008,4.25
+L3,Camelot,Staked,Camelot GRAIL Pool (xGRAIL),GRAIL,0.046752,2.46
+L3,Wallet tokens,—,—,SEAM,235.385074,1.32
+L3,Wallet tokens,—,—,MORPHO,0.556409,1.10
+L3,Wallet tokens,—,—,ETH,0.000387,0.68
+L3,Wallet tokens,—,—,ETH,0.00037,0.65
+B1,Wallet tokens,—,—,ETH,0.084448,149.42
+B1,Wallet tokens,—,—,ETH,0.063491,112.34
+B1,Wallet tokens,—,—,USDC,25,25.00
+B1,Uniswap V3,Deposit,Uniswap V3 WETH/USDC Pool (#451323),WETH,0.006813,12.06
+B1,Wallet tokens,—,—,AVAX,1.280615,8.65
+B1,Uniswap V3,Rewards,Uniswap V3 WETH/USDC Pool (#451323),USDC,3.601974,3.60
+B1,Polygon Staking,Staked,Polygon Staking POL Pool (Coinbase),POL,45,3.34
+B1,Uniswap V3,Rewards,Uniswap V3 WETH/USDC Pool (#451323),WETH,0.001374,2.43
+B1,Uniswap V3,Deposit,Uniswap V3 WETH/USDC Pool (#451323),USDC,1.953646,1.95
+B1,Wallet tokens,—,—,USDC,0.928041,0.93
+B1,Wallet tokens,—,—,USDT,0.878278,0.88
+B3,Fluid,Deposit,Fluid Yield: USDT Pool (Fluid Tether USD),USDT,15664.320828,15653.53
+B3,Maple,Deposit,Maple Yield: USDC Pool (Syrup USDC),USDC,8468.428501,8468.70
+B3,Wallet tokens,—,—,syrupUSDC,7223.592675,8466.69
+B3,Avantis,Deposit,Avantis Yield: USDC Pool (JUNIOR TRANCHE Tranche USD Coin),USDC,1043.910304,1043.94
+B3,Wallet tokens,—,—,jUSDC,781.080066,1018.38
+B3,Wallet tokens,—,—,LINEA,276045.904871,674.01
+B3,Wallet tokens,—,—,STRK,12938.608058,400.17
+B3,Wallet tokens,—,—,PAXG,0.045875,188.91
+B3,Wallet tokens,—,—,MORPHO,74.422862,146.86
+B3,Wallet tokens,—,—,CAKE,22.887932,32.66
+B3,Wallet tokens,—,—,AERO,45.580951,26.26
+B3,Wallet tokens,—,—,POL,103.881513,7.72
+B3,Wallet tokens,—,—,SEAM,120.591246,0.68
+B3,Wallet tokens,—,—,ETH,0.000321,0.57
+B3,Wallet tokens,—,—,ETH,0.000297,0.53
+B5,Wallet tokens,—,—,ETH,0.001838,3.25
+B5,Wallet tokens,—,—,ETH,0.000513,0.91
+T1,USDT Storm LP,Deposit,—,USDT-SLP,6784.118887,9003.59
+T1,TON Storm LP,Deposit,—,TON-SLP,3247.089571,6963.29
+T1,DeDust Pool: TON/USDT,Deposit,—,LP,68.381597,6175.75
+T1,Wallet tokens,—,—,TON,66.717474,112.25
+T1,Wallet tokens,—,—,USD₮,7.3,7.29
+T1,Wallet tokens,—,—,Unfreeze at FROZENGRAM.NET,239,0.00
+T1,Wallet tokens,—,—,SWPG,1,0.00
+T1,Wallet tokens,—,—,GRAM Unlock at GRAMUNLOCK.ORG,119.2,0.00
+T1,Wallet tokens,—,—,GRAM Unlock at gramunlock.org,119.2,0.00
+T1,Wallet tokens,—,—,GRAM AT GRAMEVENT.ORG,100,0.00
+T1,YT USDT-SLP (01Sep2025),Deposit,—,YT USDT-SLP,3114.237032,0.00
+T1,Coffee DEX: TON/USDT LP,Deposit,—,TON/USDT LP,19.926532,0.00
+T1,Wallet tokens,—,—,TONRAGE,6996,0.00
+T1,Wallet tokens,—,—,DOFA,0.99,0.00
+T1,Wallet tokens,—,—,$BLUM,10000,0.00
+T1,Wallet tokens,—,—,TSLA,10000,0.00
+S1,Wallet tokens,—,—,USDC,3000.001124,3000.10
+S1,Wallet tokens,—,—,SOL,8.692642,704.59
+S1,Wallet tokens,—,—,JUP,2964.219644,697.99
+S1,Rent,Locked,Rent,SOL,0.020462,1.66
+S1,Wallet tokens,—,—,jlUSDS,1214.846598,0.00
+S1,Wallet tokens,—,—,fragSOL,39.807133,0.00
+S2,Wallet tokens,—,—,SOL,0.017846,1.45
+S2,Rent,Locked,Rent,SOL,0.008157,0.66
