@@ -1,0 +1,15 @@
+{
+  "comment": "Canonical DeFi wallet list. Labels match the DeFi tab of the Porfolio sheet. Chains: evm|solana (Zerion), ton (swap.coffee). hyperliquid:true = also query the Hyperliquid info API for this address.",
+  "wallets": [
+    {"label": "L1", "chain": "evm", "address": "0x5c1b7a3ab7797e237cc9ec1e30a18048c364174a", "hyperliquid": true},
+    {"label": "L3", "chain": "evm", "address": "0x5d039ece117073323ade5057a516864f4c40e653", "hyperliquid": true},
+    {"label": "B1", "chain": "evm", "address": "0x9945Ba0a781200B90b4c28528cced309aBB90871", "hyperliquid": false},
+    {"label": "B3", "chain": "evm", "address": "0xd6b5587944a2bf537ef9cf04695ed093f4805e75", "hyperliquid": false},
+    {"label": "B5", "chain": "evm", "address": "0xaefdc2b58f5a15b6e5e3d6d7ac707c76967ab4ae", "hyperliquid": false},
+    {"label": "T1", "chain": "ton", "address": "UQBkT-XTPTbYeVNsWmC5Dxnw6DUygKOgTMTooA7SIz7BE19N"},
+    {"label": "S1", "chain": "solana", "address": "jetmpL3H387ck44FNiAZsyGNNRad3mvHgSs1mbppqdG"},
+    {"label": "S2", "chain": "solana", "address": "6iQHaQyTwZHqXKcVMoBUWELvRQTD2bXJ5AJouJjx8jRD"}
+  ],
+  "dust_floor_usd": 0.5,
+  "keep_all_dust": ["T1", "S1", "S2"]
+}

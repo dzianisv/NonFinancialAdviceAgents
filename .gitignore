@@ -88,3 +88,6 @@ logs/
 # stocks-advisor: yfinance fundamentals cache (runtime, re-fetched each run)
 .agents/skills/stocks-advisor/scripts/*.json
 .agents/skills/stocks-advisor/scripts/*.json.out.json
+
+# local secrets (mirror of Bitwarden dev collection)
+.env
