@@ -21,6 +21,7 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
+import aster_positions
 import hyperliquid_positions
 import ton_positions
 import zerion_positions
@@ -53,6 +54,10 @@ def main():
             rows = zerion_positions.fetch_positions(label, chain, address)
             if w.get("hyperliquid"):
                 rows += hyperliquid_positions.fetch_positions(label, address)
+            if w.get("asterdex"):
+                # Aster's account is keyed by ASTER_USER env creds, not this address;
+                # the flag marks which wallet row the positions belong to on the sheet.
+                rows += aster_positions.fetch_positions(label)
         elif chain == "ton":
             rows = ton_positions.fetch_positions(label, address)
         else:

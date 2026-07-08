@@ -48,6 +48,7 @@ Per-wallet modules are runnable standalone for debugging:
 | Solana | Zerion (same endpoint; `filter[positions]` unsupported) + Jupiter `lite-api.jup.ag/price/v2` for tokens Zerion returns unpriced (fragSOL, jlUSDS) | |
 | TON | swap.coffee: `backend.swap.coffee/v1/ton/wallet/{addr}/balance` (native) + `tokens.swap.coffee/api/v3/accounts/{addr}/jettons` (jettons incl. DeFi receipt tokens with `market_stats.price_usd`) | TON DeFi (Storm SLP, DeDust/Coffee LP, YT) is held as receipt jettons; no per-user "all yield positions" endpoint exists, so jettons ARE the position list |
 | Hyperliquid | HL info API `POST api.hyperliquid.xyz/info` (`spotClearinghouseState`, `clearinghouseState`, `userVaultEquities`, marks from `metaAndAssetCtxs`) | **Zerion cannot see Hyperliquid at all** (~$21k of book, 2026-07) |
+| AsterDEX | Aster V3 futures API `GET fapi.asterdex.com/fapi/v3/{balance,positionRisk}`, EIP-712-signed (needs `ASTER_USER`/`ASTER_SIGNER`/`ASTER_SIGNER_PRIVATE_KEY` in `.env` — mint the API wallet at asterdex.com/en/api-wallet; the key can TRADE, treat as hot) | **Neither Zerion nor DeBank sees Aster** (off-chain engine, no adapter, no keyless read; verified 2026-07-08). Wallet gets `asterdex: true` in `wallets.yaml`. Skips with a warning when creds absent |
 
 ## Data-integrity rules (each one earned by a real corruption)
 
@@ -98,4 +99,8 @@ comparing against DeBank — keep doing that when the totals are about to be pub
 - swap.coffee staking balances endpoint needs a TON-proof header (wallet signature) — liquid
   staking read that way is out; staked TON appears only if held as a receipt jetton.
 - Perp rows report **margin** as the position value (matches the sheet convention), with
-  unrealized P&L in the Asset label, not added to value.
+  unrealized P&L in the Asset label, not added to value. Aster cross-margined positions
+  value at $0 on the position row (margin already counted in the Futures Account row).
+- **A DeBank cross-check cannot catch AsterDEX gaps** — DeBank has no Aster adapter. The
+  only signal is the investor saying a venue exists: when they name one, wire its own API
+  module (Aster, HL) — never trust "DeBank shows everything".
