@@ -1,21 +1,27 @@
 export const meta = {
   name: 'research-market-workflow',
   description: 'Unified portfolio-aware research (crypto + equities). An LLM CIO discovers the available skills live and decides the screening strategy and desk — then the team runs: screen → gather → consolidate → panel → decide → report → ledger. NOTHING about the roster or tickers is hardcoded here; this script only dispatches the full skill names the CIO returns. All substance lives in .agents/skills. Two extra modes: strategy="trend-discovery" (CIO-selectable at Intake) runs a quant pre-screen + EDGAR/WebSearch journalism fan-out + beneficiary mapping + skeptic filter before handing survivors to the standard gather/panel/decide pipeline (supersedes the old standalone research-trend-stocks workflow). args.mode="holdings-sweep" bypasses discovery entirely and instead reviews every HELD position from positions.csv (ADD/HOLD/TRIM/EXIT).',
+  // NOTE: this list must match the actual phase() call titles used at runtime (both modes), exactly --
+  // a prior consolidation left it out of sync (a fake 'HoldingsSweep' title that's never called, and
+  // 'CIO-Review' declared-but-unused). Shared titles (Consolidate/Panel/Report/Ledger) are used by BOTH
+  // discovery and holdings-sweep mode with different content; each detail notes which mode(s) apply.
   phases: [
-    { title: 'LoadState', detail: 'read cross-run state file (prior screened tickers + verdicts)' },
-    { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy (standard | trend-discovery) + assembles desk (no tickers)' },
-    { title: 'CIO-Review', detail: 'CIO decides STOP (have a BUY / exhausted) or CONTINUE (screen a fresh slice)' },
-    { title: 'SaveState', detail: 'persist screened tickers + per-asset verdicts for the next run' },
-    { title: 'ThemeCycle', detail: 'assess whether the theme/sector is already extended; if so, widen to adjacent laggards' },
-    { title: 'Screen', detail: 'standard: research team autonomously finds 5-10 candidates via web search + screener logic. trend-discovery: quant pre-screen -> EDGAR+WebSearch journalism fan-out -> beneficiary mapping -> skeptic filter' },
-    { title: 'NewsFetch', detail: 'pre-fetch WSJ + FT + Bloomberg headlines into local article cache; gather agents query BM25 instead of hitting live URLs' },
-    { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill' },
-    { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief' },
-    { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail' },
-    { title: 'Decide', detail: 'manager-selected chair: portfolio-aware buy/sell decision' },
-    { title: 'Report', detail: 'write markdown research report to disk' },
-    { title: 'Ledger', detail: 'log the dated chair call per asset to the forecast-ledger' },
-    { title: 'HoldingsSweep', detail: '(args.mode="holdings-sweep" only) classify positions.csv -> trend-only screen for ETFs -> one 5-seat BSC panel agent per single-name/crypto-beta holding -> consolidate to ADD/HOLD/TRIM/EXIT -> report + ledger' },
+    { title: 'LoadState', detail: 'read cross-run state file (prior screened tickers + verdicts) [discovery mode]' },
+    { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy (standard | trend-discovery) + assembles desk (no tickers) [discovery mode]' },
+    { title: 'ThemeCycle', detail: 'assess whether the theme/sector is already extended; if so, widen to adjacent laggards [discovery mode]' },
+    { title: 'Screen', detail: 'standard: research team autonomously finds 5-10 candidates via web search + screener logic. trend-discovery: quant pre-screen -> EDGAR+WebSearch journalism fan-out -> beneficiary mapping -> skeptic filter [discovery mode; also re-run per CIO-Review iteration]' },
+    { title: 'NewsFetch', detail: 'pre-fetch WSJ + FT + Bloomberg headlines into local article cache; gather agents query BM25 instead of hitting live URLs [discovery mode]' },
+    { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill [discovery mode]' },
+    { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief [discovery mode]. holdings-sweep: merges per-position panel verdicts + trend-screen rows into one report (pure JS, no extra LLM call)' },
+    { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail [discovery mode]. holdings-sweep: one 5-seat BSC panel agent per single-name/crypto-beta holding' },
+    { title: 'Decide', detail: 'manager-selected chair: portfolio-aware buy/sell decision [discovery mode]' },
+    { title: 'CIO-Review', detail: 'CIO decides STOP (have a BUY / exhausted) or CONTINUE (screen a fresh slice) [discovery mode, iterative re-screen loop]' },
+    { title: 'SaveState', detail: 'persist screened tickers + per-asset verdicts for the next run [discovery mode]' },
+    { title: 'Report', detail: 'write markdown research report to disk [both modes]' },
+    { title: 'Ledger', detail: 'log the dated chair call (discovery) or panel verdict (holdings-sweep) per asset to the forecast-ledger [both modes]' },
+    { title: 'LoadPositions', detail: 'read positions.csv and parse Position/Quantity/Type/Unrealized_PnL rows [holdings-sweep mode]' },
+    { title: 'Classify', detail: 'classify each Stock-type ticker as single-name vs ETF/fund [holdings-sweep mode]' },
+    { title: 'TrendScreen', detail: 'lightweight batched trend-only screen for ETF/commodity-trust holdings [holdings-sweep mode]' },
   ],
 }
 
@@ -46,6 +52,11 @@ const QUESTION = ARGS.question || ARGS.query || '(no question provided)'
 const RAW_PORTFOLIO = ARGS.portfolio || ''   // empty = caller gave none; manager must NOT invent one
 const ANCHOR = ARGS.anchor || ''             // optional seed; '' → Gather fetches LIVE
 const MODE = ARGS.mode || 'discovery'        // 'discovery' (default, this file's original behavior) | 'holdings-sweep'
+// Explicit caller override for screen strategy (docs: AGENTS.md/README/SKILLS-MAP tell callers to pass
+// args.strategy:"trend-discovery"). Validated against the same enum as PLAN_SCHEMA.strategy; '' = caller
+// gave none, so the CIO decides at Intake as before. When set, it is a DETERMINISTIC override applied
+// after the Intake plan comes back -- the CIO may not veto an explicit caller arg.
+const STRATEGY_ARG = (ARGS.strategy === 'trend-discovery' || ARGS.strategy === 'standard') ? ARGS.strategy : ''
 
 const PLAN_SCHEMA = {
   type: 'object',
@@ -320,12 +331,19 @@ const plan = await agent(
   `RAW QUERY: ${QUESTION}\nPORTFOLIO PASSED BY CALLER: ${RAW_PORTFOLIO || '(none -- caller gave no holdings; do NOT invent any)'}\nAs-of: ${REPORT_DATE}\n\n` +
   `Set screen_scope (what universe/sector/theme to screen, e.g. "AI supply chain semiconductors -- mid/small cap names not yet surged") and screen_criteria (what makes a good candidate, e.g. "valuation gap vs peers, upcoming catalysts, supply inflection point").\n` +
   `Choose a screening strategy: set strategy="standard" (default -- web-search + screener-logic candidate hunt) OR strategy="trend-discovery" when the mandate is a BROAD momentum/trend hunt rather than a specific sector query -- trend-discovery runs a quantitative pre-screen (emerging_scan.py) then an EDGAR-filing + WebSearch journalism fan-out, non-obvious-beneficiary mapping, and a skeptic filter before candidates reach the desk. It is more expensive (50+ extra agents) -- only pick it when the mandate is genuinely open-ended trend discovery, not a targeted theme.\n` +
+  (STRATEGY_ARG ? `CALLER PASSED AN EXPLICIT strategy ARG: "${STRATEGY_ARG}". This will be force-applied after you return regardless of what you set here -- you may still set strategy for your own reasoning, but it will be overridden.\n` : '') +
   `Do NOT populate assets[] -- leave it empty or omit it. The screening team decides which stocks to analyze.\n` +
   `Keep all existing skill-discovery instructions for gather_skills, panel_skills, desk_skill, chair_skill.` +
   `\nPRIOR-RUN STATE (already-screened tickers + verdicts from earlier runs — avoid repeating; the dedup list is enforced separately):\n${priorState}`,
   { label: 'manager-intake', phase: 'Intake', schema: PLAN_SCHEMA, model: MODEL })
 
 if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 'no plan from manager' } }
+
+// Deterministic override -- an explicit caller arg wins over the CIO's own choice (docs promise this).
+if (STRATEGY_ARG && plan.strategy !== STRATEGY_ARG) {
+  log(`INTAKE strategy: caller arg "${STRATEGY_ARG}" overrides CIO's choice "${plan.strategy || '(none)'}"`)
+  plan.strategy = STRATEGY_ARG
+}
 
 const STRATEGY = (plan.strategy === 'trend-discovery') ? 'trend-discovery' : 'standard'
 log(`INTAKE strategy: ${STRATEGY}`)
@@ -417,10 +435,17 @@ let screened = null
       log(`Screen: ${tickers.length} candidates found: ${tickers.join(', ')}`)
       if (screened.screen_notes) log(`Screen notes: ${screened.screen_notes}`)
     } else {
+      if (STRATEGY === 'trend-discovery' && screened) return await writeNoSurvivorsReport(screened)
       log('WARNING: screener returned no valid tickers -- aborting.')
       return { error: 'screener returned no valid tickers' }
     }
   } else {
+    // trend-discovery: an empty candidate set after the skeptic filter (or an empty pre-screen) is a
+    // legitimate, reportable outcome -- not a screener failure. The original standalone trend workflow
+    // wrote an honest dated "NO SURVIVORS" report here and returned cleanly; the consolidation collapsed
+    // this into a generic {error}. Restore that behavior for trend-discovery only -- standard screening
+    // returning nothing is still a real failure.
+    if (STRATEGY === 'trend-discovery' && screened) return await writeNoSurvivorsReport(screened)
     log('WARNING: screener returned nothing -- aborting.')
     return { error: 'screener returned nothing' }
   }
@@ -473,8 +498,21 @@ async function runPipeline(assets, tag) {
   const lbl = (s) => tag ? `${tag}-${s}` : s          // namespaced agent label
   const ph = (s) => tag ? `${s} (${tag})` : s          // namespaced phase name
   // Per-asset context builder -- each agent focuses on ONE asset, avoiding giant multi-asset context blowup.
+  // trend-discovery only: thread the screen's structured journalism findings (demand_inflection,
+  // supply_constraint, catalyst, timeline, beneficiary chains) into Gather/Panel context. Without this the
+  // 50+ journalism agents from the trend-discovery screen only ever filter tickers via the skeptic step --
+  // their findings never reach the desk that actually forms a verdict.
+  const journalismFor = (asset) => {
+    if (STRATEGY !== 'trend-discovery' || !screened || !Array.isArray(screened.candidates)) return ''
+    const c = screened.candidates.find(x => String(x.ticker || '').toUpperCase() === String(asset).toUpperCase())
+    if (!c) return ''
+    const parts = []
+    if (Array.isArray(c.journalism) && c.journalism.length) parts.push(`Journalism findings (trend-discovery screen): ${JSON.stringify(c.journalism)}`)
+    if (Array.isArray(c.beneficiary_chains) && c.beneficiary_chains.length) parts.push(`Beneficiary chains: ${JSON.stringify(c.beneficiary_chains)}`)
+    return parts.length ? `\n${parts.join('\n')}` : ''
+  }
   const ctxFor = (asset) =>
-    `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${batchList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nArticle cache: python3 ${FETCH_SCRIPT} --search "${asset}" --limit 5  (pre-fetched FT/WSJ/Bloomberg; query before hitting live URLs)\nFull article body: bun ${READ_SCRIPT} "<url>"  (FT→archive.ph/Chrome, WSJ→Wayback, no extension needed)\nAs-of: ${REPORT_DATE}`
+    `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${batchList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nArticle cache: python3 ${FETCH_SCRIPT} --search "${asset}" --limit 5  (pre-fetched FT/WSJ/Bloomberg; query before hitting live URLs)\nFull article body: bun ${READ_SCRIPT} "<url>"  (FT→archive.ph/Chrome, WSJ→Wayback, no extension needed)\nAs-of: ${REPORT_DATE}${journalismFor(asset)}`
 
   // ---------- GATHER -- per-asset pipeline (each asset x all gather skills in parallel) ----------
   // Old: one agent covers ALL assets per skill -> massive context, stalls on large lists.
@@ -578,6 +616,7 @@ for (let iter = 1; iter <= 3; iter++) {
     decision.per_asset.some(a => bullActions.includes(String(a.action || '').toUpperCase()))
   if (hasBuy) { log(`CIO-Review iter ${iter}: STOP — already have a BUY signal`); break }
 
+  phase('CIO-Review')
   const review = await agent(
     `You are the CIO running an iterative search for a conviction BUY.\n` +
     `GOAL: find at least ONE high/medium-conviction BUY (action ACCUMULATE / BUY_NOW / ADD / SCALE / DCA / BUY_ON_TOUCH). ` +
@@ -732,6 +771,19 @@ const perAssetReasoning = ASSETS.map(asset => {
 
   return lines.join('\n')
 }).join('\n\n---\n\n')
+
+// trend-discovery only: beneficiary chains + theme list + killed-ticker/reason list were part of the
+// original standalone trend workflow's report and were dropped in the consolidation. Restore them.
+const trendReportSection = (STRATEGY === 'trend-discovery' && screened) ? `
+## Trend-discovery: themes scanned
+${((screened.themes) || []).map(t => `- ${t}`).join('\n') || '(none)'}
+
+## Trend-discovery: beneficiary chains
+${((screened.chains) || []).map(c => `- **${c.primary}** -> ${(c.beneficiaries || []).join(', ')} (${c.conviction || 'n/a'} conviction): ${c.logic || ''}`).join('\n') || '(none mapped)'}
+
+## Trend-discovery: killed by skeptic filter
+${((screened.killedDetail) || []).map(k => `- **${k.ticker}**: ${k.kill_reason}`).join('\n') || '(none)'}
+` : ''
 const reportMd = `# Research -- ${FINAL_ASSET_LIST} (${ASSET_CLASS}) -- ${REPORT_DATE}
 
 > Question: ${QUESTION}
@@ -768,7 +820,7 @@ ${seatRows}
 
 ## Seat detail
 ${seatDetail}
-
+${trendReportSection}
 ## Behavioral guardrail (non-voting)
 ${guardrail}
 
@@ -831,7 +883,8 @@ const ledgerLogs = await parallel(LEDGER_ASSETS.map(asset => () =>
     `Use Bash to run EXACTLY (appends one dated forecast row):\n\n` +
     `python3 ${LEDGER_PY} add --asset ${asset} --q ${JSON.stringify('panel chair call (' + asset + '): ' + ledgerQ)} ` +
     `--p ${probFor(asset).toFixed(2)} --by ${JSON.stringify(horizon)} --lens ${JSON.stringify(votingLenses)} ` +
-    `--source research-market --flip ${JSON.stringify(flipFor(asset))} --created ${JSON.stringify(REPORT_DATE)}\n\n` +
+    // Provenance: trend-originated buys must be discriminable from standard-strategy runs in ledger history.
+    `--source ${STRATEGY === 'trend-discovery' ? 'research-market:trend-discovery' : 'research-market'} --flip ${JSON.stringify(flipFor(asset))} --created ${JSON.stringify(REPORT_DATE)}\n\n` +
     `--p is the chair's per-asset conviction (fallback = per-asset panel tally) -- do not change it. If "id exists", re-run once with --id ${asset.toLowerCase()}-${REPORT_DATE}-panel. Reply with the CLI's stdout line.`,
     { label: `ledger-${asset}`, phase: 'Ledger', model: MODEL }))
 )
@@ -1022,6 +1075,12 @@ async function runTrendDiscoveryScreen() {
 
   const survivors = (skepticResult && skepticResult.survivors) ? skepticResult.survivors.filter(s => s.passed) : []
   const killed = (skepticResult && skepticResult.killed) || []
+  // Full kill detail (ticker + reason) for the report/no-survivors path -- the top-level `killed` field
+  // above is just ticker strings; skepticResult.survivors carries kill_reason per evaluated candidate
+  // (both passed and failed) so pull reasons from there and fall back to the bare ticker list.
+  const killedDetail = (skepticResult && Array.isArray(skepticResult.survivors))
+    ? skepticResult.survivors.filter(s => !s.passed).map(s => ({ ticker: s.ticker, kill_reason: s.kill_reason || '(no reason given)' }))
+    : killed.map(t => ({ ticker: t, kill_reason: '(no reason given)' }))
   log(`trend-discovery skeptic: ${survivors.length} survived, ${killed.length} killed`)
 
   // Cap survivors -- downstream Gather+Panel run per-asset, so keep the candidate count bounded (the
@@ -1034,19 +1093,81 @@ async function runTrendDiscoveryScreen() {
     const jFindings = journalism.flatMap(j => (j.findings || []).filter(f => f.ticker === s.ticker))
     const demandInflection = jFindings.map(f => f.demand_inflection).filter(Boolean).join(' | ') || ''
     const supplyConstraint = jFindings.map(f => f.supply_constraint).filter(Boolean).join(' | ') || ''
+    // Beneficiary chains this ticker participates in (as primary or as a beneficiary) -- kept structured.
+    const relatedChains = chains.filter(c => c.primary === s.ticker || (c.beneficiaries || []).includes(s.ticker))
     return {
       ticker: s.ticker,
       thesis: s.thesis || demandInflection || '(trend-discovery survivor -- see journalism findings)',
       catalyst: s.catalyst || '',
       valuation_gap: '',
       why_not_yet_surged: supplyConstraint || (s.timeline ? `catalyst timeline: ${s.timeline}` : ''),
+      // Structured per-ticker journalism evidence -- threaded into Gather/Panel context via ctxFor() so the
+      // 50+ journalism agents inform the desk's verdicts, not just the skeptic filter's pass/kill call.
+      // Kept lean: structured fields only, never raw agent transcripts.
+      journalism: jFindings.map(f => ({
+        demand_inflection: f.demand_inflection, supply_constraint: f.supply_constraint,
+        catalyst: f.catalyst, timeline: f.timeline, confidence: f.confidence,
+        what_would_change_mind: f.what_would_change_mind, source: f.source,
+      })),
+      beneficiary_chains: relatedChains.map(c => ({ primary: c.primary, beneficiaries: c.beneficiaries, logic: c.logic, conviction: c.conviction })),
     }
   })
 
   return {
     candidates,
     excluded: killed,
+    killedDetail,
+    themes,
+    chains,
     screen_notes: `trend-discovery: pre-screen ${tickers.length} -> journalism ${totalFindings} findings -> beneficiary ${chains.length} chains -> skeptic ${survivors.length}/${allCandidates.length} survived -> ${candidates.length} handed to the desk`,
+  }
+}
+
+// ---------- No-survivors report (trend-discovery only) — restores behavior lost in the consolidation:
+// when the skeptic filter kills every candidate (or the pre-screen itself returns empty), that is a
+// legitimate, reportable outcome, not a generic screener failure. Writes a dated report with themes
+// scanned + killed tickers/reasons and returns a clean {survivors:0,...} result (never {error}). Hoisted
+// function declaration -- called from the Screen-phase result block above, defined here for readability.
+// ----------
+async function writeNoSurvivorsReport(screenedResult) {
+  const killedList = (screenedResult && Array.isArray(screenedResult.killedDetail) && screenedResult.killedDetail.length)
+    ? screenedResult.killedDetail
+    : ((screenedResult && screenedResult.excluded) || []).map(t => ({ ticker: t, kill_reason: '(no reason given)' }))
+  const themesScanned = (screenedResult && screenedResult.themes) || []
+  const noSurvivorsPath = `/Users/engineer/workspace/backtest/research/research.${ASSET_CLASS}.${REPORT_DATE}.md`
+  const noSurvivorsMd = `# Research -- NO SURVIVORS (${ASSET_CLASS}) -- ${REPORT_DATE}
+
+> Question: ${QUESTION}
+> Strategy: trend-discovery
+> Generated by \`research-market-workflow\`. Educational, not advice; re-pull before acting.
+
+## Verdict
+**NO SURVIVORS** -- the skeptic filter killed every trend-discovery candidate this run (or the pre-screen returned no tickers). No BUY/HOLD/AVOID verdicts to report.
+
+## Themes scanned
+${themesScanned.length ? themesScanned.map(t => `- ${t}`).join('\n') : '(none returned)'}
+
+## Killed tickers + reasons
+${killedList.length ? killedList.map(k => `- **${k.ticker}**: ${k.kill_reason}`).join('\n') : '(none -- pre-screen itself returned empty)'}
+
+## Screen notes
+${(screenedResult && screenedResult.screen_notes) || '(none)'}
+`
+  let noSurvivorsOk = false
+  for (let attempt = 1; attempt <= 2 && !noSurvivorsOk; attempt++) {
+    await agent(`Use the Write tool to create EXACTLY this file:\n${noSurvivorsPath}\nWrite this content VERBATIM (no edits/summary). Create parent dirs. After writing, run Bash \`wc -c < ${noSurvivorsPath}\` to confirm. Reply with just the byte count.\n--- BEGIN ---\n${noSurvivorsMd}\n--- END ---`,
+      { label: attempt === 1 ? 'write-no-survivors-report' : `write-no-survivors-report-retry${attempt}`, phase: 'Report', model: MODEL })
+    const check = await agent(`Run Bash EXACTLY: \`test -f ${noSurvivorsPath} && wc -c < ${noSurvivorsPath} || echo MISSING\`. Reply with ONLY the byte count number, or the word MISSING.`,
+      { label: `verify-no-survivors-report-${attempt}`, phase: 'Report', model: MODEL })
+    const bytes = parseInt(String(check).replace(/[^0-9]/g, ''), 10) || 0
+    noSurvivorsOk = String(check).indexOf('MISSING') === -1 && bytes > 200
+    log(noSurvivorsOk ? `NO SURVIVORS report written + verified (${bytes} bytes): ${noSurvivorsPath}`
+      : `WARNING: no-survivors report attempt ${attempt} did NOT persist. ${attempt < 2 ? 'Retrying.' : 'GIVING UP -- report NOT on disk.'}`)
+  }
+  return {
+    survivors: 0, killed: killedList, themes: themesScanned,
+    reportPath: noSurvivorsPath, reportPersisted: noSurvivorsOk,
+    screen_notes: (screenedResult && screenedResult.screen_notes) || '',
   }
 }
 
@@ -1154,9 +1275,22 @@ async function runHoldingsSweep() {
       { label: `holding-panel:${r.position}`, phase: 'Panel', schema: HOLDING_PANEL_SCHEMA, model: MODEL }
     )
   }))
-  const panelVerdicts = panelResults.map((v, i) => v || {
-    ticker: panelBucket[i].position, final_verdict: 'HOLD', conviction: 0,
-    data_coverage: '0/5 -- agent failed', gate_triggered: true, cio_memo: '[UNAVAILABLE: panel agent failed]',
+  const panelVerdicts = panelResults.map((v, i) => {
+    const r = panelBucket[i]
+    const filled = v || {
+      ticker: r.position, final_verdict: 'HOLD', conviction: 0,
+      data_coverage: '0/5 -- agent failed', gate_triggered: true, cio_memo: '[UNAVAILABLE: panel agent failed]',
+    }
+    // Code-enforced policy clamp -- the POLICY OVERRIDE prompt note above is advisory only; an LLM panel
+    // agent can still return TRIM/EXIT on a crypto-beta proxy despite the instruction. Force HOLD-ONLY here
+    // so the policy is guaranteed, not merely requested. Raw (pre-clamp) verdict kept in panel_verdict for
+    // transparency -- the report/consumer can see what the panel actually concluded before the clamp.
+    if (r.holdOnly && ['TRIM', 'EXIT'].includes(filled.final_verdict)) {
+      filled.panel_verdict = filled.final_verdict
+      filled.final_verdict = 'HOLD'
+      filled.policy_note = 'clamped: crypto-beta HOLD-ONLY'
+    }
+    return filled
   })
   log(`holdings-sweep panel: ${panelVerdicts.filter(v => v.final_verdict !== 'HOLD').length}/${panelVerdicts.length} non-HOLD verdicts`)
 
@@ -1176,7 +1310,8 @@ async function runHoldingsSweep() {
     `**Data coverage:** ${v.data_coverage || 'n/a'}${v.gate_triggered ? ' -- GATE TRIGGERED' : ''}\n` +
     `**Dissent:** ${v.dissent_logged || 'none'}\n` +
     `**CIO memo:** ${v.cio_memo || ''}\n` +
-    (v.funding_pool_test ? `**Funding-pool test:** ${v.funding_pool_test}\n` : '')
+    (v.funding_pool_test ? `**Funding-pool test:** ${v.funding_pool_test}\n` : '') +
+    (v.policy_note ? `**Policy:** ${v.policy_note} (raw panel verdict: ${v.panel_verdict})\n` : '')
   ).join('\n\n---\n\n')
 
   const addCount = panelVerdicts.filter(v => v.final_verdict === 'ADD').length
