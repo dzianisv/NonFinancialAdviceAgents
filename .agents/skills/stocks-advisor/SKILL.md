@@ -374,6 +374,8 @@ or for portfolio review:
 Review my portfolio [sheet URL] using --hierarchy bsc
 ```
 
+**Eval protocol** (how hierarchies are compared — blind pairwise, judge prompt, anti-self-grading): `references/eval-protocol.md`.
+
 **Invoking the comparison mode** (runs all hierarchies on the same input, blind-scored):
 ```
 Compare hierarchies on: AAPL, KO — use all
