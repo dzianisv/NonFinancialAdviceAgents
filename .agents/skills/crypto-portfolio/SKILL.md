@@ -74,10 +74,27 @@ by wallet, one `<label> TOTAL (<address>)` row with a `=SUM()` formula per walle
 a GRAND TOTAL row. Re-read the tab immediately before writing (row numbers shift). Clear
 leftover old rows after an update that shortens the table.
 
+## Verification — DeBank browser cross-check (recommended before writing the sheet)
+
+The API pipeline is primary (fast, deterministic), but its blind spots were found by
+comparing against DeBank — keep doing that when the totals are about to be published:
+
+1. Run the pipeline, note per-wallet totals from `defi_positions_totals.json`.
+2. Via the `chrome-use` / claude-in-chrome browser tools (NEVER the DeBank API — keyed and
+   rate-limited), open `https://debank.com/profile/<address>` for each **EVM** wallet
+   (DeBank doesn't cover TON; Solana coverage is partial — cross-check EVM only), wait for
+   the portfolio to load, read the total net worth + per-protocol breakdown.
+3. Compare: divergence ≤3% is price drift, ignore. Beyond that, diff line-items — a missing
+   PROTOCOL (not a price gap) means a venue Zerion doesn't index: add a module for it (like
+   `hyperliquid_positions.py`) or list it under Known gaps with its DeBank value.
+4. Expected, explainable deltas — don't chase: HL illiquid dust (MAX/UPUMP) shows at spot mid
+   on DeBank but $0 here (deliberate, unrealizable); Lighter appears only on DeBank.
+
 ## Known gaps (state them, don't hide them)
 
 - **Lighter** (zkSync perp DEX): no public read API wired up — its deposits (~$600, 2026-07)
-  are invisible here; note it when reporting totals.
+  are invisible here; note it when reporting totals. Visible on DeBank (browser cross-check
+  above) — that's currently the only way to read it.
 - swap.coffee staking balances endpoint needs a TON-proof header (wallet signature) — liquid
   staking read that way is out; staked TON appears only if held as a receipt jetton.
 - Perp rows report **margin** as the position value (matches the sheet convention), with
