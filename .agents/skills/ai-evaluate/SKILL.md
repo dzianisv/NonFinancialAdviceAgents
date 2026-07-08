@@ -1,5 +1,5 @@
 ---
-name: blind-pairwise-eval
+name: ai-evaluate
 description: "Blind pairwise evaluation of K generator variants (decision hierarchies, workflows, prompt versions) on identical frozen inputs — firewalled rubric author, name-scrubbed blinding, blind pairwise judges, count+margin tally. Never self-grade. Triggers: \"compare hierarchies\", \"A/B these prompts\", \"run a blind eval\"."
 license: MIT
 compatibility: opencode

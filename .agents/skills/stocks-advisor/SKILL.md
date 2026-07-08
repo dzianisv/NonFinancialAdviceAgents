@@ -374,7 +374,7 @@ or for portfolio review:
 Review my portfolio [sheet URL] using --hierarchy bsc
 ```
 
-**Eval protocol** (how hierarchies are compared — blind pairwise, judge prompt, anti-self-grading): `../blind-pairwise-eval/SKILL.md`.
+**Eval protocol** (how hierarchies are compared — blind pairwise, judge prompt, anti-self-grading): `../ai-evaluate/SKILL.md`.
 
 **Invoking the comparison mode** (runs all hierarchies on the same input, blind-scored):
 ```
