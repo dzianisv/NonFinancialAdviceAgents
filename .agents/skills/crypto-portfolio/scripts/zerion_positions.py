@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """EVM + Solana positions via the Zerion API.
 
+Role: automated CROSS-CHECK and machine-readable balance source — the PRIMARY truth for
+EVM positions is the DeBank browser read (see SKILL.md); Zerion does not index every
+protocol (missed Hyperliquid, Lighter).
+
 Returns a list of normalized position rows for one wallet:
   {wallet, protocol, type, pool, asset, balance, usd_value, note}
 
