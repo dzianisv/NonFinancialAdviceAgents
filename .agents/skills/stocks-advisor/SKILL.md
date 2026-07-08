@@ -338,7 +338,7 @@ The decision chain (how per-stock panel verdicts get turned into a final call) i
 HIERARCHY="${HIERARCHY_FLAG:-bsc}"   # default: bsc
 HIERARCHY_FILE=".agents/skills/stocks-advisor/references/hierarchies/${HIERARCHY}.md"
 if [[ ! -f "$HIERARCHY_FILE" ]]; then
-  echo "Unknown hierarchy: $HIERARCHY. Available: bsc, bridgewater, berkshire, citadel, millennium, point72, soros"
+  echo "Unknown hierarchy: $HIERARCHY. Available: bsc, bridgewater, berkshire, citadel, millennium, point72, soros, panel"
   exit 1
 fi
 # Load and follow the steps in $HIERARCHY_FILE — they replace Steps 2–2.7 entirely
@@ -357,6 +357,7 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 | `citadel` | Pod PM → Central Risk (bidirectional, no PM recourse) → Griffin | 19/25 | Multi-strategy books with strict factor concentration limits |
 | `point72` | Edge Gate → Conviction → Cohen Seat | 19/25 | Idea-generation / new positions with strong edge hypothesis |
 | `tiger` (reference-only — file not shipped; scored worst, use discouraged) | Variant perception → Adversarial pitch → Robertson sole authority | 15/25 | Concentrated 15–20 name long/short books only — not suitable for diversified portfolios |
+| `panel` | Research desk briefing → 6 independent investor votes → conviction-weighted quorum; scorecard ACTION binding | 3–2 head-to-head vs bsc, 44.2% avg margin (2026-07-08 blind pairwise, n=5) — best-in-class dissent preservation; bsc stays default | Named-investor-lens transparency — auditable per-seat OWN/TODAY votes instead of one blended CIO read |
 
 Eval-score caveat: the original /25 pointwise rubric's authorship was never verified as independent — treat
 those numbers as indicative only. **Re-eval done 2026-07-08** (independently-authored rubric, frozen identical
