@@ -76,6 +76,13 @@ the discovered names.
    `chart_manage_indicator` ignores the MA `length` input).
 6. **Individual stocks only.** ETF / sleeve allocation belongs in `tradfi-portfolio-manager`. Portfolio-level
    synthesis across the analyzed names is the `stock-chair` skill's job (§Step 4).
+7. **The panel is an investor panel, not a generic "research" step — this holds even when compressed.** If a
+   run compresses the panel (one bundled agent per ticker instead of 6 parallel subagents), the bundled agent
+   MUST still load and apply each named investor lens from `references/seat-prompts.md`
+   (Fundamental=Buffett, Technical=Druckenmiller, Narrative=Alden, Cycle/Regime=Dalio, Smart-Money=flows,
+   Sell-side=Street consensus) and label each seat line with its lens (§Output format per stock). A run whose
+   output shows generic seat labels without lens names — or that skips loading the lens skills to save time —
+   is non-compliant, not merely abbreviated.
 
 ---
 
@@ -349,7 +356,7 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 | `millennium` | PM thesis → Auto Hard Stop (Kelly-based, no override) | 20/25 | Risk-first portfolio triage — automated de-risking on breach |
 | `citadel` | Pod PM → Central Risk (bidirectional, no PM recourse) → Griffin | 19/25 | Multi-strategy books with strict factor concentration limits |
 | `point72` | Edge Gate → Conviction → Cohen Seat | 19/25 | Idea-generation / new positions with strong edge hypothesis |
-| `tiger` | Variant perception → Adversarial pitch → Robertson sole authority | 15/25 | Concentrated 15–20 name long/short books only — not suitable for diversified portfolios |
+| `tiger` (reference-only — file not shipped; scored worst, use discouraged) | Variant perception → Adversarial pitch → Robertson sole authority | 15/25 | Concentrated 15–20 name long/short books only — not suitable for diversified portfolios |
 
 Eval-score caveat: judge was blind to hierarchy names, but the rubric's authorship was not independently
 verified against the no-self-graded-evals rule — treat rankings as indicative, not proven. Re-eval with an
@@ -401,14 +408,14 @@ After loading $HIERARCHY_FILE, follow its steps exactly. The file contains the f
  Theme: {AI_SUPPLY_CHAIN | ROBOTICS | ENERGY | DEFENSE | FINTECH | HEALTHCARE | OTHER}
  Theme phase: {EARLY_CYCLE | MID_CYCLE | LATE_CYCLE | FADING}
 ═══════════════════════════════════════════════════════
- SEAT VERDICTS
- Fundamental : {STRONG/GOOD/FAIR/POOR} — {one line: key metric}
- Technical   : {SETUP_NAMED/NO_SETUP/BROKEN} — {setup name or "no trigger"}
- Narrative   : {EARLY/MID/LATE/FADING} — {one line: why}
- Sentiment   : {QUIET_ACCUM/NEUTRAL/CROWDED/EXTREME} — {one line}
- Smart-money : {ACCUMULATING/DISTRIBUTING/NEUTRAL} — {CONVICTION: HIGH/MED/LOW | one line: key signal}
- Sell-side   : {BULLISH/NEUTRAL/BEARISH} — {consensus_rating, N analysts, PT $mean (upside %), dispersion, momentum}
- Skeptic     : {SKIP/WATCH/BUY} — {one line: strongest objection}
+ SEAT VERDICTS (each line names the investor lens applied — see references/seat-prompts.md)
+ Fundamental — Buffett lens     : {STRONG/GOOD/FAIR/POOR} — {one line: key metric}
+ Technical — Druckenmiller lens : {SETUP_NAMED/NO_SETUP/BROKEN} — {setup name or "no trigger"}
+ Narrative — Alden lens         : {EARLY/MID/LATE/FADING} — {one line: why}
+ Cycle/Regime — Dalio lens      : {QUIET_ACCUM/NEUTRAL/CROWDED/EXTREME} — {one line}
+ Smart-Money — flows            : {ACCUMULATING/DISTRIBUTING/NEUTRAL} — {CONVICTION: HIGH/MED/LOW | one line: key signal}
+ Sell-side — Street consensus   : {BULLISH/NEUTRAL/BEARISH} — {consensus_rating, N analysts, PT $mean (upside %), dispersion, momentum}
+ Skeptic — Hunt lens            : {SKIP/WATCH/BUY} — {one line: strongest objection}
 
  CIO DECISION: {BUY / WATCH / SKIP / PASS}   (or ADD / HOLD / TRIM / EXIT on holdings path)
  Entry zone  : ${low}–${high}
@@ -452,8 +459,10 @@ market-data point is traceable. Aggregate from every seat that fetched:
 
 1. **News / narrative sources** — every URL the narrative seat web_fetched OR got from the feed scripts
    (`feeds/wsj.ts`, `feeds/ft.ts`, `read_news.ts`). One per line: `[Tn] https://url (date) — "verbatim teaser/quote"`.
-2. **Smart-money / filing sources** — every URL the smart-money seat actually web_fetched (openinsider,
-   13f.info, EDGAR, capitoltrades, finviz/marketbeat fallbacks). One per line.
+2. **Smart-money / filing sources** — every URL the smart-money seat actually web_fetched. Insider
+   transactions (Form 4): **finviz.com/quote.ashx?t=TICKER is PRIMARY** (openinsider.com is secondary /
+   when-available — it has been 403-blocked since 2026-07-05). Other classes: 13f.info, EDGAR, capitoltrades,
+   marketbeat fallbacks. One per line.
 3. **Sell-side / analyst-consensus sources** — every analyst-page URL the sell-side seat actually
    web_fetched (Yahoo Finance analysis tab, StockAnalysis.com forecast, TipRanks, MarketBeat, Zacks,
    Morningstar, Nasdaq analyst-research, Finviz, WSJ research-ratings). One per line. If the seat returned
@@ -654,10 +663,12 @@ orchestrator context (it re-reads the full report and would bloat the main conte
 1. Reads `$RUN_DIR/report.md` (or the saved `.cache/stocks-advisor/research/<title>.md`) and
    `$RUN_DIR/_scorecard.json`.
 2. Writes `$RUN_DIR/reasoning_diagram.mmd` — a mermaid `flowchart TD` with:
-   - one subgraph per ticker containing **the full panel as desks**: one node per seat that ran
-     (Fundamental / Technical / Narrative / Sentiment / Smart-Money / Sell-side), each carrying its seat
+   - one subgraph per ticker containing **the full panel as desks**: one node per seat that ran, named
+     by its investor lens per `references/seat-prompts.md` — e.g. `Buffett desk (Fundamental)`,
+     `Druckenmiller desk (Technical)`, `Alden desk (Narrative)`, `Dalio desk (Cycle/Regime)`,
+     `Smart-Money desk (flows)`, `Sell-side desk (Street consensus)` — each carrying its seat
      verdict + the key number it contributed ("Smart-$: CEO bought $1M — ACCUMULATING"), flowing into the
-     **Skeptic desk** (strongest objection) → **CIO/scorecard decision node** (scorecard ACTION + basis —
+     **Hunt desk / Skeptic** (strongest objection) → **CIO/scorecard decision node** (scorecard ACTION + basis —
      labelled as the binding source) → DISSENT node when a seat disagreed (name the seat, show it was
      overruled) → final verdict node with the flip-to-ADD/BUY trigger. The panel structure must be visible
      as a panel — seats are desks in a deliberation, not a flat evidence list;
@@ -691,14 +702,14 @@ fcf_yield: 0.98, rev_growth: 27.6%, earnings_growth: -80.4%, short: 4.7%, inst: 
 analysts: 41, dd_from_52wh: -19.8%}`. Assembles the package, spawns 6 seats in parallel.
 
 Seat verdicts:
-- Fundamental: **FAIR** — fwd P/E 42.9, PEG 1.58, FCF yield 0.98% (rich); but rev +27.6% AI-driven. Thin
+- Fundamental — Buffett lens: **FAIR** — fwd P/E 42.9, PEG 1.58, FCF yield 0.98% (rich); but rev +27.6% AI-driven. Thin
   margin of safety at this price.
-- Technical: **SETUP_NAMED** — pullback off 52w high, holding well above rising 200d ($116). Trigger:
+- Technical — Druckenmiller lens: **SETUP_NAMED** — pullback off 52w high, holding well above rising 200d ($116). Trigger:
   daily close > $280 on above-avg volume. Stop: $245 (range low / 50d). Target $320, R:R ~2.4:1.
-- Narrative: **MID_CYCLE** — custom-silicon / AI accelerator theme, broad participation, earnings
+- Narrative — Alden lens: **MID_CYCLE** — custom-silicon / AI accelerator theme, broad participation, earnings
   confirming [source: https://www.ft.com/...]. Real beneficiary, not noise.
-- Sentiment: **CROWDED** — rec_mean 1.45 across 41 analysts, inst 85.5% — little marginal buyer left.
-- Sell-side: **NEUTRAL** — consensus Buy, 41 analysts, PT mean $290 (+9.6% upside), dispersion WIDE, momentum
+- Cycle/Regime — Dalio lens: **CROWDED** — rec_mean 1.45 across 41 analysts, inst 85.5% — little marginal buyer left.
+- Sell-side — Street consensus: **NEUTRAL** — consensus Buy, 41 analysts, PT mean $290 (+9.6% upside), dispersion WIDE, momentum
   STABLE; independent view (Morningstar) not confirming — 2-of-3 rule not met, crowded-consensus trap.
 
 Decision: Fundamental only FAIR (not ≥ GOOD) → fails the BUY gate → **WATCH**. Output a WATCH block: enter
@@ -736,8 +747,9 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       hypotheses to be backtested in `strategy-discovery-backtest`.
 - [ ] A TradingView screenshot is embedded inline per stock — UNLESS DEGRADED_TECH mode, where screenshots
       are skipped and each block is tagged DEGRADED.
-- [ ] The smart-money seat cited ≥1 real filing/trade URL it actually web_fetched (openinsider, 13f.info,
-      EDGAR, capitoltrades), or returned `NEUTRAL — INSUFFICIENT DATA`; no filing is fabricated.
+- [ ] The smart-money seat cited ≥1 real filing/trade URL it actually web_fetched (finviz PRIMARY for
+      insider transactions, openinsider secondary/when-available, 13f.info, EDGAR, capitoltrades), or
+      returned `NEUTRAL — INSUFFICIENT DATA`; no filing is fabricated.
 - [ ] **The Sell-side seat ran on every deep-dive ticker** (or returned `INSUFFICIENT_DATA`), cited every
       analyst page it actually `web_fetch`ed (Yahoo/StockAnalysis.com/TipRanks/MarketBeat/Zacks/Morningstar),
       and did **NOT** assign BULLISH on the raw consensus rating level alone — the ≥2-of-3 rule (independent

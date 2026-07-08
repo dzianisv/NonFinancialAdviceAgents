@@ -183,8 +183,10 @@ CHANNEL=$(grep '^channel_id:' .cache/stocks-daily/telegram.yaml 2>/dev/null | se
 2. **Lead with an action summary, then group by action — not by ticker order.** A reader must get the whole
    picture from the first few lines without scrolling through prose.
 
-**4.5b — Build the message(s).** Use the exact stocks-advisor seat labels — Fundamental / Technical /
-Narrative / Sentiment / Smart-Money / Sell-side — NOT the crypto seats.
+**4.5b — Build the message(s).** Use the exact stocks-advisor seat labels, each carrying its investor lens
+(see stocks-advisor's `references/seat-prompts.md`) — `Fundamental — Buffett lens` / `Technical —
+Druckenmiller lens` / `Narrative — Alden lens` / `Cycle/Regime — Dalio lens` / `Smart-Money — flows` /
+`Sell-side — Street consensus` — NOT the crypto seats, and never a bare generic label without the lens name.
 
 ```
 📊 Stocks Daily — {TODAY} | Regime: {one phrase, e.g. "risk-off, debasement unwind"}
@@ -198,12 +200,12 @@ Narrative / Sentiment / Smart-Money / Sell-side — NOT the crypto seats.
 🔻 SELLS / TRIMS / EXITS
 ━━━━━━━━━━━━━━━━━━━━━━
 {EMOJI} {TICKER} ${PRICE} — {DECISION}
-  📊 Fundamental:  {finding (plain explanation in parens)} [(as of MM-DD) if reused]
-  📈 Technical:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
-  📰 Narrative:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
-  🌡 Sentiment:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
-  🐋 Smart-Money:  {finding (plain explanation in parens)} [(as of MM-DD) if reused]
-  🏦 Sell-side:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  📊 Fundamental — Buffett lens:     {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  📈 Technical — Druckenmiller lens: {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  📰 Narrative — Alden lens:         {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  🌡 Cycle/Regime — Dalio lens:      {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  🐋 Smart-Money — flows:            {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  🏦 Sell-side — Street consensus:   {finding (plain explanation in parens)} [(as of MM-DD) if reused]
 ...only seats with real content — see rule 1. Repeat block per stock in this bucket...
 
 ━━━━━━━━━━━━━━━━━━━━━━
@@ -234,18 +236,18 @@ DYOR. Educational only. Not financial advice. #Stocks #Investing
 **Concrete stock block example (fresh + reused seats mixed, per rule 1):**
 ```
 🔴 COIN $149 — TRIM
-  📊 Fundamental:  Fwd P/E 38, FCF yield 1.1% (rich); rev tied to crypto volume (cyclical, not steady).
-  📈 Technical:    Below 200d MA ($178 long-term avg), RSI 41 (weak), MACD bearish — downtrend intact.
-  📰 Narrative:    Debasement trade unwinding (gold −12% MTD, BTC down) — crypto-beta out of favor. (as of 07-07)
-  🌡 Sentiment:    22.7% of the book in one name — extreme single-name concentration risk.
-  ⚠️ dark seats: COIN (Smart-Money — openinsider blocked, no prior verdict)
+  📊 Fundamental — Buffett lens:     Fwd P/E 38, FCF yield 1.1% (rich); rev tied to crypto volume (cyclical, not steady).
+  📈 Technical — Druckenmiller lens: Below 200d MA ($178 long-term avg), RSI 41 (weak), MACD bearish — downtrend intact.
+  📰 Narrative — Alden lens:         Debasement trade unwinding (gold −12% MTD, BTC down) — crypto-beta out of favor. (as of 07-07)
+  🌡 Cycle/Regime — Dalio lens:      22.7% of the book in one name — extreme single-name concentration risk.
+  ⚠️ dark seats: COIN (Smart-Money — finviz + openinsider both blocked, no prior verdict)
 
 🟢 KHC $25.30 — ADD
-  📊 Fundamental:  Cheap (fwd P/E 12.1), FCF yield 10.7%, genuine 6.45% dividend. (as of 07-07)
-  📈 Technical:    Above 200d MA (+7.0%) — uptrend confirmed.
-  📰 Narrative:    CEO bought $4.99M open-market. (as of 07-07)
-  🌡 Sentiment:    NEUTRAL — inst ~65%, short interest ~2% (light, no crowding). (as of 07-07)
-  🐋 Smart-Money:  CEO open-market buy is the smart-money signal — no separate 13F delta this week. (as of 07-07)
+  📊 Fundamental — Buffett lens:     Cheap (fwd P/E 12.1), FCF yield 10.7%, genuine 6.45% dividend. (as of 07-07)
+  📈 Technical — Druckenmiller lens: Above 200d MA (+7.0%) — uptrend confirmed.
+  📰 Narrative — Alden lens:         CEO bought $4.99M open-market. (as of 07-07)
+  🌡 Cycle/Regime — Dalio lens:      NEUTRAL — inst ~65%, short interest ~2% (light, no crowding). (as of 07-07)
+  🐋 Smart-Money — flows:            CEO open-market buy is the smart-money signal — no separate 13F delta this week. (as of 07-07)
 ```
 
 **⛔ Rules (mirror crypto-daily):**

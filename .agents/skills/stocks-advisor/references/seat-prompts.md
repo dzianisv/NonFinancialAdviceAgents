@@ -181,7 +181,10 @@ No fetched URL = not a source. Fabricated filing → verdict invalidated.
 DATA PACKAGE: <inject: company name + ticker>
 
 FETCH (web_fetch each URL; stop early if signal is clear):
-  Form 4: https://openinsider.com/screener?s={TICKER}   — code P only, last 30d
+  Form 4 (insider transactions) — finviz is PRIMARY, openinsider is SECONDARY (try it, don't block on it):
+    PRIMARY:   https://finviz.com/quote.ashx?t={TICKER}   — "Insider Trading" table at the bottom of the page
+    SECONDARY: https://openinsider.com/screener?s={TICKER}   — code P only, last 30d (when available;
+               openinsider.com has been 403-blocked since 2026-07-05 — do not stall the seat waiting on it)
      ≥3 distinct insiders → ACC | 2 incl. CEO/CFO → ACC | 1 buy → NEUTRAL | sells → ignore
   13F:    https://13f.info/stock/{TICKER}  (fallback: https://www.hedgefollow.com/{TICKER})
      net adds > net trims last Q → ACC | mixed → NEUTRAL | net trims dominant → DIST
