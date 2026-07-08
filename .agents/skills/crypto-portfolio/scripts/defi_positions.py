@@ -2,7 +2,7 @@
 """DeFi portfolio snapshot orchestrator: all wallets -> CSV + totals JSON.
 
 Sources: Zerion (EVM + Solana), swap.coffee (TON), Hyperliquid info API (HL book —
-Zerion can't see it). Wallet list lives in wallets.json next to this script.
+Zerion can't see it). Wallet list lives in <repo>/.cache/crypto-portfolio/wallets.yaml.
 
 Run:
   ZERION_API_KEY=... /Users/engineer/.venv/bin/python3 defi_positions.py [--out DIR]
@@ -26,15 +26,18 @@ import ton_positions
 import zerion_positions
 
 
+CACHE_DIR = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".cache", "crypto-portfolio"))
+
+
 def load_config():
-    with open(os.path.join(HERE, "wallets.json")) as f:
-        return json.load(f)
+    import yaml
+    with open(os.path.join(CACHE_DIR, "wallets.yaml")) as f:
+        return yaml.safe_load(f)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    default_out = os.path.abspath(os.path.join(HERE, "..", "..", "..", "..", ".cache", "crypto-portfolio"))
-    parser.add_argument("--out", default=default_out, help="output directory")
+    parser.add_argument("--out", default=CACHE_DIR, help="output directory")
     args = parser.parse_args()
     os.makedirs(args.out, exist_ok=True)
 

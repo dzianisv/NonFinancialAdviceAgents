@@ -12,7 +12,7 @@ license: MIT
 compatibility: >
   Needs network access to api.zerion.io (key required), backend.swap.coffee +
   tokens.swap.coffee (public, ~1 req/s), tonapi.io, api.hyperliquid.xyz and
-  lite-api.jup.ag (all public). Python 3 with `requests` (venv: /Users/engineer/.venv).
+  lite-api.jup.ag (all public). Python 3 with `requests` + `PyYAML` (venv: /Users/engineer/.venv).
 metadata:
   author: engineer
   version: "1.0"
@@ -31,9 +31,9 @@ set -a; source .env; set +a   # provides ZERION_API_KEY (mirrored in Bitwarden '
 /Users/engineer/.venv/bin/python3 .agents/skills/crypto-portfolio/scripts/defi_positions.py
 ```
 
-Outputs to `.cache/crypto-portfolio/` (gitignored): `defi_positions.csv` +
+Outputs to `.cache/crypto-portfolio/` (overwritten each run): `defi_positions.csv` +
 `defi_positions_totals.json` (per-wallet totals computed pre-dust-filter, so they are
-honest against the raw sources). Wallet registry: `scripts/wallets.json` — labels match
+honest against the raw sources). Wallet registry: `.cache/crypto-portfolio/wallets.yaml` — labels match
 the DeFi tab of the Porfolio Google Sheet (`1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8`).
 
 Per-wallet modules are runnable standalone for debugging:
@@ -63,7 +63,7 @@ Per-wallet modules are runnable standalone for debugging:
 4. **HL spot tokens without a perp oracle are dust valued $0** (flagged in Note) — HL's thin
    spot mid quotes unrealizable values (a 1.3M MAX bag ≈ "$8.65M"). Stables at $1, everything
    else off perp marks.
-5. **Dust filter** $0.50 (per `wallets.json`), except wallets in `keep_all_dust` where scam/
+5. **Dust filter** $0.50 (per `wallets.yaml`), except wallets in `keep_all_dust` where scam/
    zero-value jettons are kept visible on purpose (they document the wallet's state).
 
 ## Updating the DeFi tab of the Google Sheet
