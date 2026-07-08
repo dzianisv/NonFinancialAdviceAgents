@@ -635,6 +635,38 @@ Publishing is opt-in and silent-skip — never fail the run because of it.
 
 ---
 
+## Step 5.5 — Reasoning diagram (MANDATORY when a report was produced; DELEGATE to one subagent)
+
+After the report exists (and the Notion page, if configured, is created), attach a **mermaid diagram of how
+the run reached its conclusions** — the decision flow the reader can audit: data inputs → deterministic
+scorecard ACTION → per-seat evidence → skeptic/dissent → final verdict + flip-trigger, per ticker.
+
+**Delegate the WHOLE step to ONE subagent** (`/model sonnet`) — never build the diagram in the main
+orchestrator context (it re-reads the full report and would bloat the main context). The subagent:
+
+1. Reads `$RUN_DIR/report.md` (or the saved `.cache/stocks-advisor/research/<title>.md`) and
+   `$RUN_DIR/_scorecard.json`.
+2. Writes `$RUN_DIR/reasoning_diagram.mmd` — a mermaid `flowchart TD` with:
+   - one subgraph per ticker: data package → scorecard ACTION (+basis) → the 2-3 seat findings that
+     actually drove the call (with the key number each contributed) → DISSENT node if logged → final
+     verdict node with the flip-to-ADD/BUY trigger;
+   - a shared top node for the run inputs (fundamentals.py / TradingView / scorecard) and a shared bottom
+     node for the report outputs;
+   - edge labels carrying the load-bearing evidence ("div 6.65%, 127y streak", "insiders sold @62"), so the
+     diagram answers *"why this verdict"*, not just *"what ran"*.
+3. Renders it: `npx --yes @mermaid-js/mermaid-cli -i reasoning_diagram.mmd -o reasoning_diagram.png -b transparent -w 1600`
+   (mermaid-cli is available via npx; on render failure keep the .mmd and continue — the code block still
+   publishes).
+4. Appends a `## Reasoning diagram` section to the report .md containing the fenced ```mermaid code block.
+5. If a Notion page was created this run: appends the same fenced mermaid block to that page
+   (`notion-update-page`; Notion renders mermaid natively). Loads the tool itself via ToolSearch.
+6. Returns ONLY: the .mmd/.png paths and "Notion updated: yes/no" — never the diagram source (context bloat).
+
+The orchestrator then sends `reasoning_diagram.png` to the user alongside the report link. On any failure in
+this step, report it and continue — the diagram never fails the run.
+
+---
+
 ## Worked example (one stock)
 
 <example>
@@ -751,5 +783,8 @@ Recommend-only and backtest-gated — an alert is a reminder to re-evaluate, not
   high-conviction actions from buy-on-condition names.
 - If `.cache/stocks-advisor/notion.yaml` is configured, a dated Notion page (title `YYYY-MM-DD <narrative>`,
   Step 5) was created and its URL returned; if not configured, publishing was skipped silently (not an error).
+- A **reasoning diagram** (Step 5.5) was produced by a delegated subagent — `$RUN_DIR/reasoning_diagram.mmd`
+  (+ rendered .png where mermaid-cli works), the mermaid block appended to the report .md and the Notion page,
+  and the .png sent to the user. Diagram failure was reported but did not fail the run.
 </content>
 </invoke>

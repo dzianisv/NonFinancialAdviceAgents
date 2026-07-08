@@ -75,19 +75,7 @@ logs/
 # Relocated skill runtime state + personal holdings under .cache/{skill}/ (public repo — never commit).
 # Intentionally NOT ignored (stay committed): .cache/analyst-smartmoney-*/ ledgers,
 # .cache/crypto-advisor/crypto-advisor.eval.csv, and per-skill .cache/*/notion.yaml.
-.cache/stocks-daily/positions.csv
-.cache/crypto-daily/portfolio.csv
-.cache/defi-portfolio-manager/
-.cache/forecast-ledger/
-.cache/mkt/
-.cache/dip-scanner/
-.cache/read-news/
-.cache/stocks-trend-screener/*
+.cache/
 !.cache/stocks-trend-screener/notion.yaml
-
-# stocks-advisor: yfinance fundamentals cache (runtime, re-fetched each run)
-.agents/skills/stocks-advisor/scripts/*.json
-.agents/skills/stocks-advisor/scripts/*.json.out.json
-
-# local secrets (mirror of Bitwarden dev collection)
 .env
+

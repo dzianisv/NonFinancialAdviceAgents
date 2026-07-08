@@ -216,6 +216,10 @@ Runs **once** after the per-stock loop completes. A single `/model opus /effort 
 4. **Portfolio structure verdict** — biggest structural risk + single highest-impact action
 5. **Cash deployment priority** — top 3 ADD candidates ranked by portfolio-level fit
 
+## Step 5.5 — Reasoning diagram
+
+After the report (and Notion page) exists, one delegated subagent builds `$RUN_DIR/reasoning_diagram.mmd` — a mermaid flowchart of how the run reached each verdict (data → scorecard ACTION → decisive seat evidence → dissent → verdict + flip-trigger), renders it via mermaid-cli, appends the mermaid block to the report .md and the Notion page, and the orchestrator sends the .png to the user. Delegated so the main context never re-reads the full report.
+
 ## Verdict rules
 
 ```
