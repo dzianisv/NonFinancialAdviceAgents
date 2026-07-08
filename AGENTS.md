@@ -157,6 +157,13 @@ One row per run. The judge is a fresh subagent with no access to the skill body 
 
 All in `.agents/skills/`. Full architecture diagrams: `.agents/skills/README.md`.
 
+**Evaluating investment skills (mandatory):** any claim that one investment skill / hierarchy /
+workflow / prompt version "works better" than another MUST come from `/ai-evaluate`
+(`.agents/skills/ai-evaluate/SKILL.md`): identical frozen inputs, firewalled rubric author,
+blinded outputs, blind pairwise judges, count+margin tally. Never self-grade, never rank by
+intuition or a designer-authored rubric. Applies before changing any default (hierarchy, seat
+structure, prompt) in stocks-advisor / crypto-advisor / stocks-daily / research workflows.
+
 ### Operating
 | Skill | Role |
 |---|---|
