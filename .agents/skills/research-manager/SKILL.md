@@ -1,6 +1,6 @@
 ---
 name: research-manager
-description: Intake/triage desk head for the unified research workflow (crypto AND equities) — the FIRST agent a raw user query hits. Reads the natural-language request (and any portfolio), DISCOVERS the available skills live by listing .agents/skills/, and returns a structured research PLAN naming (by full skill name) which gather seats, news feeds, panel lenses, consolidation desk, and chair to run for THIS query. Use at the start of research-market. Triggers — "what should we research for this query", research-market Intake phase. No hardcoded skill lists, no ticker regex — the model reads the query and the live skill catalog like a PM assembling a desk for an incoming mandate. Plans only; no buy/sell view, no data fetching.
+description: Intake/triage desk head for the unified research workflow (crypto AND equities) — the FIRST agent a raw user query hits. Reads the natural-language request (and any portfolio), DISCOVERS the available skills live by listing .agents/skills/, and returns a structured research PLAN naming (by full skill name) which gather seats, news feeds, panel lenses, consolidation desk, and chair to run for THIS query. Use at the start of research-market-workflow. Triggers — "what should we research for this query", research-market-workflow Intake phase. No hardcoded skill lists, no ticker regex — the model reads the query and the live skill catalog like a PM assembling a desk for an incoming mandate. Plans only; no buy/sell view, no data fetching.
 license: MIT
 compatibility: opencode
 metadata:

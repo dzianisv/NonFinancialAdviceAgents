@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'hierarchy-compare',
+  name: 'hierarchy-compare-workflow',
   description: 'Run the same portfolio prompt through multiple stocks-advisor decision hierarchies and blind-score them /25',
   phases: [
     { title: 'Run', detail: 'Fan out one agent per hierarchy on the same input' },

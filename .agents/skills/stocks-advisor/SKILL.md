@@ -341,7 +341,7 @@ Review my portfolio [sheet URL] using --hierarchy bsc
 ```
 Compare hierarchies on: AAPL, KO — use all
 ```
-→ Routes to the `hierarchy-compare` workflow (see `.claude/workflows/hierarchy-compare.js`).
+→ Routes to the `hierarchy-compare-workflow` (see `.claude/workflows/hierarchy-compare-workflow.js`).
 
 After loading $HIERARCHY_FILE, follow its steps exactly. The file contains the full decision chain (subagent prompts, output shapes, hard constraints). Do not improvise or mix steps from different hierarchies.
 

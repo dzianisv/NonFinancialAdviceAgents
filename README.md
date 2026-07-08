@@ -8,9 +8,9 @@ The agent proposes; the human approves every order. Recommend-only, always.
 
 ## Architecture
 
-The `research-market` workflow is an 8-phase dynamic pipeline where a **CIO agent (`research-manager`) discovers all skill components live at runtime** — no roster is hardcoded in the orchestrator. Phases execute as sequential gates; within each gate, work fans out in parallel across assets, keeping per-asset cost O(1) regardless of how many tickers the screener surfaces.
+The `research-market-workflow` is an 8-phase dynamic pipeline where a **CIO agent (`research-manager`) discovers all skill components live at runtime** — no roster is hardcoded in the orchestrator. Phases execute as sequential gates; within each gate, work fans out in parallel across assets, keeping per-asset cost O(1) regardless of how many tickers the screener surfaces. A CIO-selectable `trend-discovery` strategy and a separate `holdings-sweep` mode extend the same workflow (see below).
 
-![research-market workflow](docs/research-market-architecture.svg)
+![research-market-workflow](docs/research-market-architecture.svg)
 
 Key design properties:
 - **Autonomous screener** — no hardcoded tickers; `sector-screen` derives candidates from ETF holdings, analyst screeners, and earnings transcripts using runtime `screen_criteria`
@@ -30,7 +30,7 @@ Two tiers run on any backend. FAST catches same-day setups; SLOW produces a week
           +--------------+---------------+
           |                              |
    FAST (daily cron)             SLOW (weekly workflow)
-   scan -> gate -> DM            hedge-fund-committee
+   scan -> gate -> DM            hedge-fund-committee-workflow
           |                              |
   dip-screener                   1. COLLECT  (x6 parallel)
   crypto-dip-scanner                regime, fomc, 13f,
@@ -82,11 +82,11 @@ Invoke with `--hierarchy <name>`. Default is `bsc` (best eval score). All 8 hier
 ```
 Run stocks-advisor with --hierarchy bridgewater on: AAPL, KO, AXP
 Review my portfolio [sheet URL] using --hierarchy bsc
-Compare hierarchies on: AAPL, KO — use all        # → routes to hierarchy-compare workflow
+Compare hierarchies on: AAPL, KO — use all        # → routes to hierarchy-compare-workflow
 ```
 
 Hierarchy files: `.agents/skills/stocks-advisor/references/hierarchies/`
-Eval workflow: `.claude/workflows/hierarchy-compare.js`
+Eval workflow: `.claude/workflows/hierarchy-compare-workflow.js`
 
 ```
 BSC Hybrid decision chain (6 steps):
@@ -130,7 +130,7 @@ BSC Hybrid decision chain (6 steps):
 
 ---
 
-## research-market pipeline
+## research-market-workflow pipeline
 
 > Source: [`.agents/workflows/research-market.workflow.js`](.agents/workflows/research-market.workflow.js)
 
@@ -394,7 +394,7 @@ Six-phase dynamic workflow. **`research-manager`** (intake/triage desk head) rea
   > **Why this is needed:** The `crypto-advisor` skill reads live chart data (price, RSI, MACD, OHLCV bars, Bollinger Bands) directly from your running TradingView Desktop instance via Chrome DevTools Protocol. There is no API key or cloud alternative — the desktop app is the data source.
 
 - **Python 3** with `yfinance` — used by the data-pulling `.py` scripts bundled in `.agents/skills/` (e.g. `dip_screener.py`, `crypto_dip_scanner.py`, `ledger.py`). Install once: `pip install yfinance`.
-- **Claude Code ≥ v2.1.154** with Dynamic Workflows enabled (`/config`) — required to run `/hedge-fund-committee`, `/research-market`, and the other slash-command workflows.
+- **Claude Code ≥ v2.1.154** with Dynamic Workflows enabled (`/config`) — required to run `/hedge-fund-committee-workflow`, `/research-market-workflow`, and the other slash-command workflows.
 - **`opencode-drawer-workflows` plugin (v1.6.0+)** — required to run `.workflow.js` files from OpenCode sessions. Provides tools: `workflow`, `workflow_status`, `workflow_stop`, `workflow_save_run`. Install:
   1. Add `"opencode-drawer-workflows"` to the `plugin` array in `~/.config/opencode/opencode.json`
   2. `cd ~/.config/opencode && npm install opencode-drawer-workflows`
@@ -424,11 +424,12 @@ To install skills onto another runtime (openclaw, hermes, Cursor):
 Workflow scripts live in `.agents/workflows/`. Symlinks in `.claude/workflows/` register them as slash commands — present in this repo:
 
 ```
-.claude/workflows/hedge-fund-committee.js   -> ../../.agents/workflows/hedge-fund-committee.workflow.js
-.claude/workflows/research-market.js        -> ../../.agents/workflows/research-market.workflow.js
-.claude/workflows/pairwise-eval.js          -> ../../.agents/workflows/pairwise-eval.workflow.js
-.claude/workflows/multi-lens-quorum.js      # direct workflow (not a symlink)
-.claude/workflows/trend-stock-research.js   # direct workflow (not a symlink)
+.claude/workflows/hedge-fund-committee-workflow.js -> ../../.agents/workflows/hedge-fund-committee.workflow.js
+.claude/workflows/research-market-workflow.js      -> ../../.agents/workflows/research-market.workflow.js
+.claude/workflows/pairwise-eval-workflow.js        -> ../../.agents/workflows/pairwise-eval.workflow.js
+.claude/workflows/crypto-advisor-workflow.js       -> ../../.agents/workflows/crypto-advisor.workflow.js
+.claude/workflows/multi-lens-quorum-workflow.js    # direct workflow (not a symlink)
+.claude/workflows/hierarchy-compare-workflow.js    # direct workflow (not a symlink)
 ```
 
 To use them from another project, copy to `~/.claude/workflows/`:
@@ -457,11 +458,10 @@ Claude routes to the right workflow and passes your portfolio as args.
 With the repo open in Claude Code, the workflows are available as:
 
 ```
-/hedge-fund-committee    ← weekly equity committee → staged buy brief
-/research-market         ← ad-hoc crypto or equity research question
-/pairwise-eval           ← blind A/B comparison of two research reports
-/multi-lens-quorum       ← convene N independent analyst lenses on a judgment call
-/trend-stock-research    ← research-first trend-stock screen → nominees for quorum
+/hedge-fund-committee-workflow    ← weekly equity committee → staged buy brief
+/research-market-workflow         ← ad-hoc crypto/equity research, trend-discovery screen, or holdings-sweep
+/pairwise-eval-workflow           ← blind A/B comparison of two research reports
+/multi-lens-quorum-workflow       ← convene N independent analyst lenses on a judgment call
 ```
 
 ### OpenCode workflow execution
@@ -483,7 +483,7 @@ OpenCode runs workflow scripts through its installed `workflow` tool from the `o
 
 Use this when you want to pass specific args (ticker, date, portfolio):
 
-**Ad-hoc research — crypto** (`research-market`):
+**Ad-hoc research — crypto** (`research-market-workflow`):
 
 ```js
 Workflow({
@@ -497,7 +497,7 @@ Workflow({
 })
 ```
 
-**Ad-hoc research — equity / mixed** (`research-market`):
+**Ad-hoc research — equity / mixed** (`research-market-workflow`):
 
 ```js
 Workflow({
@@ -511,7 +511,7 @@ Workflow({
 })
 ```
 
-**Weekly equity committee** (`hedge-fund-committee`):
+**Weekly equity committee** (`hedge-fund-committee-workflow`):
 
 ```js
 Workflow({
@@ -521,7 +521,7 @@ Workflow({
 // Output: reports/hedge-fund-brief-<date>.md (30-sec read) + reports/hedge-fund-committee-<date>.md (full memo)
 ```
 
-**Blind A/B comparison of two research reports** (`pairwise-eval`):
+**Blind A/B comparison of two research reports** (`pairwise-eval-workflow`):
 
 ```js
 Workflow({
@@ -549,7 +549,7 @@ Each research workflow writes:
 | `crypto/crypto.goal.md` | Crypto book mission + constraints |
 | `crypto/crypto.prd.md` | Feature spec for the crypto workflow |
 | `crypto/crypto.tdd.md` | Architecture + wiring diagrams |
-| `crypto/eval/IMPROVE-LOOP.md` | How to improve a workflow with pairwise-eval |
+| `crypto/eval/IMPROVE-LOOP.md` | How to improve a workflow with pairwise-eval-workflow |
 
 ---
 
@@ -591,15 +591,15 @@ Each skill's description is written as a routing trigger, so the right desk answ
 ```bash
 # Option A — clone the repo, open Claude Code in it; the workflows are project /commands
 git clone https://github.com/dzianisv/financial-advisor-agents && cd financial-advisor-agents
-#   → /hedge-fund-committee   /research-market   /pairwise-eval   /multi-lens-quorum   /trend-stock-research
+#   → /hedge-fund-committee-workflow   /research-market-workflow   /pairwise-eval-workflow   /multi-lens-quorum-workflow
 
 # Option B — make them global (available in every project)
 cp financial-advisor-agents/.claude/workflows/*.js ~/.claude/workflows/
 ```
 
-Then run e.g. `/hedge-fund-committee` or `/research-market`. (Needs Claude Code ≥ v2.1.154 with Dynamic workflows enabled in `/config`. Workflows are a Claude Code feature — openclaw/hermes use the skills, which orchestrate via their own primitives.)
+Then run e.g. `/hedge-fund-committee-workflow` or `/research-market-workflow`. (Needs Claude Code ≥ v2.1.154 with Dynamic workflows enabled in `/config`. Workflows are a Claude Code feature — openclaw/hermes use the skills, which orchestrate via their own primitives.)
 
-> Note: some `.claude/workflows/*.js` entries are symlinks to `.agents/workflows/` (they resolve on macOS/Linux; on Windows copy the real files). `multi-lens-quorum.js` and `trend-stock-research.js` are standalone files in `.claude/workflows/` directly.
+> Note: some `.claude/workflows/*.js` entries are symlinks to `.agents/workflows/` (they resolve on macOS/Linux; on Windows copy the real files). `multi-lens-quorum-workflow.js` and `hierarchy-compare-workflow.js` are standalone files in `.claude/workflows/` directly.
 
 ---
 
@@ -647,15 +647,16 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 
 ## Skills
 
-### Workflows (5 total, all in `.claude/workflows/`)
+### Workflows (6 total, all in `.claude/workflows/`)
 
 | Slash command | Description |
 |---|---|
-| `/hedge-fund-committee` | Find the next stocks to BUY and hand over a STAGED ENTRY plan. Open-universe candidate discovery → panel vote → risk veto → scale-in plan. RECOMMEND-ONLY. |
-| `/research-market` | Unified portfolio-aware research (crypto + equities). LLM manager discovers skills live, decides everything — assets, seats, panel, chair. Pass `question` + optional `portfolio` + `date`. |
-| `/multi-lens-quorum` | Convene N independent analyst lenses on ONE judgment call; synthesize consensus without averaging away dissent. |
-| `/trend-stock-research` | Research-first trend-stock screen: prescreen → parallel journalism → non-obvious beneficiary mapping → 3-question skeptic filter → route to multi-lens-quorum. |
-| `/pairwise-eval` | Blind A/B comparison of two research reports — N position-randomized judges, majority vote. Used in the improve loop. |
+| `/hedge-fund-committee-workflow` | Find the next stocks to BUY and hand over a STAGED ENTRY plan. Open-universe candidate discovery → panel vote → risk veto → scale-in plan. RECOMMEND-ONLY. |
+| `/research-market-workflow` | Unified portfolio-aware research (crypto + equities). LLM manager discovers skills live, decides everything — assets, seats, panel, chair. Pass `question` + optional `portfolio` + `date`. Also: `args.strategy: "trend-discovery"` (prescreen → parallel journalism → non-obvious beneficiary mapping → skeptic filter) and `args.mode: "holdings-sweep"` (full-book ADD/HOLD/TRIM/EXIT review). |
+| `/multi-lens-quorum-workflow` | Convene N independent analyst lenses on ONE judgment call; synthesize consensus without averaging away dissent. |
+| `/pairwise-eval-workflow` | Blind A/B comparison of two research reports — N position-randomized judges, majority vote. Used in the improve loop. |
+| `/hierarchy-compare-workflow` | Runs the same portfolio prompt through multiple stocks-advisor decision hierarchies and blind-scores them /25. |
+| `/crypto-advisor-workflow` | Sequential per-token crypto analysis: TradingView data pull → 5-seat quorum → sourced narrative. |
 
 ### Data & monitoring
 
@@ -744,7 +745,6 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 | `tax-loss-harvesting` | Tax-loss harvesting |
 | `tradfi-portfolio-manager` | TradFi portfolio manager skill |
 | `trend-following` | Trend-following strategy |
-| `trend-stock-research` | Research-first trend-stock screen |
 
 ### Evaluation & ops
 

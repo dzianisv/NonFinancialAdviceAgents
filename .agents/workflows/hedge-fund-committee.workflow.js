@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'hedge-fund-committee',
+  name: 'hedge-fund-committee-workflow',
   description: 'Find the next stocks to BUY and hand over a STAGED ENTRY plan. A hedge-fund org of agent-employees DISCOVERS candidates (FT/WSJ/Reddit news + 13F/congress/dips/macro), aggregates by conviction, a panel votes on OWNERSHIP vs TIMING separately (4 skeptics + 1 PM advocate who builds the bull case), risk vetoes/sizes, and the CIO issues a scale-in plan (start small now, add on triggers) — not a binary buy/pass. Open-universe research, no ticker needed. RECOMMEND-ONLY.',
   whenToUse: 'PRIMARY: "what should I buy this week / next picks" — open-universe discovery, NO ticker. The SLOW/deliberative tier (daily cron dip/convergence alerts are the separate FAST tier). SECONDARY (optional): pass args:{ticker} only to deep-dive a name you ALREADY have.',
   phases: [

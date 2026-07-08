@@ -1,13 +1,13 @@
 export const meta = {
-  name: 'research-market',
-  description: 'Unified portfolio-aware research (crypto + equities). An LLM CIO discovers the available skills live and decides the screening strategy and desk — then the team runs: screen → gather → consolidate → panel → decide → report → ledger. NOTHING about the roster or tickers is hardcoded here; this script only dispatches the full skill names the CIO returns. All substance lives in .agents/skills.',
+  name: 'research-market-workflow',
+  description: 'Unified portfolio-aware research (crypto + equities). An LLM CIO discovers the available skills live and decides the screening strategy and desk — then the team runs: screen → gather → consolidate → panel → decide → report → ledger. NOTHING about the roster or tickers is hardcoded here; this script only dispatches the full skill names the CIO returns. All substance lives in .agents/skills. Two extra modes: strategy="trend-discovery" (CIO-selectable at Intake) runs a quant pre-screen + EDGAR/WebSearch journalism fan-out + beneficiary mapping + skeptic filter before handing survivors to the standard gather/panel/decide pipeline (supersedes the old standalone research-trend-stocks workflow). args.mode="holdings-sweep" bypasses discovery entirely and instead reviews every HELD position from positions.csv (ADD/HOLD/TRIM/EXIT).',
   phases: [
     { title: 'LoadState', detail: 'read cross-run state file (prior screened tickers + verdicts)' },
-    { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy + assembles desk (no tickers)' },
+    { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy (standard | trend-discovery) + assembles desk (no tickers)' },
     { title: 'CIO-Review', detail: 'CIO decides STOP (have a BUY / exhausted) or CONTINUE (screen a fresh slice)' },
     { title: 'SaveState', detail: 'persist screened tickers + per-asset verdicts for the next run' },
     { title: 'ThemeCycle', detail: 'assess whether the theme/sector is already extended; if so, widen to adjacent laggards' },
-    { title: 'Screen', detail: 'research team autonomously finds 5-10 candidates via web search + screener logic' },
+    { title: 'Screen', detail: 'standard: research team autonomously finds 5-10 candidates via web search + screener logic. trend-discovery: quant pre-screen -> EDGAR+WebSearch journalism fan-out -> beneficiary mapping -> skeptic filter' },
     { title: 'NewsFetch', detail: 'pre-fetch WSJ + FT + Bloomberg headlines into local article cache; gather agents query BM25 instead of hitting live URLs' },
     { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill' },
     { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief' },
@@ -15,6 +15,7 @@ export const meta = {
     { title: 'Decide', detail: 'manager-selected chair: portfolio-aware buy/sell decision' },
     { title: 'Report', detail: 'write markdown research report to disk' },
     { title: 'Ledger', detail: 'log the dated chair call per asset to the forecast-ledger' },
+    { title: 'HoldingsSweep', detail: '(args.mode="holdings-sweep" only) classify positions.csv -> trend-only screen for ETFs -> one 5-seat BSC panel agent per single-name/crypto-beta holding -> consolidate to ADD/HOLD/TRIM/EXIT -> report + ledger' },
   ],
 }
 
@@ -23,6 +24,13 @@ const MODEL = 'sonnet'
 
 const SKILL = '/Users/engineer/workspace/backtest/.agents/skills'
 const LEDGER_PY = `${SKILL}/forecast-ledger/ledger.py`
+// trend-discovery strategy (folded in from the retired research-trend-stocks workflow) — script paths
+// corrected here: the original workflow pointed at a non-existent 'trend-stock-research' skill dir; the
+// real skill is 'stocks-trend-screener' and mention_velocity.py lives at its root, not under scripts/.
+const TREND_SCAN_PY = `${SKILL}/stocks-trend-screener/scripts/emerging_scan.py`
+const TREND_VELOCITY_PY = `${SKILL}/stocks-trend-screener/mention_velocity.py`
+// holdings-sweep mode — full-book review of HELD positions (vs discovery of new names)
+const POSITIONS_CSV = '/Users/engineer/workspace/backtest/.cache/stocks-daily/positions.csv'
 
 // Inputs via args (no long text here). Date can't come from Date.now() (throws in this runtime).
 // The query is interpreted by the LLM CIO (Phase 0) which DISCOVERS skills live — no hardcoded roster.
@@ -37,6 +45,7 @@ const REPORT_DATE = ARGS.date || '2026-06-15'
 const QUESTION = ARGS.question || ARGS.query || '(no question provided)'
 const RAW_PORTFOLIO = ARGS.portfolio || ''   // empty = caller gave none; manager must NOT invent one
 const ANCHOR = ARGS.anchor || ''             // optional seed; '' → Gather fetches LIVE
+const MODE = ARGS.mode || 'discovery'        // 'discovery' (default, this file's original behavior) | 'holdings-sweep'
 
 const PLAN_SCHEMA = {
   type: 'object',
@@ -57,6 +66,7 @@ const PLAN_SCHEMA = {
     notes: { type: 'string' },
     screen_scope: { type: 'string' },    // what universe/sector/theme to screen
     screen_criteria: { type: 'string' }, // what makes a good candidate
+    strategy: { type: 'string', enum: ['standard', 'trend-discovery'] }, // screening strategy for the Screen phase
   },
   required: ['asset_class', 'side', 'portfolio_provided', 'portfolio_summary',
     'gather_skills', 'panel_skills', 'desk_skill', 'chair_skill', 'screen_scope', 'screen_criteria'],
@@ -161,6 +171,141 @@ const REVIEW_SCHEMA = {
   required: ['verdict'],
 }
 
+// ============================================================================
+// trend-discovery strategy — superseded-by research-market-workflow trend-discovery strategy.
+// Folded in from the retired standalone research-trend-stocks.workflow.js (deleted). Ported faithfully:
+// quant pre-screen -> EDGAR-x-phrase + WebSearch-x-angle parallel journalism fan-out -> non-obvious
+// beneficiary mapping -> skeptic filter. Survivors are handed back as SCREEN_SCHEMA candidates so every
+// downstream phase (Gather/Consolidate/Panel/Decide/Report/Ledger, the CIO-Review re-screen loop) runs
+// completely unchanged for both strategies. Only the Screen phase branches on STRATEGY.
+// ============================================================================
+
+const TREND_SCAN_SCHEMA = {
+  type: 'object',
+  properties: {
+    tickers: { type: 'array', items: { type: 'object', properties: {
+      symbol: { type: 'string' }, name: { type: 'string' }, theme: { type: 'string' },
+      mom_6m: { type: 'number' }, vol_ratio: { type: 'number' }, score: { type: 'number' },
+    }, required: ['symbol', 'theme', 'score'] } },
+    themes: { type: 'array', items: { type: 'string' } },
+    scan_date: { type: 'string' },
+  },
+  required: ['tickers', 'themes'],
+}
+
+const TREND_JOURNALISM_SCHEMA = {
+  type: 'object',
+  properties: {
+    theme: { type: 'string' },
+    findings: { type: 'array', items: { type: 'object', properties: {
+      ticker: { type: 'string' }, company: { type: 'string' },
+      headline: { type: 'string' }, source: { type: 'string' }, source_url: { type: 'string' },
+      demand_inflection: { type: 'string', description: '2-4 sentences: what structural shift is driving demand?' },
+      supply_constraint: { type: 'string', description: '1-2 sentences: why supply can\'t catch up (if applicable)' },
+      catalyst: { type: 'string', description: 'Specific upcoming event/date that triggers the move' },
+      timeline: { type: 'string', description: 'When does the catalyst resolve? (e.g. Q3 earnings, Dec 2026)' },
+      what_would_change_mind: { type: 'string', description: 'Name the ONE thing that kills this thesis' },
+      confidence: { type: 'string', enum: ['HIGH', 'MEDIUM', 'LOW'] },
+      already_extended: { type: 'boolean', description: 'True if already up >100% in 6 months' },
+    }, required: ['ticker', 'headline', 'source', 'demand_inflection', 'confidence'] } },
+    summary: { type: 'string' },
+  },
+  required: ['theme', 'findings', 'summary'],
+}
+
+const TREND_BENEFICIARY_SCHEMA = {
+  type: 'object',
+  properties: {
+    chains: { type: 'array', items: { type: 'object', properties: {
+      primary: { type: 'string' }, beneficiaries: { type: 'array', items: { type: 'string' } },
+      logic: { type: 'string' }, conviction: { type: 'string' },
+    }, required: ['primary', 'beneficiaries', 'logic'] } },
+  },
+  required: ['chains'],
+}
+
+const TREND_SKEPTIC_SCHEMA = {
+  type: 'object',
+  properties: {
+    survivors: { type: 'array', items: { type: 'object', properties: {
+      ticker: { type: 'string' }, thesis: { type: 'string' },
+      catalyst: { type: 'string' }, timeline: { type: 'string' },
+      return_12m: { type: 'number' }, passed: { type: 'boolean' },
+      kill_reason: { type: 'string' },
+    }, required: ['ticker', 'passed'] } },
+    killed: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['survivors', 'killed'],
+}
+
+// EDGAR demand-signal phrases (supply/capacity language that appears in 8-K/10-K/10-Q)
+const TREND_DEMAND_PHRASES = [
+  'capacity constrained', 'record backlog', 'sole supplier',
+  'lead times extended', 'supply agreement', 'qualified second source',
+]
+
+// WebSearch angles: snippets carry enough signal (ticker + inflection) without full-text browser
+const TREND_SEARCH_ANGLES = [
+  'demand inflection catalyst earnings',
+  'supply constraint pricing power',
+  'non-obvious beneficiary picks-and-shovels',
+  'insider buying institutional accumulation',
+  'analyst upgrade emerging growth secular',
+]
+
+// ============================================================================
+// holdings-sweep mode — full-book review of HELD positions (vs discovery of new names).
+// Dispatch check lives further below (after these schemas are initialized) and short-circuits the
+// entire discovery pipeline (LoadState/Intake/Screen/etc. never run for this mode).
+// ============================================================================
+
+const HOLDINGS_CLASSIFY_SCHEMA = {
+  type: 'object',
+  properties: {
+    classifications: { type: 'array', items: { type: 'object', properties: {
+      ticker: { type: 'string' },
+      bucket: { type: 'string', enum: ['single-name', 'etf-fund'] },
+      reason: { type: 'string' },
+    }, required: ['ticker', 'bucket'] } },
+  },
+  required: ['classifications'],
+}
+
+const HOLDING_PANEL_SCHEMA = {
+  type: 'object',
+  properties: {
+    ticker: { type: 'string' },
+    final_verdict: { type: 'string', enum: ['ADD', 'HOLD', 'TRIM', 'EXIT'] },
+    conviction: { type: 'number' },
+    data_coverage: { type: 'string' },
+    gate_triggered: { type: 'boolean' },
+    dissent_logged: { type: 'string' },
+    cio_memo: { type: 'string' },
+    funding_pool_test: { type: 'string' }, // for TRIM/EXIT: states the 1-2Y growth + dividend check result
+  },
+  required: ['ticker', 'final_verdict', 'conviction', 'cio_memo'],
+}
+
+const HOLDINGS_TREND_SCHEMA = {
+  type: 'object',
+  properties: {
+    rows: { type: 'array', items: { type: 'object', properties: {
+      ticker: { type: 'string' },
+      verdict: { type: 'string', enum: ['HOLD', 'TRIM'] },
+      note: { type: 'string' },
+    }, required: ['ticker', 'verdict'] } },
+  },
+  required: ['rows'],
+}
+
+// ---------- MODE DISPATCH: holdings-sweep bypasses the discovery pipeline entirely ----------
+// Placed after every const/schema it (transitively) depends on has been initialized -- top-level `const`
+// is in the temporal dead zone until its declaration line executes, and runHoldingsSweep (hoisted function
+// declaration, defined near the end of this file) is CALLED here, not merely referenced.
+if (MODE === 'holdings-sweep') {
+  return await runHoldingsSweep()
+}
+
 // ---------- Phase -0.5: LOAD STATE (cross-run memory so the CIO avoids re-screening prior names) ----------
 phase('LoadState')
 const priorState = await agent(
@@ -174,12 +319,16 @@ const plan = await agent(
   `FIRST discover the available skills live (list ${SKILL}/ and read each SKILL.md description -- do NOT rely on memory), THEN return the research plan naming every component by its real discovered directory name.\n` +
   `RAW QUERY: ${QUESTION}\nPORTFOLIO PASSED BY CALLER: ${RAW_PORTFOLIO || '(none -- caller gave no holdings; do NOT invent any)'}\nAs-of: ${REPORT_DATE}\n\n` +
   `Set screen_scope (what universe/sector/theme to screen, e.g. "AI supply chain semiconductors -- mid/small cap names not yet surged") and screen_criteria (what makes a good candidate, e.g. "valuation gap vs peers, upcoming catalysts, supply inflection point").\n` +
+  `Choose a screening strategy: set strategy="standard" (default -- web-search + screener-logic candidate hunt) OR strategy="trend-discovery" when the mandate is a BROAD momentum/trend hunt rather than a specific sector query -- trend-discovery runs a quantitative pre-screen (emerging_scan.py) then an EDGAR-filing + WebSearch journalism fan-out, non-obvious-beneficiary mapping, and a skeptic filter before candidates reach the desk. It is more expensive (50+ extra agents) -- only pick it when the mandate is genuinely open-ended trend discovery, not a targeted theme.\n` +
   `Do NOT populate assets[] -- leave it empty or omit it. The screening team decides which stocks to analyze.\n` +
   `Keep all existing skill-discovery instructions for gather_skills, panel_skills, desk_skill, chair_skill.` +
   `\nPRIOR-RUN STATE (already-screened tickers + verdicts from earlier runs — avoid repeating; the dedup list is enforced separately):\n${priorState}`,
   { label: 'manager-intake', phase: 'Intake', schema: PLAN_SCHEMA, model: MODEL })
 
 if (!plan) { log('FATAL: manager returned no plan; aborting.'); return { error: 'no plan from manager' } }
+
+const STRATEGY = (plan.strategy === 'trend-discovery') ? 'trend-discovery' : 'standard'
+log(`INTAKE strategy: ${STRATEGY}`)
 
 // Resolve plan -> run inputs (all manager-driven; safe fallbacks only for emptiness, never fabricate holdings).
 const ASSET_CLASS = plan.asset_class || 'equities'
@@ -238,6 +387,10 @@ if (themeCycle) {
 let screened = null
 {
   phase('Screen')
+  if (STRATEGY === 'trend-discovery') {
+    log(`Screen: trend-discovery strategy -- quant pre-screen + EDGAR/WebSearch journalism fan-out + beneficiary mapping + skeptic filter`)
+    screened = await runTrendDiscoveryScreen()
+  } else {
   log(`Screen: searching sector "${plan.screen_scope}" | criteria: ${plan.screen_criteria}`)
   screened = await agent(
     `Task: Screen for investment candidates.\n\n` +
@@ -254,6 +407,7 @@ let screened = null
     `Aim for diverse names across the supply chain (memory, EDA, packaging, test equipment, networking, power mgmt).`,
     { label: 'sector-screen', phase: 'Screen', schema: SCREEN_SCHEMA, model: MODEL }
   )
+  }
   if (screened && Array.isArray(screened.candidates) && screened.candidates.length) {
     const tickers = screened.candidates
       .map(c => String(c.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, ''))
@@ -583,7 +737,7 @@ const reportMd = `# Research -- ${FINAL_ASSET_LIST} (${ASSET_CLASS}) -- ${REPORT
 > Question: ${QUESTION}
 > Portfolio: ${PORTFOLIO}
 > Desk assembled by \`research-manager\`: gather [${gatherSkills.join(', ')}] * panel [${panelSkills.join(', ')}] * desk ${deskSkill} * chair ${chairSkill}.
-> Generated by \`research-market\`. Educational, not advice; re-pull before acting.
+> Generated by \`research-market-workflow\`. Educational, not advice; re-pull before acting.
 ${gatherComplete ? '' : `\n> **WARNING INCOMPLETE DATA:** Some gather seats unavailable. Treat with caution.\n`}
 ## Answer
 **${decision.answer || decision.decision}**
@@ -687,3 +841,407 @@ log(`Ledger: ${ledgerLog}`)
 return { reportPath, reportPersisted: reportOk, asset_class: ASSET_CLASS, assets: ASSETS, plan, decision, verdicts,
   panelByAsset, briefByAsset, guardrail, complete: gatherComplete,
   ledger: { impliedProb, horizon, lenses: votingLenses, logged: LEDGER_ASSETS, skipped: skippedLedger, result: ledgerLog } }
+
+// ============================================================================
+// runTrendDiscoveryScreen — the trend-discovery Screen-phase strategy.
+// superseded-by research-market-workflow trend-discovery strategy (this function IS that strategy;
+// the standalone research-trend-stocks.workflow.js it was ported from has been deleted).
+// Hoisted function declaration -- called earlier in the Screen phase, defined here for readability.
+// Returns a SCREEN_SCHEMA-shaped object so every downstream phase runs unmodified.
+// ============================================================================
+async function runTrendDiscoveryScreen() {
+  const TOP_N = ARGS.top || 25
+  const THEMES_OVERRIDE = ARGS.themes || ''
+
+  // ---- Pre-screen (quantitative scan) ----
+  const scanResult = await agent(
+    `Run the quantitative pre-screen for trend stocks.\n\n` +
+    `Execute: python3 ${TREND_SCAN_PY} --top ${TOP_N}\n\n` +
+    `If the script is not found or fails, fall back to using yfinance directly:\n` +
+    `- Screen the 180-name universe (see ${SKILL}/stocks-trend-screener/SKILL.md for the ticker list)\n` +
+    `- Rank by: 6-month momentum, volume ratio vs 50d avg, relative strength\n` +
+    `- Return the top ${TOP_N} with their scores and theme classification\n\n` +
+    `Also run mention velocity if available: python3 ${TREND_VELOCITY_PY}\n` +
+    `Group results by THEME (AI/semis, energy transition, biotech, defense, fintech, etc.).\n` +
+    `Date: ${REPORT_DATE}`,
+    { label: 'trend-prescreen', phase: 'Screen', schema: TREND_SCAN_SCHEMA, model: MODEL }
+  )
+
+  if (!scanResult || !scanResult.tickers || !scanResult.tickers.length) {
+    log('trend-discovery: pre-screen returned no tickers -- returning empty candidate set.')
+    return { candidates: [], excluded: [], screen_notes: 'trend-discovery pre-screen returned empty' }
+  }
+
+  const themes = THEMES_OVERRIDE ? THEMES_OVERRIDE.split(',').map(t => t.trim()) : (scanResult.themes || ['general'])
+
+  let tickers = scanResult.tickers
+  if (THEMES_OVERRIDE) {
+    const themeLower = themes.map(t => t.toLowerCase())
+    const filtered = tickers.filter(t =>
+      !t.theme || themeLower.some(th => (t.theme || '').toLowerCase().includes(th) || th.includes((t.theme || '').toLowerCase()))
+    )
+    if (filtered.length >= 3) {
+      tickers = filtered
+      log(`trend-discovery theme filter: kept ${tickers.length}/${scanResult.tickers.length} matching themes: ${themes.join(', ')}`)
+    } else {
+      log(`trend-discovery theme filter: only ${filtered.length} matched (keeping all ${tickers.length} to avoid empty pipeline)`)
+    }
+  }
+  log(`trend-discovery pre-screen: ${tickers.length} tickers across ${themes.length} themes: ${themes.join(', ')}`)
+
+  // ---- Journalism: EDGAR x phrase + WebSearch x angle fan-out -- independent HTTP taps, no browser ----
+  const edgarTasks = themes.flatMap(theme => {
+    const themeTickers = tickers.filter(t => t.theme === theme || !t.theme).map(t => t.symbol)
+    const startDt = REPORT_DATE.slice(0, 7) + '-01'
+    return TREND_DEMAND_PHRASES.map(phrase => () => {
+      const encodedPhrase = phrase.replace(/ /g, '%20')
+      return agent(
+        `Search SEC EDGAR full-text search for demand-signal language in recent filings.\n\n` +
+        `EDGAR full-text API (plain HTTP -- no browser needed, call via WebFetch):\n` +
+        `https://efts.sec.gov/LATEST/search-index?q="${encodedPhrase}"&forms=8-K,10-K,10-Q&dateRange=custom&startdt=${startDt}&enddt=${REPORT_DATE}\n\n` +
+        `Steps:\n` +
+        `1. WebFetch the URL above. It returns JSON with hits[].file_date, hits[]._source.period_of_report,\n` +
+        `   hits[]._source.entity_name, hits[]._source.file_num, hits[].accession_no.\n` +
+        `2. Filter hits where entity_name matches a focus ticker (case-insensitive).\n` +
+        `3. For each match: set source="SEC EDGAR", source_url="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK="+entity_name.\n` +
+        `4. Infer demand_inflection from the phrase context + entity context.\n\n` +
+        `Focus tickers: ${themeTickers.join(', ')}\n` +
+        `Theme: ${theme} | Phrase: "${phrase}"\n\n` +
+        `Output schema fields required: ticker, company, headline (use phrase as headline), source, source_url,\n` +
+        `demand_inflection, confidence (HIGH/MEDIUM/LOW based on how directly the ticker is named).\n` +
+        `Set already_extended: false (you have no price data).\n` +
+        `Return theme: "${theme}".\n` +
+        `Return empty findings array if no focus ticker appears in hits. Do NOT fabricate.\n` +
+        `Date: ${REPORT_DATE}`,
+        { label: `edgar-${theme.slice(0,8)}-${phrase.slice(0,10).replace(/ /g,'_')}`, phase: 'Screen', schema: TREND_JOURNALISM_SCHEMA, model: MODEL }
+      ).then(r => r ? { ...r, theme } : null)  // override self-reported theme with authoritative closed-over value
+    })
+  })
+
+  // WebSearch fan-out: (theme x angle)
+  const webSearchTasks = themes.flatMap(theme => {
+    const themeTickers = tickers.filter(t => t.theme === theme || !t.theme).map(t => t.symbol)
+    return TREND_SEARCH_ANGLES.map(angle => () => agent(
+      `Search for demand-inflection signals using WebSearch (snippets carry the key data -- no browser needed).\n\n` +
+      `Use the WebSearch tool with these queries (try both):\n` +
+      `1. "${theme} ${angle} ${REPORT_DATE.slice(0, 7)}"\n` +
+      `2. "${themeTickers.slice(0, 3).join(' OR ')} ${angle}"\n\n` +
+      `From SEARCH SNIPPETS:\n` +
+      `- Extract: ticker, company, headline (snippet title), source (publication), source_url\n` +
+      `- Infer: demand_inflection (what structural shift does this snippet signal?)\n` +
+      `- Estimate: catalyst, timeline, confidence (HIGH/MEDIUM/LOW)\n` +
+      `- Set already_extended: false (you have no price data)\n\n` +
+      `Rules:\n` +
+      `- Only report findings where the snippet directly mentions a focus ticker.\n` +
+      `- Do NOT click through to articles -- snippets only (avoids paywall blocks).\n` +
+      `- Do NOT fabricate. Empty findings array if nothing relevant.\n` +
+      `Focus tickers: ${themeTickers.join(', ')}\n` +
+      `Theme: ${theme} | Angle: ${angle}\n` +
+      `Return theme: "${theme}".\n` +
+      `Date: ${REPORT_DATE}`,
+      { label: `wsearch-${theme.slice(0,8)}-${angle.slice(0,14).replace(/ /g,'_')}`, phase: 'Screen', schema: TREND_JOURNALISM_SCHEMA, model: MODEL }
+    ).then(r => r ? { ...r, theme } : null))
+  })
+
+  // All agents hit independent taps -> true parallel breadth (16-slot cap queues excess, all complete)
+  log(`trend-discovery journalism: launching ${edgarTasks.length} EDGAR + ${webSearchTasks.length} WebSearch agents`)
+  const rawResults = await parallel([...edgarTasks, ...webSearchTasks])
+
+  // Consolidate findings by theme, deduplicate by ticker+headline
+  const findingsByTheme = {}
+  for (const result of rawResults) {
+    if (!result || !result.findings) continue
+    const th = result.theme || themes[0]
+    if (!findingsByTheme[th]) findingsByTheme[th] = []
+    for (const finding of result.findings) {
+      const key = `${finding.ticker}|${finding.headline}`
+      if (!findingsByTheme[th].some(f => `${f.ticker}|${f.headline}` === key)) {
+        findingsByTheme[th].push(finding)
+      }
+    }
+  }
+
+  const journalism = themes.map(theme => ({
+    theme,
+    findings: findingsByTheme[theme] || [],
+    summary: findingsByTheme[theme] && findingsByTheme[theme].length
+      ? `${(findingsByTheme[theme] || []).length} findings (EDGAR + WebSearch fan-out)`
+      : '[UNAVAILABLE]',
+  }))
+
+  const totalFindings = journalism.reduce((sum, j) => sum + (j.findings ? j.findings.length : 0), 0)
+  const agentsReturned = rawResults.filter(Boolean).length
+  log(`trend-discovery journalism: ${totalFindings} findings from ${agentsReturned}/${edgarTasks.length + webSearchTasks.length} agents across ${themes.length} themes`)
+
+  // ---- Beneficiary mapping (non-obvious second-order picks) ----
+  const beneficiaryResult = await agent(
+    `You are mapping NON-OBVIOUS BENEFICIARY CHAINS from the journalism findings.\n\n` +
+    `For each strong demand-inflection signal found, ask:\n` +
+    `- Who ELSE benefits that the market hasn't priced in?\n` +
+    `- What's the picks-and-shovels play?\n` +
+    `- What's the supply-chain chokepoint that gets pricing power?\n` +
+    `- Is there a mid-cap/small-cap riding the same wave as the obvious large-cap?\n\n` +
+    `Rules:\n` +
+    `- The PRIMARY ticker is what journalism found; BENEFICIARIES are the non-obvious plays\n` +
+    `- Each chain needs a clear LOGIC (why this benefits)\n` +
+    `- Conviction: high/medium/low based on how direct the link is\n` +
+    `- Ignore beneficiaries already in the top-${TOP_N} scan (those are obvious)\n\n` +
+    `JOURNALISM FINDINGS:\n${JSON.stringify(journalism, null, 1)}\n` +
+    `SCAN TICKERS (exclude these as beneficiaries -- they're already obvious):\n${tickers.map(t => t.symbol).join(', ')}`,
+    { label: 'trend-beneficiary-map', phase: 'Screen', schema: TREND_BENEFICIARY_SCHEMA, model: MODEL }
+  )
+
+  const chains = (beneficiaryResult && beneficiaryResult.chains) || []
+  log(`trend-discovery beneficiary: ${chains.length} chains mapped`)
+
+  // ---- Skeptic filter (kill overhyped, require catalyst) ----
+  const allCandidates = [
+    ...tickers.map(t => t.symbol),
+    ...chains.flatMap(c => c.beneficiaries || [])
+  ].filter((v, i, a) => a.indexOf(v) === i)  // dedupe
+
+  const extendedFromJournalism = journalism.flatMap(j => (j.findings || []).filter(f => f.already_extended).map(f => f.ticker)).filter(Boolean)
+
+  const skepticResult = await agent(
+    `You are the SKEPTIC FILTER. Your job is to KILL bad ideas before they waste desk time.\n\n` +
+    `For EACH candidate ticker, apply these 4 kill tests:\n` +
+    `1. Has it already run +150% in the last 12 months? -> KILL (you're late)\n` +
+    `   PRE-FLAGGED as already extended (>100% in 6mo): ${extendedFromJournalism.join(', ') || 'none'}\n` +
+    `2. Is there a CONCRETE catalyst with a specific DATE/TIMELINE? -> Required to pass\n` +
+    `3. Can you name the BUYER -- who specifically will buy this stock in the next 3-6 months?\n` +
+    `4. Does the journalism cite what_would_change_mind? If the invalidator has ALREADY happened -> KILL\n\n` +
+    `Use yfinance (via bash: python3 -c "import yfinance; ...") to check 12-month returns.\n` +
+    `Pre-flagged tickers still need yfinance confirmation (journalism may be stale).\n` +
+    `Any ticker that fails ANY question gets killed with a reason.\n\n` +
+    `CANDIDATES: ${allCandidates.join(', ')}\n` +
+    `JOURNALISM CONTEXT:\n${JSON.stringify(journalism, null, 1)}\n` +
+    `BENEFICIARY CHAINS:\n${JSON.stringify(chains, null, 1)}\n` +
+    `Date: ${REPORT_DATE}`,
+    { label: 'trend-skeptic-filter', phase: 'Screen', schema: TREND_SKEPTIC_SCHEMA, model: MODEL }
+  )
+
+  const survivors = (skepticResult && skepticResult.survivors) ? skepticResult.survivors.filter(s => s.passed) : []
+  const killed = (skepticResult && skepticResult.killed) || []
+  log(`trend-discovery skeptic: ${survivors.length} survived, ${killed.length} killed`)
+
+  // Cap survivors -- downstream Gather+Panel run per-asset, so keep the candidate count bounded (the
+  // journalism fan-out alone already spends 50+ agents; uncapped survivors would multiply that by
+  // MAX_GATHER+MAX_PANEL each). Mirrors the original research-trend-stocks quorum cap rationale.
+  const capped = survivors.slice(0, 5)
+  if (survivors.length > capped.length) log(`trend-discovery: capping ${survivors.length} survivors to top ${capped.length} for the desk`)
+
+  const candidates = capped.map(s => {
+    const jFindings = journalism.flatMap(j => (j.findings || []).filter(f => f.ticker === s.ticker))
+    const demandInflection = jFindings.map(f => f.demand_inflection).filter(Boolean).join(' | ') || ''
+    const supplyConstraint = jFindings.map(f => f.supply_constraint).filter(Boolean).join(' | ') || ''
+    return {
+      ticker: s.ticker,
+      thesis: s.thesis || demandInflection || '(trend-discovery survivor -- see journalism findings)',
+      catalyst: s.catalyst || '',
+      valuation_gap: '',
+      why_not_yet_surged: supplyConstraint || (s.timeline ? `catalyst timeline: ${s.timeline}` : ''),
+    }
+  })
+
+  return {
+    candidates,
+    excluded: killed,
+    screen_notes: `trend-discovery: pre-screen ${tickers.length} -> journalism ${totalFindings} findings -> beneficiary ${chains.length} chains -> skeptic ${survivors.length}/${allCandidates.length} survived -> ${candidates.length} handed to the desk`,
+  }
+}
+
+// ============================================================================
+// runHoldingsSweep — args.mode === "holdings-sweep". Full-book review of HELD positions (vs discovery
+// of new names). Reads positions.csv (Position,Quantity,Type,Unrealized_PnL). ETFs/commodity trusts get
+// one cheap batched trend-only screen; single-name stocks and crypto-beta proxies each get ONE agent
+// running the full stocks-advisor BSC hierarchy (5-seat panel + skeptic + CIO synthesis + DATA-COVERAGE
+// GATE) internally in a single turn. crypto-beta positions are policy-capped at ADD/HOLD -- this mode
+// never emits a sell verdict on them. Hoisted function declaration; called from the MODE dispatch above.
+// ============================================================================
+async function runHoldingsSweep() {
+  phase('LoadPositions')
+  const csvRaw = await agent(
+    `Run Bash EXACTLY: \`cat ${POSITIONS_CSV}\`. Reply with ONLY the raw file contents, nothing else.`,
+    { label: 'load-positions', phase: 'LoadPositions', model: MODEL })
+
+  const lines = String(csvRaw || '').split('\n').map(l => l.trim()).filter(Boolean)
+  const dataLines = lines.filter(l => !/^Position\s*,\s*Quantity/i.test(l))
+  const rows = dataLines.map(l => {
+    const parts = l.split(',')
+    return { position: (parts[0] || '').trim(), quantity: (parts[1] || '').trim(), type: (parts[2] || '').trim(), pnl: (parts[3] || '').trim() }
+  }).filter(r => r.position && r.type)
+
+  if (!rows.length) { log('FATAL: positions.csv parsed to zero rows; aborting holdings-sweep.'); return { error: 'positions.csv empty or unparsable', mode: 'holdings-sweep' } }
+
+  const cashRows = rows.filter(r => /^cash$/i.test(r.type))
+  const cryptoBetaRows = rows.filter(r => /^crypto-beta$/i.test(r.type))
+  const commodityRows = rows.filter(r => /^comodity$/i.test(r.type) || /^commodity$/i.test(r.type))
+  const stockRows = rows.filter(r => /^stock$/i.test(r.type))
+  log(`holdings-sweep: ${rows.length} positions -- ${stockRows.length} Stock, ${cryptoBetaRows.length} crypto-beta, ${commodityRows.length} commodity, ${cashRows.length} cash (skipped)`)
+
+  // ---- Classify Stock-type rows: single-name operating company vs ETF/index/sector fund ----
+  // The Type column alone can't tell (VOO/XLE/SCHD are all Type=Stock) -- one LLM classification call,
+  // not per-position, keeps this cheap while future-proofing against new tickers appearing in the book.
+  phase('Classify')
+  const classifyResult = stockRows.length ? await agent(
+    `Classify each ticker below as either "single-name" (an individual operating company) or "etf-fund" ` +
+    `(an ETF, index fund, sector fund, or closed-end fund -- anything that holds a basket rather than operating a business).\n` +
+    `Examples of etf-fund: VOO, XLE, SCHD, VXUS, VWO, VEA, GDX, EWZ, ILF, SPLV, ROBO, URNM, GSY, RSP, VHT, XLI.\n` +
+    `Examples of single-name: ACN, PYPL, NKE, MSFT, TSLA, AMD, GOOG.\n` +
+    `Tickers: ${stockRows.map(r => r.position).join(', ')}\n` +
+    `Return one classification per ticker.`,
+    { label: 'classify-holdings', phase: 'Classify', schema: HOLDINGS_CLASSIFY_SCHEMA, model: MODEL }
+  ) : { classifications: [] }
+
+  const classMap = {}
+  for (const c of (classifyResult && classifyResult.classifications) || []) {
+    if (c && c.ticker) classMap[String(c.ticker).toUpperCase()] = c.bucket
+  }
+  const singleNameStocks = stockRows.filter(r => classMap[r.position.toUpperCase()] !== 'etf-fund')
+  const etfStocks = stockRows.filter(r => classMap[r.position.toUpperCase()] === 'etf-fund')
+  log(`holdings-sweep classify: ${singleNameStocks.length} single-name, ${etfStocks.length} ETF/fund (of ${stockRows.length} Stock-type rows)`)
+
+  // Commodity trusts (PSLV, PHYS) hold bullion rather than operate a business -- bucket with ETFs.
+  const etfBucket = [...etfStocks, ...commodityRows]
+  const panelBucket = [...singleNameStocks, ...cryptoBetaRows.map(r => ({ ...r, holdOnly: true }))]
+
+  // ---- ETF/commodity trend-only screen: ONE batched agent, not per-name (kept lean) ----
+  phase('TrendScreen')
+  const trendResult = etfBucket.length ? await agent(
+    `Run a LIGHTWEIGHT trend-only screen (NOT a full fundamental panel) for these ETF/index/commodity-trust ` +
+    `holdings. For each: check price vs 50d/200d moving average and recent momentum via TradingView MCP or a ` +
+    `quick price fetch. Verdict is HOLD by default; only flag TRIM if the fund is decisively broken-trend ` +
+    `(price well below both 50d and 200d MA with no reversal signal) -- ETFs are diversified, so this is a ` +
+    `coarse screen, not a sell recommendation engine.\n` +
+    `Holdings: ${etfBucket.map(r => `${r.position} (qty ${r.quantity}, unrealized P&L ${r.pnl})`).join('; ')}\n` +
+    `Date: ${REPORT_DATE}`,
+    { label: 'etf-trend-screen', phase: 'TrendScreen', schema: HOLDINGS_TREND_SCHEMA, model: MODEL }
+  ) : { rows: [] }
+  const trendRows = (trendResult && trendResult.rows) || []
+  log(`holdings-sweep trend-screen: ${trendRows.length} ETF/commodity rows screened`)
+
+  // ---- Single-name + crypto-beta: ONE 5-seat BSC panel agent per ticker, batched under the concurrency cap ----
+  // Plain parallel() -- the platform auto-queues past its concurrency cap (established precedent: the
+  // trend-discovery journalism fan-out above routinely runs 50+ agents this way).
+  phase('Panel')
+  log(`holdings-sweep panel: fanning out ${panelBucket.length} per-name agents`)
+  const panelResults = await parallel(panelBucket.map(r => () => {
+    const holdOnlyNote = r.holdOnly
+      ? `\nPOLICY OVERRIDE -- this is a crypto-beta proxy position. FINAL VERDICT must be ADD or HOLD ONLY -- ` +
+        `never TRIM or EXIT on this ticker in this workflow, regardless of what the panel/skeptic finds. This is ` +
+        `a house policy constraint, not a data judgment -- state it explicitly in the CIO memo if the underlying ` +
+        `analysis would otherwise have supported a sell.`
+      : ''
+    return agent(
+      `You are running a full holdings review for ONE position: ${r.position} (qty ${r.quantity}, unrealized P&L ${r.pnl}).\n` +
+      `Do this yourself, in this ONE turn -- do NOT spawn subagents, you are already the leaf-level worker:\n` +
+      `1. Gather data yourself: fundamentals + TradingView MCP price/indicators + a recent-news check. For the ` +
+      `smart-money/insider seat use Form 4 via https://openinsider.com/screener?s=${r.position} -- if that returns ` +
+      `403/blocked, fall back to https://finviz.com/quote.ashx?t=${r.position} (Insider Trading table) as documented.\n` +
+      `2. Run the 5-seat panel using the verbatim seat prompts in ${SKILL}/stocks-advisor/references/seat-prompts.md ` +
+      `(Fundamental/Buffett, Technical/Druckenmiller, Narrative-Macro, Sentiment-Positioning, Smart-Money) -- apply ` +
+      `each seat's framework yourself, one at a time, to the data you gathered.\n` +
+      `3. Apply the BSC hierarchy in ${SKILL}/stocks-advisor/references/hierarchies/bsc.md: mandatory Skeptic step, ` +
+      `then CIO Synthesis -- INCLUDING the DATA-COVERAGE GATE (>=2/5 seats with no real data caps the verdict at HOLD).\n` +
+      `4. Use HOLDINGS-PATH vocabulary: FINAL VERDICT must be one of ADD | HOLD | TRIM | EXIT (cost basis is known ` +
+      `from the unrealized P&L given above).\n` +
+      `5. FUNDING-POOL TEST -- if your verdict would be TRIM or EXIT, only let it stand if BOTH (a) no realistic ` +
+      `1-2 year growth catalyst AND (b) no dividend yield good enough to justify holding for income; otherwise ` +
+      `downgrade to HOLD and say so in funding_pool_test. State the test result explicitly either way.${holdOnlyNote}\n` +
+      `Date: ${REPORT_DATE}\n` +
+      `Return: ticker=${r.position}, final_verdict, conviction (1-5), data_coverage ("N/5 seats had real evidence"), ` +
+      `gate_triggered (bool), dissent_logged, cio_memo, funding_pool_test.`,
+      { label: `holding-panel:${r.position}`, phase: 'Panel', schema: HOLDING_PANEL_SCHEMA, model: MODEL }
+    )
+  }))
+  const panelVerdicts = panelResults.map((v, i) => v || {
+    ticker: panelBucket[i].position, final_verdict: 'HOLD', conviction: 0,
+    data_coverage: '0/5 -- agent failed', gate_triggered: true, cio_memo: '[UNAVAILABLE: panel agent failed]',
+  })
+  log(`holdings-sweep panel: ${panelVerdicts.filter(v => v.final_verdict !== 'HOLD').length}/${panelVerdicts.length} non-HOLD verdicts`)
+
+  // ---- Consolidate: merge per-name verdicts into one report (pure JS -- each panel agent already
+  // returned a final structured verdict, so no extra LLM synthesis step is needed here) ----
+  phase('Consolidate')
+  const panelTableRows = panelVerdicts.map(v => {
+    const src = panelBucket.find(r => r.position === v.ticker) || {}
+    return `| ${v.ticker} | ${src.quantity || ''} | ${src.pnl || ''} | **${v.final_verdict}** | ${v.conviction}/5 | ${v.data_coverage || ''} |`
+  }).join('\n')
+  const trendTableRows = trendRows.map(t => {
+    const src = etfBucket.find(r => r.position === t.ticker) || {}
+    return `| ${t.ticker} | ${src.quantity || ''} | ${src.pnl || ''} | **${t.verdict}** | ${t.note || ''} |`
+  }).join('\n')
+  const panelDetail = panelVerdicts.map(v =>
+    `### ${v.ticker} -- ${v.final_verdict} (conviction ${v.conviction}/5)\n` +
+    `**Data coverage:** ${v.data_coverage || 'n/a'}${v.gate_triggered ? ' -- GATE TRIGGERED' : ''}\n` +
+    `**Dissent:** ${v.dissent_logged || 'none'}\n` +
+    `**CIO memo:** ${v.cio_memo || ''}\n` +
+    (v.funding_pool_test ? `**Funding-pool test:** ${v.funding_pool_test}\n` : '')
+  ).join('\n\n---\n\n')
+
+  const addCount = panelVerdicts.filter(v => v.final_verdict === 'ADD').length
+  const trimExitCount = panelVerdicts.filter(v => v.final_verdict === 'TRIM' || v.final_verdict === 'EXIT').length
+  const holdCount = panelVerdicts.length - addCount - trimExitCount
+
+  // ---- Report: write + VERIFY + retry (mirrors the discovery-mode Report phase above) ----
+  phase('Report')
+  const reportPath = `/Users/engineer/workspace/backtest/research/holdings-sweep.${REPORT_DATE}.md`
+  const reportMd = `# Holdings Sweep -- ${REPORT_DATE}
+
+> Full-book review of ${rows.length} HELD positions (${panelBucket.length} full BSC panel, ${etfBucket.length} ETF/commodity trend-only, ${cashRows.length} cash skipped).
+> Source: ${POSITIONS_CSV}
+> Generated by \`research-market-workflow\` (holdings-sweep mode). Educational, not advice; re-pull before acting.
+
+## Summary
+**${addCount} ADD** | ${holdCount} HOLD | ${trimExitCount} TRIM/EXIT
+
+## Single-name + crypto-beta panel (full BSC hierarchy)
+| Ticker | Qty | Unrealized P&L | Verdict | Conviction | Data coverage |
+|---|---|---|---|---|---|
+${panelTableRows}
+
+## ETF / commodity trend-only screen
+| Ticker | Qty | Unrealized P&L | Verdict | Note |
+|---|---|---|---|---|
+${trendTableRows || '(none)'}
+
+## Panel detail
+${panelDetail}
+
+## Cash (skipped)
+${cashRows.map(r => `- ${r.position}: ${r.quantity}`).join('\n') || '(none)'}
+`
+  let reportOk = false
+  for (let attempt = 1; attempt <= 2 && !reportOk; attempt++) {
+    await agent(`Use the Write tool to create EXACTLY this file:\n${reportPath}\nWrite this content VERBATIM (no edits/summary). Create parent dirs. After writing, run Bash \`wc -c < ${reportPath}\` to confirm. Reply with just the byte count.\n--- BEGIN ---\n${reportMd}\n--- END ---`,
+      { label: attempt === 1 ? 'write-holdings-report' : `write-holdings-report-retry${attempt}`, phase: 'Report', model: MODEL })
+    const check = await agent(`Run Bash EXACTLY: \`test -f ${reportPath} && wc -c < ${reportPath} || echo MISSING\`. Reply with ONLY the byte count number, or the word MISSING.`,
+      { label: `verify-holdings-report-${attempt}`, phase: 'Report', model: MODEL })
+    const bytes = parseInt(String(check).replace(/[^0-9]/g, ''), 10) || 0
+    reportOk = String(check).indexOf('MISSING') === -1 && bytes > 500
+    log(reportOk ? `Holdings-sweep report written + verified (${bytes} bytes): ${reportPath}`
+      : `WARNING: write-holdings-report attempt ${attempt} did NOT persist. ${attempt < 2 ? 'Retrying.' : 'GIVING UP -- report NOT on disk; downstream must use the returned verdicts field.'}`)
+  }
+
+  // ---- Ledger: one row per panel-reviewed ticker (ETF trend-only rows skipped -- a coarse screen isn't a dated forecast) ----
+  phase('Ledger')
+  const horizon = REPORT_DATE.slice(0, 4) + '-12-31'
+  const verdictProb = { ADD: 0.7, HOLD: 0.5, TRIM: 0.3, EXIT: 0.15 }
+  const ledgerLogs = await parallel(panelVerdicts.map(v => () =>
+    agent(
+      `Use Bash to run EXACTLY (appends one dated forecast row):\n\n` +
+      `python3 ${LEDGER_PY} add --asset ${v.ticker} --q ${JSON.stringify('holdings-sweep panel: ' + String(v.cio_memo || v.final_verdict).slice(0, 160))} ` +
+      `--p ${(verdictProb[v.final_verdict] ?? 0.5).toFixed(2)} --by ${JSON.stringify(horizon)} --lens stocks-advisor-bsc ` +
+      `--source research-market-workflow-holdings-sweep --flip ${JSON.stringify(String(v.dissent_logged || 'thesis break').slice(0, 160))} --created ${JSON.stringify(REPORT_DATE)}\n\n` +
+      `If "id exists", re-run once with --id ${String(v.ticker).toLowerCase()}-${REPORT_DATE}-holdings. Reply with the CLI's stdout line.`,
+      { label: `ledger-holding-${v.ticker}`, phase: 'Ledger', model: MODEL }))
+  )
+  log(`holdings-sweep ledger: ${panelVerdicts.length} entries logged`)
+
+  return {
+    mode: 'holdings-sweep', date: REPORT_DATE, reportPath, reportPersisted: reportOk,
+    totalPositions: rows.length, panelCount: panelBucket.length, etfCount: etfBucket.length, cashSkipped: cashRows.length,
+    verdicts: panelVerdicts, trend: trendRows,
+    summary: { add: addCount, hold: holdCount, trimExit: trimExitCount },
+  }
+}

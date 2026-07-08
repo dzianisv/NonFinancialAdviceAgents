@@ -133,7 +133,7 @@ Do NOT use `fapi.binance.com` (HTTP 451) or Bybit (403).
 
 ## Price-ground mode (`--tickers`)
 
-Ground an ARBITRARY list of tickers (no universe scan, no dip threshold). Returns every ticker's live 52w-high / 200dMA metrics regardless of distance from high. Used by the hedge-fund-committee workflow to attach paywall-independent pricing to narrative names. Example:
+Ground an ARBITRARY list of tickers (no universe scan, no dip threshold). Returns every ticker's live 52w-high / 200dMA metrics regardless of distance from high. Used by the hedge-fund-committee-workflow to attach paywall-independent pricing to narrative names. Example:
 ```bash
 python3 .agents/skills/dip-scanner/dip_scanner.py --tickers LEU,KGS,POWL,MSFT,BTC-USD
 ```

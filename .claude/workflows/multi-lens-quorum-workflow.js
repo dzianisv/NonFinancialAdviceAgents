@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'multi-lens-quorum',
+  name: 'multi-lens-quorum-workflow',
   description: 'Convene N independent analyst lenses on ONE judgment call; synthesize consensus without averaging away dissent.',
   whenToUse: 'Reversible-expensive investment/trading judgment calls where 4-7 lenses would genuinely disagree (buy/sell/hold, allocation, cadence, timing). Not for facts/lookups/code.',
   phases: [

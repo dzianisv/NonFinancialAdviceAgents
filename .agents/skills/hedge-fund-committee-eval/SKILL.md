@@ -1,6 +1,6 @@
 ---
 name: hedge-fund-committee-eval
-description: Blind LLM-as-judge that scores a hedge-fund-committee workflow run (0–100) against the owner's actual ask and docs/prd.md. Use to grade a run and drive the run→score→fix→rerun loop. Triggers — "score the committee run", "evaluate the buy brief", "grade the staged-entry plan".
+description: Blind LLM-as-judge that scores a hedge-fund-committee-workflow run (0–100) against the owner's actual ask and docs/prd.md. Use to grade a run and drive the run→score→fix→rerun loop. Triggers — "score the committee run", "evaluate the buy brief", "grade the staged-entry plan".
 license: MIT
 compatibility: opencode
 metadata:

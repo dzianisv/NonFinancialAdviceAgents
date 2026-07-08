@@ -1,6 +1,6 @@
 export const meta = {
-  name: 'crypto-advisor',
-  description: 'Sequential per-token crypto analysis: TradingView MCP data pull (orchestrator only) → 5-seat quorum → narrative with real web-fetched sources → citation validation post-hook (code-enforced ERR_RX, same pattern as hedge-fund-committee). Outputs BUY/SELL/HOLD signal table + plain-English verdicts + validated news sources.',
+  name: 'crypto-advisor-workflow',
+  description: 'Sequential per-token crypto analysis: TradingView MCP data pull (orchestrator only) → 5-seat quorum → narrative with real web-fetched sources → citation validation post-hook (code-enforced ERR_RX, same pattern as hedge-fund-committee-workflow). Outputs BUY/SELL/HOLD signal table + plain-English verdicts + validated news sources.',
   phases: [
     { title: 'Analyze',  detail: 'Sequential per-token: TV data pull (orchestrator) → indicators.py → 5-seat quorum → narrative with real web fetches. Returns structured JSON per token.' },
     { title: 'Validate', detail: 'Code-enforced citation scan: ERR_RX on every cited URL, spawn cold re-fetch validator agent, log failures to logs/citation-errors.log' },
@@ -120,7 +120,7 @@ for (const symbol of TOKENS) {
 }
 
 // ── PHASE 2 — CITATION VALIDATION (code-enforced post-hook) ──────────────────
-// This is the same ERR_RX pattern from hedge-fund-committee Phase 4.5.
+// This is the same ERR_RX pattern from hedge-fund-committee-workflow Phase 4.5.
 // The JS regex runs on the structured citation JSON — no LLM decides whether citations are valid.
 // A hallucinated URL (no https://, status != fetched) is caught here regardless of what the
 // analysis agent claimed in its prose.
@@ -181,7 +181,7 @@ if (goodCitations.length > 0) {
   }
 }
 
-// Append to durable error log (same pattern as hedge-fund-committee logs/error.log)
+// Append to durable error log (same pattern as hedge-fund-committee-workflow logs/error.log)
 const errRows = [
   ...badCitations.map(c => ({ symbol: c.symbol, type: 'BAD_URL', detail: c.url.slice(0, 300) })),
   ...(Array.isArray(validationReport)

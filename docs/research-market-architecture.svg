@@ -15,7 +15,7 @@
 <rect width="1200" height="1380" fill="#0d1117"/>
 
 <!-- ═══ TITLE ═══ -->
-<text x="600" y="36" text-anchor="middle" fill="#e6edf3" font-size="20" font-weight="700" letter-spacing="1">research-market — Dynamic Workflow Architecture</text>
+<text x="600" y="36" text-anchor="middle" fill="#e6edf3" font-size="20" font-weight="700" letter-spacing="1">research-market-workflow — Dynamic Workflow Architecture</text>
 <text x="600" y="56" text-anchor="middle" fill="#8b9ab5" font-size="12">8-phase sequential gates · per-asset O(1) parallelism · CIO discovers skills live at runtime</text>
 
 <!-- ═══════════════════════════════════════════════════════════

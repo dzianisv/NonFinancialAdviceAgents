@@ -7,7 +7,7 @@ git config core.hooksPath hooks
 ```
 
 ## pre-push
-Runs the hedge-fund-committee invariant tests and **blocks the push** if they fail:
+Runs the hedge-fund-committee-workflow invariant tests and **blocks the push** if they fail:
 - `test_gate_contract.mjs` — a single-source narrative name (SNDK-class) must reach the panel (the SanDisk regression guard, bound to the real workflow source).
 - `apply_score_caps.mjs --selftest` — the deterministic eval hard-caps (flagship-exclusion → 35, all-PASS → 45) are intact.
 

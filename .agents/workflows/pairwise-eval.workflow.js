@@ -1,5 +1,5 @@
 export const meta = {
-  name: 'pairwise-eval',
+  name: 'pairwise-eval-workflow',
   description: 'Reliable blind SELECTION for the improvement loop: N judges decide which of two research reports (A vs B) better answers the question. Pairwise preference beats pointwise absolute scoring (which clusters/fluctuates). Position-randomized by judge index to kill position bias. Judges see only the reports. Returns the winner + vote split — the accept/reject signal the loop needs.',
   phases: [{ title: 'Compare', detail: 'N blind judges, A/B order swapped by index, majority vote' }],
 }

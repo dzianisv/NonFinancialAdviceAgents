@@ -16,16 +16,19 @@ QUESTION TYPE
      │        → tradfi-portfolio-manager (REVIEW→ASSESS→RESEARCH→DECIDE→ORDER)
      │
      ├── "should I buy/sell X?" (known ticker)
-     │        → research-market workflow  (crypto OR equity path auto-detected)
+     │        → research-market-workflow  (crypto OR equity path auto-detected)
      │
      ├── "what should I buy this week?" (open universe)
-     │        → hedge-fund-committee workflow  (weekly, no ticker needed)
+     │        → hedge-fund-committee-workflow  (weekly, no ticker needed)
      │
      ├── "should I buy/hold/size X?" (pure judgment)
      │        → multi-lens-quorum  (4-7 independent analyst lenses)
      │
      ├── "find trending stocks"
-     │        → research-trend-stocks workflow  (EDGAR×phrase + WebSearch×angle, ~50 agents)
+     │        → research-market-workflow, args.strategy="trend-discovery"  (EDGAR×phrase + WebSearch×angle, ~50 agents)
+     │
+     ├── "review my whole book / trim losers"
+     │        → research-market-workflow, args.mode="holdings-sweep"  (per-name panel → ADD/HOLD/TRIM/EXIT)
      │
      ├── "where does X go by [date]?"
      │        → superforecasting  (scenarios × probabilities; scored by forecast-ledger)
@@ -67,9 +70,8 @@ QUESTION TYPE
 
 | Skill | Invoked by | Notes |
 |-------|-----------|-------|
-| hedge-fund-committee workflow | weekly review session | open-universe, no ticker |
-| research-market workflow | "should I buy/sell X?" | passes question + portfolio + date |
-| research-trend-stocks workflow | "find trending stocks" | wide-parallel HTTP fan-out |
+| hedge-fund-committee-workflow | weekly review session | open-universe, no ticker |
+| research-market-workflow | "should I buy/sell X?" | passes question + portfolio + date; strategy="trend-discovery" for wide-parallel HTTP fan-out, mode="holdings-sweep" for full-book review |
 | multi-lens-quorum | any judgment call | convenes 4-7 lenses on identical brief |
 | macro-panel | "what does macro say?" | 7 thinker personas |
 | superforecasting | "where does X go by date?" | logs to forecast-ledger |
@@ -94,7 +96,7 @@ These are sub-skills. Call them via their orchestrator, not directly:
 `dip-tranches-strategy`, `tax-loss-harvesting`, `trend-following`, all `feed-*` adapters,
 all `investor-*` and `research-*` thinker lenses (consumed by macro-panel or multi-lens-quorum),
 all `analyst-*` lenses (consumed by multi-lens-quorum),
-`analyse-smartmoney` (family orchestrator — runs spokes; use directly or via hedge-fund-committee),
+`analyse-smartmoney` (family orchestrator — runs spokes; use directly or via hedge-fund-committee-workflow),
 `analyse-smartmoney-options`, `analyse-smartmoney-darkpool` (analytical — consumed by multi-lens-quorum or analyse-smartmoney).
 
 ### Evaluation / quality (meta — not part of the fund loop)
@@ -102,8 +104,8 @@ all `analyst-*` lenses (consumed by multi-lens-quorum),
 | Skill | When |
 |-------|------|
 | skill-supervisor | before shipping any SKILL.md edit |
-| hedge-fund-committee-eval | after running hedge-fund-committee workflow |
-| crypto-workflow-eval | after running research-market workflow (crypto) |
+| hedge-fund-committee-eval | after running hedge-fund-committee-workflow |
+| crypto-workflow-eval | after running research-market-workflow (crypto) |
 
 ### Deprecated — do not use
 
@@ -120,9 +122,9 @@ Critical rule: fan out only when each agent has an INDEPENDENT resource tap.
 
 | Workflow | Parallel-safe? | Why |
 |----------|---------------|-----|
-| research-trend-stocks | YES | EDGAR queries + WebSearch calls — independent HTTP per agent |
-| hedge-fund-committee | YES | 6 collector agents hit independent sources (13F, congress, feeds…) |
-| research-market (gather phase) | YES | each gather seat is a different skill/source |
+| research-market-workflow (trend-discovery screen) | YES | EDGAR queries + WebSearch calls — independent HTTP per agent |
+| hedge-fund-committee-workflow | YES | 6 collector agents hit independent sources (13F, congress, feeds…) |
+| research-market-workflow (gather phase) | YES | each gather seat is a different skill/source |
 | multi-lens-quorum | YES | each lens reads same brief independently |
 | macro-panel | YES | each thinker-persona is stateless |
 | trend-stock-research (old v1) | NO | readers shared the one Chrome browser → serialized, timeouts |

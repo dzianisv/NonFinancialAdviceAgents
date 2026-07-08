@@ -21,7 +21,7 @@ npx -y skills add dzianisv/financial-advisor-agents
 
 ## Step 2 — Install the weekly workflow (clone once)
 
-The `hedge-fund-committee` workflow runs a parallel weekly brief (news → price-ground → quorum → CIO memo). Workflows travel via repo clone, not npx.
+The `hedge-fund-committee-workflow` runs a parallel weekly brief (news → price-ground → quorum → CIO memo). Workflows travel via repo clone, not npx.
 
 ```bash
 git clone https://github.com/dzianisv/financial-advisor-agents.git ~/financial-advisor-agents
@@ -29,7 +29,7 @@ git clone https://github.com/dzianisv/financial-advisor-agents.git ~/financial-a
 # Claude Code: symlink into .claude/workflows/
 mkdir -p ~/.claude/workflows
 ln -sf ~/financial-advisor-agents/.agents/workflows/hedge-fund-committee.workflow.js \
-       ~/.claude/workflows/hedge-fund-committee.js
+       ~/.claude/workflows/hedge-fund-committee-workflow.js
 ```
 
 For OpenClaw/Hermes: place the `.workflow.js` file anywhere the agent can read it and invoke it as:

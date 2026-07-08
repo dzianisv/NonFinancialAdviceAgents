@@ -14,9 +14,10 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 
 | Request | Tool | Notes |
 |---|---|---|
-| "What to buy this week?" | `hedge-fund-committee` workflow | open-universe weekly buy memo |
-| "Should I buy/sell/trim X?" | `research-market` workflow | pass query + date + prior_context |
-| "Find trending stocks" | `stocks-trend-screener` workflow | journalism screen → quorum |
+| "What to buy this week?" | `hedge-fund-committee-workflow` | open-universe weekly buy memo |
+| "Should I buy/sell/trim X?" | `research-market-workflow` | pass query + date + prior_context |
+| "Find trending stocks" | `research-market-workflow` (`args.strategy: "trend-discovery"`) | quant pre-screen → EDGAR/WebSearch journalism fan-out → beneficiary mapping → skeptic |
+| "Review my whole book / trim losers" | `research-market-workflow` (`args.mode: "holdings-sweep"`) | full-book panel per held name → ADD/HOLD/TRIM/EXIT |
 | Buy/hold/size judgment | `multi-lens-quorum` skill | 4-7 independent lenses |
 | "When to buy / entry levels / support zones for X" | Pull OHLCV first → identify levels from data → set `mkt` alert with `--data-source` | Enforced in code: `mkt-alert.ts` rejects `above`/`below` price alerts with no `--data-source`. Pull `data_get_ohlcv` 210 weekly bars, bucket closes, cite N-week concentration or 200wMA. |
 | "Where does X go by [date]?" | `superforecasting` skill | logged to forecast-ledger for scoring |
@@ -24,29 +25,43 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 | Risk-on / risk-off | `regime-detection` skill | weighted signal ensemble |
 | Run the fund / daily cycle | `hedge-fund-manager` skill | delegates to sub-skills |
 | Weekly portfolio review | `tradfi-portfolio-manager` skill | REVIEW→ASSESS→RESEARCH→DECIDE→ORDER |
-| Compare two outputs | `pairwise-eval` workflow | blind A/B, N judges |
+| Compare two outputs | `pairwise-eval-workflow` | blind A/B, N judges |
 
 `stocks-trend-screener` finds WHICH names → `multi-lens-quorum` judges WHETHER/size → `superforecasting` times. Chain in that order.
+
+## Workflows — which one to use
+
+| Workflow | Job | Reach for it when |
+|---|---|---|
+| `research-market-workflow` | Unified research pipeline: CIO Intake picks a strategy (`standard` discovery, or `trend-discovery` for quant pre-screen → journalism fan-out → beneficiary mapping → skeptic), plus a separate `holdings-sweep` mode for full-book review of what you already hold | You have a specific question about a ticker or sector, want a fresh-name discovery screen, or want your whole book reviewed for ADD/HOLD/TRIM/EXIT |
+| `hedge-fund-committee-workflow` | Open-universe weekly BUY discovery with a tuned staged-entry voting/dissent panel — deliberately kept separate, not folded into research-market | You want "what should I buy this week" as a ranked memo, not a single-name or single-strategy answer |
+| `multi-lens-quorum-workflow` | Runs N independent analytical lenses over one hard judgment call | You have one specific buy/hold/size decision and want disagreement surfaced, not averaged |
+| `hierarchy-compare-workflow` / `pairwise-eval-workflow` | Eval infra — compares two SKILL.md variants or two report outputs | You're running the skill-improvement loop and need a blind score or blind A/B winner |
+| `crypto-advisor-workflow` | Crypto book review and advisory pipeline | You're working the crypto (~$177k) book specifically, not tradfi |
 
 ## Invoking workflows
 
 ```js
-// research-market — autonomous screen → gather → panel → decide → ledger
+// research-market-workflow — autonomous screen → gather → panel → decide → ledger
 Workflow({
-  name: "research-market",
+  name: "research-market-workflow",
   args: {
     query: "find overlooked AI supply chain stocks not yet surged",
     date: "2026-06-20",       // required; workflow cannot call Date.now()
     prior_context: "...",     // read from .agents/memory/ and inject (see below)
     portfolio: "",            // omit if no holdings
+    strategy: "trend-discovery", // optional; omit for standard discovery
   }
 })
 
-// hedge-fund-committee — open-universe weekly buy memo
-Workflow({ name: "hedge-fund-committee" })
+// research-market-workflow — holdings-sweep mode (full-book review of held positions)
+Workflow({ name: "research-market-workflow", args: { mode: "holdings-sweep", date: "2026-06-20" } })
 
-// pairwise-eval
-Workflow({ name: "pairwise-eval", args: { a: "/path/a.md", b: "/path/b.md", rubric: "..." } })
+// hedge-fund-committee-workflow — open-universe weekly buy memo
+Workflow({ name: "hedge-fund-committee-workflow" })
+
+// pairwise-eval-workflow
+Workflow({ name: "pairwise-eval-workflow", args: { a: "/path/a.md", b: "/path/b.md", rubric: "..." } })
 ```
 
 Never pass `assets: [...]` — the screener is CIO-directed and always runs. Use `query` to guide what gets screened.
@@ -63,7 +78,7 @@ Skill({ skill: "regime-detection" })
 
 Skills = instructions to you (single-step). Workflows = autonomous pipelines (multi-phase subagents).
 
-## CIO memory pattern (before every research-market run)
+## CIO memory pattern (before every research-market-workflow run)
 
 The workflow is stateless. You own the memory.
 
@@ -83,7 +98,7 @@ prior_context: `Watchlist 2026-06-20:
 Append to `.agents/memory/YYYY-MM-DD.md` before replying. Format:
 
 ```
-## research-market — YYYY-MM-DD
+## research-market-workflow — YYYY-MM-DD
 **Query:** [one line]
 **Assets:** [tickers]
 **Verdicts:**
@@ -159,7 +174,8 @@ All in `.agents/skills/`. Full architecture diagrams: `.agents/skills/README.md`
 ### Slow advisor (weekly workflow)
 | Workflow | Role |
 |---|---|
-| `hedge-fund-committee` | analyst fan-out → conviction aggregation → 4-lens panel (code-enforced dissent) → CRO veto → ranked BUY memo |
+| `hedge-fund-committee-workflow` | analyst fan-out → conviction aggregation → 4-lens panel (code-enforced dissent) → CRO veto → ranked BUY memo |
+| `research-market-workflow` | CIO-directed research: standard/trend-discovery strategies for new names, holdings-sweep mode for the existing book |
 
 ### Desk sub-skills
 | Skill | Role |
@@ -216,7 +232,7 @@ Always pass `model: 'sonnet'` to every `agent()` call. Claude Code ignores it; O
 
 ## Eval rules
 
-- Prefer pairwise (`pairwise-eval` workflow) over pointwise for selecting between workflow versions.
+- Prefer pairwise (`pairwise-eval-workflow`) over pointwise for selecting between workflow versions.
 - Missing data = `[UNAVAILABLE]` (loud). Never silently drop a category.
 - `forecast-ledger` Brier score is ground truth. LLM judges are a coarse filter.
 

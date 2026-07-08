@@ -74,10 +74,10 @@ USER QUESTION
      │        → tradfi-portfolio-manager (REVIEW→ASSESS→RESEARCH→DECIDE→ORDER)
      │
      ├── "should I buy/sell X?" (known ticker)
-     │        → research-market workflow (manager → gather → consolidate → panel → chair)
+     │        → research-market-workflow (manager → gather → consolidate → panel → chair)
      │
      ├── "what should I buy this week?" (open universe)
-     │        → hedge-fund-committee workflow (fan-out → rank → panel → veto → brief)
+     │        → hedge-fund-committee-workflow (fan-out → rank → panel → veto → brief)
      │
      ├── "should I buy/sell/hold X?" (judgment call)
      │        → multi-lens-quorum (4-7 independent lenses → synthesis)
@@ -153,7 +153,7 @@ hedge-fund-manager (PM/CIO)
 
 ---
 
-### 2. research-market workflow (unified crypto + equity research)
+### 2. research-market-workflow (unified crypto + equity research)
 
 A single workflow handles both crypto and equity questions. The research-manager reads the query and dynamically assembles the right gather seats from the live skill catalog.
 
@@ -293,7 +293,7 @@ They chain: scout picks → quorum judges → superforecaster times.
 
 ---
 
-### 6. hedge-fund-committee workflow (weekly open-universe)
+### 6. hedge-fund-committee-workflow (weekly open-universe)
 
 The SLOW tier. Runs weekly to find the next stocks to buy — open universe, no ticker needed.
 
@@ -532,7 +532,7 @@ THINKER-PERSONA LENSES (worldview-based):
 └── research-morgan-housel  behavioral guardrail (non-voting) — "enough" / room for error
 
 Each lens is a LENS, not gospel — carry per-skill Caveats.
-Consumed by: multi-lens-quorum, macro-panel, research-market workflow
+Consumed by: multi-lens-quorum, macro-panel, research-market-workflow
 ```
 
 ---

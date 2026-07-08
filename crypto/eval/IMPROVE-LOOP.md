@@ -17,7 +17,7 @@ SUPERVISOR (main agent) drives the loop:
   2. REFLEXION (diagnose)  -> judges critique baseline report -> name single weakest skill
   3. DSPy (propose)        -> K instruction rewrites of that ONE skill (separate proposer agent)
   4. apply candidate       -> write skill, re-run target via Workflow tool -> candidate report
-  5. SELECT (pairwise)     -> pairwise-eval.js: N blind judges pick candidate vs baseline,
+  5. SELECT (pairwise)     -> pairwise-eval-workflow.js: N blind judges pick candidate vs baseline,
                               position-randomized, majority vote                                [PROVEN]
   6. accept iff candidate wins the majority -> commit (HUMAN GATE before merge)
   7. ground truth          -> forecast-ledger Brier score over weeks/months (the real arbiter)
@@ -31,7 +31,7 @@ Research (Zheng 2023 / MT-Bench / AlpacaEval; see survey): LLM judges are far mo
 outputs than assigning an absolute score — relative comparison needs no calibrated scale and tracks human
 preference better. So **selection** (accept/reject) uses pairwise, not a 0-100 number.
 
-**What's actually shown (honest):** `pairwise-eval.js` on iter1 (news seat literally `[UNAVAILABLE — DID NOT
+**What's actually shown (honest):** `pairwise-eval-workflow.js` on iter1 (news seat literally `[UNAVAILABLE — DID NOT
 RUN]`) vs iter4 (complete), 5 judges, order swapped by index → iter4 won 5–0; pointwise on the same pair gave
 88/89 then 63.5/64. This validates the **plumbing** (parallel judges, position-randomization, tally) and that
 pairwise cleanly flags a **gross defect**. It does NOT yet prove pairwise discriminates **subtle** improvements
