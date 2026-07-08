@@ -13,7 +13,7 @@ export const meta = {
     { title: 'NewsFetch', detail: 'pre-fetch WSJ + FT + Bloomberg headlines into local article cache; gather agents query BM25 instead of hitting live URLs [discovery mode]' },
     { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill [discovery mode]' },
     { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief [discovery mode]. holdings-sweep: merges per-position panel verdicts + trend-screen rows into one report (pure JS, no extra LLM call)' },
-    { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail [discovery mode]. holdings-sweep: one 5-seat BSC panel agent per single-name/crypto-beta holding' },
+    { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail [discovery mode]. holdings-sweep: one 5-seat BSC panel agent per single-name/hold-only-tagged holding' },
     { title: 'Decide', detail: 'manager-selected chair: portfolio-aware buy/sell decision [discovery mode]' },
     { title: 'CIO-Review', detail: 'CIO decides STOP (have a BUY / exhausted) or CONTINUE (screen a fresh slice) [discovery mode, iterative re-screen loop]' },
     { title: 'SaveState', detail: 'persist screened tickers + per-asset verdicts for the next run [discovery mode]' },
@@ -57,6 +57,15 @@ const MODE = ARGS.mode || 'discovery'        // 'discovery' (default, this file'
 // gave none, so the CIO decides at Intake as before. When set, it is a DETERMINISTIC override applied
 // after the Intake plan comes back -- the CIO may not veto an explicit caller arg.
 const STRATEGY_ARG = (ARGS.strategy === 'trend-discovery' || ARGS.strategy === 'standard') ? ARGS.strategy : ''
+// Caller-supplied hold-only mandate (holdings-sweep mode only). This workflow is a NEUTRAL analyst --
+// it does not hardcode any ticker as un-sellable. A caller who wants a hold-only clamp on specific
+// positions passes them here (array or comma-separated string, same normalize-both-shapes pattern as
+// ARGS above). The OTHER accepted source is positions.csv itself: rows the USER tagged with a
+// hold-only Type (e.g. 'crypto-beta') in that caller-maintained data file -- see runHoldingsSweep.
+const HOLD_ONLY_ARG = (Array.isArray(ARGS.hold_only) ? ARGS.hold_only
+  : (typeof ARGS.hold_only === 'string' && ARGS.hold_only.trim() ? ARGS.hold_only.split(',') : []))
+  .map(t => String(t).trim().toUpperCase()).filter(Boolean)
+const HOLD_ONLY_ARG_SET = new Set(HOLD_ONLY_ARG)
 
 const PLAN_SCHEMA = {
   type: 'object',
@@ -1174,10 +1183,14 @@ ${(screenedResult && screenedResult.screen_notes) || '(none)'}
 // ============================================================================
 // runHoldingsSweep — args.mode === "holdings-sweep". Full-book review of HELD positions (vs discovery
 // of new names). Reads positions.csv (Position,Quantity,Type,Unrealized_PnL). ETFs/commodity trusts get
-// one cheap batched trend-only screen; single-name stocks and crypto-beta proxies each get ONE agent
-// running the full stocks-advisor BSC hierarchy (5-seat panel + skeptic + CIO synthesis + DATA-COVERAGE
-// GATE) internally in a single turn. crypto-beta positions are policy-capped at ADD/HOLD -- this mode
-// never emits a sell verdict on them. Hoisted function declaration; called from the MODE dispatch above.
+// one cheap batched trend-only screen; single-name stocks and any hold-only-tagged positions each get
+// ONE agent running the full stocks-advisor BSC hierarchy (5-seat panel + skeptic + CIO synthesis +
+// DATA-COVERAGE GATE) internally in a single turn. This workflow is unbiased by default -- it has no
+// opinion on any ticker. A position is policy-capped at ADD/HOLD (never TRIM/EXIT) ONLY if the CALLER
+// said so, via one of two caller-supplied sources: (a) args.hold_only (explicit ticker list passed at
+// invocation) or (b) the positions.csv Type column, which is USER-maintained data -- if the user tagged
+// a row 'crypto-beta' or 'hold-only', that is the user specifying their own mandate, not a rule this
+// workflow imposes. Hoisted function declaration; called from the MODE dispatch above.
 // ============================================================================
 async function runHoldingsSweep() {
   phase('LoadPositions')
@@ -1195,10 +1208,14 @@ async function runHoldingsSweep() {
   if (!rows.length) { log('FATAL: positions.csv parsed to zero rows; aborting holdings-sweep.'); return { error: 'positions.csv empty or unparsable', mode: 'holdings-sweep' } }
 
   const cashRows = rows.filter(r => /^cash$/i.test(r.type))
-  const cryptoBetaRows = rows.filter(r => /^crypto-beta$/i.test(r.type))
+  // Rows the USER tagged hold-only in their own positions.csv (caller-maintained data, not a rule this
+  // workflow invents). 'crypto-beta' is this book's existing tag; 'hold-only' is accepted generically
+  // for any future caller mandate expressed the same way.
+  const taggedHoldOnlyRows = rows.filter(r => /^crypto-beta$/i.test(r.type) || /^hold-only$/i.test(r.type))
   const commodityRows = rows.filter(r => /^comodity$/i.test(r.type) || /^commodity$/i.test(r.type))
   const stockRows = rows.filter(r => /^stock$/i.test(r.type))
-  log(`holdings-sweep: ${rows.length} positions -- ${stockRows.length} Stock, ${cryptoBetaRows.length} crypto-beta, ${commodityRows.length} commodity, ${cashRows.length} cash (skipped)`)
+  log(`holdings-sweep: ${rows.length} positions -- ${stockRows.length} Stock, ${taggedHoldOnlyRows.length} tagged hold-only, ${commodityRows.length} commodity, ${cashRows.length} cash (skipped)` +
+    (HOLD_ONLY_ARG.length ? `; +${HOLD_ONLY_ARG.length} hold-only ticker(s) via args.hold_only` : ''))
 
   // ---- Classify Stock-type rows: single-name operating company vs ETF/index/sector fund ----
   // The Type column alone can't tell (VOO/XLE/SCHD are all Type=Stock) -- one LLM classification call,
@@ -1224,7 +1241,12 @@ async function runHoldingsSweep() {
 
   // Commodity trusts (PSLV, PHYS) hold bullion rather than operate a business -- bucket with ETFs.
   const etfBucket = [...etfStocks, ...commodityRows]
-  const panelBucket = [...singleNameStocks, ...cryptoBetaRows.map(r => ({ ...r, holdOnly: true }))]
+  // holdOnly flag: true iff the CALLER said so -- via positions.csv Type tag (taggedHoldOnlyRows) or
+  // args.hold_only naming this ticker explicitly. No ticker is hardcoded as hold-only in this file.
+  const panelBucket = [
+    ...singleNameStocks.map(r => ({ ...r, holdOnly: HOLD_ONLY_ARG_SET.has(r.position.toUpperCase()) })),
+    ...taggedHoldOnlyRows.map(r => ({ ...r, holdOnly: true })),
+  ]
 
   // ---- ETF/commodity trend-only screen: ONE batched agent, not per-name (kept lean) ----
   phase('TrendScreen')
@@ -1241,17 +1263,18 @@ async function runHoldingsSweep() {
   const trendRows = (trendResult && trendResult.rows) || []
   log(`holdings-sweep trend-screen: ${trendRows.length} ETF/commodity rows screened`)
 
-  // ---- Single-name + crypto-beta: ONE 5-seat BSC panel agent per ticker, batched under the concurrency cap ----
+  // ---- Single-name + caller-tagged hold-only: ONE 5-seat BSC panel agent per ticker, batched under the concurrency cap ----
   // Plain parallel() -- the platform auto-queues past its concurrency cap (established precedent: the
   // trend-discovery journalism fan-out above routinely runs 50+ agents this way).
   phase('Panel')
   log(`holdings-sweep panel: fanning out ${panelBucket.length} per-name agents`)
   const panelResults = await parallel(panelBucket.map(r => () => {
     const holdOnlyNote = r.holdOnly
-      ? `\nPOLICY OVERRIDE -- this is a crypto-beta proxy position. FINAL VERDICT must be ADD or HOLD ONLY -- ` +
-        `never TRIM or EXIT on this ticker in this workflow, regardless of what the panel/skeptic finds. This is ` +
-        `a house policy constraint, not a data judgment -- state it explicitly in the CIO memo if the underlying ` +
-        `analysis would otherwise have supported a sell.`
+      ? `\nCALLER MANDATE -- this position was flagged hold-only by the caller (positions.csv Type tag or ` +
+        `args.hold_only), not by this workflow. FINAL VERDICT must be ADD or HOLD ONLY -- never TRIM or EXIT on ` +
+        `this ticker in this run, regardless of what the panel/skeptic finds. Run the analysis exactly as ` +
+        `unbiased as any other ticker; only the final verdict is clamped -- state that explicitly in the CIO ` +
+        `memo if the underlying analysis would otherwise have supported a sell.`
       : ''
     return agent(
       `You are running a full holdings review for ONE position: ${r.position} (qty ${r.quantity}, unrealized P&L ${r.pnl}).\n` +
@@ -1281,14 +1304,15 @@ async function runHoldingsSweep() {
       ticker: r.position, final_verdict: 'HOLD', conviction: 0,
       data_coverage: '0/5 -- agent failed', gate_triggered: true, cio_memo: '[UNAVAILABLE: panel agent failed]',
     }
-    // Code-enforced policy clamp -- the POLICY OVERRIDE prompt note above is advisory only; an LLM panel
-    // agent can still return TRIM/EXIT on a crypto-beta proxy despite the instruction. Force HOLD-ONLY here
-    // so the policy is guaranteed, not merely requested. Raw (pre-clamp) verdict kept in panel_verdict for
-    // transparency -- the report/consumer can see what the panel actually concluded before the clamp.
+    // Code-enforced clamp -- the CALLER MANDATE prompt note above is advisory only; an LLM panel agent can
+    // still return TRIM/EXIT despite the instruction. Force HOLD here so the caller's mandate is guaranteed,
+    // not merely requested. Raw (pre-clamp) verdict kept in panel_verdict for transparency -- the
+    // report/consumer can see what the panel actually concluded before the clamp. This clamp only fires for
+    // rows the caller flagged (r.holdOnly) -- untagged positions always get the panel's unbiased verdict.
     if (r.holdOnly && ['TRIM', 'EXIT'].includes(filled.final_verdict)) {
       filled.panel_verdict = filled.final_verdict
       filled.final_verdict = 'HOLD'
-      filled.policy_note = 'clamped: crypto-beta HOLD-ONLY'
+      filled.policy_note = 'clamped: caller-flagged HOLD-ONLY'
     }
     return filled
   })
@@ -1330,7 +1354,7 @@ async function runHoldingsSweep() {
 ## Summary
 **${addCount} ADD** | ${holdCount} HOLD | ${trimExitCount} TRIM/EXIT
 
-## Single-name + crypto-beta panel (full BSC hierarchy)
+## Single-name + hold-only-tagged panel (full BSC hierarchy)
 | Ticker | Qty | Unrealized P&L | Verdict | Conviction | Data coverage |
 |---|---|---|---|---|---|
 ${panelTableRows}

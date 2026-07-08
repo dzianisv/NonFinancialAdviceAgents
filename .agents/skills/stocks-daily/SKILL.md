@@ -5,7 +5,8 @@ description: >
   (.cache/stocks-daily/positions.csv), runs the stocks-advisor 5-seat holdings panel,
   ranks which holdings are undervalued enough to BUY MORE of today, and emits a SWAP
   table where every buy is paired with a funding SELL (the user is fully invested, so
-  buys are sourced from broken/no-catalyst non-crypto-beta names). Publishes three
+  buys are sourced from broken/no-catalyst names that are NOT flagged hold-only by the
+  caller). Publishes three
   outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap + swap
   to the configured Telegram channel (target read from .cache/stocks-daily/telegram.yaml
   at runtime, never hardcoded), and (3) optionally a short X.com tweet. Triggers on:
@@ -63,8 +64,9 @@ better hold than the sell-side over the 1–2yr horizon. Tax-loss harvest is onl
 names a concrete redeploy target — a sell with no "buy this instead" is not an action, it is just raising
 cash and must be labelled as such.
 
-**Crypto-beta names stay HOLD-ONLY** (Step 1) — they are never the funding SELL, because the user is
-crypto-bullish. Fund buys from broken/extended NON-crypto-beta names instead.
+**Positions the caller flags HOLD-ONLY stay HOLD-ONLY** (Step 1) — they are never the funding SELL. This
+skill has no built-in bias toward or against any asset or sector; the HOLD-ONLY set is entirely
+caller-supplied (see Step 1.4). Fund buys from broken/extended non-hold-only names instead.
 
 ---
 
@@ -72,9 +74,15 @@ crypto-bullish. Fund buys from broken/extended NON-crypto-beta names instead.
 2. If the file is missing or empty, stop immediately. Tell the user:
    > "Create `{POSITIONS_CSV}` with columns: Position,Quantity,Type,Unrealized_PnL. One row per holding."
 3. Parse into a holdings list: ticker, qty, type, pnl.
-4. Tag crypto-adjacent names as HOLD-ONLY. The user is crypto-bullish; never recommend selling these:
-   `COIN, TONX, CRCL, HOOD, SOFI, IBKR, BTC` (and any ticker the user has flagged crypto-related in the CSV `Type` column as `crypto-beta`).
-   Pass these through to analysis but mark them exempt from EXIT/TRIM recommendations.
+4. Tag positions HOLD-ONLY from **caller-supplied sources only** — this skill names no tickers itself and
+   carries no built-in stance on any name or sector:
+   - any ticker whose `Type` column in `POSITIONS_CSV` the user has tagged with a hold-only marker (e.g.
+     `crypto-beta`, or literally `hold-only`) — that tag is the user's own data, maintained by them; or
+   - any ticker/mandate stated explicitly in this run's invocation (e.g. a caller passes a list of
+     tickers, or says "treat X as hold-only for this run").
+   *Example, not a rule:* a crypto-bullish user might tag `COIN, TONX, CRCL, HOOD, SOFI, IBKR, BTC` as
+   `crypto-beta` in their CSV — a different user's book would tag different names, or none at all.
+   Pass all positions through to analysis unbiased; only mark caller-tagged ones exempt from EXIT/TRIM.
 
 ---
 
@@ -88,7 +96,7 @@ crypto-bullish. Fund buys from broken/extended NON-crypto-beta names instead.
 4. **Rank for accumulation.** From the panel output, rank holdings by *undervaluation + intact thesis +
    near-term catalyst* — the names worth buying MORE of today. A cheap name with NO catalyst is a value trap,
    not an accumulate candidate; say so. This ranked list feeds the SWAP table (Step 3c).
-5. **Pair each accumulate candidate with a funding SELL.** For every ADD, name the NON-crypto-beta holding to
+5. **Pair each accumulate candidate with a funding SELL.** For every ADD, name the non-hold-only holding to
    sell to fund it (broken/below-200d/no-catalyst/extended names are the funding pool), and state in one line
    why the buy-side is the better 1–2yr hold than the sell-side. Never emit a naked buy (Core funding rule).
 6. Collect stocks-advisor's full output for assembly in Step 3.
@@ -103,7 +111,7 @@ Compose a single Markdown document in this order:
 - Report date
 - Total equity (sum of positions × approximate price or use PnL + cost basis from CSV if available)
 - Top-10 concentration % (top 10 positions as % of total book)
-- Crypto-beta % (HOLD-ONLY names as % of total book)
+- Hold-only % (caller-flagged HOLD-ONLY names as % of total book)
 
 ### (b) Financial Narrative
 - Sourced narrative from stocks-advisor's narrative seat.
@@ -113,7 +121,7 @@ Compose a single Markdown document in this order:
 The most important section. One row per paired action. **No naked buys** (Core funding discipline).
 Columns: `SELL (source) | $ | → | BUY (accumulate) | $ | Why buy-side is the better 1–2yr hold`.
 - Buy-side = the highest-ranked undervalued-with-catalyst names from Step 2.4.
-- Sell-side = NON-crypto-beta broken/extended/no-catalyst funding names. Never a HOLD-ONLY crypto name.
+- Sell-side = non-hold-only broken/extended/no-catalyst funding names. Never a caller-flagged HOLD-ONLY name.
 - If `cash_to_deploy` was provided, add cash-funded buy rows (SELL column = "CASH $N").
 - If a name is cheap but has NO catalyst, it goes in the DROP list (e) as raise-cash, NOT here as a buy —
   and it may only be SOLD if its dollars are assigned to a specific BUY row (else label it "raise cash, no
@@ -125,9 +133,9 @@ Columns: `SELL (source) | $ | → | BUY (accumulate) | $ | Why buy-side is the b
 - After the table, add: "Register these alerts via the `mkt` skill."
 
 ### (e) DROP / FUNDING POOL List
-- Non-crypto-beta EXIT and TRIM candidates with one-line reasoning — these are the SELL side of the swaps.
+- Non-hold-only EXIT and TRIM candidates with one-line reasoning — these are the SELL side of the swaps.
 - For each, state whether its dollars are assigned to a BUY row (c) or are "raise cash, no redeploy target".
-- Never include HOLD-ONLY crypto names here.
+- Never include caller-flagged HOLD-ONLY names here.
 
 ### (f) ETF Section
 - Which ETFs in the portfolio are fair/undervalued vs extended, per stocks-advisor ETF analysis.
@@ -214,9 +222,10 @@ DYOR. Educational only. Not financial advice. #Stocks #Investing
 - Use concrete numbers where available ($, %, P/E, RSI).
 - Signal emoji: **🟢 BUY / ADD · 🟡 HOLD / WATCH · 🔴 TRIM / EXIT / SELL**. HOLD is 🟡, never 🔴 — red is
   reserved for reduce-the-position actions only.
-- **Crypto-beta HOLD-ONLY names** (Step 1: COIN-family the user is bullish on) — if the panel said EXIT/TRIM
-  but the name is HOLD-ONLY, show it as 🟡 HOLD on Telegram. The one exception: if the user's own review
-  this run explicitly approved a TRIM (e.g. trimming a 22% concentration down to target), honor that TRIM.
+- **Caller-flagged HOLD-ONLY names** (Step 1: tagged via the CSV `Type` column or stated in this run's
+  invocation) — if the panel said EXIT/TRIM but the name is HOLD-ONLY, show it as 🟡 HOLD on Telegram. The
+  one exception: if the user's own review this run explicitly approved a TRIM (e.g. trimming a 22%
+  concentration down to target), honor that TRIM.
 - If a seat returned no data, write "no data this run" — do not invent.
 - The BUY/ADD summary line MUST include price for every ticker.
 - No raw URLs inline — the Notion link is the ONLY URL in the message.

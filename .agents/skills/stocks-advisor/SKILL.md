@@ -281,7 +281,7 @@ tree, first match wins:
 
 | # | Condition | Action | Meaning |
 |---|---|---|---|
-| 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (crypto-beta: rotate to BTC, don't go to cash) |
+| 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (if the caller flagged this position hold-only, TRIM means rotate within the caller's mandate rather than exit to cash — this skill has no default asset-class preference) |
 | 1 | downtrend + deteriorating EPS + not cheap | **EXIT** | thesis broken — genuine dead money |
 | 2 | val ≥ 1 AND trend ≥ 1 AND qual ≥ 0 | **ADD** | cheap with the wind at its back |
 | 3 | uptrend + expensive | **TRIM** | extended winner — take partial, let rest run |
