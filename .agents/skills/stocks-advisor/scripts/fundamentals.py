@@ -14,7 +14,7 @@ point-in-time vendor (Sharadar/SimFin). See the fundamental-analysis skill.
 INPUT (JSON file passed as argv[1]):
   {"symbol": "AVGO", "period": "1y"}
 
-OUTPUT (written to <path>.out.json, also printed to stdout):
+OUTPUT (written to {out-dir}/{symbol}.out.json, also printed to stdout):
   symbol, company, price, 52w_high, 52w_low, ma50, ma200,
   forward_pe, trailing_pe, peg_ratio, revenue_growth, earnings_growth,
   gross_margin, operating_margin, fcf, market_cap, fcf_yield, roe,
@@ -22,10 +22,15 @@ OUTPUT (written to <path>.out.json, also printed to stdout):
   dd_from_52wh, vs_200d_ma, vs_50d_ma
   (any field yfinance does not provide is emitted as null — never invented)
 
+  --out-dir defaults to .cache/stocks-advisor/fundamentals/ and is created if
+  missing. Output NEVER lands next to the input file or inside this scripts/
+  directory — the skill's own source tree must stay free of runtime artifacts.
+
 USAGE:
-  python3 fundamentals.py /path/to/AVGO.json
+  python3 fundamentals.py /path/to/AVGO.json [--out-dir DIR]
 """
 import json
+import os
 import sys
 
 
@@ -123,23 +128,48 @@ def fundamentals(symbol, period="1y"):
     return out
 
 
-def main():
-    if len(sys.argv) < 2:
-        sys.exit("usage: fundamentals.py <input.json>  (input: {\"symbol\":\"AVGO\",\"period\":\"1y\"})")
+DEFAULT_OUT_DIR = os.path.join(".cache", "stocks-advisor", "fundamentals")
 
-    path = sys.argv[1]
+
+def main():
+    args = sys.argv[1:]
+    usage = "usage: fundamentals.py <input.json> [--out-dir DIR]  (input: {\"symbol\":\"AVGO\",\"period\":\"1y\"})"
+
+    out_dir = None
+    if "--out-dir" in args:
+        i = args.index("--out-dir")
+        if i + 1 >= len(args):
+            sys.exit(usage)
+        out_dir = args[i + 1]
+        del args[i : i + 2]
+
+    if not args:
+        sys.exit(usage)
+
+    path = args[0]
     with open(path) as f:
         spec = json.load(f)
 
     symbol = spec["symbol"].upper().strip()
     period = spec.get("period", "1y")
 
+    # Guard against the space-joined-ticker-list bug: a caller that accidentally
+    # passes "CRM GOOG ABBV ..." as one symbol must fail loudly here, not create
+    # a garbage-named output file.
+    if not symbol or any(ch.isspace() for ch in symbol) or "," in symbol:
+        sys.exit(
+            f"error: symbol {symbol!r} looks like multiple tickers, not one. "
+            "Run this script once per ticker with a single-symbol input JSON."
+        )
+
     try:
         out = fundamentals(symbol, period)
     except Exception as e:
         out = {"symbol": symbol, "error": f"{type(e).__name__}: {e}"}
 
-    out_path = path + ".out.json"
+    out_dir = out_dir or DEFAULT_OUT_DIR
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, f"{symbol}.out.json")
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2)
     print(json.dumps(out, indent=2))

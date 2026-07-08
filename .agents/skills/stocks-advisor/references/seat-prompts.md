@@ -210,6 +210,86 @@ Return ONLY:
 
 ---
 
+### Seat 6 — Sell-side · `analyse-sellside`
+
+```
+You are the SELL-SIDE seat. Your analytical lens is analyse-sellside — Wall Street analyst
+consensus ratings, price targets, dispersion, rating momentum, and independent research
+(Morningstar fair value/moat/star rating, Zacks Rank). Fetch ONLY via web_fetch.
+NO TradingView, NO yfinance — same grounding constraint as the Narrative seat.
+
+Load this skill now and apply its method:
+  /Users/engineer/workspace/backtest/.agents/skills/analyse-sellside/SKILL.md
+
+Judge ONE stock on the injected data package — do not pull any TradingView/yfinance data.
+
+DATA PACKAGE:
+  <inject: company name + ticker + current_price (from the orchestrator's fundamentals.py pull —
+   this seat needs it to compute implied_upside_pct but must not fetch it itself)>
+
+⛔ HARD RULE: web_fetch a real analyst page before naming any firm, rating, or price target.
+No fetched URL = not a source. A fabricated firm/rating/PT invalidates the whole verdict.
+
+FETCH (web_fetch each in order; stop early once the signal is clear — full grounding procedure,
+reconciliation rule, and per-source detail live in the skill's "Grounding procedure" section):
+  1. Yahoo Finance analyst page  — https://finance.yahoo.com/quote/{TICKER}/analysis
+  2. StockAnalysis.com forecast  — https://stockanalysis.com/stocks/{TICKER}/forecast/
+  3. TipRanks forecast           — https://www.tipranks.com/stocks/{TICKER}/forecast
+  4. MarketBeat price-target     — https://www.marketbeat.com/stocks/{EXCHANGE}/{TICKER}/price-target/
+  5. Zacks quote page            — https://www.zacks.com/stock/quote/{TICKER}
+  6. Morningstar public quote    — https://www.morningstar.com/stocks/{EXCHANGE}/{TICKER}/quote
+  (Nasdaq analyst-research, Finviz, WSJ research-ratings are secondary corroboration only — see skill)
+
+Apply the skill's base-rate weighting — consensus rating LEVEL is a weak-to-contrarian standalone
+signal (crowding trap); weight independent view > dispersion > momentum > raw consensus level:
+  BULLISH requires ≥2 of: (a) independent view (Morningstar/Zacks) agrees directionally,
+    (b) dispersion TIGHT, (c) rating_momentum UPGRADING. Never BULLISH on a bare "Strong Buy"
+    consensus alone.
+  BEARISH mirrors: independent view bearish/overvalued AND (WIDE dispersion or DOWNGRADING momentum).
+  NEUTRAL otherwise, including a genuinely mixed or single-signal case.
+  INSUFFICIENT_DATA if fewer than 2 real fetched sources agree on the aggregate consensus, or all
+    fetches fail — every unresolved field becomes null, do not guess.
+
+Return ONLY this shape:
+```json
+{
+  "seat": "sellside",
+  "ticker": "string",
+  "as_of": "YYYY-MM-DD",
+  "read": "BULLISH | NEUTRAL | BEARISH | INSUFFICIENT_DATA",
+  "consensus_rating": "Strong Buy | Buy | Hold | Sell | Strong Sell | null",
+  "num_analysts": "int | null",
+  "pt_mean": "number | null",
+  "pt_high": "number | null",
+  "pt_low": "number | null",
+  "current_price": "number | null",
+  "implied_upside_pct": "number | null",
+  "dispersion": "TIGHT | WIDE | UNKNOWN",
+  "rating_momentum": "UPGRADING | STABLE | DOWNGRADING | UNKNOWN",
+  "momentum_detail": "string — e.g. '3 upgrades vs 1 downgrade, trailing 90d (MarketBeat)'",
+  "independent_view": {
+    "source": "Morningstar | Zacks | CFRA | null",
+    "star_rating": "int 1-5 | null",
+    "fair_value": "number | null",
+    "moat": "Wide | Narrow | None | null",
+    "zacks_rank": "int 1-5 | null"
+  },
+  "firm_ratings": [
+    {"firm": "string", "rating": "string", "pt": "number", "date": "YYYY-MM-DD", "url": "https://..."}
+  ],
+  "conviction": "HIGH | MED | LOW",
+  "disagreement_with_price": "string — one line: does the aggregate PT + independent view agree with, or diverge from, the current price and each other",
+  "sources": ["https://... (every URL actually fetched)"],
+  "notes": "string — caveats, INSUFFICIENT_DATA fields, crowding/base-rate flag if consensus is near-unanimous"
+}
+```
+Cache: `$RUN_DIR/{TICKER}/seat_sellside.json`.
+  BLIND SPOT: <one line — sell-side is structurally biased toward Buy/Hold (banking-relationship
+    conflict); a rare Sell rating from a covering firm is informationally louder than a Buy>
+```
+
+---
+
 ### Skeptic seat (BSC Hierarchy Step 2.3) · `research-lacy-hunt`
 
 ```
@@ -220,11 +300,11 @@ deflationary force of excessive debt makes most bullish theses fragile.
 Load this skill now and apply its method:
   /Users/engineer/workspace/backtest/.agents/skills/research-lacy-hunt/SKILL.md
 
-You receive the 5-seat panel verdicts and must ADVERSARIALLY CHALLENGE every bullish conclusion.
+You receive the 6-seat panel verdicts and must ADVERSARIALLY CHALLENGE every bullish conclusion.
 Your job is NOT to agree — it is to find the strongest case AGAINST the trade.
 
 DATA PACKAGE:
-  <inject the 5-seat verdicts + full data package>
+  <inject the 6-seat verdicts + full data package>
 
 Apply Lacy Hunt's framework:
 1. DEBT OVERHANG — does this company or its key customers carry debt above the threshold where
@@ -248,7 +328,7 @@ Return ONLY this shape:
     -30% scenario: $<dollar loss> (<weight>% × $<book> × 0.30)
     -50% scenario: $<dollar loss> (<weight>% × $<book> × 0.50)
   HISTORICAL_ANALOG: <prior failure case + [LIVE/FILED/MEM] tag>
-  MEM_FLAGS: <list every [MEM]-only claim from the 5-seat panel that the CIO must address>
+  MEM_FLAGS: <list every [MEM]-only claim from the 6-seat panel that the CIO must address>
   INVALIDATION_CONDITIONS (3 falsifiable, not just the price stop):
     1. <thesis-break condition — e.g. "revenue growth decelerates below 10% in next Q">
     2. <macro condition — e.g. "Fed pivots hawkish, 10y yield breaks above 5.5%">

@@ -1,6 +1,6 @@
 # stocks-advisor
 
-Analyzes individual stocks one at a time — runs a **5-seat analyst panel** (fundamental / technical / narrative / sentiment / smart-money) per stock and outputs a concrete **entry plan** (price zone + bar-close trigger + market-based stop) with a **BUY / WATCH / SKIP** decision.
+Analyzes individual stocks one at a time — runs a **6-seat analyst panel** (fundamental / technical / narrative / sentiment / smart-money / sell-side) per stock and outputs a concrete **entry plan** (price zone + bar-close trigger + market-based stop) with a **BUY / WATCH / SKIP** decision.
 
 For portfolio reviews: outputs HOLD / ADD / TRIM / EXIT per position with a tax-harvest table, cash deployment plan, and a cross-portfolio synthesis seat.
 
@@ -30,7 +30,7 @@ feeds/wsj.ts + feeds/ft.ts + Yahoo Finance
     subgraph SEQ ["Sequential per-ticker loop — one ticker at a time (TradingView single slot)"]
         direction TB
 
-        subgraph SEATS ["Step 2 · 5 investor seats — PARALLEL subagents per ticker"]
+        subgraph SEATS ["Step 2 · 6 investor seats — PARALLEL subagents per ticker"]
             direction LR
 
             subgraph SF ["Seat 1 · Fundamental
@@ -101,6 +101,17 @@ DISTRIBUTING
 NEUTRAL"]
                 SM_FETCH --> SM_OUT
             end
+
+            subgraph SL ["Seat 6 · Sell-Side
+analyse-sellside"]
+                direction TB
+                SL_FETCH["web_fetch per-ticker:
+Yahoo analyst tab · TipRanks
+MarketBeat · Zacks · Morningstar"]
+                SL_OUT["BULLISH / NEUTRAL
+BEARISH / INSUFFICIENT_DATA"]
+                SL_FETCH --> SL_OUT
+            end
         end
 
         subgraph BSC ["BSC Decision Chain (default hierarchy)"]
@@ -110,7 +121,7 @@ research-lacy-hunt
 Adversarial challenge · [LIVE]/[FILED]/[MEM] tags
 -30% / -50% tail stress · deflation dissent"]
             CIO["Step 2.5 · CIO Synthesis
-Weighs 5 seats vs Skeptic
+Weighs 6 seats vs Skeptic
 DISSENT LOGGED even when Skeptic overruled"]
             RISK["Step 2.7 · Risk Manager
 risk-management
@@ -119,7 +130,7 @@ Required for every BUY / ADD"]
             SKEP --> CIO --> RISK
         end
 
-        SF_OUT & ST_OUT & SN_OUT & SS_OUT & SM_OUT --> SKEP
+        SF_OUT & ST_OUT & SN_OUT & SS_OUT & SM_OUT & SL_OUT --> SKEP
     end
 
     EXEC["Step 3.6 · P0/P1/P2/P3 Execution Table
@@ -151,7 +162,7 @@ sizing · concentration"]]
 | **Watchlist / Theme discovery** | Explicit tickers or live theme discovery | BUY / WATCH / SKIP |
 | **Portfolio review** | Google Sheet URL (holdings + cost basis) | HOLD / ADD / TRIM / EXIT + tax-harvest table + portfolio synthesis |
 
-## The 5 seats
+## The 6 seats
 
 Each seat is grounded in a named investor skill from `.agents/skills/`. The skill's SKILL.md and `references/` provide the framework; the seat injects the per-ticker data package and asks the lens to apply its method.
 
@@ -162,13 +173,14 @@ Each seat is grounded in a named investor skill from `.agents/skills/`. The skil
 | **Narrative / Macro** | `investor-lyn-alden` | Fiscal dominance + broad-money cycle + theme phase. `read_news.ts` for discovery; feed scripts for verbatim citation. No fabrication. | Injected — `macro_regime.txt` + live news | EARLY / MID / LATE / FADING |
 | **Cycle / Regime** | `investor-ray-dalio` | Debt-cycle quadrant (growth/inflation rising/falling). Contrarian positioning read: short%, institutional%, analyst consensus. All-Weather regime context. | Injected — `fundamentals.py` (yfinance) | QUIET_ACCUM / NEUTRAL / CROWDED / EXTREME |
 | **Smart-Money** | `analyse-smartmoney` | Disclosed institutional flows: Form 4 (openinsider), 13F (13f.info), 13D (EDGAR), PTR (capitoltrades). ≥2 classes agreeing → verdict. | Live `web_fetch` | ACCUMULATING / DISTRIBUTING / NEUTRAL |
+| **Sell-Side** | `analyse-sellside` | Wall Street consensus rating, PT dispersion, rating momentum + independent research (Morningstar/Zacks). Never BULLISH on raw consensus level alone — needs ≥2 of {independent view, dispersion, momentum}. | Live `web_fetch` (no TradingView/yfinance) | BULLISH / NEUTRAL / BEARISH / INSUFFICIENT_DATA |
 
-**BSC Hierarchy — additional named seats after the 5-seat panel:**
+**BSC Hierarchy — additional named seats after the 6-seat panel:**
 
 | Role | Skill | Function |
 |---|---|---|
 | **Skeptic** | `research-lacy-hunt` | Deflation / over-indebtedness dissent. Adversarial challenge of every thesis before CIO decides. Tags every unverified claim `[MEM]`. |
-| **CIO** | BSC Hybrid logic | Weighs 5-seat panel + Skeptic. DISSENT LOGGED even when Skeptic is overruled. |
+| **CIO** | BSC Hybrid logic | Weighs 6-seat panel + Skeptic. DISSENT LOGGED even when Skeptic is overruled. |
 | **Risk Manager** | `risk-management` | APPROVED / BLOCKED per BUY/ADD. Dollar amount, % book, position limit enforcement. |
 
 **Optional extended panel (skills available, not wired by default):**
@@ -229,5 +241,6 @@ Smart-money is a conviction modifier (not a primary driver):
 | Path | What |
 |---|---|
 | `SKILL.md` | Full operating instructions with source citations |
-| `scripts/fundamentals.py` | yfinance data helper — writes `{TICKER}.json.out.json` |
+| `scripts/fundamentals.py` | yfinance data helper — writes `.cache/stocks-advisor/fundamentals/{TICKER}.out.json` (never into `scripts/`) |
+| `scripts/scorecard.py` | deterministic verdict engine — writes `.cache/stocks-advisor/_scorecard.json` (never into `scripts/`) |
 | `references/seat-prompts.md` | Per-seat subagent prompt templates |

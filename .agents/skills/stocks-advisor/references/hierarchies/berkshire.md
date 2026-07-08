@@ -1,7 +1,7 @@
 # Hierarchy: Berkshire Hathaway
 
 ## When to use
-Long-duration, high-conviction single-name analysis modeled on Buffett/Munger. Use when the question is "should we own this for a decade" rather than "should we enter this setup this week." Replaces Steps 2–2.7 entirely — no 5-seat panel timing signals, no RSI/MACD gate.
+Long-duration, high-conviction single-name analysis modeled on Buffett/Munger. Use when the question is "should we own this for a decade" rather than "should we enter this setup this week." Replaces Steps 2–2.7 entirely — no 6-seat panel timing signals, no RSI/MACD gate.
 
 ## Key gate
 Circle of Competence (Pre-Panel): if the analyst cannot explain in 2 sentences how the company earns money and why that will still be true in 20 years, the full panel is skipped — PASS immediately. No panel runs without competence.

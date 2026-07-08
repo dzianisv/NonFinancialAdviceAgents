@@ -13,7 +13,7 @@ export const meta = {
     { title: 'NewsFetch', detail: 'pre-fetch WSJ + FT + Bloomberg headlines into local article cache; gather agents query BM25 instead of hitting live URLs [discovery mode]' },
     { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill [discovery mode]' },
     { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief [discovery mode]. holdings-sweep: merges per-position panel verdicts + trend-screen rows into one report (pure JS, no extra LLM call)' },
-    { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail [discovery mode]. holdings-sweep: one 5-seat BSC panel agent per single-name/hold-only-tagged holding' },
+    { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail [discovery mode]. holdings-sweep: one 6-seat BSC panel agent per single-name/hold-only-tagged holding' },
     { title: 'Decide', detail: 'manager-selected chair: portfolio-aware buy/sell decision [discovery mode]' },
     { title: 'CIO-Review', detail: 'CIO decides STOP (have a BUY / exhausted) or CONTINUE (screen a fresh slice) [discovery mode, iterative re-screen loop]' },
     { title: 'SaveState', detail: 'persist screened tickers + per-asset verdicts for the next run [discovery mode]' },
@@ -1184,7 +1184,7 @@ ${(screenedResult && screenedResult.screen_notes) || '(none)'}
 // runHoldingsSweep — args.mode === "holdings-sweep". Full-book review of HELD positions (vs discovery
 // of new names). Reads positions.csv (Position,Quantity,Type,Unrealized_PnL). ETFs/commodity trusts get
 // one cheap batched trend-only screen; single-name stocks and any hold-only-tagged positions each get
-// ONE agent running the full stocks-advisor BSC hierarchy (5-seat panel + skeptic + CIO synthesis +
+// ONE agent running the full stocks-advisor BSC hierarchy (6-seat panel + skeptic + CIO synthesis +
 // DATA-COVERAGE GATE) internally in a single turn. This workflow is unbiased by default -- it has no
 // opinion on any ticker. A position is policy-capped at ADD/HOLD (never TRIM/EXIT) ONLY if the CALLER
 // said so, via one of two caller-supplied sources: (a) args.hold_only (explicit ticker list passed at
@@ -1263,7 +1263,7 @@ async function runHoldingsSweep() {
   const trendRows = (trendResult && trendResult.rows) || []
   log(`holdings-sweep trend-screen: ${trendRows.length} ETF/commodity rows screened`)
 
-  // ---- Single-name + caller-tagged hold-only: ONE 5-seat BSC panel agent per ticker, batched under the concurrency cap ----
+  // ---- Single-name + caller-tagged hold-only: ONE 6-seat BSC panel agent per ticker, batched under the concurrency cap ----
   // Plain parallel() -- the platform auto-queues past its concurrency cap (established precedent: the
   // trend-discovery journalism fan-out above routinely runs 50+ agents this way).
   phase('Panel')
@@ -1281,19 +1281,22 @@ async function runHoldingsSweep() {
       `Do this yourself, in this ONE turn -- do NOT spawn subagents, you are already the leaf-level worker:\n` +
       `1. Gather data yourself: fundamentals + TradingView MCP price/indicators + a recent-news check. For the ` +
       `smart-money/insider seat use Form 4 via https://openinsider.com/screener?s=${r.position} -- if that returns ` +
-      `403/blocked, fall back to https://finviz.com/quote.ashx?t=${r.position} (Insider Trading table) as documented.\n` +
-      `2. Run the 5-seat panel using the verbatim seat prompts in ${SKILL}/stocks-advisor/references/seat-prompts.md ` +
-      `(Fundamental/Buffett, Technical/Druckenmiller, Narrative-Macro, Sentiment-Positioning, Smart-Money) -- apply ` +
-      `each seat's framework yourself, one at a time, to the data you gathered.\n` +
+      `403/blocked, fall back to https://finviz.com/quote.ashx?t=${r.position} (Insider Trading table) as documented. ` +
+      `For the sell-side seat web_fetch analyst consensus/price-target pages per the analyse-sellside skill ` +
+      `(Yahoo Finance analysis tab, StockAnalysis.com forecast, TipRanks, MarketBeat, Zacks, Morningstar) -- ` +
+      `no fetched page = INSUFFICIENT_DATA for that seat, never guess a rating or PT.\n` +
+      `2. Run the 6-seat panel using the verbatim seat prompts in ${SKILL}/stocks-advisor/references/seat-prompts.md ` +
+      `(Fundamental/Buffett, Technical/Druckenmiller, Narrative-Macro, Sentiment-Positioning, Smart-Money, Sell-Side) -- ` +
+      `apply each seat's framework yourself, one at a time, to the data you gathered.\n` +
       `3. Apply the BSC hierarchy in ${SKILL}/stocks-advisor/references/hierarchies/bsc.md: mandatory Skeptic step, ` +
-      `then CIO Synthesis -- INCLUDING the DATA-COVERAGE GATE (>=2/5 seats with no real data caps the verdict at HOLD).\n` +
+      `then CIO Synthesis -- INCLUDING the DATA-COVERAGE GATE (>=2/6 seats with no real data caps the verdict at HOLD).\n` +
       `4. Use HOLDINGS-PATH vocabulary: FINAL VERDICT must be one of ADD | HOLD | TRIM | EXIT (cost basis is known ` +
       `from the unrealized P&L given above).\n` +
       `5. FUNDING-POOL TEST -- if your verdict would be TRIM or EXIT, only let it stand if BOTH (a) no realistic ` +
       `1-2 year growth catalyst AND (b) no dividend yield good enough to justify holding for income; otherwise ` +
       `downgrade to HOLD and say so in funding_pool_test. State the test result explicitly either way.${holdOnlyNote}\n` +
       `Date: ${REPORT_DATE}\n` +
-      `Return: ticker=${r.position}, final_verdict, conviction (1-5), data_coverage ("N/5 seats had real evidence"), ` +
+      `Return: ticker=${r.position}, final_verdict, conviction (1-5), data_coverage ("N/6 seats had real evidence"), ` +
       `gate_triggered (bool), dissent_logged, cio_memo, funding_pool_test.`,
       { label: `holding-panel:${r.position}`, phase: 'Panel', schema: HOLDING_PANEL_SCHEMA, model: MODEL }
     )
@@ -1302,7 +1305,7 @@ async function runHoldingsSweep() {
     const r = panelBucket[i]
     const filled = v || {
       ticker: r.position, final_verdict: 'HOLD', conviction: 0,
-      data_coverage: '0/5 -- agent failed', gate_triggered: true, cio_memo: '[UNAVAILABLE: panel agent failed]',
+      data_coverage: '0/6 -- agent failed', gate_triggered: true, cio_memo: '[UNAVAILABLE: panel agent failed]',
     }
     // Code-enforced clamp -- the CALLER MANDATE prompt note above is advisory only; an LLM panel agent can
     // still return TRIM/EXIT despite the instruction. Force HOLD here so the caller's mandate is guaranteed,

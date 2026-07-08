@@ -12,7 +12,12 @@ a downtrend is WAIT, never ADD — and that answer does not change if the user
 pushes back.
 
 Usage:
-  python3 scorecard.py <fundamentals.out.json | dir_of_out_jsons> [--positions positions.csv] [--hold-only TICK1,TICK2,...]
+  python3 scorecard.py [<fundamentals.out.json | dir_of_out_jsons>] [--positions positions.csv] [--hold-only TICK1,TICK2,...] [--out-dir DIR]
+
+  Target defaults to .cache/stocks-advisor/fundamentals/ (where fundamentals.py
+  writes its *.out.json files). --out-dir controls where _scorecard.json is
+  written and defaults to .cache/stocks-advisor/ — never inside this scripts/
+  directory.
 
 positions.csv (optional, for concentration + P&L context):
   Position,Quantity,MarketValue,Unrealized_PnL,Type   (header flexible; ticker + MV used)
@@ -21,6 +26,9 @@ positions.csv (optional, for concentration + P&L context):
   preference; hold-only status is caller data (positions.csv Type column) or a caller CLI flag.
 """
 import json, sys, os, glob, csv
+
+DEFAULT_TARGET_DIR = os.path.join(".cache", "stocks-advisor", "fundamentals")
+DEFAULT_OUT_DIR = os.path.join(".cache", "stocks-advisor")
 
 def _num(d, *keys):
     for k in keys:
@@ -210,7 +218,10 @@ def main():
         i = args.index("--hold-only")
         hold_only_arg = {t.strip().upper() for t in args[i+1].split(",") if t.strip()}
         del args[i:i+2]
-    target = args[0] if args else "."
+    out_dir = None
+    if "--out-dir" in args:
+        i = args.index("--out-dir"); out_dir = args[i+1]; del args[i:i+2]
+    target = args[0] if args else DEFAULT_TARGET_DIR
     pos = load_positions(pos_path, hold_only_arg)
     files = []
     if os.path.isdir(target):
@@ -240,8 +251,11 @@ def main():
             print(f"          └ {r['scores'][ax][1]}")
         for fl in r["flags"]:
             print(f"          └ {fl}")
-    # JSON dump for programmatic use
-    out_json = os.path.join(target if os.path.isdir(target) else ".", "_scorecard.json")
+    # JSON dump for programmatic use — always under .cache/stocks-advisor/, never
+    # inside the skill's own scripts/ directory.
+    out_dir = out_dir or DEFAULT_OUT_DIR
+    os.makedirs(out_dir, exist_ok=True)
+    out_json = os.path.join(out_dir, "_scorecard.json")
     json.dump(results, open(out_json,"w"), indent=1, default=str)
     print("-"*120)
     print(f"wrote {out_json}  ({len(results)} names)")
