@@ -759,6 +759,24 @@ Invoke the reference-validator skill with this citations JSON:
 
 After Block 3 and citation validation, print the Telegram message for @CryptoAiInvestor.
 
+**Recap style rules (mandatory — read before building the message):**
+
+1. **No provenance-as-content.** Never write `"carried from MM-DD"` or `"no data this run"` as a seat's
+   plain-English line — those are metadata, not findings.
+   - Fresh this run → print the seat's finding + vote, no tag.
+   - Reused from a prior briefing (Research Desk input not re-sourced today) → print the **actual
+     finding/vote** (e.g. "Trend (Druckenmiller): price below all MAs, no reversal yet; voted BUY (small)
+     [LOW]"), then append a compact `(as of MM-DD)` staleness tag at the end of the line.
+   - Genuinely nothing (briefing never covered this seat/token, no prior vote exists) → drop that seat's
+     line entirely from the panel and roll it into one line at the end of the token block: `⚠️ dark seats:
+     {Seat, Seat — reason}`.
+   - This is distinct from the Sources rule below (`no sources fetched this run` stays — that's an honest
+     citation-count statement, not a placeholder for a missing finding).
+2. **Lead with an action summary, then group tokens by signal.** Open the message with one line per
+   BUY/BUY(small)/SELL token — `{EMOJI} {TOKEN} {SIGNAL} — {controlling reason, ≤10 words}` — before any
+   per-token detail block, and order detail blocks SELL first, then BUY/BUY(small), then HOLD — not
+   enumeration order.
+
 **Three mandatory elements per token — no exceptions:**
 
 1. **Market data** — price, RSI, MACD line vs signal, EMA20 vs SMA200 (above/below), % from ATH
@@ -794,12 +812,20 @@ A token entry without all three is incomplete. Write them in this order per toke
 🌡️ Fear & Greed: {value} ({classification})
 ⚠️ {1-sentence macro regime summary}
 
+⚡ ACTION SUMMARY
+{EMOJI} {TOKEN} {SIGNAL} — {single controlling reason, ≤10 words}
+...one line per BUY/BUY(small)/SELL token, SELL first, then BUY/BUY(small)...
+
 ━━━━━━━━━━━━━━━━━━━━━━
-{token block 1}
+{SELL token blocks, if any}
 ━━━━━━━━━━━━━━━━━━━━━━
-{token block 2}
-...
+{BUY / BUY(small) token blocks}
 ━━━━━━━━━━━━━━━━━━━━━━
+{HOLD token blocks — only holds with a material change or new finding; quiet holds collapse to one line:
+ 🟡 HOLD (no change): {space-separated tokens}}
+━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ dark seats: {TOKEN (Seat, Seat — reason); ...}  [omit line entirely if nothing is dark]
 
 📅 Watch: {2–3 upcoming catalysts with dates}
 
@@ -834,9 +860,9 @@ Plain-English replacements:
 - Seat counts → name the leaning CORE lenses in plain English (e.g. `on-chain + value lead bullish`); the panel block explains each with its conviction
 - `UNKNOWN` zone → `only {N} months of price history — 4yr average not yet available`
 
-**Telegram length limit is 4096 bytes per message (hard limit).** With full panel + sources, 11 tokens exceed one message. Split at token boundaries:
-- Part 1: header + BUY/SELL tokens (highest priority)
-- Part 2: remaining HOLD tokens + watch list + disclaimer
+**Telegram length limit is 4096 bytes per message (hard limit).** With full panel + sources, 11 tokens exceed one message. Split at section/token boundaries, not mid-block:
+- Part 1: header + macro + ACTION SUMMARY + SELL blocks + BUY/BUY(small) blocks (highest priority)
+- Part 2: remaining HOLD blocks + quiet-holds line + dark-seats line + watch list + disclaimer
 - Send each part: `python3 telegram-cli.py send @CryptoAiInvestor "$PART_N"`
 - ⛔ Never use `head -c N` — silently truncates multibyte emoji
 

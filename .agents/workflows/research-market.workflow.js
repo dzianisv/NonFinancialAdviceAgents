@@ -1344,6 +1344,15 @@ async function runHoldingsSweep() {
   const addCount = panelVerdicts.filter(v => v.final_verdict === 'ADD').length
   const trimExitCount = panelVerdicts.filter(v => v.final_verdict === 'TRIM' || v.final_verdict === 'EXIT').length
   const holdCount = panelVerdicts.length - addCount - trimExitCount
+  // Action summary: one scannable line per non-HOLD verdict (SELL/TRIM/EXIT first, then ADD), the
+  // controlling reason truncated to keep it a one-liner -- same "lead with the actions" convention as
+  // stocks-daily/crypto-daily's Telegram ACTION SUMMARY, adapted to this markdown report surface.
+  const actionEmoji = { ADD: '🟢', TRIM: '🔴', EXIT: '🔴' }
+  const actionLines = panelVerdicts
+    .filter(v => v.final_verdict !== 'HOLD')
+    .sort((a, b) => (a.final_verdict === 'ADD' ? 1 : 0) - (b.final_verdict === 'ADD' ? 1 : 0))
+    .map(v => `${actionEmoji[v.final_verdict] || '🟡'} ${v.ticker} ${v.final_verdict} -- ${String(v.cio_memo || v.funding_pool_test || '').slice(0, 90)}`)
+    .join('\n')
 
   // ---- Report: write + VERIFY + retry (mirrors the discovery-mode Report phase above) ----
   phase('Report')
@@ -1356,6 +1365,9 @@ async function runHoldingsSweep() {
 
 ## Summary
 **${addCount} ADD** | ${holdCount} HOLD | ${trimExitCount} TRIM/EXIT
+
+## Action summary
+${actionLines || '(no ADD/TRIM/EXIT this run -- every position HOLD)'}
 
 ## Single-name + hold-only-tagged panel (full BSC hierarchy)
 | Ticker | Qty | Unrealized P&L | Verdict | Conviction | Data coverage |

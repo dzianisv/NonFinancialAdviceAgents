@@ -2,7 +2,7 @@
 name: stocks-daily
 description: >
   Daily portfolio accumulation monitor. Reads the user's cached positions
-  (.cache/stocks-daily/positions.csv), runs the stocks-advisor 5-seat holdings panel,
+  (.cache/stocks-daily/positions.csv), runs the stocks-advisor 6-seat holdings panel,
   ranks which holdings are undervalued enough to BUY MORE of today, and emits a SWAP
   table where every buy is paired with a funding SELL (the user is fully invested, so
   buys are sourced from broken/no-catalyst names that are NOT flagged hold-only by the
@@ -21,7 +21,7 @@ metadata:
 
 # stocks-daily
 
-**One-liner:** A DAILY monitor of the user's book answering one question — *"what that I own (or want) is undervalued enough to buy MORE of today, and what do I sell to fund it?"* Reads cached positions, runs the stocks-advisor 5-seat panel, ranks accumulate-on-weakness candidates, and emits a **SWAP table** (every buy paired with a funding sell). Publishes to three outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap + swap to the **Telegram channel** (config-driven target), and (3) optionally a short X.com tweet. Educational, not investment advice.
+**One-liner:** A DAILY monitor of the user's book answering one question — *"what that I own (or want) is undervalued enough to buy MORE of today, and what do I sell to fund it?"* Reads cached positions, runs the stocks-advisor 6-seat panel, ranks accumulate-on-weakness candidates, and emits a **SWAP table** (every buy paired with a funding sell). Publishes to three outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap + swap to the **Telegram channel** (config-driven target), and (3) optionally a short X.com tweet. Educational, not investment advice.
 
 **Triggers:** `/stocks-daily`, "run the daily stocks monitor", "what should I buy more of / what's undervalued", "publish stocks report", "post stocks to telegram"
 
@@ -91,7 +91,7 @@ caller-supplied (see Step 1.4). Fund buys from broken/extended non-hold-only nam
 1. Read the project daily log (`.agents/memory/YYYY-MM-DD.md`) to extract any prior context for these
    tickers — pass it as `prior_context` to bias the run toward changed names and known watch levels.
 2. Invoke the `stocks-advisor` skill in **holdings-review mode** on the parsed positions list.
-   stocks-advisor handles: Step -1 memory recall, Step 0.7 TradingView health check (DEGRADED fallback = MA-only, WATCH-only verdicts), Step 0.8 triage (N>12 → full-panel top K≈10, one-line screen the rest), 5-seat panel analysis, Step 3.5 SOURCES & DATA appendix, Step 3.6 high-confidence RECAP + SETUP ALERTS.
+   stocks-advisor handles: Step -1 memory recall, Step 0.7 TradingView health check (DEGRADED fallback = MA-only, WATCH-only verdicts), Step 0.8 triage (N>12 → full-panel top K≈10, one-line screen the rest), 6-seat panel analysis, Step 3.5 SOURCES & DATA appendix, Step 3.6 high-confidence RECAP + SETUP ALERTS.
 3. Do NOT pull TradingView data, yfinance, or fundamentals yourself — stocks-advisor's orchestrator does that.
 4. **Rank for accumulation.** From the panel output, rank holdings by *undervaluation + intact thesis +
    near-term catalyst* — the names worth buying MORE of today. A cheap name with NO catalyst is a value trap,
@@ -156,7 +156,8 @@ Notion publishing is owned by `stocks-advisor`. When `.cache/stocks-advisor/noti
 
 ## Step 4.5 — Post the per-stock recap to the Telegram channel
 
-This is the user-facing deliverable. The Telegram message stays short and links to the full Notion report.
+This is the user-facing deliverable. It must be **self-contained** (the reader never has to open the prior
+day's report or the Notion page to understand a verdict) and **scannable in seconds on a phone**.
 
 **4.5a — Read the channel target at runtime (never hardcode):**
 ```bash
@@ -165,59 +166,90 @@ CHANNEL=$(grep '^channel_id:' .cache/stocks-daily/telegram.yaml 2>/dev/null | se
 [ -z "$CHANNEL" ] && echo "No telegram.yaml channel_id — skipping Telegram (not an error)" # then skip 4.5
 ```
 
-**4.5b — Build the per-stock recap message(s).** Each FULL-PANEL stock block carries **one sentence from each
-of the 5 seats** (pulled from stocks-advisor's per-stock verdict). No seat line may be omitted. Use the exact
-stocks-advisor seat labels — Fundamental / Technical / Narrative / Sentiment / Smart-Money — NOT the crypto
-seats.
+**Recap style rules (mandatory — read before building the message):**
+
+1. **No provenance-as-content.** Never write `"carried from MM-DD"` or `"no data this run"` as a seat's
+   line — those are not findings, they're metadata. Rules:
+   - Fresh this run → print the finding, no tag.
+   - Reused from a prior run (not re-fetched today) → print the **actual finding/metric** from that prior
+     verdict (e.g. "Sentiment: NEUTRAL — inst 62%, shorts 2.1%"), then append a compact `(as of MM-DD)`
+     staleness tag at the end of the line. The tag is a suffix, never the whole line.
+   - Genuinely nothing (source blocked AND no prior verdict exists for this seat/ticker) → **drop that seat
+     line entirely** for that stock. Do not pad the block with a placeholder row.
+   - Roll every dropped seat across the message into **one compact line**: `⚠️ dark seats: TICKER (Seat,
+     Seat — reason); TICKER2 (...)`. One line total, not one per stock.
+   - Net effect: a stock block shows only the seats that have real content — 3 lines and 6 lines are both
+     fine; a padded 6-line block with "no data" filler is not.
+2. **Lead with an action summary, then group by action — not by ticker order.** A reader must get the whole
+   picture from the first few lines without scrolling through prose.
+
+**4.5b — Build the message(s).** Use the exact stocks-advisor seat labels — Fundamental / Technical /
+Narrative / Sentiment / Smart-Money / Sell-side — NOT the crypto seats.
 
 ```
 📊 Stocks Daily — {TODAY} | Regime: {one phrase, e.g. "risk-off, debasement unwind"}
 {1-sentence macro context — the single dominant driver this week}
 
+⚡ ACTION SUMMARY
+{EMOJI} {TICKER} {ACTION} — {single controlling reason, ≤10 words}
+...one line per actionable ticker (every BUY/ADD/TRIM/EXIT), SELL/TRIM/EXIT first then ADD/BUY...
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔻 SELLS / TRIMS / EXITS
 ━━━━━━━━━━━━━━━━━━━━━━
 {EMOJI} {TICKER} ${PRICE} — {DECISION}
-  📊 Fundamental:  {1 sentence — key metric (plain explanation in parens)}
-  📈 Technical:    {1 sentence — chart indicator (plain explanation in parens)}
-  📰 Narrative:    {1 sentence — theme/catalyst (plain explanation in parens)}
-  🌡 Sentiment:    {1 sentence — crowding/positioning (plain explanation in parens)}
-  🐋 Smart-Money:  {1 sentence — flows/filings (plain explanation in parens); or "no data this run"}
-━━━━━━━━━━━━━━━━━━━━━━
-...repeat for each FULL-PANEL stock...
-━━━━━━━━━━━━━━━━━━━━━━
+  📊 Fundamental:  {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  📈 Technical:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  📰 Narrative:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  🌡 Sentiment:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  🐋 Smart-Money:  {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+  🏦 Sell-side:    {finding (plain explanation in parens)} [(as of MM-DD) if reused]
+...only seats with real content — see rule 1. Repeat block per stock in this bucket...
 
-🟢 BUY/ADD:  {space-separated tickers WITH price, e.g. META $562 · HOOD $102}
-🟡 HOLD:     {space-separated tickers}
-🔴 TRIM/EXIT:{space-separated tickers}
+━━━━━━━━━━━━━━━━━━━━━━
+🟢 ADDS / BUYS
+━━━━━━━━━━━━━━━━━━━━━━
+...same per-stock block shape...
 
 🔁 TODAY'S SWAPS (every buy funded by a sell):
   SELL {Y} ${N} → BUY {X} ${N}  — {≤10-word why X is the better hold}
   ...one line per swap...
 
-📋 Full 5-seat report (Notion):
+[--- PART 2 (only if needed) starts here ---]
+
+━━━━━━━━━━━━━━━━━━━━━━
+🟡 NOTABLE HOLDS / WATCH
+━━━━━━━━━━━━━━━━━━━━━━
+...per-stock block for holds with a material change or new finding only...
+🟡 HOLD (no change): {space-separated tickers — quiet holds get one line, not a block}
+
+⚠️ dark seats: {TICKER (Seat, Seat — reason); ...}  [omit line entirely if nothing is dark]
+
+📋 Full 6-seat report (Notion):
 {NOTION_PUBLIC_URL}
 
 DYOR. Educational only. Not financial advice. #Stocks #Investing
 ```
 
-**Concrete stock block example:**
+**Concrete stock block example (fresh + reused seats mixed, per rule 1):**
 ```
 🔴 COIN $149 — TRIM
   📊 Fundamental:  Fwd P/E 38, FCF yield 1.1% (rich); rev tied to crypto volume (cyclical, not steady).
   📈 Technical:    Below 200d MA ($178 long-term avg), RSI 41 (weak), MACD bearish — downtrend intact.
-  📰 Narrative:    Debasement trade unwinding (gold −12% MTD, BTC down) — crypto-beta out of favor this week.
+  📰 Narrative:    Debasement trade unwinding (gold −12% MTD, BTC down) — crypto-beta out of favor. (as of 07-07)
   🌡 Sentiment:    22.7% of the book in one name — extreme single-name concentration risk.
-  🐋 Smart-Money:  No clean filing signal this run (openinsider 403) — flows inconclusive.
+  ⚠️ dark seats: COIN (Smart-Money — openinsider blocked, no prior verdict)
 
-🟢 META $562 — ADD
-  📊 Fundamental:  Fwd P/E 24, 22% rev growth, $50B+ FCF (cheap for the growth) — best risk:reward in book.
-  📈 Technical:    Reclaimed 50d MA (short-term avg $548), RSI 58 (room to run) — trend turning up.
-  📰 Narrative:    AI-capex monetization (ads + Llama) confirming in earnings — real beneficiary, not hype.
-  🌡 Sentiment:    Rec_mean 1.6 across 60 analysts — well-owned but not euphoric.
-  🐋 Smart-Money:  Net institutional accumulation per 13F roll-up — large buyers still adding.
+🟢 KHC $25.30 — ADD
+  📊 Fundamental:  Cheap (fwd P/E 12.1), FCF yield 10.7%, genuine 6.45% dividend. (as of 07-07)
+  📈 Technical:    Above 200d MA (+7.0%) — uptrend confirmed.
+  📰 Narrative:    CEO bought $4.99M open-market. (as of 07-07)
+  🌡 Sentiment:    NEUTRAL — inst ~65%, short interest ~2% (light, no crowding). (as of 07-07)
+  🐋 Smart-Money:  CEO open-market buy is the smart-money signal — no separate 13F delta this week. (as of 07-07)
 ```
 
 **⛔ Rules (mirror crypto-daily):**
-- Every seat line is **mandatory** — never omit a seat, never collapse to one summary line.
+- Apply the **Recap style rules** above to every seat line and to message structure — no exceptions.
 - Keep the technical term, then follow it with `(plain explanation)` in parentheses — write for a non-expert.
 - Use concrete numbers where available ($, %, P/E, RSI).
 - Signal emoji: **🟢 BUY / ADD · 🟡 HOLD / WATCH · 🔴 TRIM / EXIT / SELL**. HOLD is 🟡, never 🔴 — red is
@@ -226,13 +258,12 @@ DYOR. Educational only. Not financial advice. #Stocks #Investing
   invocation) — if the panel said EXIT/TRIM but the name is HOLD-ONLY, show it as 🟡 HOLD on Telegram. The
   one exception: if the user's own review this run explicitly approved a TRIM (e.g. trimming a 22%
   concentration down to target), honor that TRIM.
-- If a seat returned no data, write "no data this run" — do not invent.
-- The BUY/ADD summary line MUST include price for every ticker.
+- The ACTION SUMMARY reason must be the single controlling factor, ≤10 words — not a restated seat line.
+- The BUY/ADD summary line and ACTION SUMMARY MUST include price for every ticker.
 - No raw URLs inline — the Notion link is the ONLY URL in the message.
-- **Length:** many stocks × 5 lines each will exceed 4096 bytes — split at stock boundaries into multiple
-  messages. Send action names (TRIM/EXIT/BUY/ADD) first, HOLDs second:
-  - Part 1: header + macro + every TRIM/EXIT/BUY/ADD stock block
-  - Part 2: HOLD stock blocks + the group-summary lines + Notion link + disclaimer
+- **Length:** split at section/stock boundaries into multiple messages, not mid-block:
+  - Part 1: header + macro + ACTION SUMMARY + every SELL/TRIM/EXIT block + every ADD/BUY block + SWAP table
+  - Part 2 (only if needed): NOTABLE HOLDS/WATCH blocks + quiet-holds line + dark-seats line + Notion link + disclaimer
   - Verify each part: `echo -n "$PART" | wc -c` — must be ≤ 4096.
 
 **4.5c — Send via telegram-cli (numeric channel id from config):**
@@ -294,8 +325,10 @@ The skill is **idempotent per run** — re-running creates another dated Notion 
       only recommended with a named redeploy target, else labelled "raise cash, no target yet"
 - [ ] Report assembled: narrative + SWAP table + ACCUMULATE WATCH + DROP/funding pool + ETF section + SOURCES appendix
 - [ ] Notion publishing left to stocks-advisor (no duplicate publish here); captured the returned page URL if one was produced
-- [ ] **Telegram recap posted to the channel** (id from `telegram.yaml`, read at runtime) with every stock's
-      5 seat lines, the SWAP lines, correct signal emoji (🟢/🟡/🔴), multi-part split ≤4096 bytes, Notion link
-      only in the final part — or skipped silently if `telegram.yaml` is absent
+- [ ] **Telegram recap posted to the channel** (id from `telegram.yaml`, read at runtime) — ACTION SUMMARY
+      first, detail blocks grouped SELL/TRIM/EXIT → ADD → HOLD, only substantive seat lines (no "carried
+      from" / "no data this run" filler — reused findings carry an `(as of MM-DD)` tag, dark seats collapsed
+      into one line), the SWAP lines, correct signal emoji (🟢/🟡/🔴), multi-part split ≤4096 bytes, Notion
+      link only in the final part — or skipped silently if `telegram.yaml` is absent
 - [ ] Memory entry appended to daily log (including the swaps)
 - [ ] Response to user flags output as educational, not advice

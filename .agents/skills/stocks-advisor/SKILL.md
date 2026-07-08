@@ -374,6 +374,20 @@ After loading $HIERARCHY_FILE, follow its steps exactly. The file contains the f
 > highest-confidence BUY/SELL actions to take now, each with one-line reasoning; (b) the current market
 > narrative in one sentence. This is a prose TL;DR — **distinct** from the Step 3.6 RECAP *table* at the end.
 
+> **Recap style rules (mandatory — every seat line, chat output AND Notion page):**
+> - **No provenance-as-content.** When a run doesn't re-verify every seat for every ticker (e.g. a same-day
+>   rerun, or a caller-supplied `prior_context` carrying forward an earlier panel) and a seat's verdict is
+>   reused rather than freshly analyzed, print that seat's **actual finding** (the metric/fact) in the SEAT
+>   VERDICTS line below — never `"carried from MM-DD"` or `"no data this run"` as the line itself. Append a
+>   compact `(as of MM-DD)` staleness tag at the end of the line instead; the tag is metadata, not content.
+>   If a seat returned `INSUFFICIENT_DATA` with no prior verdict to fall back on, omit that seat's line from
+>   the SEAT VERDICTS block below (it still belongs, explicitly, in the Step 3.5 SOURCES appendix — that's
+>   the audit-trail surface, a different purpose) and fold it into one line at the end of the stock's block:
+>   `⚠️ dark: {Seat, Seat — reason}`.
+> - **Action-first, grouped by urgency — not a ticker-ordered stream.** The TOP RECAP prose above and the
+>   Step 3.6 RECAP + SETUP ALERTS + EXECUTION TABLE (P0→P3) already satisfy this; keep leading every report
+>   with them and do not bury BUY/SELL actions inside the per-stock blocks below.
+
 ```
 ═══════════════════════════════════════════════════════
  {TICKER} — {COMPANY} — {DATE}
@@ -654,6 +668,9 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 
 - [ ] The report **OPENS with the 2–3 sentence prose RECAP** (highest-confidence buy/sell to take now +
       one-line reasoning + the market narrative in one sentence) before any per-stock block or the signal table.
+- [ ] **No seat line reads "carried from MM-DD" or "no data this run".** Reused verdicts print the actual
+      finding with an `(as of MM-DD)` tag; seats with nothing (and no prior verdict) are dropped from the
+      block and rolled into one `⚠️ dark: {Seat, Seat — reason}` line.
 - [ ] Every FULL-PANEL ticker has `status='done'` in `stock_analysis`; one-line-screened names (N>12 triage)
       carry a one-line note and are listed, not dropped.
 - [ ] Each stock block ends with a concrete **entry zone + bar-close trigger + market-based stop** — never a
