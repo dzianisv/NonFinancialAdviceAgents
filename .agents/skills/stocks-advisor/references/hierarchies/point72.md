@@ -6,6 +6,14 @@ Short-to-medium duration equity ideas that require a named informational or anal
 ## Key gate
 Edge Validator (Pre-Panel): analyst must articulate why they know something others don't. Edge score below 3/5 → REJECT immediately. No panel runs without a named edge.
 
+## Action authority
+This hierarchy does not set the BUY/WATCH/HOLD-family ACTION label — that is the Step 0.82 scorecard's output,
+non-negotiable. Cohen's SIZE_DOWN/REJECT authority (Step C) governs whether this idea advances and at what size —
+it does not relabel the scorecard ACTION. If Cohen's read disagrees with the scorecard ACTION, log it as DISSENT;
+never substitute Cohen's call for the printed ACTION. The only two sanctioned ACTION modifiers are (a) a
+documented caller-mandate clamp, printed as `POLICY NOTE`, and (b) the Risk Overlay's hard gate downgrading a
+BUY/ADD to WATCH/HOLD — never upgrading.
+
 ---
 
 ## Pre-Panel: Edge Validator
@@ -121,9 +129,13 @@ Spawn as a subagent (`/model sonnet /effort high`). Cohen reads the PM memo and 
 **Subagent prompt — inject verbatim, fill `{placeholders}`:**
 
 ```
-You are the Cohen seat for {TICKER}. You have unilateral override authority — you can APPROVE, REJECT, or SIZE_DOWN at will, for any reason or no reason. Your instinct is a data point.
+You are the Cohen seat for {TICKER}. You have override authority over SIZE and over whether this idea ADVANCES
+to execution — you can APPROVE, REJECT (from the deep-dive queue), or SIZE_DOWN based on your read of the bear
+case, at your discretion. You do NOT have authority to relabel the scorecard ACTION ({SCORECARD_ACTION}) — if
+your read disagrees with it, that disagreement is DISSENT, not a new label. Your instinct is a data point that
+feeds conviction and sizing, not the ACTION.
 
-READ: PM Conviction Score ({IDEA_SCORE}/10), Portfolio Fit ({PORTFOLIO_FIT}), Risk Status ({RISK_STATUS}).
+READ: PM Conviction Score ({IDEA_SCORE}/10), Portfolio Fit ({PORTFOLIO_FIT}), Risk Status ({RISK_STATUS}), scorecard ACTION ({SCORECARD_ACTION}).
 
 ADVERSARIAL PROBE — answer these before deciding:
   "What's the bear case that the PM is not pricing?"
@@ -136,16 +148,19 @@ ADVERSARIAL PROBE — answer these before deciding:
 COHEN DECISION:
   APPROVE → trade proceeds at PM-scored size
   SIZE_DOWN {N}% → approve but reduce proposed size by N% (state the reason)
-  REJECT → kill the trade (state the single controlling reason, one sentence)
+  REJECT → kill the trade (state the single controlling reason, one sentence) — this stops the idea from advancing to execution; it does not change the printed ACTION for the ticker in the portfolio-level output, which still reflects the scorecard.
 
 Output exactly:
+ACTION: {SCORECARD_ACTION — printed verbatim from the Step 0.82 scorecard, never computed here}
 BEAR_CASE: {scenario, probability, max loss}
 EDGE_CHECK: {real|narrative} — {one sentence}
 MARKET_SIGNAL: {one data point that cuts against the thesis}
 COHEN_DECISION: {APPROVE | SIZE_DOWN {N}% | REJECT}
+DISSENT LOGGED: {any conflict between Cohen's read and the scorecard ACTION — one sentence; "none" if aligned}
+POLICY NOTE: {documented caller-mandate clamp applied, or "n/a"}
 COHEN_MEMO: {1 sentence: controlling factor in the decision}
 
-Inputs: {PM_JSON} | {RISK_JSON} | {DATA_PACKAGE_JSON} | {MACRO_REGIME}
+Inputs: {SCORECARD_ACTION} | {PM_JSON} | {RISK_JSON} | {DATA_PACKAGE_JSON} | {MACRO_REGIME}
 ```
 
 Cache output: `echo '{cohen_json}' > "$RUN_DIR/{TICKER}/seat_cohen.json"`
@@ -155,7 +170,8 @@ Cache output: `echo '{cohen_json}' > "$RUN_DIR/{TICKER}/seat_cohen.json"`
 ## Output shape
 
 ```
-FINAL VERDICT: {TRADE|WATCH|REJECT}
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — from the Step 0.82 scorecard (never computed by this chain)
+CHAIN READ: {TRADE|WATCH|REJECT} — this hierarchy's own read (informational; see DISSENT if it differs from ACTION)
 EDGE: {INFORMATION|ANALYTICAL|TIMING|STRUCTURAL} score {N}/5 — "{edge statement}"
 IDEA SCORE: {N}/10 (edge={N}, fundamental={N}, technical={N}, fit={N})
 COHEN DECISION: {APPROVE|SIZE_DOWN N%|REJECT} — {one sentence}
@@ -163,6 +179,8 @@ CONVICTION SIZE: {conviction-scaled % of book}
 STOP: close below ${level} ({rationale})
 BEAR CASE: {scenario, probability}
 PORTFOLIO FIT: {ADDITIVE|REDUNDANT|CONCENTRATION_RISK}
+DISSENT LOGGED: {any conflict between Cohen's read and the scorecard ACTION — one sentence; "none" if aligned}
+POLICY NOTE: {documented caller-mandate clamp applied, or "n/a"}
 ```
 
 Execution table entry: P0/P1/P2/P3 row with conviction-scaled share count and Cohen's stop level as the falsification trigger.

@@ -6,6 +6,15 @@ Macro-reflexivity-driven positions where the trade thesis is as much about the m
 ## Key gate
 Macro Thesis Frame (Pre-Panel): analyst must articulate the reflexivity hypothesis — how does participant belief change the underlying, and how does that change feed back into belief? No generic macro thesis; the feedback loop must be named.
 
+## Action authority
+This hierarchy does not set the BUY/WATCH/HOLD-family ACTION label — that is the Step 0.82 scorecard's output,
+non-negotiable. This chain supplies the reflexivity thesis, entry zone, staged sizing, and falsification triggers.
+Where the Reflexivity Gate (Step C) or Position Monitor (Step B) would produce a read that conflicts with the
+scorecard ACTION, log the conflict as DISSENT — do not substitute this chain's read for the printed ACTION. The
+only two sanctioned ACTION modifiers are (a) a documented caller-mandate clamp, printed as `POLICY NOTE`, and
+(b) a Risk Manager downgrade of BUY/ADD to WATCH/HOLD — never upgrading (this hierarchy enforces its own
+market-impact throttle in Step C, which may only reduce size, never invent a stronger ACTION than the scorecard's).
+
 ---
 
 ## Pre-Panel: Macro Thesis Frame
@@ -190,7 +199,8 @@ Priority rules:
 ## Output shape
 
 ```
-FINAL VERDICT: {ENTER|WATCH|PASS}
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — from the Step 0.82 scorecard (never computed by this chain)
+CHAIN READ: {ENTER|WATCH|PASS} — this hierarchy's own read (informational; see DISSENT if it differs from ACTION)
 REFLEXIVITY HYPOTHESIS: {one paragraph — specific loop, not generic macro}
 PHASE: {BOOM|BUST|TURNING}
 INSTRUMENT: {type + rationale}
@@ -199,6 +209,8 @@ STOP EVENT: {named falsification event} (approx ${price})
 CONFIRMATION SIGNALS: [{1}, {2}, {3}]
 CONTRADICTION SIGNALS: [{1}, {2}, {3}]
 REFLEXIVITY GATE: {PROCEED|THROTTLE|CLOSE}
+DISSENT LOGGED: {any conflict between CHAIN READ and ACTION — one sentence; "none" if aligned}
+POLICY NOTE: {documented caller-mandate clamp applied, or "n/a"}
 
 EXECUTION TABLE:
 P0 | P1 | P2 | P3 — share counts, entry zones, triggers, falsification conditions (see Step D)

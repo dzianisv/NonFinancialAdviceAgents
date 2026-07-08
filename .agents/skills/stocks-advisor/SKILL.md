@@ -318,6 +318,9 @@ stop, and invalidation** — but a seat may NOT overturn the scorecard ACTION. I
 it records the disagreement as the DISSENT field; it does not change the label. Print the scorecard ACTION
 and BASIS verbatim in each output block.
 
+A CIO/hierarchy prose override of the scorecard ACTION is a defect, not a judgment call — the only sanctioned
+ACTION modifiers are documented caller-mandate clamps and the Risk Manager's downgrade gate.
+
 ---
 
 ## Step 2 — Decision Hierarchy (pluggable)
@@ -347,6 +350,10 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 | `citadel` | Pod PM → Central Risk (bidirectional, no PM recourse) → Griffin | 19/25 | Multi-strategy books with strict factor concentration limits |
 | `point72` | Edge Gate → Conviction → Cohen Seat | 19/25 | Idea-generation / new positions with strong edge hypothesis |
 | `tiger` | Variant perception → Adversarial pitch → Robertson sole authority | 15/25 | Concentrated 15–20 name long/short books only — not suitable for diversified portfolios |
+
+Eval-score caveat: judge was blind to hierarchy names, but the rubric's authorship was not independently
+verified against the no-self-graded-evals rule — treat rankings as indicative, not proven. Re-eval with an
+independently-authored rubric is an open task.
 
 **Invoking with a specific hierarchy:**
 ```
@@ -647,13 +654,19 @@ orchestrator context (it re-reads the full report and would bloat the main conte
 1. Reads `$RUN_DIR/report.md` (or the saved `.cache/stocks-advisor/research/<title>.md`) and
    `$RUN_DIR/_scorecard.json`.
 2. Writes `$RUN_DIR/reasoning_diagram.mmd` — a mermaid `flowchart TD` with:
-   - one subgraph per ticker: data package → scorecard ACTION (+basis) → the 2-3 seat findings that
-     actually drove the call (with the key number each contributed) → DISSENT node if logged → final
-     verdict node with the flip-to-ADD/BUY trigger;
+   - one subgraph per ticker containing **the full panel as desks**: one node per seat that ran
+     (Fundamental / Technical / Narrative / Sentiment / Smart-Money / Sell-side), each carrying its seat
+     verdict + the key number it contributed ("Smart-$: CEO bought $1M — ACCUMULATING"), flowing into the
+     **Skeptic desk** (strongest objection) → **CIO/scorecard decision node** (scorecard ACTION + basis —
+     labelled as the binding source) → DISSENT node when a seat disagreed (name the seat, show it was
+     overruled) → final verdict node with the flip-to-ADD/BUY trigger. The panel structure must be visible
+     as a panel — seats are desks in a deliberation, not a flat evidence list;
    - a shared top node for the run inputs (fundamentals.py / TradingView / scorecard) and a shared bottom
      node for the report outputs;
-   - edge labels carrying the load-bearing evidence ("div 6.65%, 127y streak", "insiders sold @62"), so the
-     diagram answers *"why this verdict"*, not just *"what ran"*.
+   - seat nodes carry the load-bearing evidence ("div 6.65%, 127y streak", "insiders sold @62"), so the
+     diagram answers *"why this verdict and who argued what"*, not just *"what ran"*;
+   - if the run compressed seats (bundled panel agent), still draw the seats individually — they each
+     produced a verdict line — and note the compression in a caption node.
 3. Renders it: `npx --yes @mermaid-js/mermaid-cli -i reasoning_diagram.mmd -o reasoning_diagram.png -b transparent -w 1600`
    (mermaid-cli is available via npx; on render failure keep the .mmd and continue — the code block still
    publishes).

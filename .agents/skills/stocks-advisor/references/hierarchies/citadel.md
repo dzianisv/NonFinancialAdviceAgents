@@ -6,6 +6,14 @@ Citadel multi-pod architecture — highest-frequency risk monitoring of any test
 ## Key gate
 Central Risk (Step C): a firm-wide real-time layer that sees ALL positions simultaneously and can force reduction or exit intraday — the PM has no recourse. This is structurally different from an advisory review: Central Risk acts, it doesn't recommend.
 
+## Action authority
+This hierarchy sizes and risk-gates a position — POD VERDICT, POD RISK VERDICT, and CENTRAL RISK VERDICT are
+submission/sizing statuses, not the BUY/WATCH/HOLD-family ACTION label. The ACTION is the Step 0.82 scorecard's
+output, non-negotiable, and is printed alongside this chain's sizing output regardless of what this chain
+concludes. Central Risk's REDUCE/EXIT authority governs position SIZE (it may force size to zero), not the
+scorecard ACTION field itself; if Central Risk's read of the position conflicts with the scorecard ACTION,
+log it as DISSENT.
+
 ---
 
 ## Step A: Pod PM — Alpha Idea
@@ -134,6 +142,7 @@ CAPITAL FREED: {$amount}
 ## Output shape
 
 ```
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — from the Step 0.82 scorecard (never computed by this chain)
 TICKER: {ticker}
 EDGE: {type — statement}
 ENTRY ZONE: {price range}
@@ -148,6 +157,8 @@ Central Risk: {GREEN | REDUCE ($new_size) | EXIT}
 
 FINAL SIZE: {$amount after all adjustments}
 MONITORING: Position enters continuous intraday monitoring. Auto-cut at -{DD_LIMIT}% from peak.
+DISSENT LOGGED: {any conflict between Central Risk's read and the scorecard ACTION — one sentence; "none" if aligned}
+POLICY NOTE: {documented caller-mandate clamp applied, or "n/a"}
 
 PORTFOLIO SYNTHESIS NOTE: Capital reallocation review due {QUARTER}. Underperforming pods flagged for budget reduction.
 ```

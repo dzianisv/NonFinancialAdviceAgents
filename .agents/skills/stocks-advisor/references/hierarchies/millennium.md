@@ -6,6 +6,13 @@ Millennium's capital-allocator model — Englander does not trade; he allocates 
 ## Key gate
 Drawdown Hard Stop (Step C): if a PM's allocated capital falls below the drawdown threshold (-5% to -15% depending on strategy type), the risk system cuts positions automatically with no override path — not even Englander can override an automatic stop. This is the defining mechanism: the risk rules are the product.
 
+## Action authority
+This hierarchy sizes and risk-gates a position — PM VERDICT, STRATEGY HEAD VERDICT, and RISK SYSTEM VERDICT are
+submission/sizing statuses, not the BUY/WATCH/HOLD-family ACTION label. The ACTION is the Step 0.82 scorecard's
+output, non-negotiable, and is printed alongside this chain's sizing output regardless of what this chain
+concludes. The automated drawdown stop governs position SIZE (it may force size to zero), not the scorecard
+ACTION field itself; if this chain's read of the position conflicts with the scorecard ACTION, log it as DISSENT.
+
 ---
 
 ## Step A: PM Idea Submission
@@ -157,6 +164,7 @@ DIVERSIFICATION STATUS: {any correlation issues flagged}
 ## Output shape
 
 ```
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — from the Step 0.82 scorecard (never computed by this chain)
 TICKER: {ticker}
 ALPHA SOURCE: {type — one sentence}
 CATALYST: {specific event}
@@ -173,6 +181,8 @@ FINAL SIZE: {after all adjustments}
 AUTO-CUT THRESHOLD: Position auto-cut if pod drawdown reaches -{DD_REMAINING}% additional from here.
 
 MONITORING: Continuous. Position auto-cut at drawdown limit — no override exists.
+DISSENT LOGGED: {any conflict between this chain's read and the scorecard ACTION — one sentence; "none" if aligned}
+POLICY NOTE: {documented caller-mandate clamp applied, or "n/a"}
 ```
 
 > Source: Millennium Management operates 100+ independent pods with different strategy mandates, all governed by the same capital-allocation and drawdown-limit framework. The key architectural insight: at Millennium, risk management IS the product. Englander's edge is not trading skill — it is the ability to find, vet, and optimally capital-allocate to hundreds of PMs, while the automated stop-loss system prevents any single bad bet from becoming a firm-level event. The risk rules are non-negotiable because they exist to protect other PMs' capital, not just the firm.

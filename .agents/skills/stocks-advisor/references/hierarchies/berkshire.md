@@ -6,6 +6,16 @@ Long-duration, high-conviction single-name analysis modeled on Buffett/Munger. U
 ## Key gate
 Circle of Competence (Pre-Panel): if the analyst cannot explain in 2 sentences how the company earns money and why that will still be true in 20 years, the full panel is skipped — PASS immediately. No panel runs without competence.
 
+## Action authority
+This hierarchy does not set the BUY/WATCH/HOLD-family ACTION label — that is the Step 0.82 scorecard's output,
+non-negotiable. This chain supplies conviction, sizing, exit conditions, and the thesis memo. Where a gate below
+(moat ILLUSORY, management PASS, inversion KILLER_FOUND, discount < 25%) would produce a BUY-candidate read
+that conflicts with the scorecard ACTION, log the conflict as DISSENT — do not substitute this chain's read for
+the printed ACTION. The only two sanctioned ACTION modifiers are (a) a documented caller-mandate clamp, printed
+as `POLICY NOTE`, and (b) the Risk Manager's downgrade gate (not used in this hierarchy — Berkshire enforces its
+constraints inline in Step E instead, which may only cap sizing/BUY-candidate status, never invent a stronger
+ACTION than the scorecard's).
+
 ---
 
 ## Pre-Panel: Circle of Competence (Buffett gate)
@@ -171,9 +181,11 @@ Run inline after all prior steps pass.
 **Inline logic — apply directly:**
 
 ```
-All gates cleared (INSIDE_CIRCLE, moat not ILLUSORY, management not PASS, inversion CLEAR, discount ≥ 25%) → BUY.
+All gates cleared (INSIDE_CIRCLE, moat not ILLUSORY, management not PASS, inversion CLEAR, discount ≥ 25%) → CHAIN READ: BUY-CANDIDATE.
+  This is this hierarchy's own read, not the printed ACTION. Compare CHAIN READ to the input {SCORECARD_ACTION}:
+  if they disagree, log it in DISSENT — the printed ACTION still comes from the scorecard.
 
-SIZING RULES (Berkshire-specific — concentration is a feature, not a risk):
+SIZING RULES (Berkshire-specific — concentration is a feature, not a risk; sizing applies only when ACTION is BUY/ADD):
   Minimum position: 5% of portfolio. No half-positions. If 5% would breach cash floor → WATCH until cash frees.
   Exceptional criteria (BOTH must be true): moat DURABLE AND discount ≥ 40% → up to 15% of portfolio.
   Default: 5–10% based on moat durability and discount depth.
@@ -189,6 +201,7 @@ Berkshire hard constraints (enforced here, not in Risk Manager):
   - Diversification is NOT a goal — conviction and margin of safety are the goal
 
 Output:
+CHAIN READ: {BUY-CANDIDATE|WATCH|PASS} — this hierarchy's own read (informational; see DISSENT if it differs from ACTION)
 POSITION_SIZE_PCT: {5–15}%
 POSITION_SIZE_$: {dollar amount at current book size}
 HOLD_FOREVER: true
@@ -202,7 +215,8 @@ Cache output: `echo '{sizing_json}' > "$RUN_DIR/{TICKER}/seat_sizing.json"`
 ## Output shape
 
 ```
-FINAL VERDICT: {BUY|WATCH|PASS}
+ACTION: {BUY|WATCH|PASS}   — from the Step 0.82 scorecard (never computed by this chain)
+CHAIN READ: {BUY-CANDIDATE|WATCH|PASS} — this hierarchy's own read, informational only
 POSITION SIZE: {5–15}% / ${dollar amount}   or "n/a"
 HOLD FOREVER: true (exit only on thesis break)
 MOAT: {type} — {DURABLE|NARROWING|ILLUSORY}
@@ -210,6 +224,8 @@ MANAGEMENT: {HONEST_CAPABLE|CAPABLE_ONLY|PASS}
 INVERSION: {CLEAR|KILLER_FOUND — reason}
 INTRINSIC VALUE: ${amount} | DISCOUNT: {N}%
 EXIT CONDITIONS: moat ILLUSORY | management DISHONEST
+DISSENT LOGGED: {any disagreement between CHAIN READ and ACTION — one sentence; "none" if aligned}
+POLICY NOTE: {documented caller-mandate clamp applied, or "n/a"}
 BERKSHIRE MEMO: {1 sentence: why this is a 20-year hold or why it isn't}
 ```
 
