@@ -358,9 +358,11 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 | `point72` | Edge Gate → Conviction → Cohen Seat | 19/25 | Idea-generation / new positions with strong edge hypothesis |
 | `tiger` (reference-only — file not shipped; scored worst, use discouraged) | Variant perception → Adversarial pitch → Robertson sole authority | 15/25 | Concentrated 15–20 name long/short books only — not suitable for diversified portfolios |
 
-Eval-score caveat: judge was blind to hierarchy names, but the rubric's authorship was not independently
-verified against the no-self-graded-evals rule — treat rankings as indicative, not proven. Re-eval with an
-independently-authored rubric is an open task.
+Eval-score caveat: the original /25 pointwise rubric's authorship was never verified as independent — treat
+those numbers as indicative only. **Re-eval done 2026-07-08** (independently-authored rubric, frozen identical
+inputs, blind pairwise, 6 judges): **bsc 4–0 · millennium 2–2 · bridgewater 0–4** — confirms `bsc` as default;
+note millennium beat bridgewater head-to-head twice, flipping the old #2. Caveats: n=2 WAIT-type tickers,
+same-model-family judges. Full results: `.cache/stocks-advisor/eval/RESULTS-2026-07-08-hierarchy-pairwise.md`.
 
 **Invoking with a specific hierarchy:**
 ```
