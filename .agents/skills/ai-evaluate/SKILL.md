@@ -167,3 +167,12 @@ Apply these when the decision is expensive enough to warrant the extra cost — 
   55.8–44.2 on average weighted margin → bsc kept as the default (the margin overturned what the raw count
   suggested).
   `.cache/stocks-advisor/eval/round2/RESULTS-round2-bsc-vs-panel.md`
+- **Round 3** (bsc vs PATCHED panel, 5 FRESH tickers — patches not taught to the round-2 bug names): panel
+  won 3–2 count AND flipped the margin to 52.6–47.4 (round-2 patches moved it ~8.4 pts). A reversal — but
+  modest (~5 pts), n=5, and one panel win (AMD) was **prompt-confounded** (the orchestrator's per-ticker
+  stress instruction nudged the bsc runner into a TRIM/new-position contradiction the judge then penalized).
+  Lesson logged: **keep the orchestrator's per-variant prompts byte-identical except for the variant file** —
+  a stray per-ticker instruction difference confounds the comparison exactly like an input difference would.
+  Verdict: not clean enough to auto-flip a twice-validated default; recommend a clean round 4 (identical
+  prompts) + the Step-6 3-judge-majority upgrade before deciding.
+  `.cache/stocks-advisor/eval/round3/RESULTS-round3-bsc-vs-panel.md`
