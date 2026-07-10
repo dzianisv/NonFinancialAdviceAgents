@@ -88,8 +88,19 @@ Portfolio Google Sheet (`1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8`).
 4. **HL spot tokens without a perp oracle are dust valued $0** (flagged in Note) — HL's thin
    spot mid quotes unrealizable values (a 1.3M MAX bag ≈ "$8.65M"). Stables at $1, everything
    else off perp marks.
-5. **Dust filter** $0.50 (per `wallets.yaml`), except wallets in `keep_all_dust` where scam/
-   zero-value jettons are kept visible on purpose (they document the wallet's state).
+5. **Dust filter** $0.50 (per `wallets.yaml`), except wallets in `keep_all_dust` where real
+   sub-$0.50 balances are kept visible on purpose (documents wallet state — e.g. how the
+   Save/Solend obligation-account deposit below was first spotted). This does NOT cover
+   scam/spam jettons — see rule 6.
+6. **TON scam/airdrop-spam suppression (added 2026-07-10).** swap.coffee returns every
+   jetton ever airdropped to a wallet, including obvious spam (fake "GRAM Unlock" claim
+   tokens, "$BLUM", "TONRAGE") and fantasy-priced scam jettons ("DOFA" quoted at a made-up
+   price no other source confirms). `ton_positions.py` now drops any jetton that is BOTH
+   unverified (`verification != "WHITELISTED"`) AND has no real price from any source
+   (swap.coffee price rejected as fantasy, no TONAPI cross-check) — unconditionally, even
+   for `keep_all_dust` wallets, since these rows carry zero economic and zero diagnostic
+   value. A real but unverified token that has a confirmed price (TONAPI or swap.coffee
+   agreeing) still passes through normally.
 
 ## Updating the DeFi tab of the Google Sheet
 

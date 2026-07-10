@@ -109,6 +109,16 @@ def fetch_positions(label, address):
             price = 0.0
 
         protocol, type_label, pool = _classify(name, symbol)
+
+        if protocol == "Wallet tokens" and verification != "WHITELISTED" and price == 0:
+            # Unverified + no real price from ANY source = airdrop spam/scam jetton
+            # (fake "GRAM Unlock" claim tokens, $BLUM, TONRAGE, etc.), not real dust.
+            # Recognized DeFi receipt jettons (Storm/DeDust/Coffee LP, YT, ...) are
+            # NEVER suppressed here even if currently unpriced — real user deposits
+            # stay visible regardless of price-feed gaps. Drop unconditionally, even
+            # for keep_all_dust wallets — zero economic and zero diagnostic value.
+            print(f"SKIP scam/spam jetton: {symbol} ({name}) in {label}", file=sys.stderr)
+            continue
         rows.append({
             "wallet": label, "protocol": protocol, "type": type_label, "pool": pool,
             "asset": symbol, "balance": balance, "usd_value": balance * price,
