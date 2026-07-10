@@ -103,6 +103,33 @@ after an update that shortens the table. **Mirror the GRAND TOTAL into the stabl
 `DeFi!I1`** (value in I1; a `GRAND TOTAL:` label in H1 helps) — `Totals!C7/C11` reference
 `DeFi!I1`, so a snapshot that moves the grand-total row must not break Totals.
 
+## Pricing infra (Apps Script price feed)
+
+The Google Sheet's live crypto prices come from `quoteCoinmarketcap()`, a custom function in
+a **separate** GitHub repo `dzianisv/GoogleAppScripts` (mirrored locally at
+`apps-script-source.txt` in this repo, ~line 201) — not from this skill's Python pipeline.
+
+- **Past "CoinMarketCap-throttle" bug reports (see memory `portfolio-sheet-structure.md`)
+  were mislabeled.** Despite the function's name, it was actually calling CoinGecko's
+  anonymous public API (~5-15 req/min, shared across all Apps Script users on Google's IPs).
+  A 429 throttle response body ("Throttled", plaintext) was fed straight into `JSON.parse()`
+  with no status check, crashing and cascading into `#VALUE!`/$0 on `Crypto!F89` and
+  `Totals!C6/C7/C11`. Root-caused 2026-07-09 — not a sheet-formula bug, all rows already used
+  the correct VLOOKUP pattern. Don't assume the old label was accurate.
+- **Fixed (2026-07-09):** rewritten to hit CMC's own internal, no-API-key website endpoint —
+  `GET api.coinmarketcap.com/data-api/v3/cryptocurrency/quote/latest?id=<ids>&convertId=2781`
+  — batching ALL tracked symbols into one request per cache miss (not one call per cell), with
+  retry+backoff and a persisted last-known-good price so a transient failure degrades to
+  stale-but-real instead of N/A/#VALUE!. No auth/cookies/key needed; just send a non-empty
+  `User-Agent` header.
+- **ASTER was mismapped** to CoinGecko's "astar" (Astar — an unrelated chain, not the Aster
+  DEX/BSC token the sheet tracks). Fixed to CMC id 36341. Don't revert this to Astar.
+- **TON/Toncoin gap, open — needs a human decision, not a bug fix:** CMC's old Toncoin id
+  (11419) now resolves to symbol "GRAM" / "Gram (prev. Toncoin)" as of 2026-07-09, and no
+  other CMC listing currently matches Toncoin's identity. Deliberately left out of the id map
+  (falls back to last-known-good/N/A) pending a call: accept the renamed GRAM id, or wait for
+  CMC to publish a new canonical Toncoin id.
+
 ## Known gaps (state them, don't hide them)
 
 - **Lighter** (zkSync perp DEX): no public read API wired up — its deposits ($584, 2026-07)
@@ -115,3 +142,16 @@ after an update that shortens the table. **Mirror the GRAND TOTAL into the stabl
 - **Neither DeBank nor Zerion can catch AsterDEX** — no adapter on either side, module
   disabled (see Source map). The only signal is the investor naming the venue: when they
   do, wire its own API module (Aster, HL) — never trust "DeBank shows everything".
+- **Save/Solend (Solana lending) is invisible to both Zerion and Solscan's summary views** —
+  deposits live in a program-owned "Obligation" account (Solend/Save program
+  `So1endDq2YkqhipRh3WViPa8hdiSpxWy6z3Z6tMCpAo`), not as a token balance in the wallet, so a
+  plain token-account scan shows a zero-balance receipt-token account and misses the real
+  deposit entirely. Confirmed 2026-07-09 on wallet SOL.L1 — a $16,647.74 USDC deposit was
+  invisible to Zerion (fetched twice) and Solscan's account/DeFi summary views, only found via
+  direct `getProgramAccounts` + manual account-struct decoding. If a wallet shows a mysterious
+  low total vs. the owner's own knowledge, check for Save/Solend Obligation accounts
+  specifically.
+- **TRUMP token has no reliable price feed** — CoinMarketCap and GOOGLEFINANCE both fail or
+  are unreliable for this symbol; manually verify against multiple sources before trusting any
+  single quote (this is why the sheet now hardcodes a confirmed price rather than a live
+  formula for it).
