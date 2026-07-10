@@ -124,11 +124,9 @@ a **separate** GitHub repo `dzianisv/GoogleAppScripts` (mirrored locally at
   `User-Agent` header.
 - **ASTER was mismapped** to CoinGecko's "astar" (Astar — an unrelated chain, not the Aster
   DEX/BSC token the sheet tracks). Fixed to CMC id 36341. Don't revert this to Astar.
-- **TON/Toncoin gap, open — needs a human decision, not a bug fix:** CMC's old Toncoin id
-  (11419) now resolves to symbol "GRAM" / "Gram (prev. Toncoin)" as of 2026-07-09, and no
-  other CMC listing currently matches Toncoin's identity. Deliberately left out of the id map
-  (falls back to last-known-good/N/A) pending a call: accept the renamed GRAM id, or wait for
-  CMC to publish a new canonical Toncoin id.
+- **TON/Toncoin gap, resolved — owner decision made 2026-07-09.** CMC's old Toncoin id
+  (11419) now resolves to symbol "GRAM" / "Gram (prev. Toncoin)"; owner decided to accept it
+  as the same asset continued under CMC's new label. TON now maps to id 11419 in the id map.
 
 ## Known gaps (state them, don't hide them)
 
