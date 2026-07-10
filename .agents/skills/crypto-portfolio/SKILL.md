@@ -106,8 +106,11 @@ after an update that shortens the table. **Mirror the GRAND TOTAL into the stabl
 ## Pricing infra (Apps Script price feed)
 
 The Google Sheet's live crypto prices come from `quoteCoinmarketcap()`, a custom function in
-a **separate** GitHub repo `dzianisv/GoogleAppScripts` (mirrored locally at
-`apps-script-source.txt` in this repo, ~line 201) — not from this skill's Python pipeline.
+a **separate** GitHub repo `dzianisv/GoogleAppScripts` (`GoogleScript/Crypto.gs`) — that repo
+is the ONLY source of truth for this code, not this skill's Python pipeline. (A flat, hand-
+copied `apps-script-source.txt` used to live in this repo as a second mirror; it drifted out
+of sync with the real repo more than once, so it was retired 2026-07-09 — clone
+`GoogleAppScripts` directly instead of trusting a local snapshot.)
 
 - **Past "CoinMarketCap-throttle" bug reports (see memory `portfolio-sheet-structure.md`)
   were mislabeled.** Despite the function's name, it was actually calling CoinGecko's
