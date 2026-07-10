@@ -13,11 +13,12 @@ license: MIT
 compatibility: >
   Needs a browser session (claude-in-chrome / chrome-use) for debank.com, plus network
   access to api.zerion.io (key required), backend.swap.coffee + tokens.swap.coffee
-  (public, ~1 req/s), tonapi.io, api.hyperliquid.xyz and lite-api.jup.ag (all public).
-  Python 3 with `requests` + `PyYAML` (venv: /Users/engineer/.venv).
+  (public, ~1 req/s), tonapi.io, api.hyperliquid.xyz, lite-api.jup.ag, api.mainnet-beta.solana.com
+  and api.solend.fi (all public, no key). Python 3 with `requests` + `PyYAML` + `base58`
+  (venv: /Users/engineer/.venv).
 metadata:
   author: engineer
-  version: "2.0"
+  version: "2.1"
 ---
 
 # crypto-portfolio — list DeFi assets & positions
@@ -66,7 +67,7 @@ Per-wallet modules are runnable standalone for debugging:
 | Chain / venue | Completeness (position list) | Valuation / machine-readable | Why |
 |---|---|---|---|
 | EVM wallets + protocols | **DeBank browser read** (`debank.com/profile/<addr>`) | Zerion `GET /v1/wallets/{addr}/positions/` (Basic auth: key as username, `filter[positions]=no_filter`) — cross-check | DeBank's adapters cover venues Zerion doesn't (Lighter, HL listing) |
-| Solana | Zerion (same endpoint; `filter[positions]` unsupported) | + Jupiter `lite-api.jup.ag/price/v2` for tokens Zerion returns unpriced (fragSOL, jlUSDS) | DeBank Solana coverage is partial |
+| Solana | Zerion (same endpoint; `filter[positions]` unsupported) | + Jupiter `lite-api.jup.ag/price/v2` for tokens Zerion returns unpriced (fragSOL, jlUSDS); + `solend_positions.py` (raw Solana RPC `getProgramAccounts` + `api.solend.fi/v1/reserves`) for Save/Solend obligation deposits, invisible to both Zerion and Solscan | DeBank Solana coverage is partial |
 | TON | swap.coffee: `backend.swap.coffee/v1/ton/wallet/{addr}/balance` + `tokens.swap.coffee/api/v3/accounts/{addr}/jettons` | same (jettons carry `market_stats.price_usd`) | DeBank has no TON; TON DeFi is held as receipt jettons, so jettons ARE the position list |
 | Hyperliquid | DeBank lists it (and the investor names it) | HL info API `POST api.hyperliquid.xyz/info` (`spotClearinghouseState`, `clearinghouseState`, `userVaultEquities`, marks from `metaAndAssetCtxs`) | Zerion can't see HL at all (~$21k); DeBank misprices its illiquid spot |
 | AsterDEX | **invisible to BOTH DeBank and Zerion** (off-chain engine, no adapter; verified 2026-07-08) | Aster V3 futures API `GET fapi.asterdex.com/fapi/v3/{balance,positionRisk}`, EIP-712-signed | **DISABLED by owner's choice for now**: no `asterdex:` flag in `wallets.yaml`, no `ASTER_*` creds. To activate: mint the API wallet at asterdex.com/en/api-wallet, set `ASTER_USER`/`ASTER_SIGNER`/`ASTER_SIGNER_PRIVATE_KEY` in `.env` (key can TRADE — hot), flag the wallet `asterdex: true`. Module skips with a warning when creds absent |
@@ -85,9 +86,17 @@ Portfolio Google Sheet (`1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8`).
 3. **swap.coffee jetton prices can be stale on thin receipt tokens** (USDT-SLP quoted +8% vs
    TONAPI). Every jetton price is cross-checked against TONAPI; >5% divergence → TONAPI price
    wins and the row's `Note` says so. Never silently trust one price graph for LP receipts.
-4. **HL spot tokens without a perp oracle are dust valued $0** (flagged in Note) — HL's thin
-   spot mid quotes unrealizable values (a 1.3M MAX bag ≈ "$8.65M"). Stables at $1, everything
-   else off perp marks.
+4. **HL spot tokens without a perp oracle fall back to their own HL spot-pair mark**
+   (flagged in Note as spot-priced, more slippage risk than perp-quoted). Stables at $1,
+   perp-listed tokens off perp marks. Only a token with no price anywhere (neither perp nor
+   spot) is valued $0. Fixed 2026-07-10: a real, moderate position (UPUMP, ~$644 on L1) was
+   being silently zeroed by the old blanket "no perp oracle = $0" rule. The fallback itself
+   has one sharp edge, caught by testing against live balances before shipping: HL's
+   `spotMetaAndAssetCtxs` returns `ctxs` indexed by each pair's `index` field, NOT by its
+   position in the `universe` array — the two diverge once index gaps appear, so naively
+   zipping `ctxs[i]` to `universe[i]` by enumeration silently prices a token off an unrelated
+   pair (first draft priced UPUMP at $46,800 and MAX at $3.9M off the wrong markets before
+   this was caught). `hyperliquid_positions.py`'s `_spot_marks()` indexes by `pair["index"]`.
 5. **Dust filter** $0.50 (per `wallets.yaml`), except wallets in `keep_all_dust` where real
    sub-$0.50 balances are kept visible on purpose (documents wallet state — e.g. how the
    Save/Solend obligation-account deposit below was first spotted). This does NOT cover
@@ -144,8 +153,14 @@ of sync with the real repo more than once, so it was retired 2026-07-09 — clon
 
 ## Known gaps (state them, don't hide them)
 
-- **Lighter** (zkSync perp DEX): no public read API wired up — its deposits ($584, 2026-07)
-  are visible ONLY on DeBank; the browser read (step 1) is currently the only way to read it.
+- **Lighter** (zkSync perp DEX): no public read API wired up — its deposits (~$595 on L3,
+  negligible <$0.01 dust on B3, 2026-07-10) are visible ONLY on DeBank; the browser read
+  (step 1) is currently the only way to read it. Lighter does have a public read endpoint
+  (`GET mainnet.zklighter.elliot.ai/api/v1/account?by=l1_address&value=<addr>`) but its
+  cross-margin accounting (separate `available_balance`/`collateral`/per-position
+  `cross_initial_margin_requirement` fields whose exact relationship to "how much is really
+  the investor's money" isn't fully pinned down) risks a wrong auto-computed total worse than
+  a manual, DeBank-verified carry-forward — don't wire it up until that's resolved.
 - swap.coffee staking balances endpoint needs a TON-proof header (wallet signature) — liquid
   staking read that way is out; staked TON appears only if held as a receipt jetton.
 - Perp rows report **margin** as the position value (matches the sheet convention), with
@@ -154,16 +169,30 @@ of sync with the real repo more than once, so it was retired 2026-07-09 — clon
 - **Neither DeBank nor Zerion can catch AsterDEX** — no adapter on either side, module
   disabled (see Source map). The only signal is the investor naming the venue: when they
   do, wire its own API module (Aster, HL) — never trust "DeBank shows everything".
-- **Save/Solend (Solana lending) is invisible to both Zerion and Solscan's summary views** —
-  deposits live in a program-owned "Obligation" account (Solend/Save program
-  `So1endDq2YkqhipRh3WViPa8hdiSpxWy6z3Z6tMCpAo`), not as a token balance in the wallet, so a
-  plain token-account scan shows a zero-balance receipt-token account and misses the real
-  deposit entirely. Confirmed 2026-07-09 on wallet SOL.L1 — a $16,647.74 USDC deposit was
-  invisible to Zerion (fetched twice) and Solscan's account/DeFi summary views, only found via
-  direct `getProgramAccounts` + manual account-struct decoding. If a wallet shows a mysterious
-  low total vs. the owner's own knowledge, check for Save/Solend Obligation accounts
-  specifically.
+- **FIVA yield-token (YT) positions may carry separate unclaimed yield, invisible to this
+  pipeline.** A matured YT jetton (e.g. T1's "YT USDT-SLP (01Sep2025)") is correctly priced
+  $0 as a token — FIVA's own docs confirm YT value is genuinely zero at/after maturity — but
+  FIVA's protocol separately lets holders manually claim accrued pre-maturity yield via the
+  FIVA dashboard (`app.thefiva.com`), and that claimable balance is NOT exposed by any public
+  REST endpoint found so far (`api2.thefiva.com/{user,users,rewards,claimable,account}/<addr>`
+  all 404). If a YT position matured without the owner manually claiming first, there could be
+  real unclaimed value this pipeline cannot see. Requires a wallet-connected dashboard check,
+  not resolvable via curl. Flagged, not resolved, 2026-07-10.
 - **TRUMP token has no reliable price feed** — CoinMarketCap and GOOGLEFINANCE both fail or
   are unreliable for this symbol; manually verify against multiple sources before trusting any
   single quote (this is why the sheet now hardcodes a confirmed price rather than a live
   formula for it).
+
+## Resolved gaps
+
+- **Save/Solend (Solana lending)** — was invisible to both Zerion and Solscan's summary views
+  (deposits live in a program-owned "Obligation" account, not a wallet token balance).
+  Automated 2026-07-10 via `solend_positions.py`: `getProgramAccounts` memcmp-filtered on the
+  Obligation account's `owner` field (offset 42) finds every obligation for a wallet with no
+  address to derive up front; byte layout transcribed from `solendprotocol/solend-sdk`
+  (`src/state/obligation.ts`); value computed live from `api.solend.fi/v1/reserves`'
+  `cTokenExchangeRate` + oracle `marketPrice`, never from the obligation's own cached
+  (frequently-stale) `marketValue` field. Wired into `defi_positions.py` for every `solana`
+  wallet unconditionally — empty obligations just decode to zero rows, no per-wallet flag
+  needed. Confirmed materially correct: $16,648.23 live vs. $16,647.74 prior manual figure
+  (the ~$0.50 gap is ~2 weeks of accrued interest, not error).

@@ -12,8 +12,9 @@ POST https://api.hyperliquid.xyz/info with:
 
 Pricing discipline (same as defi-portfolio-manager/hyperliquid_status.ts): spot
 tokens are priced off the PERP mark oracle; stables at $1; a spot token with no
-perp oracle and not a stable is illiquid dust valued $0 and flagged — HL's thin
-spot mid would quote unrealizable millions for it.
+perp oracle and not a stable falls back to its own HL spot-pair mark (spot vs
+USDC), noted as such since it may carry more slippage risk than a perp-quoted
+price; only a token with no price anywhere is genuine illiquid dust valued $0.
 """
 from __future__ import annotations
 import sys
@@ -49,9 +50,32 @@ def _perp_marks():
     return marks
 
 
+def _spot_marks():
+    """coin name -> its own HL spot-pair mark price (vs USDC), for tokens with no perp market.
+
+    ctxs is indexed by each pair's `index` field, NOT by its position in the
+    `universe` array -- the two diverge once index gaps appear, so ctxs[i] by
+    enumeration order silently pulls the wrong pair's price (caught by feeding
+    real balances through: UPUMP came back priced off an unrelated pair).
+    """
+    spot_meta, ctxs = _info({"type": "spotMetaAndAssetCtxs"})
+    token_names = {t["index"]: t["name"] for t in spot_meta.get("tokens", [])}
+    marks = {}
+    for pair in spot_meta.get("universe", []):
+        idx = pair["index"]
+        ctx = ctxs[idx] if idx < len(ctxs) else {}
+        px = ctx.get("markPx") or ctx.get("midPx")
+        base_idx, quote_idx = pair.get("tokens", [None, None])
+        quote_name = token_names.get(quote_idx)
+        if px and quote_name == "USDC":
+            marks[token_names.get(base_idx)] = float(px)
+    return marks
+
+
 def fetch_positions(label, address):
     """-> list of row dicts {wallet, protocol, type, pool, asset, balance, usd_value, note}."""
     marks = _perp_marks()
+    spot_marks = None  # lazy: only fetched if a balance actually needs the fallback
     spot = _info({"type": "spotClearinghouseState", "user": address})
     perp = _info({"type": "clearinghouseState", "user": address})
     vaults = _info({"type": "userVaultEquities", "user": address})
@@ -68,7 +92,13 @@ def fetch_positions(label, address):
         elif mark_coin in marks:
             price, note = marks[mark_coin], "priced off perp mark"
         else:
-            price, note = 0.0, "no perp oracle + not a stable -> illiquid dust, $0"
+            if spot_marks is None:
+                spot_marks = _spot_marks()
+            if coin in spot_marks:
+                price = spot_marks[coin]
+                note = "no perp oracle; priced off HL spot mark (may carry more slippage risk than perp-quoted tokens)"
+            else:
+                price, note = 0.0, "no perp oracle and no spot mark -> illiquid dust, $0"
         rows.append({
             "wallet": label, "protocol": "Hyperliquid", "type": "Deposit",
             "pool": "Spot", "asset": coin, "balance": total,

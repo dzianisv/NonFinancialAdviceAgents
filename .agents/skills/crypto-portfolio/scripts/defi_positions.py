@@ -23,6 +23,7 @@ sys.path.insert(0, HERE)
 
 import aster_positions
 import hyperliquid_positions
+import solend_positions
 import ton_positions
 import zerion_positions
 
@@ -52,6 +53,12 @@ def main():
         print(f"Fetching {label} ({chain}) {address} ...", file=sys.stderr)
         if chain in ("evm", "solana"):
             rows = zerion_positions.fetch_positions(label, chain, address)
+            if chain == "solana":
+                # Zerion/Solscan don't surface Solend/Save deposits (cTokens sit in the
+                # protocol's pooled vault, not the wallet's own token account) -- see
+                # solend_positions.py docstring. Confirmed material ($16.6k) on SOL.L1
+                # via manual audit 2026-07-10; now read automatically every run.
+                rows += solend_positions.fetch_positions(label, address)
             if w.get("hyperliquid"):
                 rows += hyperliquid_positions.fetch_positions(label, address)
             if w.get("asterdex"):
