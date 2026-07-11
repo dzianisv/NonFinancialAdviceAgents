@@ -176,3 +176,19 @@ Apply these when the decision is expensive enough to warrant the extra cost — 
   Verdict: not clean enough to auto-flip a twice-validated default; recommend a clean round 4 (identical
   prompts) + the Step-6 3-judge-majority upgrade before deciding.
   `.cache/stocks-advisor/eval/round3/RESULTS-round3-bsc-vs-panel.md`
+- **Round 4** (bsc vs panel, SAME 5 tickers as round 3 — reused deliberately to isolate the fix, not a fresh
+  sample — with the AMD prompt confound closed and the Step-6 3-judge-majority upgrade applied: 3
+  judges/pair, 15 judge votes total): panel won 3–2 on count (identical to round 3) and 53.05–46.95 on
+  average weighted margin (nearly identical to round 3's 52.6–47.4). Inter-judge agreement 86.7% (13/15
+  votes agreed with their ticker's majority; 4/5 tickers unanimous). The AMD confound closed in panel's
+  favor (unanimous 81/19, stronger than round 3, not weaker). Which individual tickers each side won
+  shifted (CI and JPM flipped panel→bsc, PFE and UNH flipped bsc→panel) even though the aggregate count and
+  margin held — read as generator variance on individual runs riding on top of a stable aggregate edge, not
+  eval noise (independently confirmed per-ticker by all 3 judges, e.g. bsc's CI win traced to a real
+  EPS/revenue-divergence catch its Skeptic step made that panel's 6 seats missed). New finding (not one of
+  round 3's 3 patches): panel's mechanical conviction-boost rule inflates HOLD-call confidence in the wrong
+  direction when the agreeing signals are actually bearish (flagged by judges on JPM and UNH) — logged as a
+  patch-next item, did not cost panel the round. **Verdict: round 4 clears round 3's bar for a flip — two
+  consecutive rounds, similar margin, high judge agreement, confound resolved in panel's favor. Default
+  hierarchy flipped from `bsc` to `panel`**; bsc remains available via `--hierarchy bsc`.
+  `.cache/stocks-advisor/eval/round4/RESULTS-round4-bsc-vs-panel.md`

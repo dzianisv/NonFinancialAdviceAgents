@@ -70,7 +70,7 @@ Per-wallet modules are runnable standalone for debugging:
 | Solana | Zerion (same endpoint; `filter[positions]` unsupported) | + Jupiter `lite-api.jup.ag/price/v2` for tokens Zerion returns unpriced (fragSOL, jlUSDS); + `solend_positions.py` (raw Solana RPC `getProgramAccounts` + `api.solend.fi/v1/reserves`) for Save/Solend obligation deposits, invisible to both Zerion and Solscan | DeBank Solana coverage is partial |
 | TON | swap.coffee: `backend.swap.coffee/v1/ton/wallet/{addr}/balance` + `tokens.swap.coffee/api/v3/accounts/{addr}/jettons` | same (jettons carry `market_stats.price_usd`) | DeBank has no TON; TON DeFi is held as receipt jettons, so jettons ARE the position list |
 | Hyperliquid | DeBank lists it (and the investor names it) | HL info API `POST api.hyperliquid.xyz/info` (`spotClearinghouseState`, `clearinghouseState`, `userVaultEquities`, marks from `metaAndAssetCtxs`) | Zerion can't see HL at all (~$21k); DeBank misprices its illiquid spot |
-| AsterDEX | **invisible to BOTH DeBank and Zerion** (off-chain engine, no adapter; verified 2026-07-08) | Aster V3 futures API `GET fapi.asterdex.com/fapi/v3/{balance,positionRisk}`, EIP-712-signed | **DISABLED by owner's choice for now**: no `asterdex:` flag in `wallets.yaml`, no `ASTER_*` creds. To activate: mint the API wallet at asterdex.com/en/api-wallet, set `ASTER_USER`/`ASTER_SIGNER`/`ASTER_SIGNER_PRIVATE_KEY` in `.env` (key can TRADE — hot), flag the wallet `asterdex: true`. Module skips with a warning when creds absent |
+| AsterDEX | **invisible to BOTH DeBank and Zerion** (off-chain engine, no adapter; verified 2026-07-08) | Aster V3 futures API `GET fapi.asterdex.com/fapi/v3/{balance,positionRisk}`, EIP-712-signed | **Automated module still DISABLED**: no `asterdex:` flag in `wallets.yaml`, no `ASTER_*` creds — and even if enabled, the L3 account has privacy mode ON, which blocks the keyless-style V3 read the module expects. To activate: mint the API wallet at asterdex.com/en/api-wallet, set `ASTER_USER`/`ASTER_SIGNER`/`ASTER_SIGNER_PRIVATE_KEY` in `.env` (key can TRADE — hot), flag the wallet `asterdex: true`. Module skips with a warning when creds absent. **3 rows now on the sheet as a MANUAL/static snapshot** (L3: ASTER $3,322.32, USDC $964.17, LINEA $83.16 — user-provided 2026-07-10, qty n/a for ASTER/LINEA since only USD value was given) — same carry-forward treatment as Lighter, see Known gaps |
 
 Wallet registry: `.cache/crypto-portfolio/wallets.yaml` — labels match the DeFi tab of the
 Portfolio Google Sheet (`1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8`).
@@ -161,6 +161,15 @@ of sync with the real repo more than once, so it was retired 2026-07-09 — clon
   `cross_initial_margin_requirement` fields whose exact relationship to "how much is really
   the investor's money" isn't fully pinned down) risks a wrong auto-computed total worse than
   a manual, DeBank-verified carry-forward — don't wire it up until that's resolved.
+- **AsterDEX (L3, added 2026-07-10):** `aster_positions.py` exists and would auto-fetch via
+  the V3 futures API, but the L3 account has privacy mode enabled, which blocks the keyless
+  read the module relies on (no `asterdex:` flag/creds wired either — see Source map). 3 rows
+  carried forward as a MANUAL, user-provided snapshot: ASTER $3,322.32, USDC $964.17 (balance
+  = value, 1:1), LINEA $83.16 — ASTER/LINEA quantities were not provided (value-only, `n/a` in
+  the Balance column rather than a guessed token count). Re-verify and refresh by hand each
+  snapshot until privacy mode is disabled or the module is adapted to read a privacy-enabled
+  account. Do not confuse with the unrelated Hyperliquid `ASTER/USDC (Long 3x)` perp row on
+  L1 — that's a leveraged position on the ASTER token, not an AsterDEX-venue balance.
 - swap.coffee staking balances endpoint needs a TON-proof header (wallet signature) — liquid
   staking read that way is out; staked TON appears only if held as a receipt jetton.
 - Perp rows report **margin** as the position value (matches the sheet convention), with

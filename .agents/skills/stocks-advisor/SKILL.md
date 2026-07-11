@@ -335,7 +335,7 @@ ACTION modifiers are documented caller-mandate clamps and the Risk Manager's dow
 The decision chain (how per-stock panel verdicts get turned into a final call) is **pluggable** — load the appropriate module based on the user's `--hierarchy` flag:
 
 ```bash
-HIERARCHY="${HIERARCHY_FLAG:-bsc}"   # default: bsc
+HIERARCHY="${HIERARCHY_FLAG:-panel}"   # default: panel (flipped from bsc round 4, 2026-07-09 — see hierarchy table below)
 HIERARCHY_FILE=".agents/skills/stocks-advisor/references/hierarchies/${HIERARCHY}.md"
 if [[ ! -f "$HIERARCHY_FILE" ]]; then
   echo "Unknown hierarchy: $HIERARCHY. Available: bsc, bridgewater, berkshire, citadel, millennium, point72, soros, panel"
@@ -349,7 +349,8 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 
 | Name | Key mechanism | Eval score | Best for |
 |---|---|---|---|
-| `bsc` (default) | Edge Gate + Skeptic [MEM audit] + P0/P1/P2/P3 | **25/25** | Full portfolio reviews — broadest coverage |
+| `panel` (default, since round 4 — 2026-07-09) | Research desk briefing → 6 independent investor votes → conviction-weighted quorum; scorecard ACTION binding | **Pairwise winner, rounds 3+4** — not a /25 pointwise score; see caveat below. R3 patched-panel: 3–2 count AND panel margin 52.6–47.4 (modest, one win prompt-confounded). R4 (same 5 tickers, confound closed, 3-judge-majority upgrade, 15 judge votes): panel again 3–2 count, margin 53.05–46.95, 86.7% inter-judge agreement. Two consecutive rounds replicate within ~1pt of each other under different judge conditions — real, reproducible edge, not noise. Known open issue: mechanical conviction-boost rule miscalibrates HOLD confidence direction (patch-next, did not cost the round). | Full portfolio reviews and standard equity analysis — new default; named-investor-lens transparency, auditable per-seat OWN/TODAY votes, best-in-class dissent preservation |
+| `bsc` (prior default, demoted round 4) | Edge Gate + Skeptic [MEM audit] + P0/P1/P2/P3 | **25/25** (original pointwise eval); lost pairwise rounds 3 and 4 to `panel` on both count and margin | Still fully available via `--hierarchy bsc` — broad coverage, strong Edge Gate/Skeptic audit trail |
 | `bridgewater` | Skeptic → CIO → Risk Manager | 23/25 | Standard equity analysis — strong adversarialism without edge gate overhead |
 | `soros` | Macro thesis → Reflexivity → P0/P1/P2/P3 | 21/25 | Macro-driven positions where regime is the primary driver |
 | `berkshire` | Circle of Competence → Moat → Munger → Margin of Safety | 20/25 | Long-term concentrated conviction positions only |
@@ -357,13 +358,20 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 | `citadel` | Pod PM → Central Risk (bidirectional, no PM recourse) → Griffin | 19/25 | Multi-strategy books with strict factor concentration limits |
 | `point72` | Edge Gate → Conviction → Cohen Seat | 19/25 | Idea-generation / new positions with strong edge hypothesis |
 | `tiger` (reference-only — file not shipped; scored worst, use discouraged) | Variant perception → Adversarial pitch → Robertson sole authority | 15/25 | Concentrated 15–20 name long/short books only — not suitable for diversified portfolios |
-| `panel` | Research desk briefing → 6 independent investor votes → conviction-weighted quorum; scorecard ACTION binding | R2 (2026-07-08): 3–2 count, bsc won margin 55.8–44.2. R3 patched-panel on fresh names: 3–2 count AND panel won margin 52.6–47.4 (reversal) — but modest (~5pt), n=5, one win (AMD) prompt-confounded, 2 live nits (CHAIN-READ-vs-ACTION reads as contradiction; decorative per-seat conviction). **bsc stays default pending a clean round 4 + 3-judge majority.** | Named-investor-lens transparency — auditable per-seat OWN/TODAY votes instead of one blended CIO read; best-in-class dissent preservation |
 
 Eval-score caveat: the original /25 pointwise rubric's authorship was never verified as independent — treat
 those numbers as indicative only. **Re-eval done 2026-07-08** (independently-authored rubric, frozen identical
-inputs, blind pairwise, 6 judges): **bsc 4–0 · millennium 2–2 · bridgewater 0–4** — confirms `bsc` as default;
-note millennium beat bridgewater head-to-head twice, flipping the old #2. Caveats: n=2 WAIT-type tickers,
-same-model-family judges. Full results: `.cache/stocks-advisor/eval/RESULTS-2026-07-08-hierarchy-pairwise.md`.
+inputs, blind pairwise, 6 judges): **bsc 4–0 · millennium 2–2 · bridgewater 0–4** — confirmed `bsc` as default
+at the time; note millennium beat bridgewater head-to-head twice, flipping the old #2. Caveats: n=2 WAIT-type
+tickers, same-model-family judges. Full results:
+`.cache/stocks-advisor/eval/RESULTS-2026-07-08-hierarchy-pairwise.md`.
+
+**Default flipped bsc → panel after round 4 (2026-07-09).** `panel`'s score above is a pairwise win-rate
+result (head-to-head count + average weighted margin across two independent rounds), not a /25 pointwise
+score — it is not directly comparable to the other rows' numbers, only to `bsc`'s round 3/4 pairwise results.
+See `.cache/stocks-advisor/eval/round4/RESULTS-round4-bsc-vs-panel.md` and
+`.cache/stocks-advisor/eval/round3/RESULTS-round3-bsc-vs-panel.md` for full reasoning, and
+`ai-evaluate/SKILL.md`'s History section for the round-by-round summary.
 
 **Invoking with a specific hierarchy:**
 ```
@@ -467,7 +475,11 @@ market-data point is traceable. Aggregate from every seat that fetched:
 2. **Smart-money / filing sources** — every URL the smart-money seat actually web_fetched. Insider
    transactions (Form 4): **finviz.com/quote.ashx?t=TICKER is PRIMARY** (openinsider.com is secondary /
    when-available — it has been 403-blocked since 2026-07-05). Other classes: 13f.info, EDGAR, capitoltrades,
-   marketbeat fallbacks. One per line.
+   marketbeat fallbacks. Retail crowd positioning (explicitly a WEAK signal — retail crowding, not
+   institutional flow): call `python3 scripts/robinhood_top100.py --ticker TICKER` to check whether the name
+   is in Robinhood's current Top-100-Most-Popular list; treat an `INSUFFICIENT_DATA` result as *absent* (not
+   "no" and not an error to surface loudly), and never invent/fabricate a rank the script didn't return. One
+   per line.
 3. **Sell-side / analyst-consensus sources** — every analyst-page URL the sell-side seat actually
    web_fetched (Yahoo Finance analysis tab, StockAnalysis.com forecast, TipRanks, MarketBeat, Zacks,
    Morningstar, Nasdaq analyst-research, Finviz, WSJ research-ratings). One per line. If the seat returned

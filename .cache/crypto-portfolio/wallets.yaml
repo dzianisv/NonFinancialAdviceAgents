@@ -25,12 +25,12 @@ wallets:
   - label: T1
     chain: ton
     address: "UQBkT-XTPTbYeVNsWmC5Dxnw6DUygKOgTMTooA7SIz7BE19N"
-  - label: S1
+  - label: SOL.L1
     chain: solana
     address: "jetmpL3H387ck44FNiAZsyGNNRad3mvHgSs1mbppqdG"
-  - label: S2
+  - label: SOL.2
     chain: solana
     address: "6iQHaQyTwZHqXKcVMoBUWELvRQTD2bXJ5AJouJjx8jRD"
 
 dust_floor_usd: 0.5
-keep_all_dust: [T1, S1, S2]
+keep_all_dust: [T1, SOL.L1, SOL.2]

@@ -64,6 +64,10 @@ logs/
 # opencode / supervisor runtime state
 .opencode/
 .supervisor/
+.agents/supervisor/
+
+# git worktrees (linked working trees, not real content)
+.worktrees/
 
 # SQLite dbs from news feeds (runtime, not tracked)
 *.db
