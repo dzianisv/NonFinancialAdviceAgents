@@ -78,7 +78,8 @@ logs/
 
 # Relocated skill runtime state + personal holdings under .cache/{skill}/ (public repo — never commit).
 # Intentionally NOT ignored (stay committed): .cache/analyst-smartmoney-*/ ledgers,
-# .cache/crypto-advisor/crypto-advisor.eval.csv, and per-skill .cache/*/notion.yaml.
+# .cache/crypto-advisor/crypto-advisor.eval.csv, .cache/stocks-advisor/eval/stocks-advisor.eval.csv,
+# and per-skill .cache/*/notion.yaml.
 .cache/
 !.cache/stocks-trend-screener/notion.yaml
 .env
