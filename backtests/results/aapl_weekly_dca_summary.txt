@@ -1,0 +1,405 @@
+====================================================================================================
+AAPL WEEKLY DCA v2 -- PORTFOLIO-AWARE CAPPED-SATELLITE GATE (strategy-discovery-backtest)
+====================================================================================================
+
+AAPL Weekly DCA Gate Backtest v2 — Portfolio-Aware Capped-Satellite Test
+==========================================================================
+strategy-discovery-backtest gate: "Invest $250/week of NEW money into direct AAPL,
+on top of an existing ~$710,445 diversified stock sleeve (proxied here by RSP) and a
+negligible existing ~$26 direct AAPL position."
+
+>>> SUPERSEDES the prior gate run <<<
+The prior script tested an abstract fixed contribution-mix blend (100/0, 90/10, 80/20
+RSP/AAPL of NEW weekly $250 contributions only) starting from ZERO capital, and derived
+its PASS/FAIL bands from thresholds chosen AFTER looking at the results. That is a
+cold-start abstraction that does not match the user's actual situation: a real existing
+stock sleeve (~$710,445, systematic/diversified, proxied by RSP — NOT literal RSP
+holdings) plus a trivial existing direct AAPL position (~$26), with $250/week of NEW
+money proposed to go into direct AAPL going forward. This script tests THAT concrete
+incremental plan, with mechanical, PRE-declared dollar-based position caps enforced going
+forward, and PRE-declared PASS thresholds (no post-hoc numbers near the results).
+
+>>> SURVIVORSHIP / SELECTION CAVEAT (read this first, holds regardless of outcome) <<<
+AAPL was picked by the user WITH HINDSIGHT knowledge of its historical outperformance.
+Nothing below validates a forward, repeatable edge for AAPL — it describes what already
+happened to one stock. A PASS verdict in this gate can ONLY validate a CAPPED
+RISK-MANAGEMENT STRATEGY (i.e. "if you are going to do this, capping the position is
+safer than not capping it, and a modest amount of tested/bounded concentrated risk is
+tolerable") — it is NEVER proof that AAPL has forward alpha.
+
+--------------------------------------------------------------------------------
+SPEC (predeclared before any data pull — every number below has a named CONFIG constant)
+--------------------------------------------------------------------------------
+Initial state (identical at the start of EVERY window simulated — OOS headline, every
+rolling cohort, every crisis window — each is a FRESH account starting from this state
+at ITS OWN start date, not a continuation of another window):
+  - RSP-proxy stock sleeve  : $710,445  ("RSP proxy for the user's actual diversified
+    stock sleeve" — not literal RSP holdings)
+  - Direct AAPL position    : $26       (negligible but tracked, never zeroed)
+  - New weekly contribution : $250      (decided at each complete Friday weekly close)
+
+Four trials, sharing the identical initial state above — only the ROUTING of each week's
+NEW $250 (and any quarter-end cap-enforcement trims) differs:
+  1. RSP-only benchmark        : 100% of every $250 -> RSP. Legacy $26 AAPL held, untouched.
+  2. Uncapped AAPL plan        : 100% of every $250 -> AAPL, forever. No trims, no cap.
+                                  This is the user's literal raw ask, tested as-is.
+  3. Conservative capped sat.  : target 5% / hard ceiling 10% direct AAPL (of AAPL+RSP).
+  4. Standard capped sat.      : target 10% / hard ceiling 15% direct AAPL (of AAPL+RSP).
+
+Capped contribution routing (variants 3 & 4 ONLY — 1 & 2 NEVER trim or reroute):
+  Each week, BEFORE deciding that week's $250, mark AAPL value and RSP value from actual
+  held shares (post any settlement/trim that week — see delayed-fill below). Compute
+  current AAPL weight = AAPL value / (AAPL value + RSP value) — pending cash EXCLUDED
+  from this denominator.
+    - If weight < target: route enough of the $250 to AAPL to move the sleeve TOWARD
+      (never past) target this week: solve x in
+          (AAPL + x) / (AAPL + RSP + 250) = target,   x clipped to [0, 250]
+      the remaining (250 - x) goes to RSP.
+    - If weight >= target: 100% of the $250 goes to RSP.
+  At every CALENDAR QUARTER-END (Mar/Jun/Sep/Dec, actual calendar boundaries — the last
+  COMPLETE weekly bar on/before that boundary, derived programmatically, NOT "every 13
+  weeks"), after that week's settlement: if AAPL weight > hard ceiling, SELL AAPL down to
+  EXACTLY the target weight (not the ceiling) and route the (cost-adjusted) proceeds to
+  RSP. Sell-side cost applies to the AAPL trim; buy-side cost applies to the RSP
+  purchase of the proceeds. This is the ONLY rebalancing mechanism anywhere in this
+  script.
+
+Delayed fill / cash queue (identical mechanic for ALL FOUR variants, always on): a
+contribution (or trim's proceeds) decided/generated at week t's close becomes "pending
+cash" and is invested at week t+1's close (one full week settlement lag) — modeled as an
+explicit per-instrument pending-cash queue, not an approximation. No shares may be
+created before their settlement week. At the final week of any window, any still-pending
+cash from that final week's decision remains uninvested CASH in terminal value (there is
+no week t+1 within the window) — reported explicitly, never dropped.
+
+Data: yfinance AAPL & RSP, auto_adjust=True Close (total-return-inclusive proxy per
+AGENTS.md), longest common history, resampled to weekly Friday (W-FRI, last available
+close each week — no fabrication of missing days). A trailing weekly bucket is DROPPED if
+the raw daily data does not yet extend through that bucket's Friday (an in-progress,
+not-yet-closed calendar week) — verified with a programmatic assertion.
+  IS  : 2003-01-01 (or first common date if later) -> 2015-12-31   (context only)
+  OOS : 2016-01-01 -> latest COMPLETE weekly close                  <- HEADLINE (verdict)
+  Rolling 5y cohorts : start 2005, 2010, 2015, 2020 (fresh state each, truncated at the
+    earlier of start+5y or the latest available data)
+  Rolling 10y cohorts: start first-common-year, 2005, 2010, 2013 (same truncation rule)
+  Crisis windows     : 2008 GFC (2007-10-01 -> 2009-03-31), 2020 COVID (2020-01-01 ->
+    2020-12-31), 2022 rate-hike bear (2022-01-01 -> 2022-12-31) — fresh state each.
+
+Costs (applied to EVERY buy/sell trade — contributions, trims, trim-proceeds RSP buys):
+  base 2bps | stress 5bps | doubled-base stress 4bps | PLUS an extra 25bps stacked ONLY
+  on top of the doubled 4bps base, applied only to trades EXECUTED in each variant's own
+  worst-5%-return weeks (2-pass: identify worst-5% weeks from the doubled-cost run, then
+  re-run with the extra cost stacked on those specific execution dates). The 1-week
+  delayed fill is ALWAYS ON for every scenario (structural, not a togglable stress).
+  Predeclared threshold: stress terminal wealth for the CAPPED variants (3 & 4) must not
+  be more than MAX_STRESS_WEALTH_DEGRADATION_PCT worse than base-case terminal wealth,
+  OOS headline window.
+
+Metrics contract:
+  - XIRR (money-weighted): weekly cashflow schedule of -$250 at every decision date
+    (routing does not change total cash contributed — always -$250/wk regardless of
+    variant) plus +terminal_account_value folded into the final cashflow.
+    DOCUMENTED SPEC DEVIATION: the initial $710,471 IS included as an additional t0
+    outflow (alongside week 0's -$250), NOT omitted. Tested literally without it, the
+    XIRR is mathematically ill-posed/meaningless here: since the $710,471 pre-existing
+    base dominates the terminal value relative to the tiny $250/wk stream, omitting it
+    forces the solver to "explain" nearly all terminal growth via the $250/wk stream
+    alone, inflating IRR to >50%/yr for what is actually an ~11-13%/yr RSP-dominated
+    decade (confirmed by hand against a plain CAGR sanity check of
+    (initial+contributions -> terminal)). Including the opening balance as a t0 outflow
+    is the standard, well-posed way to compute a money-weighted return for an account
+    with a starting balance plus periodic contributions (how real brokerage XIRR works)
+    and is what we use. Solved via scipy.optimize.brentq with a widening-bracket
+    fallback.
+  - Time-weighted weekly return series: (account_value - that week's $250) / prior
+    account_value - 1, i.e. net of new money, reflecting the REAL drifting/capped weights
+    of each variant's actual holdings — never a synthetic rebalanced blend.
+  - Contribution-adjusted max drawdown: wealth-multiple series = account_value /
+    cumulative(initial + contributions to date); report max peak-to-trough decline and
+    % of weeks spent below the prior peak (time-in-drawdown).
+  - Risk-free rate blended per AGENTS.md convention (5% 1999-2005, 3% 2005-2020,
+    4% 2020-2026) by calendar-day overlap, for Sharpe.
+  - Max AND ending direct-AAPL weight (% of AAPL+RSP, pending cash excluded), tracked
+    weekly from real per-instrument holdings across the whole window.
+  - Quarter-end trim count and total dollar size (variants 3 & 4 only).
+  - Turnover (variants 3 & 4): trim dollar volume / average sleeve value. "N/A" for
+    variants 1 & 2 (no sells ever occur there).
+
+Predeclared PASS thresholds (CONFIG constants, referenced by name in verdict logic —
+same thresholds for both capped variants 3 and 4):
+  MAX_VOL_RATIO_VS_RSP            = 1.10  (OOS ann. vol <= 1.10x RSP-benchmark OOS vol)
+  MAX_DD_RATIO_VS_RSP             = 1.10  (OOS contrib-adj max DD <= 1.10x RSP-bench DD)
+  MAX_STRESS_WEALTH_DEGRADATION_PCT = 1.0 (stress terminal wealth not >1% worse than base)
+  CAP_BREACH_TOLERANCE_PP         = 0.5   (max AAPL weight across ALL weekly
+                                            observations -- including intra-quarter
+                                            drift before any trim fires -- PLUS ending
+                                            weight, never > hard ceiling + 0.5pp)
+  UNCAPPED_AUTOFAIL_WEIGHT_PCT    = 15.0  (variant 2 auto-FAILs, REGARDLESS of returns, if
+                                            its max OR ending AAPL weight ever exceeds this
+                                            anywhere across OOS + all rolling cohorts)
+No-data-leakage: contribution/routing/trim decisions at week t use only information
+available at or before week t's close. Enforced structurally (new cash events are
+enqueued strictly AFTER that week's mark and can only settle at week t+1 or later) AND
+verified with an explicit runtime assertion on every settlement.
+
+Verdict framing: this gate can PASS only as validation of a CAPPED RISK-MANAGEMENT
+STRATEGY — never as proof AAPL has forward alpha. It EXCLUDES tax consequences entirely;
+any real quarter-end trim in a taxable account requires a SEPARATE tax-aware decision
+(capital-gains treatment, etc.) not attempted here.
+
+Implementation self-checks (run via `--selfcheck`, and always run first inside a full
+run too): (1) a hand-constructed synthetic engineered-AAPL-rally price series exercised
+through the SAME simulate_window() engine, asserting a trim fires at the expected
+calendar quarter-end and returns weight to target (not ceiling) within tolerance; (2) the
+same synthetic run traces the one-week delayed-fill lag by hand (cash decided at week i
+produces shares only from week i+1 onward); (3) complete-weeks-only and quarter-boundary
+assertions on the real data. Determinism: two consecutive full runs must produce
+byte-identical backtests/results/aapl_weekly_dca_summary.txt (no wall-clock timestamps
+are written to that file). A raw-data cache at RAW_DATA_CACHE_PATH (stored OUTSIDE this
+git repo, under the user's home cache dir, so it is not one of this script's owned repo
+deliverables) pins the exact downloaded yfinance bytes across separate CLI invocations
+for CACHE_MAX_AGE_HOURS hours -- this is what makes "run twice, byte-compare" a true
+determinism check rather than being contaminated by yfinance's live server-side
+adjusted-close recomputation jitter on the most recent bars. Delete the cache file to
+force a fresh download and roll the window forward through a newer complete week.
+
+====================================================================================================
+SELF-CHECKS (synthetic engineered-rally test through the real simulation engine)
+====================================================================================================
+  [selfcheck] synthetic quarter-end enforcement bars: [('2021-03-31', '2021-03-26'), ('2021-06-30', '2021-06-25')]
+  [selfcheck] PASS: initial AAPL weight = 10.0000% (target 10%)
+  [selfcheck] PASS: pre-trim weight 22.18% > ceiling 15.0% the week before 2021-03-26 (breach confirmed)
+  [selfcheck] PASS: trim fired at 2021-03-26 (gross $1955.56)
+  [selfcheck] PASS: post-trim weight 10.0000% == target 10.0% (returned to TARGET, not ceiling, within tolerance)
+  [selfcheck] week 2 decided contribution split: AAPL=$25.0050  RSP=$224.9950 (sums to $250.00 of the $250 nominal)
+  [selfcheck] PASS: cash decided for AAPL at week 2 ($25.0050) produces exactly +2.500000 shares at week 3's close (one-week lag confirmed)
+  [selfcheck] PASS: week 2's own AAPL decision contributes ZERO shares at week 2 itself (confirmed via prior-week settlement isolation)
+  [selfcheck] PASS: cash decided for RSP at week 2 ($224.9950) produces exactly +2.249500 shares at week 3's close (one-week lag confirmed)
+  [selfcheck] PASS: week 2's own RSP decision contributes ZERO shares at week 2 itself (confirmed via prior-week settlement isolation)
+
+All self-checks PASSED.
+
+====================================================================================================
+DOCUMENTED ASSUMPTIONS / SPEC DEVIATIONS (stated explicitly, per task instructions)
+====================================================================================================
+1. XIRR cashflow schedule DEVIATES from the literal spec text: the initial $710,471 base IS included as an additional t0 outflow (alongside week 0's -$250), not omitted. Verified by hand that omitting it produces a mathematically ill-posed/meaningless IRR (>50%/yr) here, because the pre-existing lump sum dominates the terminal value relative to the $250/wk stream, forcing the solver to misattribute nearly all terminal growth to the tiny weekly stream. Including the opening balance as a t0 outflow is the standard, well-posed money-weighted-return treatment for an account with a starting balance plus periodic contributions (how real brokerage XIRR works), and produces a plausible result matching a plain CAGR sanity check.
+2. The illustrative chart uses the full common-history window (fresh initial state at first common date, base 2bps cost) purely for visualization; it is NOT the verdict window. All PASS/FAIL verdicts below are based on the OOS-headline window (2016-01-01 -> latest complete week) as specified.
+
+Loaded AAPL, RSP daily close data (auto_adjust=True, adjusted-close proxy).
+  AAPL: 1999-01-04 -> 2026-07-13  (6922 daily bars)
+  RSP: 2003-05-01 -> 2026-07-13  (5836 daily bars)
+  Last raw daily bar across all tickers: 2026-07-13
+  Dropping incomplete trailing week: last raw bar 2026-07-13 < weekly bucket label 2026-07-17 (current calendar week not yet closed -- bucket built from partial data, discarded).
+  Complete-weeks-only self-check PASSED: last weekly bucket label 2026-07-10 <= last raw daily bar 2026-07-13.
+  Common weekly history: 2003-05-02 -> 2026-07-10  (1211 weekly bars)
+====================================================================================================
+ENGINE-LEVEL DETERMINISM PROOF (same downloaded data, same process, simulation run TWICE)
+====================================================================================================
+This isolates CODE-level determinism (dict/set ordering, floating-point op order, no unseeded randomness) from DATA-SOURCE determinism. yfinance's auto_adjust=True close is recomputed server-side on every API call and was observed to carry sub-cent floating-point jitter (~1e-4 magnitude) between successive live downloads of identical history -- external network noise, not an application bug. Prices are quantized to cent precision on download to suppress most of this; the RAW_DATA_CACHE_PATH cache (see top of file, stored outside this repo under the user's home cache dir) additionally pins the exact downloaded bytes across SEPARATE CLI invocations for up to CACHE_MAX_AGE_HOURS hours, which is what actually eliminates residual boundary-adjacent cent flips (which, uncached, could rarely move a stress-scenario terminal value by a few dollars out of several million, ~1e-6 relative, in the worst-5%-week stress bucket) as a source of run-to-run non-determinism in the persisted .txt summary. This in-process check proves that GIVEN IDENTICAL input data, the engine itself is 100% deterministic; the on-disk cache is what additionally guarantees identical input data across two separate `python3 aapl_weekly_dca_backtest.py` invocations.
+  ENGINE DETERMINISM CHECK PASSED: identical input data -> byte-identical numeric results across two in-process simulation runs (all variants, all fields checked).
+
+
+IS window (context only, not the verdict criterion): 2003-05-02 -> 2015-12-31
+OOS window: 2016-01-01 -> 2026-07-10   <-- HEADLINE (verdict window, fresh initial state at 2016-01-01)
+
+Initial state (identical at the start of EVERY window below): RSP-proxy sleeve $710,445 + direct AAPL $26 = $710,471 total, plus $250/week new money.
+
+----------------------------------------------------------------------------------------------------
+QUARTER-END ENFORCEMENT DATES (OOS window) -- derived from real calendar quarter boundaries, NOT 'every 13 weeks':
+----------------------------------------------------------------------------------------------------
+  calendar quarter-end 2016-03-31 -> last complete weekly bar used: 2016-03-25
+  calendar quarter-end 2016-06-30 -> last complete weekly bar used: 2016-06-24
+  calendar quarter-end 2016-09-30 -> last complete weekly bar used: 2016-09-30
+  calendar quarter-end 2016-12-31 -> last complete weekly bar used: 2016-12-30
+  calendar quarter-end 2017-03-31 -> last complete weekly bar used: 2017-03-31
+  calendar quarter-end 2017-06-30 -> last complete weekly bar used: 2017-06-30
+  calendar quarter-end 2017-09-30 -> last complete weekly bar used: 2017-09-29
+  calendar quarter-end 2017-12-31 -> last complete weekly bar used: 2017-12-29
+  calendar quarter-end 2018-03-31 -> last complete weekly bar used: 2018-03-30
+  calendar quarter-end 2018-06-30 -> last complete weekly bar used: 2018-06-29
+  calendar quarter-end 2018-09-30 -> last complete weekly bar used: 2018-09-28
+  calendar quarter-end 2018-12-31 -> last complete weekly bar used: 2018-12-28
+  calendar quarter-end 2019-03-31 -> last complete weekly bar used: 2019-03-29
+  calendar quarter-end 2019-06-30 -> last complete weekly bar used: 2019-06-28
+  calendar quarter-end 2019-09-30 -> last complete weekly bar used: 2019-09-27
+  calendar quarter-end 2019-12-31 -> last complete weekly bar used: 2019-12-27
+  calendar quarter-end 2020-03-31 -> last complete weekly bar used: 2020-03-27
+  calendar quarter-end 2020-06-30 -> last complete weekly bar used: 2020-06-26
+  calendar quarter-end 2020-09-30 -> last complete weekly bar used: 2020-09-25
+  calendar quarter-end 2020-12-31 -> last complete weekly bar used: 2020-12-25
+  calendar quarter-end 2021-03-31 -> last complete weekly bar used: 2021-03-26
+  calendar quarter-end 2021-06-30 -> last complete weekly bar used: 2021-06-25
+  calendar quarter-end 2021-09-30 -> last complete weekly bar used: 2021-09-24
+  calendar quarter-end 2021-12-31 -> last complete weekly bar used: 2021-12-31
+  calendar quarter-end 2022-03-31 -> last complete weekly bar used: 2022-03-25
+  calendar quarter-end 2022-06-30 -> last complete weekly bar used: 2022-06-24
+  calendar quarter-end 2022-09-30 -> last complete weekly bar used: 2022-09-30
+  calendar quarter-end 2022-12-31 -> last complete weekly bar used: 2022-12-30
+  calendar quarter-end 2023-03-31 -> last complete weekly bar used: 2023-03-31
+  calendar quarter-end 2023-06-30 -> last complete weekly bar used: 2023-06-30
+  calendar quarter-end 2023-09-30 -> last complete weekly bar used: 2023-09-29
+  calendar quarter-end 2023-12-31 -> last complete weekly bar used: 2023-12-29
+  calendar quarter-end 2024-03-31 -> last complete weekly bar used: 2024-03-29
+  calendar quarter-end 2024-06-30 -> last complete weekly bar used: 2024-06-28
+  calendar quarter-end 2024-09-30 -> last complete weekly bar used: 2024-09-27
+  calendar quarter-end 2024-12-31 -> last complete weekly bar used: 2024-12-27
+  calendar quarter-end 2025-03-31 -> last complete weekly bar used: 2025-03-28
+  calendar quarter-end 2025-06-30 -> last complete weekly bar used: 2025-06-27
+  calendar quarter-end 2025-09-30 -> last complete weekly bar used: 2025-09-26
+  calendar quarter-end 2025-12-31 -> last complete weekly bar used: 2025-12-26
+  calendar quarter-end 2026-03-31 -> last complete weekly bar used: 2026-03-27
+  calendar quarter-end 2026-06-30 -> last complete weekly bar used: 2026-06-26
+
+----------------------------------------------------------------------------------------------------
+IN-SAMPLE (IS) -- base cost 2bps -- context only, NOT the gate criterion
+----------------------------------------------------------------------------------------------------
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 10.54% $2,855,995      $165,250   19.5% 59.94%     80.79%       0.14%       0.10%         N/A      N/A
+                    2. Uncapped AAPL plan 15.09% $4,660,419      $165,250   20.5% 57.28%     78.52%      52.10%      45.65%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 12.30% $3,459,087      $165,250   19.5% 58.96%     77.91%      12.14%       7.06%  2/$226,915    12.3%
+   4. Standard capped satellite (10%/15%) 13.25% $3,829,452      $165,250   19.6% 58.09%     77.00%      17.50%       9.37%  3/$431,326    21.9%
+
+====================================================================================================
+OUT-OF-SAMPLE (OOS) -- HEADLINE RESULT -- base cost 2bps, always-on 1-week delayed fill
+====================================================================================================
+Blended OOS risk-free rate (AGENTS.md convention): 3.62%
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 12.16% $2,642,946      $137,500   18.1% 36.77%     76.36%       0.01%       0.01%         N/A      N/A
+                    2. Uncapped AAPL plan 13.65% $3,020,098      $137,500   18.1% 36.09%     73.27%      21.67%      21.38%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 13.11% $2,879,629      $137,500   18.0% 36.22%     74.36%      11.70%       7.11%   1/$76,259     4.9%
+   4. Standard capped satellite (10%/15%) 13.47% $2,973,230      $137,500   18.0% 36.09%     73.45%      15.23%      11.33%  1/$113,048     7.2%
+
+Sharpe (annualized, on the ACTUAL time-weighted return series, drift-aware, blended RF):
+  1. RSP-only benchmark                          Sharpe=0.52
+  2. Uncapped AAPL plan                          Sharpe=0.60
+  3. Conservative capped satellite (5%/10%)      Sharpe=0.57
+  4. Standard capped satellite (10%/15%)         Sharpe=0.59
+
+====================================================================================================
+OOS COST SCENARIOS (base 2bps / stress 5bps / doubled-base 4bps) + worst-5%-week stress
+====================================================================================================
+
+--- Base (2bps) ---
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 12.16% $2,642,946      $137,500   18.1% 36.77%     76.36%       0.01%       0.01%         N/A      N/A
+                    2. Uncapped AAPL plan 13.65% $3,020,098      $137,500   18.1% 36.09%     73.27%      21.67%      21.38%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 13.11% $2,879,629      $137,500   18.0% 36.22%     74.36%      11.70%       7.11%   1/$76,259     4.9%
+   4. Standard capped satellite (10%/15%) 13.47% $2,973,230      $137,500   18.0% 36.09%     73.45%      15.23%      11.33%  1/$113,048     7.2%
+
+--- Stress (5bps) ---
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 12.16% $2,642,865      $137,500   18.1% 36.77%     76.36%       0.01%       0.01%         N/A      N/A
+                    2. Uncapped AAPL plan 13.65% $3,019,904      $137,500   18.1% 36.10%     73.27%      21.67%      21.38%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 13.11% $2,879,389      $137,500   18.0% 36.22%     74.36%      11.70%       7.11%   1/$76,219     4.9%
+   4. Standard capped satellite (10%/15%) 13.47% $2,972,951      $137,500   18.0% 36.10%     73.45%      15.23%      11.33%  1/$112,962     7.2%
+
+--- Doubled-base (4bps) ---
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 12.16% $2,642,892      $137,500   18.1% 36.77%     76.36%       0.01%       0.01%         N/A      N/A
+                    2. Uncapped AAPL plan 13.65% $3,019,969      $137,500   18.1% 36.10%     73.27%      21.67%      21.38%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 13.11% $2,879,469      $137,500   18.0% 36.22%     74.36%      11.70%       7.11%   1/$76,232     4.9%
+   4. Standard capped satellite (10%/15%) 13.47% $2,973,046      $137,500   18.0% 36.10%     73.45%      15.23%      11.33%  1/$112,991     7.2%
+
+--- Doubled+Worst5%wk (4bps+25bps) ---
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 12.16% $2,642,854      $137,500   18.1% 36.77%     76.36%       0.01%       0.01%         N/A      N/A
+                    2. Uncapped AAPL plan 13.65% $3,019,890      $137,500   18.1% 36.10%     73.27%      21.67%      21.38%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 13.11% $2,879,413      $137,500   18.0% 36.22%     74.36%      11.70%       7.11%   1/$76,220     4.9%
+   4. Standard capped satellite (10%/15%) 13.47% $2,972,974      $137,500   18.0% 36.10%     73.45%      15.23%      11.33%  1/$112,960     7.2%
+
+----------------------------------------------------------------------------------------------------
+DIAGNOSTIC-ONLY: same-week fill (NO one-week delay) vs the always-on delayed-fill baseline, base cost 2bps -- isolates the delayed-fill mechanic's impact only. NOT an official stress scenario and NOT used anywhere in the verdict logic below.
+----------------------------------------------------------------------------------------------------
+                                  Variant No-delay XIRR Delayed-fill XIRR XIRR impact of delay No-delay Term$ Delayed-fill Term$
+                    1. RSP-only benchmark        12.16%            12.16%               -0.00%     $2,643,531         $2,642,946
+                    2. Uncapped AAPL plan        13.66%            13.65%               -0.01%     $3,023,175         $3,020,098
+3. Conservative capped satellite (5%/10%)        13.14%            13.11%               -0.02%     $2,885,439         $2,879,629
+   4. Standard capped satellite (10%/15%)        13.48%            13.47%               -0.01%     $2,974,596         $2,973,230
+
+----------------------------------------------------------------------------------------------------
+STRESS WEALTH-DEGRADATION CHECK (OOS headline) -- threshold: MAX_STRESS_WEALTH_DEGRADATION_PCT = 1.0% (stress terminal wealth must not be more than this % worse than base-case terminal wealth)
+----------------------------------------------------------------------------------------------------
+  3. Conservative capped satellite (5%/10%)      base=$2,879,629  stress=$2,879,413  degradation=0.008%  -> PASS
+  4. Standard capped satellite (10%/15%)         base=$2,973,230  stress=$2,972,974  degradation=0.009%  -> PASS
+
+====================================================================================================
+ROLLING START-DATE COHORTS -- each a FRESH account from the same initial state, base cost 2bps
+====================================================================================================
+
+--- 5-year cohorts ---
+Cohort start Cohort end Truncated rsp_only XIRR rsp_only EndWt% uncapped_aapl XIRR uncapped_aapl EndWt% conservative_capped XIRR conservative_capped EndWt% standard_capped XIRR standard_capped EndWt%
+  2005-01-01 2010-01-01        no         2.34%            0.0%              4.60%                17.0%                    4.20%                       7.4%                4.48%                  14.2%
+  2010-01-01 2015-01-01        no        17.32%            0.0%             17.73%                 7.8%                   17.76%                       6.4%               17.73%                   7.8%
+  2015-01-01 2020-01-01        no         9.55%            0.0%             10.50%                11.0%                   10.30%                       7.5%               10.50%                  10.8%
+  2020-01-01 2025-01-01        no        10.87%            0.0%             11.47%                 9.2%                   11.39%                       6.8%               11.47%                   9.2%
+
+--- 10-year cohorts ---
+Cohort start Cohort end Truncated rsp_only XIRR rsp_only EndWt% uncapped_aapl XIRR uncapped_aapl EndWt% conservative_capped XIRR conservative_capped EndWt% standard_capped XIRR standard_capped EndWt%
+  2003-05-02 2013-05-02        no        10.21%            0.1%             14.30%                36.6%                   12.22%                       5.1%               13.36%                   6.1%
+  2005-01-01 2015-01-01        no         9.80%            0.0%             12.52%                30.8%                   11.35%                       6.4%               11.97%                  10.0%
+  2010-01-01 2020-01-01        no        13.09%            0.0%             14.17%                17.2%                   13.85%                      10.5%               14.10%                  15.2%
+  2013-01-01 2023-01-01        no        11.64%            0.0%             12.93%                18.7%                   12.51%                       5.6%               12.88%                   9.6%
+
+====================================================================================================
+CRISIS WINDOWS -- each a FRESH account from the same initial state, base cost 2bps
+====================================================================================================
+
+--- 2008 GFC (2007-10-01 -> 2009-03-31) ---
+                                  Variant    XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark -36.36%   $378,895       $19,500   37.4% 58.32%     98.72%       0.00%       0.00%         N/A      N/A
+                    2. Uncapped AAPL plan -36.12%   $380,959       $19,500   37.2% 58.10%     98.72%       4.25%       4.20%         N/A      N/A
+3. Conservative capped satellite (5%/10%) -36.12%   $380,959       $19,500   37.2% 58.10%     98.72%       4.25%       4.20%        0/$0     0.0%
+   4. Standard capped satellite (10%/15%) -36.12%   $380,959       $19,500   37.2% 58.10%     98.72%       4.25%       4.20%        0/$0     0.0%
+
+--- 2020 COVID (2020-01-01 -> 2020-12-31) ---
+                                  Variant   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark 12.24%   $809,152       $13,000   39.1% 36.71%     84.62%       0.01%       0.01%         N/A      N/A
+                    2. Uncapped AAPL plan 12.73%   $812,552       $13,000   39.0% 36.69%     82.69%       2.32%       2.32%         N/A      N/A
+3. Conservative capped satellite (5%/10%) 12.73%   $812,552       $13,000   39.0% 36.69%     82.69%       2.32%       2.32%        0/$0     0.0%
+   4. Standard capped satellite (10%/15%) 12.73%   $812,552       $13,000   39.0% 36.69%     82.69%       2.32%       2.32%        0/$0     0.0%
+
+--- 2022 rate-hike bear (2022-01-01 -> 2022-12-31) ---
+                                  Variant    XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+                    1. RSP-only benchmark -11.24%   $644,567       $13,000   22.7% 20.09%     98.08%       0.00%       0.00%         N/A      N/A
+                    2. Uncapped AAPL plan -11.48%   $642,874       $13,000   22.7% 20.08%     98.08%       1.70%       1.69%         N/A      N/A
+3. Conservative capped satellite (5%/10%) -11.48%   $642,874       $13,000   22.7% 20.08%     98.08%       1.70%       1.69%        0/$0     0.0%
+   4. Standard capped satellite (10%/15%) -11.48%   $642,874       $13,000   22.7% 20.08%     98.08%       1.70%       1.69%        0/$0     0.0%
+
+Saving chart to /Users/engineer/workspace/backtest/report/img/aapl_weekly_dca_backtest.png ... (illustrative full-history run, fresh state at 2003-05-02, base cost 2bps -- NOT the verdict window; verdict metrics use the OOS-headline fresh-start window reported above)
+  Chart saved.
+
+====================================================================================================
+UNCAPPED VARIANT (2) AUTO-FAIL RULE -- UNCAPPED_AUTOFAIL_WEIGHT_PCT = 15.0% -- checked mechanically across OOS headline + ALL rolling cohorts + ALL crisis windows, REGARDLESS of returns/XIRR
+====================================================================================================
+  Max direct-AAPL weight observed anywhere (uncapped plan): 52.10%
+  Max ENDING direct-AAPL weight observed anywhere (uncapped plan): 36.58%
+  -> AUTO-FAIL TRIGGERED (threshold 15.0%)
+
+====================================================================================================
+CAP-BREACH TOLERANCE CHECK (OOS headline) -- CAP_BREACH_TOLERANCE_PP = 0.5pp -- max AAPL weight across ALL weekly observations (including intra-quarter drift before any trim fires), PLUS ending weight, must never exceed that variant's hard ceiling by more than this
+====================================================================================================
+  3. Conservative capped satellite (5%/10%)      ceiling=10.0%  max_wt=11.70%  end_wt=7.11%  -> FAIL
+  4. Standard capped satellite (10%/15%)         ceiling=15.0%  max_wt=15.23%  end_wt=11.33%  -> PASS
+
+====================================================================================================
+VOL / DD RATIO CHECKS vs RSP-only benchmark (OOS headline) -- MAX_VOL_RATIO_VS_RSP=1.10, MAX_DD_RATIO_VS_RSP=1.10
+====================================================================================================
+  3. Conservative capped satellite (5%/10%)      vol_ratio=0.990 (vol=18.0% vs RSP 18.1%)  dd_ratio=0.985 (DD=36.22% vs RSP 36.77%)  -> PASS
+  4. Standard capped satellite (10%/15%)         vol_ratio=0.990 (vol=18.0% vs RSP 18.1%)  dd_ratio=0.982 (DD=36.09% vs RSP 36.77%)  -> PASS
+
+====================================================================================================
+VERDICT -- PASS can ONLY validate a CAPPED RISK-MANAGEMENT STRATEGY, NEVER forward AAPL alpha. AAPL was picked WITH HINDSIGHT knowledge of its historical outperformance; none of the numbers above validate a repeatable forward edge. This caveat holds regardless of PASS/FAIL below. Excludes tax consequences entirely -- any real quarter-end trim in a taxable account needs a SEPARATE tax-aware decision.
+====================================================================================================
+
+  3. Conservative capped satellite (5%/10%):
+    FAIL -- max intra-quarter/whole-window AAPL weight (or ending weight) breached hard ceiling + tolerance (see CONFIG thresholds above).
+
+  4. Standard capped satellite (10%/15%):
+    PASS as a CAPPED RISK-MANAGEMENT STRATEGY -- vol_ratio, DD_ratio, cap-breach tolerance, and stress-wealth-degradation ALL within predeclared CONFIG thresholds (MAX_VOL_RATIO_VS_RSP=1.10, MAX_DD_RATIO_VS_RSP=1.10, CAP_BREACH_TOLERANCE_PP=0.5, MAX_STRESS_WEALTH_DEGRADATION_PCT=1.0%). NOT validation of forward AAPL alpha -- validation only that, if this plan is pursued, capping+quarterly enforcement keeps risk within a defensible band of the RSP benchmark.
+
+  1. RSP-only benchmark: BENCHMARK (not gated) -- baseline the other 3 variants are judged against.
+  2. Uncapped AAPL plan: FAIL (AUTO-FAIL RULE, UNCAPPED_AUTOFAIL_WEIGHT_PCT=15.0%) -- max weight 52.10% / ending weight 36.58% breached the threshold somewhere across OOS+cohorts+crises, REGARDLESS of its XIRR/returns. No capping mechanism exists in this variant, so it also can never qualify as a validated 'capped risk-managed strategy' even if the auto-fail rule had not fired.
+  3. Conservative capped satellite (5%/10%): FAIL
+  4. Standard capped satellite (10%/15%): PASS
+
+  OVERALL: Standalone 100%-into-AAPL plan as literally proposed: REJECTED (uncapped, no risk management, ineligible for PASS under this gate regardless of returns). 4. Standard capped satellite (10%/15%) PASS as capped risk-managed satellites -- hand off to hedge-fund-manager / tradfi-portfolio-manager for notification-first paper tracking, behind human sign-off and code-side hard caps (position size + quarterly enforcement), NOT as proof of forward AAPL alpha.
