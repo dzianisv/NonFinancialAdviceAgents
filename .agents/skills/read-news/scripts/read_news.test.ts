@@ -1,6 +1,7 @@
 import { test, expect, describe, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { connect, ingest, query, newSince } from "./news_store";
+import { parseCliArgsFromTokens, DEFAULT_ASSET_SOURCES } from "./read_news";
 import type { Article } from "./types";
 
 const TEST_DIR = ".db/test-read-news";
@@ -150,5 +151,61 @@ describe("output shape contract", () => {
     };
     expect(result.note).toBe("all feeds [UNAVAILABLE]");
     expect(result.events).toHaveLength(0);
+  });
+});
+
+// ── parseCliArgsFromTokens ───────────────────────────────────────────────────
+
+describe("parseCliArgsFromTokens", () => {
+  test("--assets parses CSV into opts.assets", () => {
+    const opts = parseCliArgsFromTokens(["--assets", "AAPL,MSFT"]);
+    expect(opts.assets).toEqual(["AAPL", "MSFT"]);
+  });
+
+  test("--asset and --assets together both populate their own raw fields (no merging here)", () => {
+    const opts = parseCliArgsFromTokens(["--asset", "AAPL", "--assets", "MSFT,GOOGL"]);
+    expect(opts.asset).toBe("AAPL");
+    expect(opts.assets).toEqual(["MSFT", "GOOGL"]);
+  });
+
+  test("--equities-only sets opts.equitiesOnly to true", () => {
+    const opts = parseCliArgsFromTokens(["--equities-only"]);
+    expect(opts.equitiesOnly).toBe(true);
+  });
+
+  test("no flags leaves opts.equitiesOnly falsy", () => {
+    const opts = parseCliArgsFromTokens([]);
+    expect(opts.equitiesOnly).toBeFalsy();
+  });
+
+  // Regression: README.md/SKILL.md document --asset/--assets as auto-fetching 5 keyless
+  // per-asset sources (TradingView, CoinMarketCap, Google Finance, Morningstar, Yahoo). This
+  // asserts the actual source list used for asset requests against that documented contract,
+  // with no network calls (fetchAllNews is never invoked here).
+  test("DEFAULT_ASSET_SOURCES includes yahoo, matching the documented 5 per-asset sources", () => {
+    expect(DEFAULT_ASSET_SOURCES).toEqual([
+      "tradingview",
+      "coinmarketcap",
+      "googlefinance",
+      "morningstar",
+      "yahoo",
+    ]);
+  });
+
+  test("existing flags still parse correctly after the refactor (regression check)", () => {
+    const opts = parseCliArgsFromTokens([
+      "--db", ".cache/read-news/custom.db",
+      "--days", "7",
+      "--k", "20",
+      "--query", "bitcoin ETF",
+      "--source", "ft,wsj",
+      "--asset", "AAVE",
+    ]);
+    expect(opts.db).toBe(".cache/read-news/custom.db");
+    expect(opts.days).toBe(7);
+    expect(opts.k).toBe(20);
+    expect(opts.query).toBe("bitcoin ETF");
+    expect(opts.sources).toEqual(["ft", "wsj"]);
+    expect(opts.asset).toBe("AAVE");
   });
 });

@@ -1,12 +1,16 @@
 /**
  * index.ts — unified registry for all news feeds.
  *
- * fetchAllNews({ sources, assets }) fetches every requested feed sequentially
+ * fetchAllNews({ sources, assets, query, days }) fetches every requested feed sequentially
  * (polite ~300ms gap) and returns normalized Article records plus per-feed failures.
  *
- * The 3 market sources (tradingview, coinmarketcap, googlefinance) are per-asset
- * and are NOT in the default NEWS_FEEDS firehose — they are fetched only when
+ * The 5 market sources (tradingview, coinmarketcap, googlefinance, morningstar, yahoo) are
+ * per-asset and are NOT in the default NEWS_FEEDS firehose — they are fetched only when
  * explicitly requested via opts.sources.
+ *
+ * googlenews is a 6th, fundamentally different, source class: a free-text SEARCH endpoint, not
+ * a firehose and not purely ticker-driven. It requires either an explicit opts.query or explicit
+ * opts.assets (never the internal DEFAULT_MARKET_ASSETS fallback) — see QUERY_SOURCES below.
  */
 
 import type { Article } from "../types";
@@ -19,19 +23,27 @@ import { fetchCryptoFeed, CRYPTO_FEED_URLS } from "./crypto";
 import {
   fetchTradingViewNews,
   fetchCmcNews,
-  fetchMarketNews,
   DEFAULT_MARKET_ASSETS,
 } from "./markets";
 import { fetchGoogleFinance } from "./googlefinance";
 import { fetchMorningstar } from "./morningstar";
+import { fetchYahooNews } from "./yahoo";
+import { fetchGoogleNews, PUBLISHER_DOMAINS } from "./googlenews";
 
-const CRYPTO_SOURCES = Object.keys(CRYPTO_FEED_URLS);
+export const CRYPTO_SOURCES = Object.keys(CRYPTO_FEED_URLS);
 
 // The default firehose — does NOT include market sources (per-asset, N×asset fetches)
 export const NEWS_FEEDS: string[] = ["ft", "wsj", ...CRYPTO_SOURCES];
 
 // Known per-asset market sources
-const MARKET_SOURCES = new Set(["tradingview", "coinmarketcap", "googlefinance", "morningstar"]);
+const MARKET_SOURCES = new Set(["tradingview", "coinmarketcap", "googlefinance", "morningstar", "yahoo"]);
+
+// Free-text discovery sources — query/topic driven, never a ticker firehose (see fetchAllNews).
+const QUERY_SOURCES = new Set(["googlenews"]);
+
+// "bi" is just an alias for businessinsider.com — drop it so we don't emit a duplicate
+// site:businessinsider.com clause alongside the one from "businessinsider".
+export const GOOGLENEWS_DEFAULT_PUBLISHERS = Object.keys(PUBLISHER_DOMAINS).filter((k) => k !== "bi");
 
 function ftToArticle(a: FtArticle): Article {
   return {
@@ -64,15 +76,18 @@ function wsjToArticle(a: WsjArticle): Article {
 export async function fetchAllNews(opts?: {
   sources?: string[];
   assets?: string[];
+  query?: string;
+  days?: number;
 }): Promise<{ records: Article[]; unavailable: string[] }> {
   const requested = opts?.sources ?? NEWS_FEEDS;
   const assets = opts?.assets ?? DEFAULT_MARKET_ASSETS;
   const records: Article[] = [];
   const unavailable: string[] = [];
 
-  // Separate market sources from standard feeds
+  // Separate market sources, query (discovery) sources, and standard firehose feeds
   const marketSourcesRequested = requested.filter(s => MARKET_SOURCES.has(s));
-  const standardRequested = requested.filter(s => !MARKET_SOURCES.has(s));
+  const querySourcesRequested = requested.filter(s => QUERY_SOURCES.has(s));
+  const standardRequested = requested.filter(s => !MARKET_SOURCES.has(s) && !QUERY_SOURCES.has(s));
 
   for (const name of standardRequested) {
     if (name === "ft") {
@@ -117,12 +132,51 @@ export async function fetchAllNews(opts?: {
           const { articles, errors } = await fetchMorningstar(upper);
           records.push(...articles);
           for (const e of errors) unavailable.push(`morningstar:${e}`);
+        } else if (sourceName === "yahoo") {
+          const { articles, errors } = await fetchYahooNews([upper]);
+          records.push(...articles);
+          for (const e of errors) unavailable.push(`yahoo:${e}`);
         }
       } catch (e) {
         unavailable.push(`${sourceName}:${e instanceof Error ? e.message : String(e)}`);
       }
       await sleep(300);
     }
+  }
+
+  // Handle query (discovery) sources — free-text search, never a bare per-asset firehose.
+  for (const sourceName of querySourcesRequested) {
+    if (sourceName === "googlenews") {
+      const days = opts?.days ?? 7;
+      if (opts?.query) {
+        try {
+          const { articles, errors } = await fetchGoogleNews(opts.query, { publishers: GOOGLENEWS_DEFAULT_PUBLISHERS, days });
+          records.push(...articles);
+          for (const e of errors) unavailable.push(`googlenews:${e}`);
+        } catch (e) {
+          unavailable.push(`googlenews:${e instanceof Error ? e.message : String(e)}`);
+        }
+      } else if (opts?.assets && opts.assets.length) {
+        // Asset-mode fallback: use each EXPLICITLY requested asset symbol itself as the search
+        // topic (only when the caller passed --asset/--assets — opts?.assets is the raw field,
+        // checked before the `?? DEFAULT_MARKET_ASSETS` fallback above is applied — so googlenews
+        // never silently searches the 11 default crypto tickers as bare-text queries when the
+        // caller gave no asset context at all).
+        for (const asset of opts.assets) {
+          try {
+            const { articles, errors } = await fetchGoogleNews(asset.toUpperCase(), { publishers: GOOGLENEWS_DEFAULT_PUBLISHERS, days });
+            records.push(...articles);
+            for (const e of errors) unavailable.push(`googlenews:${e}`);
+          } catch (e) {
+            unavailable.push(`googlenews:${e instanceof Error ? e.message : String(e)}`);
+          }
+          await sleep(300);
+        }
+      } else {
+        unavailable.push("googlenews: [UNAVAILABLE - no --query or --asset provided; refusing to fetch an unscoped Google News firehose]");
+      }
+    }
+    await sleep(300);
   }
 
   return { records, unavailable };

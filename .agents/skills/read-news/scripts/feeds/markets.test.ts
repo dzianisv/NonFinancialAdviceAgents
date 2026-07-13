@@ -3,7 +3,6 @@ import {
   flattenTvAst,
   tvSymbolToAsset,
   mapCmcItem,
-  parseGoogleFinanceHtml,
 } from "./markets";
 import type { Article } from "../types";
 
@@ -127,83 +126,4 @@ test("mapCmcItem: falls back to CMC community URL when no sourceUrl", () => {
   const article = mapCmcItem(item, "AAVE");
   expect(article.url).toContain("coinmarketcap.com");
   expect(article.url).toContain("xyz-789");
-});
-
-// ── parseGoogleFinanceHtml ───────────────────────────────────────────────────
-
-// Real Google Finance news card structure (obfuscated classes omitted — matched by structure):
-//   <div class="WrUjhf">Reuters</div>...<div class="JQ8Czd">5 hours ago</div>
-//   <a href="URL" target="_blank"><div class="TQWIEd">TITLE</div></a>
-const GF_FIXTURE_HTML = `
-<!DOCTYPE html>
-<html>
-<body>
-<div class="Yfwt5">
-  <div class="WrUjhf">Reuters</div>
-  <div class="JQ8Czd">5 hours ago</div>
-</div>
-<a href="https://www.reuters.com/markets/us/aapl-beats-earnings-q3-2026-06-25/" target="_blank"><div class="TQWIEd">Apple Beats Q3 Earnings Expectations</div></a>
-<div class="Yfwt5">
-  <div class="WrUjhf">CNBC</div>
-  <div class="JQ8Czd">3 hours ago</div>
-</div>
-<a href="https://www.cnbc.com/2026/06/25/apple-stock-surges-after-earnings.html" target="_blank"><div class="TQWIEd">Apple Stock Surges After Earnings Beat</div></a>
-</body>
-</html>
-`;
-
-test("parseGoogleFinanceHtml: extracts reuters.com article", () => {
-  const articles = parseGoogleFinanceHtml(GF_FIXTURE_HTML, "AAPL:NASDAQ");
-  const reuters = articles.find(a => a.url.includes("reuters.com"));
-  expect(reuters).toBeDefined();
-  expect(reuters!.url).toBe("https://www.reuters.com/markets/us/aapl-beats-earnings-q3-2026-06-25/");
-  expect(reuters!.title).toBe("Apple Beats Q3 Earnings Expectations");
-});
-
-test("parseGoogleFinanceHtml: extracts cnbc.com article", () => {
-  const articles = parseGoogleFinanceHtml(GF_FIXTURE_HTML, "AAPL:NASDAQ");
-  const cnbc = articles.find(a => a.url.includes("cnbc.com"));
-  expect(cnbc).toBeDefined();
-  expect(cnbc!.title).toBe("Apple Stock Surges After Earnings Beat");
-});
-
-test("parseGoogleFinanceHtml: assets set to ticker", () => {
-  const articles = parseGoogleFinanceHtml(GF_FIXTURE_HTML, "AAPL:NASDAQ");
-  for (const a of articles) {
-    expect(a.assets).toEqual(["AAPL"]);
-  }
-});
-
-test("parseGoogleFinanceHtml: every article has assets array", () => {
-  const articles = parseGoogleFinanceHtml(GF_FIXTURE_HTML, "AAPL:NASDAQ");
-  for (const a of articles) {
-    expect(Array.isArray(a.assets)).toBe(true);
-  }
-});
-
-test("parseGoogleFinanceHtml: junk HTML returns empty array", () => {
-  const articles = parseGoogleFinanceHtml("<html><body><p>No news here</p></body></html>", "AAPL");
-  expect(articles).toEqual([]);
-});
-
-test("parseGoogleFinanceHtml: nav links without target=_blank are ignored", () => {
-  // Plain <a href> without target="_blank" must not be picked up
-  const html = `<a href="https://www.reuters.com/nav-link/"><div class="TQWIEd">Home</div></a>`;
-  const articles = parseGoogleFinanceHtml(html, "AAPL");
-  expect(articles).toEqual([]);
-});
-
-test("parseGoogleFinanceHtml: non-news-domain target=_blank links are ignored", () => {
-  const html = `<a href="https://www.google.com/some-page" target="_blank"><div class="TQWIEd">Not a news headline</div></a>`;
-  const articles = parseGoogleFinanceHtml(html, "AAPL");
-  expect(articles).toEqual([]);
-});
-
-test("parseGoogleFinanceHtml: no fabricated titles — bare anchor text skipped", () => {
-  // target=_blank with no inner <div> text → must be skipped (title too short / empty)
-  const html = `<a href="https://www.reuters.com/bare/" target="_blank"><div class="X"></div></a>`;
-  const articles = parseGoogleFinanceHtml(html, "AAPL");
-  for (const a of articles) {
-    expect(a.title.length).toBeGreaterThan(0);
-  }
 });

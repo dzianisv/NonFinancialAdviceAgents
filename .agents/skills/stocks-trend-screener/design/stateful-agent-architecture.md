@@ -89,8 +89,7 @@ Signal strength = (# independent sources) × (time_span_weeks) × (evidence_qual
 where evidence_quality_weight:
   - SEC filing / earnings call:  1.0
   - WSJ/FT reporting:            0.8
-  - Seeking Alpha (filing-backed): 0.7
-  - Seeking Alpha (narrative):   0.4
+  - Google News discovery (Bloomberg/Reuters/BI/CNBC/IBD, lead only): 0.5
   - Blog/social:                 0.2
   - Insider Form 4 cluster:     1.2 (multiplier, not additive)
 
@@ -101,14 +100,16 @@ Example: "Power transformer shortage" mentioned by:
 - WSJ article week 1 (0.8)
 - FT article week 2 (0.8)
 - GE Vernova earnings call week 3 (1.0)
-- SA deep-dive week 3 (0.7)
 - CLF insider buy Form 4 week 4 (×1.2 multiplier)
-→ Total: (0.8 + 0.8 + 1.0 + 0.7) × 1.2 × (4 weeks span factor) = 3.96 × 1.2 = strong signal
+→ Total: (0.8 + 0.8 + 1.0) × 1.2 × (4 weeks span factor) = 2.6 × 1.2 = strong signal
 
 ### Components to Build
 
 1. **Daily reader script** (`scripts/daily_reader.py`)
-   - Uses chrome-use (or built-in browser or CDP) to open FT/WSJ/SA
+   - Uses the shared `read-news` adapters (`feeds/ft.ts`, `feeds/wsj.ts`, `read_news.ts --source googlenews`)
+     to fetch FT/WSJ/Bloomberg/Reuters/BI/CNBC/IBD — never a raw `chrome-use`/`web_fetch` scrape of a
+     publisher page, and never Seeking Alpha (not automatable, permanently excluded — no adapter exists
+     or will be added)
    - Reads top headlines, decides which to read in full
    - Extracts structured data from each article
    - Stores in ChromaDB
@@ -137,9 +138,10 @@ Example: "Power transformer shortage" mentioned by:
 
 | Source | Signal Type | Access Method |
 |--------|------------|---------------|
-| FT | Global view, non-US companies | chrome-use (bypass paywall) |
-| WSJ | Sector shifts, M&A, policy | chrome-use (bypass paywall) |
-| Seeking Alpha | Thesis deep-dives | chrome-use (bypass paywall) |
+| FT | Global view, non-US companies | `read-news` `feeds/ft.ts` (no chrome-use scrape needed for headlines/teasers) |
+| WSJ | Sector shifts, M&A, policy | `read-news` `feeds/wsj.ts` (no chrome-use scrape needed for headlines/teasers) |
+| Bloomberg/Reuters/BI/CNBC/IBD | Broad discovery leads (never a body quote) | `read-news` `read_news.ts --source googlenews` |
+| Seeking Alpha | Thesis deep-dives | **Excluded — not automatable, no adapter exists or will be added** |
 | SEC EDGAR | Filings, Form 4, 13F | web_fetch (free) |
 | SEC EDGAR full-text | Supply constraint language | web_fetch (free API) |
 | Strike.market signals | Alt data (web traffic, app ranks) | web_fetch (free tier) |

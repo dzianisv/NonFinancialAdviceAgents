@@ -8,8 +8,20 @@ trailing baseline, and FLAG a spike (e.g. 0→3+/week). Spikes feed ~/.openclaw/
 signal-convergence-alert can cross them with dips/13F/congress — catching a multi-week narrative
 build (SanDisk Sept-2025) BEFORE it's obvious.
 
-Data: Google News RSS (free, no key, stdlib only). Counts only headlines whose pubDate is within
---days (Google serves a fixed ~100-item feed, so a recency filter is what makes counts move).
+Data: fetched via `bun .agents/skills/read-news/scripts/read_news.ts --source googlenews` (a
+subprocess call), NOT a direct stdlib urlopen — read_news.ts is the sole front door for all
+Google News RSS fetches repo-wide, so no script raw-fetches Google News anymore. Its googlenews
+adapter already day-filters server-side (`when:Nd` matching --days) and restricts results via
+`site:` clauses to 5 whitelisted outlets (bloomberg.com, reuters.com, businessinsider.com,
+cnbc.com, investors.com/IBD). This means counts are now bounded to that 5-outlet whitelist,
+NOT the fully unrestricted "all outlets" headline volume the old raw urlopen approach captured —
+an intentional, documented consequence of centralization. It changes the ABSOLUTE SCALE of the
+velocity metric (likely lower counts, especially for smaller-cap/less-covered tickers, since
+coverage is now 5 large financial-media outlets instead of everything Google indexes). The
+ratio-vs-baseline design still works despite this: each ticker is compared ONLY against its OWN
+trailing history under the SAME restricted source, so a constant scale-down from outlet
+restriction mostly cancels out in the ratio — though it does lower the chance smaller/
+less-covered names clear MIN_BASELINE_OBS/--min-spike thresholds at all.
 NEVER fabricates a headline; a failed fetch → that ticker is [unavailable], not invented.
 
 Ledger: $NARRATIVE_LEDGER or <repo_root>/.cache/stocks-trend-screener/narrative_ledger.jsonl
@@ -19,13 +31,9 @@ Usage:
     python3 mention_velocity.py --json            # uses a default large-cap watchlist
 """
 from __future__ import annotations
-import argparse, json, os, re, sys
-from datetime import datetime, timedelta, timezone
-from email.utils import parsedate_to_datetime
+import argparse, json, os, subprocess, sys
+from datetime import datetime, timezone
 from pathlib import Path
-from urllib.request import Request, urlopen
-from urllib.parse import quote
-from xml.etree import ElementTree as ET
 
 
 def _find_repo_root() -> Path:
@@ -52,41 +60,42 @@ def _now() -> datetime:
 
 
 def fetch_recent_count(ticker: str, days: int) -> tuple[int, list[str]] | None:
-    """Return (count_within_window, sample_headlines) or None on fetch failure (never fabricate)."""
-    q = quote(f"{ticker} stock")
-    url = f"https://news.google.com/rss/search?q={q}&hl=en-US&gl=US&ceid=US:en"
+    """Return (count_within_window, sample_headlines) or None on fetch failure (never fabricate).
+
+    Goes through read-news's CLI front door (bun read_news.ts --source googlenews) instead of
+    raw-fetching Google News RSS directly — see module docstring for why. `fetched` is the raw,
+    day-filtered, 5-outlet-whitelisted item count and is the direct analog of the old code's raw
+    <item> iteration count. `sample_headlines` is best-effort, pulled from the (often empty)
+    `events` array; it's fine and expected for this to come back as [] most of the time.
+    """
+    repo_root = _find_repo_root()
+    script = repo_root / ".agents" / "skills" / "read-news" / "scripts" / "read_news.ts"
     try:
-        req = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urlopen(req, timeout=15) as r:
-            xml = r.read()
-    except Exception:
+        result = subprocess.run(
+            ["bun", str(script), "--source", "googlenews", "--query", f"{ticker} stock",
+             "--days", str(days)],
+            capture_output=True, text=True, timeout=30, cwd=str(repo_root),
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return None
+    if result.returncode != 0:
         return None
     try:
-        root = ET.fromstring(xml)
-    except ET.ParseError:
+        data = json.loads(result.stdout)
+    except json.JSONDecodeError:
         return None
-    cutoff = _now() - timedelta(days=days)
-    count, samples = 0, []
-    for item in root.iter("item"):
-        title = (item.findtext("title") or "").strip()
-        pub = item.findtext("pubDate")
-        dt = None
-        if pub:
-            try:
-                dt = parsedate_to_datetime(pub)
-                if dt and dt.tzinfo is None:
-                    dt = dt.replace(tzinfo=timezone.utc)
-            except (TypeError, ValueError):
-                dt = None
-        if dt is None or dt < cutoff:
-            continue
-        # Count is Google's query-relevance for "<ticker> stock" (fuzzy by design). We do NOT hard-gate on
-        # the literal symbol — many real headlines say "Nvidia", not "NVDA". The SIGNAL is the velocity
-        # RATIO vs this ticker's OWN baseline, so a constant fuzzy-match rate cancels out. Sample only
-        # headlines that explicitly name the symbol (cleaner display).
-        count += 1
-        if len(samples) < 3 and re.search(rf"\b{re.escape(ticker)}\b", title, re.I):
-            samples.append(title)
+    if "fetched" not in data:
+        return None
+    # read_news.ts never emits a bare "googlenews" string in `unavailable` -- entries are always
+    # prefixed, e.g. "googlenews:HTTP 500 for query ..." or "googlenews:googlenews: HTTP ...". The
+    # exact-membership check this replaced (`"googlenews" in unavailable`) could never match any
+    # real entry, so a failed fetch silently fell through to `count = data["fetched"]` (0) and got
+    # recorded as a legitimate zero-mention day instead of [unavailable]. Match by prefix instead.
+    unavailable = data.get("unavailable") or []
+    if any(isinstance(u, str) and u.startswith("googlenews") for u in unavailable):
+        return None
+    count = data["fetched"]
+    samples = [e.get("title") for e in (data.get("events") or []) if e.get("title")][:3]
     return count, samples
 
 

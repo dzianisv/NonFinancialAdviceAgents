@@ -1,6 +1,6 @@
 ---
 name: stocks-advisor
-description: "Portfolio-agnostic equity advisor. Analyzes a user-supplied ticker list, a Google Sheet of holdings, OR discovers stocks via current market themes (AI supply chain, robotics, energy transition, defense, fintech) discovered LIVE via web_fetch. Runs a 6-seat analyst panel per stock (fundamental / technical / narrative-macro / sentiment-positioning / smart-money-institutional-flows / sell-side-analyst-consensus) in parallel subagents. When holdings are provided (Google Sheet URL), outputs HOLD/ADD/TRIM/EXIT per position with tax harvest table and cash deployment plan. When discovering or analyzing a watchlist, outputs entry zone, bar-close trigger, market-based stop, conviction, theme tag. Triggers: \"run the stock panel\", \"analyze these stocks: [list]\", \"review my portfolio: [sheet URL]\", \"find stocks in the AI supply chain theme\", \"what stocks should I look at this week\", \"find entry points for my watchlist\". Individual stocks only. Educational, not advice."
+description: "Portfolio-agnostic equity advisor. Analyzes a user-supplied ticker list, a Google Sheet of holdings, OR discovers stocks via current market themes (AI supply chain, robotics, energy transition, defense, fintech) discovered LIVE via the read-news feed scripts/read_news.ts (never a raw web_fetch of a publisher listing page). Runs a 6-seat analyst panel per stock (fundamental / technical / narrative-macro / sentiment-positioning / smart-money-institutional-flows / sell-side-analyst-consensus) in parallel subagents. When holdings are provided (Google Sheet URL), outputs HOLD/ADD/TRIM/EXIT per position with tax harvest table and cash deployment plan. When discovering or analyzing a watchlist, outputs entry zone, bar-close trigger, market-based stop, conviction, theme tag. Triggers: \"run the stock panel\", \"analyze these stocks: [list]\", \"review my portfolio: [sheet URL]\", \"find stocks in the AI supply chain theme\", \"what stocks should I look at this week\", \"find entry points for my watchlist\". Individual stocks only. Educational, not advice."
 license: MIT
 compatibility: opencode
 metadata:
@@ -131,16 +131,21 @@ Market narratives rotate. **Do not hardcode a theme list.** When the user asks "
    bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets,business --days 5 --limit 25 --text
    bun .agents/skills/read-news/scripts/feeds/ft.ts  --section markets,companies,global-economy --days 5 --limit 25 --text
    ```
-   Then `web_fetch` 1–2 of the **non-paywalled** listings for breadth:
-   - `https://www.bloomberg.com/markets`
-   - `https://finance.yahoo.com/topic/latest-news/` (sector/thematic trend listings)
+   Then widen breadth via [[read-news]]'s Bloomberg firehose feed and its discovery-only Google News adapter
+   (Bloomberg/Reuters/Business Insider/CNBC/IBD) instead of a raw listing-page `web_fetch` — `read-news` is
+   the sole fetch front door, so never `web_fetch` `bloomberg.com` or `finance.yahoo.com` listing pages directly:
+   ```bash
+   bun .agents/skills/read-news/scripts/read_news.ts --source bloomberg,googlenews --query "<theme>" --days 5
+   ```
+   A `googlenews` record is a discovery pointer only (`body` is always `null`) — it names a candidate theme/
+   ticker to investigate further, it is never itself the citable T2 quote.
 2. **Map names to themes.** Tag each candidate ticker with one bucket:
    `AI_SUPPLY_CHAIN | ROBOTICS | ENERGY | DEFENSE | FINTECH | HEALTHCARE | OTHER`. Buckets are a
    classification convention, not a fixed universe — add one if the evidence supports it.
 3. **Anti-hallucination rule (same as the narrative seat):** name a theme or constituent only if you found it
-   this run in a page you actually `web_fetch`ed **or** in feed-script output you actually ran
-   (`feeds/wsj.ts`/`feeds/ft.ts` print real URLs + verbatim teasers — those count as fetched). No fetched
-   URL / no feed record = not a theme. Never list a "current narrative" from memory.
+   this run in feed-script/`read_news.ts` output you actually ran (`feeds/wsj.ts`/`feeds/ft.ts` print real
+   URLs + verbatim teasers; `read_news.ts --source bloomberg,googlenews` prints real/discovery URLs — those
+   count as fetched). No feed record = not a theme. Never list a "current narrative" from memory.
 
 If the user supplies an explicit ticker list, skip discovery and analyze that list (still tag each name with
 a theme in the output).

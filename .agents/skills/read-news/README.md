@@ -1,6 +1,8 @@
 # read-news
 
-Local-first news cache that pulls 9 RSS firehose feeds plus 3 per-asset market sources, deduplicates articles by exact URL/hash, clusters same-story multi-outlet coverage into events via fuzzy Jaccard similarity, tags articles by asset, and serves hybrid BM25+Jaccard+recency retrieval via Reciprocal Rank Fusion. Zero runtime deps: Bun + TypeScript + `bun:sqlite` (no npm packages). Educational tooling — see `SKILL.md` for agent-facing usage.
+Local-first news cache that pulls 9 RSS firehose feeds plus 5 per-asset market sources (plus 1 discovery-only query source), deduplicates articles by exact URL/hash, clusters same-story multi-outlet coverage into events via fuzzy Jaccard similarity, tags articles by asset, and serves hybrid BM25+Jaccard+recency retrieval via Reciprocal Rank Fusion. Zero runtime deps: Bun + TypeScript + `bun:sqlite` (no npm packages). Educational tooling — see `SKILL.md` for agent-facing usage.
+
+> Entitlement-gated sources (JPMorgan, BofA research) are `[UNAVAILABLE - license required]` — no endpoint, no scraping, no paywall bypass; Seeking Alpha is explicitly excluded and will not be added. See `SKILL.md`'s "Source classes and access limits" for the full statement.
 
 ## Architecture
 
@@ -11,13 +13,20 @@ flowchart TD
 cointelegraph, theblock,
 bitcoinmagazine, coinbase, bloomberg)
 feeds/ft.ts · feeds/wsj.ts · feeds/crypto.ts"]
-    F3["3 per-asset market feeds
-(tradingview, coinmarketcap, googlefinance)
-feeds/markets.ts
-— only when --asset or explicit --source"]
+    F5["5 per-asset market feeds
+(tradingview, coinmarketcap, googlefinance,
+morningstar, yahoo)
+feeds/markets.ts · feeds/googlefinance.ts
+feeds/morningstar.ts · feeds/yahoo.ts
+— only when --asset/--assets or explicit --source"]
+    FQ["1 discovery-only query feed
+(googlenews)
+feeds/googlenews.ts
+— requires --query or --asset/--assets;
+refuses (no network call) if neither given"]
 
     FETCH["fetchAllNews()
-feeds/index.ts:63
+feeds/index.ts
 300 ms polite gap between sources"]
 
     L1["Layer 1 · exact dedup
@@ -43,7 +52,8 @@ fused: score += 1/(KK+rank+1), KK=60
 news_store.ts:353-414"]
     QB["queryByAsset()
 article_assets junction
-news_store.ts:419-441"]
+news_store.ts:419-441
+(batch mode unions multiple assets + by_asset breakdown, read_news.ts)"]
     QC["newSince(days)
 unsurfaced events only
 news_store.ts:445-458"]
@@ -53,7 +63,8 @@ narrative-news · analyse-narrative
 crypto-advisor · stocks-trend-screener"]
 
     F9 --> FETCH
-    F3 --> FETCH
+    F5 --> FETCH
+    FQ --> FETCH
     FETCH --> L1
     L1 -->|new| L2
     L1 -->|dup| DB
@@ -76,9 +87,12 @@ crypto-advisor · stocks-trend-screener"]
 | `bitcoinmagazine` | firehose | `https://bitcoinmagazine.com/feed` | No | none | full body in `content:encoded` |
 | `coinbase` | firehose | Google News proxy (direct site is Cloudflare-gated) | No | none | summary only |
 | `bloomberg` | firehose | `https://www.bloomberg.com/feed/podcast/etf-report.xml` (podcast; often 403) | No | none | summary only |
-| `tradingview` | per-asset | `https://news-headlines.tradingview.com/v2/headlines?symbol=<sym>` + `/v3/story?id=` | No | `relatedSymbols` → `tvSymbolToAsset()` (markets.ts:36) | no paywall |
-| `coinmarketcap` | per-asset | `/data-api/v3/cryptocurrency/detail/lite?slug=` → `/content/v3/news?coins=<id>` | No | explicit asset from query (markets.ts:56) | no paywall |
-| `googlefinance` | per-asset | `https://www.google.com/finance/quote/<sym>` HTML scrape | No | ticker from symbol arg (markets.ts:61) | filters to known news domains only |
+| `tradingview` | per-asset | `https://news-headlines.tradingview.com/v2/headlines?symbol=<sym>` + `/v3/story?id=` | No | `relatedSymbols` → `tvSymbolToAsset()` (markets.ts:33) | no paywall |
+| `coinmarketcap` | per-asset | `/data-api/v3/cryptocurrency/detail/lite?slug=` → `/content/v3/news?coins=<id>` | No | explicit asset from query (markets.ts:41) | no paywall |
+| `googlefinance` | per-asset | `https://www.google.com/finance/quote/<sym>` HTML scrape | No | ticker from symbol arg (googlefinance.ts) | filters to known news domains only |
+| `morningstar` | per-asset | Morningstar quote-page HTML scrape (`resolveExchange()` → page URL) | No | ticker from symbol arg (morningstar.ts) | headline only |
+| `yahoo` | per-asset | `https://feeds.finance.yahoo.com/rss/2.0/headline?s=<sym>` RSS | No | full requested symbol list tagged (imprecise on multi-symbol batch requests, same caveat as CMC) (yahoo.ts) | teaser or `[UNAVAILABLE - no teaser in feed]` |
+| `googlenews` | discovery-only (query/topic-scoped, not ticker-driven) | `https://news.google.com/rss/search?q=<query>+(site:...)` restricted to Bloomberg/Reuters/Business Insider/CNBC/IBD (googlenews.ts) | No | none — always `assets: []` | N/A — `body` always `null`, link is an opaque Google redirect, never a resolved citation |
 
 ## Storage & dedup
 
@@ -116,13 +130,22 @@ Dedup unit behavior (news_store.test.ts:280, 369):
 | Flag | Purpose | Default |
 |---|---|---|
 | `--db <path>` | SQLite DB path (overrides `CRYPTO_NEWS_DB`) | `.cache/read-news/news.db` |
-| `--days <n>` | Recency window for result filtering | `3` |
+| `--days <n>` | Recency window for result filtering (also the Google News `when:Nd` window) | `3` |
 | `--k <n>` | Max events returned | `15` |
-| `--query <str>` | RRF hybrid text query → `query()` | — (uses `newSince` if absent) |
+| `--query <str>` | RRF hybrid text query → `query()`; also the Google News search topic when `--source googlenews` is set | — (uses `newSince` if absent) |
 | `--source <csv>` | Comma-separated source names to fetch | all `NEWS_FEEDS` |
-| `--asset <SYM>` | Also fetches TradingView + CMC for symbol; routes to `queryByAsset()` | — |
+| `--asset <SYM>` | Also fetches the 5 per-asset sources (TradingView, CoinMarketCap, Google Finance, Morningstar, Yahoo) for symbol; routes to `queryByAsset()` | — |
+| `--assets <csv>` | Batch form of `--asset` — CSV of symbols; merged with `--asset` (deduped, uppercased) | — |
+| `--equities-only` | Opt-in filter for an `--asset`/`--assets` run: drops CoinMarketCap and the 6 crypto-only RSS firehose feeds, unless `--source` was explicitly passed (explicit `--source` always wins) | off |
 
-Output JSON: `{ fetched, feeds_ok, unavailable, events }`.
+Output JSON: `{ fetched, feeds_ok, unavailable, events, by_asset? }`.
+
+`by_asset` is additive and only present when `--assets`/`--asset` together resolve to **more than one**
+distinct symbol: it's a `Record<symbol, EventRecord[]>` breakdown of `queryByAsset()` results per requested
+asset, alongside the flat `events` array (which is the deduped union of all `by_asset` values by
+`event_cluster_id`, for consumers that don't care about the per-asset split). The single-asset `--asset X`
+path (or `--assets X` with exactly one symbol) is unchanged — `events` is `queryByAsset(db, X, ...)` directly
+and `by_asset` is omitted.
 
 ### Environment variables
 
@@ -136,9 +159,9 @@ Output JSON: `{ fetched, feeds_ok, unavailable, events }`.
 ## Adding a feed
 
 1. **Write fetcher** `scripts/feeds/<name>.ts` returning `Article[]` (types.ts:10). Required fields: `source`, `url`, `title`, `summary`, `body` (null if unavailable), `published_at` (ISO), `lang`, `tags`, `assets`. Never fabricate body; emit `[UNAVAILABLE - paywall]` in `summary` when no teaser exists.
-2. **Register in `feeds/index.ts`**: firehose feeds go in `NEWS_FEEDS` (index.ts:30) and get a `fetchCryptoFeed`-style branch in `fetchAllNews`. Per-asset feeds go in `MARKET_SOURCES` and require an asset loop. Firehose = global macro/crypto; per-asset = fetched once per symbol per run.
+2. **Register in `feeds/index.ts`**: firehose feeds go in `NEWS_FEEDS` and get a `fetchCryptoFeed`-style branch in `fetchAllNews`. Per-asset feeds go in `MARKET_SOURCES` and require an asset loop (see `tradingview`/`coinmarketcap`/`googlefinance`/`morningstar`/`yahoo`). Free-text discovery/search feeds (query- or topic-scoped, not purely ticker-driven — see `googlenews`) go in `QUERY_SOURCES` instead and must refuse (`[UNAVAILABLE]`, no network call) rather than silently substituting a default ticker list when called with neither `opts.query` nor an explicit `opts.assets`. Firehose = global macro/crypto; per-asset = fetched once per symbol per run; query = fetched once per explicit query/topic.
 3. **Add `<name>.test.ts`** alongside the fetcher.
-4. **Keep golden-parity tests green** — `news_store.test.ts:768` defines the real gate: `GOLDEN_INGEST = { new: 15, duplicate: 1, events_touched: 2 }`. This reproduces the retired Python `news_store.py`'s exact dedup counts over a frozen parity fixture. The snapshot also covers `GOLDEN_NEW_SINCE_TITLES` (13 titles) and `GOLDEN_QUERY_TOP5` (lines 769–790). Additive schema changes must not alter any of these frozen values.
+4. **Keep golden-parity tests green** — `news_store.test.ts:768` defines the real gate: `GOLDEN_INGEST = { new: 15, duplicate: 1, events_touched: 2 }`. This reproduces the retired Python `news_store.py`'s exact dedup counts over a frozen parity fixture. The snapshot also covers `GOLDEN_NEW_SINCE_TITLES` (13 titles) and `GOLDEN_QUERY_TOP5` (lines 769–790). Additive schema changes must not alter any of these frozen values. (This gate lives entirely in `news_store.ts`/`news_store.test.ts`, neither of which this doc's `googlenews`/`yahoo`/`--assets`/`--equities-only` additions touch.)
 
 ## Consumers
 
@@ -146,6 +169,7 @@ Output JSON: `{ fetched, feeds_ok, unavailable, events }`.
 - **`analyse-narrative`** — interpretation layer; runs `read_news.ts` first as single entry point for all news sources, then classifies events PRICED_IN vs ACTIONABLE_CONTEXT (analyse-narrative/SKILL.md:65)
 - **`crypto-advisor`** — cites feed-script records (FT/WSJ/read_news.ts) as source-of-truth; hard rule against fabricating headlines (crypto-advisor/SKILL.md:170)
 - **`stocks-trend-screener`** — uses `read_news.ts` for a deterministic firm-wide macro feed (stocks-trend-screener/SKILL.md:126)
+- **`analyse-sellside`** — separate skill, NOT a consumer of this pipeline: it fetches structured sell-side data (analyst ratings, price targets, fair-value/moat) directly via `web_fetch`. `read-news`'s Morningstar/Google-Finance fetchers only ever return news headlines, never that structured data — see `SKILL.md`'s boundary note.
 
 ## Layout
 
@@ -154,13 +178,17 @@ Output JSON: `{ fetched, feeds_ok, unavailable, events }`.
 | `SKILL.md` | Agent-facing usage: commands, flags, fallback paths, hard rules |
 | `README.md` | This file — maintainer architecture reference |
 | `scripts/news_store.ts` | Storage engine: schema, `ingest`, `query`, `queryByAsset`, `newSince`, `markSurfaced`, SimHash, Jaccard, RRF |
-| `scripts/read_news.ts` | CLI entry: arg parsing, `runReadNews`, wires fetchAllNews → ingest → query |
-| `scripts/types.ts` | `Article` type, `parseRSS`, `stripHtml`, `toISO`, `fetchWaybackBody` |
-| `scripts/feeds/index.ts` | Feed registry: `NEWS_FEEDS`, `fetchAllNews`, source dispatch |
+| `scripts/read_news.ts` | CLI entry: arg parsing (`parseCliArgsFromTokens`), `runReadNews`, wires fetchAllNews → ingest → query, `--asset`/`--assets` batch handling, `--equities-only` filter, `by_asset` output |
+| `scripts/types.ts` | `Article` type, `parseRSS`, `stripHtml`, `toISO`, `shortHash`, `fetchWaybackBody` |
+| `scripts/feeds/index.ts` | Feed registry: `NEWS_FEEDS`, `CRYPTO_SOURCES`, `GOOGLENEWS_DEFAULT_PUBLISHERS`, `fetchAllNews`, source dispatch (firehose / per-asset `MARKET_SOURCES` / discovery-only `QUERY_SOURCES`) |
 | `scripts/feeds/crypto.ts` | 7 crypto RSS sources (`CRYPTO_FEED_URLS`) |
 | `scripts/feeds/ft.ts` | FT section RSS fetcher; paywall-honest |
 | `scripts/feeds/wsj.ts` | WSJ RSS fetcher; paywall-honest |
-| `scripts/feeds/markets.ts` | TradingView, CoinMarketCap, Google Finance per-asset fetchers |
+| `scripts/feeds/markets.ts` | TradingView, CoinMarketCap per-asset fetchers (`DEFAULT_MARKET_ASSETS`, `flattenTvAst`, `tvSymbolToAsset`, `mapCmcItem`) |
+| `scripts/feeds/googlefinance.ts` | Google Finance per-asset fetcher (HTML scrape) |
+| `scripts/feeds/morningstar.ts` | Morningstar per-asset fetcher (HTML scrape) |
+| `scripts/feeds/yahoo.ts` | Yahoo Finance per-asset fetcher (`fetchYahooNews`, RSS) |
+| `scripts/feeds/googlenews.ts` | Google News discovery-only fetcher (`fetchGoogleNews`, `PUBLISHER_DOMAINS`, publisher-whitelisted RSS search) |
 | `scripts/feeds/*.test.ts` | Per-fetcher unit tests |
 | `scripts/news_store.test.ts` | Storage unit tests incl. golden-parity ingest counts |
-| `scripts/read_news.test.ts` | CLI integration test |
+| `scripts/read_news.test.ts` | CLI integration test, incl. `parseCliArgsFromTokens` regression tests |

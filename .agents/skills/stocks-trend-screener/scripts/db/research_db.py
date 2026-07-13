@@ -1,6 +1,20 @@
 """
 trend-stock-research: SQLite + FTS5/BM25 article store.
 
+IMPORTANT — scope: this module is NOT a general news-fetch/discovery path. It never fetches
+anything itself. It only stores and searches agent-curated theme/company/signal tags for
+articles that were ALREADY discovered via the shared `read-news` skill
+(`read_news.ts`/`feeds/ft.ts`/`feeds/wsj.ts`/`read_news.ts --source googlenews`). Raw news
+discovery and search must go through read-news (`read_news.ts`, `news_store.ts query`), never
+through this module's `search()` as a discovery mechanism.
+
+This module is kept live (not migrated/deleted) specifically because `search_theme_convergence()`
+groups by the `articles.themes` tag column to power multi-week thesis/conviction tracking
+(`theses`/`thesis_evidence` tables) — a feature read-news's schema has no equivalent for. Deleting
+the `articles` table or its `ingest_article`/`search`/`get_articles_for_theme` functions would
+break thesis convergence detection, so full migration to `news_store.ts` was evaluated and
+rejected as unsafe within this task's scope.
+
 Zero-cost alternative to vector DB. Financial journalism uses consistent
 domain vocabulary ("bottleneck", "capacity constrained", "supply shortage")
 so BM25 keyword search works as well as semantic search — no embeddings needed.
@@ -163,6 +177,10 @@ def ingest_article(
 
 # ─── SEARCH API ───────────────────────────────────────────────────────────────
 
+# Searches ONLY this skill's own ingested/tagged article corpus (populated by
+# ingest_article() from articles fetched via read-news). For raw/fresh news discovery
+# not yet ingested here, use read-news's `news_store.ts query` instead — this function
+# does not fetch anything.
 def search(query: str, limit: int = 20, days_back: int = 90) -> list[dict]:
     """BM25 search over articles. Returns ranked results."""
     db = get_db()

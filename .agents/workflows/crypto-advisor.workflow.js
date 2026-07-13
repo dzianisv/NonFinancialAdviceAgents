@@ -69,7 +69,8 @@ const TOKEN_PROMPT = (symbol) =>
 
   `HARD CONSTRAINTS (non-negotiable):\n` +
   `1. tradingview-* MCP tools are available to you — use them for all price/indicator data.\n` +
-  `2. For the narrative seat: call web_fetch on REAL URLs before citing any source. ` +
+  `2. For the narrative seat: call web_fetch on REAL URLs, or run the read-news script ` +
+     `(bun .agents/skills/read-news/scripts/read_news.ts), before citing any source. ` +
      `If a fetch fails, set status="failed" and url="[FETCH FAILED: <reason>]" in the citations array. ` +
      `Do NOT invent headlines. Do NOT put a title where a URL belongs.\n` +
   `3. The citations array in your JSON output is code-scanned by the workflow after you return. ` +
@@ -79,8 +80,7 @@ const TOKEN_PROMPT = (symbol) =>
 
   `Starting URLs to try for the narrative seat (web_fetch these first):\n` +
   `- Fear & Greed: https://api.alternative.me/fng/?limit=1\n` +
-  `- CoinDesk: https://www.coindesk.com/search?q=${symbol}+2026\n` +
-  `- CryptoPanic: https://cryptopanic.com/news/${symbol.toLowerCase()}/\n` +
+  `- Crypto journalism (read-news is the sole fetch front door — never fetch CoinDesk/TheBlock/Decrypt/CoinTelegraph/BitcoinMagazine/CryptoPanic/Google News pages directly): bun .agents/skills/read-news/scripts/read_news.ts --source coindesk,theblock,decrypt,cointelegraph,bitcoinmagazine,bloomberg --query "${symbol}" --days 5\n` +
   `- DeFiLlama (if DeFi): https://defillama.com/protocol/${symbol.toLowerCase()}\n\n` +
 
   `Return your full analysis as a JSON object matching the schema. The plain_verdict field must be ` +
@@ -158,7 +158,8 @@ if (goodCitations.length > 0) {
   validationReport = await agent(
     `You are a citation auditor. Re-fetch every URL in the list below and check whether the quoted ` +
     `text is actually present on the page (verbatim or near-verbatim 6-word match).\n\n` +
-    `For each: call web_fetch(url), search for the quote, return status:\n` +
+    `For each: call web_fetch(url), or re-run the read-news script (bun .agents/skills/read-news/scripts/read_news.ts) ` +
+    `for journalism URLs, search for the quote, return status:\n` +
     `- VERIFIED: quote found verbatim or 5/6 words present\n` +
     `- NOT_FOUND: page fetched but quote absent → this is a hallucinated citation\n` +
     `- FETCH_FAILED: could not fetch the URL\n\n` +

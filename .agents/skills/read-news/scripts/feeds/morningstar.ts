@@ -1,4 +1,5 @@
 import type { Article } from "../types";
+import { shortHash } from "../types";
 
 // Morningstar exchange code mapping (NASDAQ → xnas, NYSE → xnys)
 const STOCK_EXCHANGE: Record<string, string> = {
@@ -21,6 +22,27 @@ const KNOWN_CRYPTO = new Set([
 const UI_TEXT_RE =
   /^(Home|Markets|Portfolio|News|Insights|Video|Research|Education|Sign In|Sign Up|Premium|Membership|Watch|Listen|Read More|See All|More|Back|Next|Previous|Loading|Subscribe|Log In|Register|Menu|Search|Close|Skip|Morningstar|Contact|About|Learn More|Get Started|Try Free|Unlock|Upgrade|Continue|View All|Show More|Related Articles|Top Stories|Recent News|Latest News|Market News|Company News|Analyst Reports)$/i;
 
+/**
+ * Resolve a stock symbol to its Morningstar exchange code. STOCK_EXCHANGE is the
+ * single source of truth for "known" listings — returns null for anything not
+ * explicitly mapped rather than silently defaulting to NASDAQ (xnas).
+ */
+export function resolveExchange(asset: string): string | null {
+  return STOCK_EXCHANGE[asset.toUpperCase()] ?? null;
+}
+
+/**
+ * Build a per-headline article URL that keeps the base page URL intact for
+ * citation/provenance (a human clicking it still lands on the exact same real
+ * Morningstar page) while adding a content-derived, non-tracking discriminator
+ * query param. Without this, every headline scraped off one page shares the same
+ * canonical_url and every headline after the first is silently dropped as a
+ * "duplicate" by news_store's exact-dedup check, even though the title differs.
+ */
+export function buildHeadlineUrl(pageUrl: string, title: string): string {
+  return `${pageUrl}?h=${shortHash(title)}`;
+}
+
 export async function fetchMorningstar(
   asset: string,
 ): Promise<{ source: string; articles: Article[]; errors: string[] }> {
@@ -34,8 +56,12 @@ export async function fetchMorningstar(
     return { source: "morningstar", articles, errors };
   }
 
-  // Resolve exchange code — default NASDAQ (xnas) for unmapped stocks
-  const exchange = STOCK_EXCHANGE[upper] ?? "xnas";
+  // Resolve exchange code — refuse to default to NASDAQ for unmapped stocks.
+  const exchange = resolveExchange(upper);
+  if (!exchange) {
+    errors.push(`morningstar: [UNAVAILABLE - unknown exchange for ${upper}; not in STOCK_EXCHANGE map, refusing to default to NASDAQ]`);
+    return { source: "morningstar", articles, errors };
+  }
   const pageUrl = `https://www.morningstar.com/stocks/${exchange}/${upper.toLowerCase()}/quote`;
 
   let rawHtml: string;
@@ -74,7 +100,7 @@ export async function fetchMorningstar(
     seen.add(text);
     articles.push({
       source: "morningstar",
-      url: pageUrl,
+      url: buildHeadlineUrl(pageUrl, text),
       title: text,
       summary: "[headline only — no teaser available]",
       body: null,

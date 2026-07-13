@@ -10,7 +10,7 @@ export const meta = {
     { title: 'Intake', detail: 'CIO reads mandate, decides screen strategy (standard | trend-discovery) + assembles desk (no tickers) [discovery mode]' },
     { title: 'ThemeCycle', detail: 'assess whether the theme/sector is already extended; if so, widen to adjacent laggards [discovery mode]' },
     { title: 'Screen', detail: 'standard: research team autonomously finds 5-10 candidates via web search + screener logic. trend-discovery: quant pre-screen -> EDGAR+WebSearch journalism fan-out -> beneficiary mapping -> skeptic filter [discovery mode; also re-run per CIO-Review iteration]' },
-    { title: 'NewsFetch', detail: 'pre-fetch WSJ + FT + Bloomberg headlines into local article cache; gather agents query BM25 instead of hitting live URLs [discovery mode]' },
+    { title: 'NewsFetch', detail: 'populate .cache/read-news/news.db via read_news.ts (the sole fetch front door); gather agents query it via news_store.ts instead of hitting live URLs [discovery mode]' },
     { title: 'Gather', detail: 'parallel data seats (manager-selected), each following its own skill [discovery mode]' },
     { title: 'Consolidate', detail: 'manager-selected desk skill merges seats into one brief [discovery mode]. holdings-sweep: merges per-position panel verdicts + trend-screen rows into one report (pure JS, no extra LLM call)' },
     { title: 'Panel', detail: 'manager-selected lenses debate + non-voting behavioral guardrail [discovery mode]. holdings-sweep: one 6-seat BSC panel agent per single-name/hold-only-tagged holding' },
@@ -466,36 +466,104 @@ if (abovePT.length) log(`Screen: ${abovePT.length} candidates above consensus PT
 const seedNote = ANCHOR ? `\nSeed (verify+extend): ${ANCHOR}` : `\nNo seed -- fetch LIVE; never fabricate, mark UNAVAILABLE if gated.`
 const bullActions = ['BUY_NOW', 'ADD', 'SCALE', 'DCA', 'BUY_ON_TOUCH']
 
-// ---------- NewsFetch: pre-populate article cache so gather agents query BM25 ----------
-// Runs once after screen; all gather agents then call fetch_article.py --search instead of
-// hitting live URLs. Cache stored at ~/.agents/cache/articles.db.
-const FETCH_SCRIPT = `${SKILL}/../scripts/feeds/fetch_article.py`
+// ---------- NewsFetch: pre-populate the read-news store so gather agents query it ----------
+// read-news (.agents/skills/read-news) is the sole journalism fetch/discovery front door -- it owns
+// fetch + normalize + dedup + cross-run state for FT/WSJ/Bloomberg/CoinDesk/Decrypt/CoinTelegraph/
+// TheBlock/BitcoinMagazine/Coinbase/Google-News. This workflow must not run its own competing
+// fetch/search pipeline (fetch_article.py's --search role duplicated that job) -- it only populates
+// and then queries the shared .cache/read-news/news.db store for this run.
+// READ_SCRIPT stays: .agents/scripts/feeds/read_article.ts is a full-BODY resolver for a URL you
+// already have (Chrome-live/Wayback/direct-fetch ladder), downstream of discovery, not a competing
+// fetch front door -- gather agents still use it to pull full body text for a cited article URL.
 const READ_SCRIPT = `${SKILL}/../scripts/feeds/read_article.ts`
+const NEWS_DB = '.cache/read-news/news.db'
 const tickerList = ASSETS.join(' OR ')
+// Map whatever the CIO named in plan.feeds (its own live skill-discovery result) onto the actual
+// read-news --source identifiers. Known read-news sources: ft, wsj, bloomberg, coindesk, decrypt,
+// cointelegraph, theblock, bitcoinmagazine, coinbase, googlenews (plus per-asset tradingview/
+// coinmarketcap/googlefinance/morningstar/yahoo -- see PER_ASSET_SOURCES below). Deterministic
+// EXACT-alias lookup, never substring matching -- a prior bidirectional substring match
+// (`s.includes(norm) || norm.includes(s)`) mapped "bi" (Business Insider) onto "bitcoinmagazine",
+// since "bitcoinmagazine".includes("bi") is true. Business Insider has no direct read-news firehose
+// source; it's one of the 5 publishers in read-news's googlenews site: whitelist (see
+// read-news/scripts/feeds/googlenews.ts PUBLISHER_DOMAINS), so "bi"/"businessinsider" route to
+// googlenews discovery here, never to bitcoinmagazine. Anything unrecognized falls through to
+// googlenews discovery rather than being silently dropped (read-news's own doc: a feed that fails
+// to fetch/map must surface loudly).
+const FEED_SOURCE_ALIASES = {
+  ft: 'ft', financialtimes: 'ft',
+  wsj: 'wsj', wallstreetjournal: 'wsj', dowjones: 'wsj',
+  bloomberg: 'bloomberg', bloombergmarkets: 'bloomberg',
+  coindesk: 'coindesk',
+  decrypt: 'decrypt',
+  cointelegraph: 'cointelegraph',
+  theblock: 'theblock',
+  bitcoinmagazine: 'bitcoinmagazine', bitcoinmag: 'bitcoinmagazine',
+  coinbase: 'coinbase',
+  googlenews: 'googlenews', google: 'googlenews',
+  reuters: 'googlenews', cnbc: 'googlenews', ibd: 'googlenews', investorsbusinessdaily: 'googlenews',
+  bi: 'googlenews', businessinsider: 'googlenews', // Business Insider -> googlenews discovery, NEVER bitcoinmagazine
+  tradingview: 'tradingview',
+  coinmarketcap: 'coinmarketcap', cmc: 'coinmarketcap',
+  googlefinance: 'googlefinance',
+  morningstar: 'morningstar',
+  yahoo: 'yahoo', yahoofinance: 'yahoo',
+}
+// The 5 per-asset read-news sources -- fetched N-times, once per entry in --assets. If --source
+// includes one of these WITHOUT an explicit --assets flag, read_news.ts silently defaults `assets`
+// to its own internal DEFAULT_MARKET_ASSETS (a hardcoded BTC/ETH/SOL/... crypto watchlist,
+// read-news/scripts/feeds/markets.ts), unrelated to whatever this workflow run actually screened.
+// Never let that happen silently -- always pass --assets explicitly for these, or drop them.
+const PER_ASSET_SOURCES = new Set(['tradingview', 'coinmarketcap', 'googlefinance', 'morningstar', 'yahoo'])
+function mapFeedToReadNewsSource(feedName) {
+  const norm = String(feedName).toLowerCase().replace(/^feed[-_]?/, '').replace(/[^a-z]/g, '')
+  return FEED_SOURCE_ALIASES[norm] || null
+}
 if (FEEDS.length) {
   phase('NewsFetch')
   const feedTopics = [
     tickerList,
     plan.screen_scope || '',
   ].filter(Boolean).join(' ')
-  await parallel(FEEDS.map(feedName => () =>
-    agent(
-      `Pre-fetch news headlines into the article cache for the gather phase.\n` +
-      `Feed: ${feedName} (follow ${SKILL}/${feedName}/SKILL.md)\n` +
-      `Topics to search: "${feedTopics}"\n` +
-      `Steps:\n` +
-      `1. Fetch headlines from the feed using the Google News RSS method documented in the skill (NOT direct site RSS).\n` +
-      `2. For each headline relevant to [${ASSETS.join(', ')}] or the research theme, fetch the full article body:\n` +
-      `   bun ${READ_SCRIPT} "<article-url>"\n` +
-      `   This handles FT (via archive.ph/Chrome), WSJ (via Wayback), and BI automatically — no extension needed.\n` +
-      `   The script caches results in SQLite automatically.\n` +
-      `3. If read_article.ts returns [UNAVAILABLE - archive.ph CAPTCHA], skip that article and continue.\n` +
-      `4. Return count of articles ingested and any errors.\n` +
-      `HARD RULE: never fabricate body text. Teaser from RSS = OK. Invented prose = defect.`,
-      { label: `newsfetch:${feedName}`, phase: 'NewsFetch', model: MODEL }
-    )
-  ))
-  log(`NewsFetch: articles cached for gather agents (query via: python3 ${FETCH_SCRIPT} --search "<ticker>")`)
+  const mappedSources = []
+  const unmappedFeeds = []
+  for (const feedName of FEEDS) {
+    const mapped = mapFeedToReadNewsSource(feedName)
+    if (mapped) mappedSources.push(mapped)
+    else unmappedFeeds.push(feedName)
+  }
+  if (unmappedFeeds.length) {
+    log(`NewsFetch: FEEDS entries not recognized as read-news --source names, falling back to googlenews discovery: ${unmappedFeeds.join(', ')}`)
+    mappedSources.push('googlenews')
+  }
+  let effectiveSources = [...new Set(mappedSources)]
+  // Never pass a per-asset source without explicit target assets (see PER_ASSET_SOURCES comment
+  // above). ASSETS is always populated by the Screen phase before NewsFetch runs (an empty Screen
+  // result returns early with an error) -- but guard defensively anyway rather than trust that.
+  const perAssetRequested = effectiveSources.filter(s => PER_ASSET_SOURCES.has(s))
+  let assetsFlag = ''
+  if (perAssetRequested.length) {
+    if (ASSETS.length) {
+      assetsFlag = ` --assets ${ASSETS.join(',')}`
+    } else {
+      log(`NewsFetch: dropping per-asset source(s) [${perAssetRequested.join(', ')}] loudly -- no target ASSETS discovered yet, so read_news.ts would silently default to its internal crypto watchlist instead of this run's actual assets.`)
+      effectiveSources = effectiveSources.filter(s => !PER_ASSET_SOURCES.has(s))
+      if (!effectiveSources.length) effectiveSources = ['googlenews']
+    }
+  }
+  const sourceArg = effectiveSources.join(',')
+  // ONE agent, not one per feed -- read_news.ts already fans out to every requested source itself.
+  await agent(
+    `Fetch and cache news for this research run via read-news, the sole journalism fetch front door. ` +
+    `Never scrape FT/WSJ/Bloomberg/CoinDesk/etc. directly -- read_news.ts owns fetch + normalize + dedup + cross-run state.\n` +
+    `Run EXACTLY:\n` +
+    `bun ${SKILL}/read-news/scripts/read_news.ts --db ${NEWS_DB} --days 5 --query "${feedTopics}" --source ${sourceArg}${assetsFlag}\n` +
+    `This fetches, normalizes, dedups, and ingests events into ${NEWS_DB} -- every Gather-phase agent for this run will subsequently query that same store via news_store.ts.\n` +
+    `Report back the JSON {fetched, feeds_ok, unavailable, events} exactly as returned by the script.\n` +
+    `HARD RULE: never fabricate a headline or body. A per-feed failure must surface in "unavailable", never be silently dropped or invented.`,
+    { label: 'newsfetch', phase: 'NewsFetch', model: MODEL }
+  )
+  log(`NewsFetch: populated ${NEWS_DB} via read_news.ts (sources: ${sourceArg}${assetsFlag ? `, assets: ${ASSETS.join(',')}` : ''}) -- gather agents query it via news_store.ts`)
 }
 
 // ---------- Reusable per-batch pipeline: Gather -> Consolidate -> Panel (+guardrail) -> Decide ----------
@@ -520,8 +588,11 @@ async function runPipeline(assets, tag) {
     if (Array.isArray(c.beneficiary_chains) && c.beneficiary_chains.length) parts.push(`Beneficiary chains: ${JSON.stringify(c.beneficiary_chains)}`)
     return parts.length ? `\n${parts.join('\n')}` : ''
   }
+  // News cache query: NewsFetch (above) populates NEWS_DB once per run via read_news.ts; every
+  // Gather-phase agent for every asset then queries that SAME db via news_store.ts -- one shared
+  // store per run, no per-agent re-fetch, no third cache (read-news is the sole fetch front door).
   const ctxFor = (asset) =>
-    `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${batchList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nArticle cache: python3 ${FETCH_SCRIPT} --search "${asset}" --limit 5  (pre-fetched FT/WSJ/Bloomberg; query before hitting live URLs)\nFull article body: bun ${READ_SCRIPT} "<url>"  (FT→archive.ph/Chrome, WSJ→Wayback, no extension needed)\nAs-of: ${REPORT_DATE}${journalismFor(asset)}`
+    `Question: ${QUESTION}\nAsset class: ${ASSET_CLASS}\nFocus asset: ${asset}\nAll assets in this research: ${batchList}\nDesk focus: ${FOCUS || 'none'}\nPortfolio: ${PORTFOLIO}\nNews feeds: ${FEEDS.length ? FEEDS.join(', ') : '(none)'}\nArticle cache: bun ${SKILL}/read-news/scripts/news_store.ts query --q "${asset}" --db ${NEWS_DB} --days 5 --k 10  (pre-fetched FT/WSJ/Bloomberg/etc. events cached this run by read_news.ts; query before hitting live URLs)\nFull article body: bun ${READ_SCRIPT} "<url>"  (FT→archive.ph/Chrome, WSJ→Wayback, no extension needed)\nAs-of: ${REPORT_DATE}${journalismFor(asset)}`
 
   // ---------- GATHER -- per-asset pipeline (each asset x all gather skills in parallel) ----------
   // Old: one agent covers ALL assets per skill -> massive context, stalls on large lists.

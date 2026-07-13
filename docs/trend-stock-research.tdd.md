@@ -19,7 +19,7 @@ Static scanners only pre-screen. The real edge is reading analysts who understan
 ```
   STEP 1: SCOUT                 STEP 2: JUDGE                   STEP 3: GATE
   ─────────────                 ─────────────                   ────────────
-  trend-stock-research          multi-lens-quorum               strategy-discovery-backtest
+  stocks-trend-screener        multi-lens-quorum               strategy-discovery-backtest
   (journalism + scan)    ──▶    (4-7 independent lenses)  ──▶   (IS backtest + OOS + costs)
          │                             │                                │
          │                             ▼                                ▼
@@ -35,7 +35,7 @@ Three distinct jobs — keep them separate:
 
 | Step | Skill | Job | Output |
 |---|---|---|---|
-| SCOUT | `trend-stock-research` | *Find WHICH names* | watchlist of hypotheses |
+| SCOUT | `stocks-trend-screener` | *Find WHICH names* | watchlist of hypotheses |
 | JUDGE | `multi-lens-quorum` | *Judge WHETHER / how much* | quorum file with verdict per ticker |
 | GATE | `strategy-discovery-backtest` | *Validate the ENTRY rule* | PASS/FAIL + cost-adjusted stats |
 
@@ -43,14 +43,14 @@ They **chain**: scout picks → quorum judges → backtest times. Never skip or 
 
 ---
 
-## 3. Step 1 — SCOUT: `trend-stock-research`
+## 3. Step 1 — SCOUT: `stocks-trend-screener`
 
-**Skill:** `.agents/skills/trend-stock-research/`
+**Skill:** `.agents/skills/stocks-trend-screener/` (skill formerly named `trend-stock-research`)
 
 **What it does:**
 
 1. Runs `emerging_scan.py` — quantitative pre-screen over a ~180-name universe (price momentum, volume, RS). Produces a short candidate list.
-2. Reads quality financial journalism (Seeking Alpha, WSJ, FT) for each candidate. Looks for: demand inflection, supply-chain bottleneck, analyst re-rating, margin expansion, category-defining product.
+2. Reads quality financial journalism (WSJ, FT via the read-news feed scripts; Seeking Alpha is not automatable and is excluded) for each candidate. Looks for: demand inflection, supply-chain bottleneck, analyst re-rating, margin expansion, category-defining product.
 3. Rates each name on *why now* — what is the narrative catalyst that most people haven't priced yet?
 4. Outputs a ranked watchlist with one-line thesis per name and a confidence tier (HIGH / MEDIUM / SPECULATIVE).
 
@@ -198,13 +198,13 @@ Backtest edge (OOS 2021-2026): Sharpe 0.71, max DD -22%, win rate 61%
 
 This workflow is the **SLOW tier's primary research engine** — it is run weekly (Monday) as part of `hedge-fund-committee.workflow.js`.
 
-The **FAST tier** feeds it: `dip-screener`, `crypto-dip-scanner`, and `signal-convergence-alert` can surface names that then get routed into `trend-stock-research` for journalism verification before entering the quorum.
+The **FAST tier** feeds it: `dip-screener`, `crypto-dip-scanner`, and `signal-convergence-alert` can surface names that then get routed into `stocks-trend-screener` for journalism verification before entering the quorum.
 
 ```
 FAST tier alert (dip-screener / convergence)
             │
             ▼  (if alert fires on an equity name)
-SLOW tier: trend-stock-research  →  multi-lens-quorum  →  strategy-discovery-backtest
+SLOW tier: stocks-trend-screener  →  multi-lens-quorum  →  strategy-discovery-backtest
 ```
 
 A FAST alert does **not** bypass the quorum or backtest gate. It only accelerates the SCOUT step by providing a pre-qualified candidate.
@@ -215,7 +215,7 @@ A FAST alert does **not** bypass the quorum or backtest gate. It only accelerate
 
 | Step | Output |
 |---|---|
-| SCOUT | `trend-stock-research` surfaced FCX (copper/China), CCJ (uranium), ETN (grid infrastructure) from journalism + emerging scan |
+| SCOUT | `stocks-trend-screener` surfaced FCX (copper/China), CCJ (uranium), ETN (grid infrastructure) from journalism + emerging scan |
 | JUDGE | `multi-lens-quorum` ran 4 lenses; verdicts: FCX=HOLD OFF (China demand uncertain), CCJ=BUY (nuclear policy + balance sheet + backtest-ready signal), ETN=HOLD (expensive, wait for pullback) |
 | Artefact | `research/quorum-fcx-ccj-etn-2026-06-17.md` written |
 | GATE | CCJ only → `backtests/ccj_pullback_backtest.py` (IS 2010-2020, OOS 2021-2026, pullback-in-uptrend signal, 10bps RT) — pending |

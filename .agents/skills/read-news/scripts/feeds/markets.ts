@@ -1,5 +1,5 @@
 import type { Article } from "../types";
-import { toISO, stripHtml, sleep } from "../types";
+import { toISO, sleep } from "../types";
 
 export const DEFAULT_MARKET_ASSETS = ["BTC","ETH","SOL","TON","HYPE","AAVE","JUP","UNI","AERO","PUMP","LINK"];
 
@@ -11,9 +11,6 @@ const CMC_SLUG: Record<string, string> = {
   AAVE: "aave", UNI: "uniswap", LINK: "chainlink", JUP: "jupiter-ag",
   AERO: "aerodrome-finance", PUMP: "pump-fun", HYPE: "hyperliquid",
 };
-
-// News domains used to filter Google Finance anchor hrefs
-const GF_NEWS_DOMAIN_RE = /(?:reuters|bloomberg|fool|finance\.yahoo|cnbc|marketwatch|barrons|seekingalpha|investing|businessinsider|wsj|ft)\.com/;
 
 export function flattenTvAst(node: unknown): string {
   if (typeof node === "string") return node;
@@ -55,43 +52,6 @@ export function mapCmcItem(item: any, queriedAsset: string): Article {
     tags: [],
     assets: [queriedAsset.toUpperCase()],
   };
-}
-
-export function parseGoogleFinanceHtml(html: string, ticker: string): Article[] {
-  const asset = ticker.split(":")[0].toUpperCase();
-  const articles: Article[] = [];
-
-  // Real Google Finance structure:
-  //   <a href="https://www.reuters.com/..." target="_blank"><div class="TQWIEd">TITLE</div></a>
-  // Class names are obfuscated and rotate — match on STRUCTURE, not class names.
-  // published_at = current ISO time (no absolute timestamp in HTML).
-  const cardRe = /<a\s+href="(https?:\/\/[^"]+)"[^>]*target="_blank"[^>]*>\s*<div[^>]*>([^<]{8,250})<\/div>\s*<\/a>/g;
-  let m: RegExpExecArray | null;
-  while ((m = cardRe.exec(html)) !== null) {
-    const url = m[1];
-    if (!GF_NEWS_DOMAIN_RE.test(url)) continue;
-    const title = stripHtml(m[2]).trim();
-    if (!title || title.length < 8) continue;
-    articles.push({
-      source: "googlefinance",
-      url,
-      title,
-      summary: "",
-      body: null,
-      published_at: new Date().toISOString(), // no absolute timestamp in GF HTML
-      lang: "en",
-      tags: [],
-      assets: [asset],
-    });
-  }
-
-  // deduplicate by url
-  const seen = new Set<string>();
-  return articles.filter(a => {
-    if (seen.has(a.url)) return false;
-    seen.add(a.url);
-    return true;
-  });
 }
 
 export async function fetchTradingViewNews(
@@ -220,71 +180,4 @@ export async function fetchCmcNews(asset: string): Promise<{ articles: Article[]
   }
 
   return { articles, errors };
-}
-
-export async function fetchGoogleFinanceNews(symbol: string): Promise<{ articles: Article[]; errors: string[] }> {
-  const errors: string[] = [];
-  const articles: Article[] = [];
-  try {
-    const ac = new AbortController();
-    const t = setTimeout(() => ac.abort(), 15_000);
-    const res = await fetch(`https://www.google.com/finance/quote/${encodeURIComponent(symbol)}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      signal: ac.signal,
-    });
-    clearTimeout(t);
-    if (!res.ok) {
-      errors.push(`Google Finance HTTP ${res.status} for ${symbol}`);
-      return { articles, errors };
-    }
-    const html = await res.text();
-    const parsed = parseGoogleFinanceHtml(html, symbol);
-    articles.push(...parsed);
-  } catch (e) {
-    errors.push(e instanceof Error ? e.message : String(e));
-  }
-  return { articles, errors };
-}
-
-export async function fetchMarketNews(
-  assets: string[],
-  opts?: { tvSymbols?: Record<string, string> }
-): Promise<{ records: Article[]; unavailable: string[] }> {
-  const records: Article[] = [];
-  const unavailable: string[] = [];
-
-  for (const asset of assets) {
-    const upper = asset.toUpperCase();
-    const tvSymbols = opts?.tvSymbols ?? {};
-    const isCrypto = CMC_SLUG[upper] !== undefined || ["BTC","ETH","SOL"].includes(upper);
-
-    // CMC (crypto only)
-    if (isCrypto) {
-      try {
-        const { articles, errors } = await fetchCmcNews(upper);
-        records.push(...articles);
-        for (const e of errors) unavailable.push(`coinmarketcap:${e}`);
-      } catch (e) {
-        unavailable.push(`coinmarketcap:${e instanceof Error ? e.message : String(e)}`);
-      }
-      await sleep(300);
-    }
-
-    // TradingView
-    try {
-      const tvSym = tvSymbols[upper] ?? (isCrypto ? `COINBASE:${upper}USD` : `NASDAQ:${upper}`);
-      const { articles, errors } = await fetchTradingViewNews(tvSym);
-      records.push(...articles);
-      for (const e of errors) unavailable.push(`tradingview:${e}`);
-    } catch (e) {
-      unavailable.push(`tradingview:${e instanceof Error ? e.message : String(e)}`);
-    }
-    await sleep(300);
-  }
-
-  return { records, unavailable };
 }

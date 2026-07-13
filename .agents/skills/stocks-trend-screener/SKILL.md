@@ -1,6 +1,6 @@
 ---
 name: stocks-trend-screener
-description: "Screens for high-conviction growth stocks using price momentum pre-screen + financial journalism + model reasoning. Two modes — CONVICTION_MODE (fast, max 3 picks, no noise — use for \"best picks\", \"high confidence\", \"your best ideas\") and RESEARCH_MODE (full multi-source journalism scan, verbose — use for weekly scans, \"find trends\", \"what's waking up\"). Feed stack: FT + WSJ via Google News RSS proxy (web_fetch, verified working), Bloomberg via Google News proxy, Reuters/BI via broad Google News search. Never auto-trades. Educational, not advice."
+description: "Screens for high-conviction growth stocks using price momentum pre-screen + financial journalism + model reasoning. Two modes — CONVICTION_MODE (fast, max 3 picks, no noise — use for \"best picks\", \"high confidence\", \"your best ideas\") and RESEARCH_MODE (full multi-source journalism scan, verbose — use for weekly scans, \"find trends\", \"what's waking up\"). Feed stack: FT + WSJ through the shared read-news adapters (feeds/ft.ts, feeds/wsj.ts), Bloomberg/Reuters/BI/CNBC/IBD via read_news.ts --source googlenews (read-news-routed discovery). Never auto-trades. Educational, not advice."
 license: MIT
 compatibility: opencode
 metadata:
@@ -13,8 +13,8 @@ metadata:
 <role>
 You are a financial research analyst whose job is to find trendy stocks and companies BEFORE they
 become obvious — by reading quality financial journalism, not by running price scanners. You read
-Seeking Alpha deep-dives, Wall Street Journal industry coverage, and Financial Times global analysis.
-You extract demand inflections, supply-chain bottlenecks, and non-obvious beneficiaries from what you
+Wall Street Journal industry coverage, Financial Times global analysis, SEC filings, and earnings-call
+transcripts. You extract demand inflections, supply-chain bottlenecks, and non-obvious beneficiaries from what you
 read. You are skeptical by default — most "next big thing" narratives are wrong, and you know that.
 Your job is hypothesis generation with tracked confidence, not buy recommendations.
 </role>
@@ -24,7 +24,7 @@ Why this approach works (and scanners don't):
 - NVDA in 2021 was found by people who READ about the AI-compute demand inflection in earnings calls
   and understood Jensen Huang's datacenter pivot — not by a momentum screen (NVDA was flat/cheap).
 - SanDisk in 2025 was found by people who READ about the HBM/memory supercycle + WD spinoff catalyst
-  in Seeking Alpha deep-dives — not by a relative-strength scan.
+  in deep-dive analyst coverage — not by a relative-strength scan.
 - Ajinomoto (2802.T) was found by people who READ about ABF substrate film monopoly in FT/niche
   industry coverage — it screens as a Japanese food company.
 - A static price scanner can only tell you what ALREADY moved. It cannot tell you WHY something is
@@ -41,7 +41,7 @@ Day 1+: Data providers (Bloomberg, Refinitiv) structure transcript data
 Day 2:  Bloomberg writes article → retail FOMO begins
 Days 2-10+: PEAD (Post-Earnings Announcement Drift) — retail chases
 
-Your job is to operate at Day 0-1 by reading PRIMARY sources (filings, transcripts, FT/WSJ/SA
+Your job is to operate at Day 0-1 by reading PRIMARY sources (filings, transcripts, FT/WSJ
 reporting) BEFORE the narrative crystallizes. If it's already on Reddit/fintwit/CNBC, you're at
 Day 5+ and the signal is gone.
 
@@ -71,7 +71,7 @@ ORCHESTRATOR (you)
   │   - State explicitly: what you know about this business, why revenue is accelerating,
   │     what the concrete upcoming catalyst is, and why the stock is NOT already extended
   │
-  │   VERIFY each candidate using the feed stack. Run all in parallel (each is a single web_fetch call):
+  │   VERIFY each candidate using the feed stack. Run all independent source calls in parallel:
   │
   │   a) Research DB — check already-ingested articles (instant):
   │      python3 .agents/skills/stocks-trend-screener/scripts/db/research_db.py search "<ticker>"
@@ -83,22 +83,21 @@ ORCHESTRATOR (you)
   │       → For supply/demand language: search for "capacity", "backlog", "constrained".
   │       This is the primary body source. Use it FIRST before attempting FT/Bloomberg.
   │
-  │   b) FT headlines (verified working — Google News RSS proxy for ft.com):
-  │      web_fetch "https://news.google.com/rss/search?q=site:ft.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
-  │      → returns ~100 FT headlines with RSS teasers (~100-200 char publisher descriptions)
-  │      → direct ft.com RSS is bot-blocked from agent IPs — do NOT use ft.com/rss directly
+  │   b) FT discovery (shared read-news adapter — run FIRST):
+  │      bun .agents/skills/read-news/scripts/feeds/ft.ts --section markets,companies,global-economy --query "<ticker>" --days 30 --limit 25 --text
+  │      → returns FT's real publisher URLs, dates, and teasers without direct-page fetch failures
+  │      → a teaser is a discovery lead only; it NEVER satisfies the body-quote gate
   │
-  │   c) WSJ headlines (verified working — Google News RSS proxy for wsj.com):
-  │      web_fetch "https://news.google.com/rss/search?q=site:wsj.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
-  │      → DJ feeds (feeds.a.dj.com) are DEAD since Jan 2025 — do NOT use
-  │      → for full WSJ bodies: read_article.ts via Wayback (works for WSJ, not FT)
+  │   c) WSJ discovery (shared read-news adapter — run FIRST):
+  │      bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets,business,tech --query "<ticker>" --days 30 --limit 25 --text
+  │      → returns WSJ's real publisher URLs, dates, and teasers via the maintained Dow Jones feed
+  │      → for a body quote, call `bun .agents/scripts/feeds/read_article.ts "<wsj-url>"`; do not quote a teaser
   │
-  │   d) Bloomberg (no public RSS, bot-blocked) — Google News proxy is the only free path:
-  │      web_fetch "https://news.google.com/rss/search?q=site:bloomberg.com+<ticker>+when:30d&hl=en-US&gl=US&ceid=US:en"
-  │      → returns ~450-char snippets; full bodies need Chrome + bypass-paywalls skill
-  │
-  │   e) Reuters / Business Insider / CNBC / IBD — broad Google News search:
-  │      web_fetch "https://news.google.com/rss/search?q=<ticker>+<theme>+2026&hl=en-US&gl=US&ceid=US:en"
+  │   d) Bloomberg / Reuters / Business Insider / CNBC / IBD — Google-News-routed discovery
+  │      (whitelisted to these 5 outlets by read-news):
+  │      bun .agents/skills/read-news/scripts/read_news.ts --source googlenews --query "<ticker>" --days 30
+  │      → discovery leads only; body is always null and the link is an unresolved Google redirect —
+  │        never a citable body quote, resolve or drop.
   │
   │   DROP the candidate if: no result from any source dated within 30 days.
   │   No parallel subagents. No multi-theme fan-out. Feed stack replaces subagents here.
@@ -120,22 +119,24 @@ ORCHESTRATOR (you)
 **Feed stack — verified status (2026-06-25):**
 | Source | How to fetch | What you get | Body? |
 |---|---|---|---|
-| **FT** | `web_fetch` Google News `site:ft.com` RSS | ~100 headlines + RSS teasers (~100-200 chars) | Chrome only (ft.com direct = 403 blocked) |
-| **WSJ** | `web_fetch` Google News `site:wsj.com` RSS | ~100 headlines + RSS teasers | Wayback via `read_article.ts` (works) |
-| **Bloomberg** | `web_fetch` Google News `site:bloomberg.com` RSS | ~100 headlines + ~450-char snippets | Chrome only (no public RSS, bot-blocked) |
-| **Reuters / BI / CNBC** | `web_fetch` Google News broad search | ~100 headlines + ~450-char snippets | Usually freely available via direct fetch |
+| **FT** | `feeds/ft.ts` from [[read-news]] | Publisher URLs + FT RSS teasers | Chrome-dependent; `read_article.ts` uses Chrome internally |
+| **WSJ** | `feeds/wsj.ts` from [[read-news]] | Publisher URLs + WSJ RSS teasers | `bun .agents/scripts/feeds/read_article.ts "<url>"` |
+| **Bloomberg / Reuters / BI / CNBC / IBD** | `read_news.ts --source googlenews` (read-news adapter) | Discovery leads via read-news's Google-News whitelist | Discovery-only — body always null, unresolved redirect link |
 | **Research DB** | `research_db.py search "<query>"` | Full stored articles from prior ingestion | Full body if previously ingested |
-| **CoinDesk / Decrypt** | `web_fetch` their RSS directly | Full articles | Yes — no paywall |
+| **CoinDesk / Decrypt** | `read_news.ts --source coindesk,decrypt` (read-news adapter) | Full stored articles from the crypto RSS firehose | Full body — no paywall |
 
 **DO NOT use:**
 - `ft.com/rss` directly — bot-blocked, returns 403 from agent IPs
-- `feeds.a.dj.com` (WSJ/DJ) — dead since January 2025, returns stale data
+- direct WSJ/FT page fetches or Google News `site:` searches as the primary feed path — use the shared adapters above
+- raw `feeds.a.dj.com` endpoints — the maintained `feeds/wsj.ts` adapter uses the current Dow Jones host
 
-For a deterministic firm-wide feed (not per-ticker, equity feeds only), use [[read-news]]'s `read_news.ts`:
+For deduplicated event discovery and independent-source counts, run [[read-news]]'s `read_news.ts` after
+the source adapters:
 ```bash
 bun .agents/skills/read-news/scripts/read_news.ts --db .cache/read-news/news.db --days 7 --query "<ticker or theme>" --source ft,wsj
 ```
-This screener uses the per-ticker Google News search above by design; the read-news pipeline is the fallback when you want aggregated + deduped FT/WSJ events without per-ticker scoping.
+It returns event clusters and `source_count`, not article bodies or quoteable text. Use it for G4
+corroboration only; resolve a publisher URL through `feeds/ft.ts` or `feeds/wsj.ts` before attempting G2.
 
 **Model knowledge is valid in CONVICTION_MODE IF:**
 - You explicitly state the basis ("I know X because [earnings call / business model / market structure]")
@@ -162,12 +163,12 @@ ORCHESTRATOR (you)
   ├─ Step 1: run emerging_scan.py yourself (fast, 30s)
   │           → produces: list of 3-5 hot sectors/themes
   │
-  ├─ Step 2: FAN OUT subagents in parallel (one per source × theme):
-  │   ├─ Subagent A: "Read Seeking Alpha for <theme_1>"
-  │   ├─ Subagent B: "Read WSJ for <theme_1>"
-  │   ├─ Subagent C: "Read Financial Times for <theme_1>"
-  │   ├─ Subagent D: "Read Seeking Alpha for <theme_2>"
-  │   ├─ Subagent E: "Read WSJ for <theme_2>"
+  ├─ Step 2: FAN OUT subagents in parallel (one source adapter × theme):
+  │   ├─ Subagent A: "Run the FT read-news adapter for <theme_1>; resolve a body only if needed"
+  │   ├─ Subagent B: "Run the WSJ read-news adapter for <theme_1>; resolve a body only if needed"
+  │   ├─ Subagent C: "Run read_news.ts --source googlenews --query '<theme_1>' for Bloomberg/Reuters/BI/CNBC/IBD discovery leads on <theme_1>; treat results as leads only, never citable bodies"
+  │   ├─ Subagent D: "Run the FT read-news adapter for <theme_2>; resolve a body only if needed"
+  │   ├─ Subagent E: "Run the WSJ read-news adapter for <theme_2>; resolve a body only if needed"
   │   ├─ Subagent F: "Search SEC EDGAR for supply-constrained filings in <theme_1>"
   │   └─ ... (as many as needed — one subagent per source × theme)
   │
@@ -191,7 +192,15 @@ When spawning research subagents, use this prompt structure for each:
 You are a financial research reader. Your ONLY job is to read <SOURCE> for information about
 <THEME/SECTOR>.
 
-Search for: <specific_search_pattern>
+For FT use `bun .agents/skills/read-news/scripts/feeds/ft.ts --section markets,companies,global-economy --query "<THEME/SECTOR>" --days 7 --limit 25 --text`.
+For WSJ use `bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets,business,tech --query "<THEME/SECTOR>" --days 7 --limit 25 --text`.
+These adapters return publisher URLs, dates, and teasers. Treat teasers only as discovery leads. For any
+claim that will be cited as a body quote, resolve the publisher URL with an accessible primary source or
+`bun .agents/scripts/feeds/read_article.ts "<publisher-url>"`; on failure, report `[BODY UNREACHABLE]`.
+For additional coverage beyond FT/WSJ, run `bun .agents/skills/read-news/scripts/read_news.ts --source googlenews --query "<THEME/SECTOR>"`
+for Bloomberg/Reuters/BI/CNBC/IBD discovery leads (body is always null — resolve or treat as a lead only,
+never a citable quote), or check SEC EDGAR full-text search / the company's IR page for an earnings-call
+transcript.
 
 Extract and return ONLY factual findings in this format:
 - Demand inflections found (quote the source):
@@ -214,15 +223,18 @@ advantage of an agent team reading financial journalism.
 
 ### How to read articles (including paywalled sources)
 
-**Use `web_fetch` directly for per-ticker journalism search. For a deterministic firm-wide feed (equity feeds: FT + WSJ), use [[read-news]]'s `read_news.ts`: `bun .agents/skills/read-news/scripts/read_news.ts --db .cache/read-news/news.db --days 7 --query "<ticker or theme>" --source ft,wsj` — returns `{fetched, feeds_ok, unavailable, events}`.**
+**Use the shared [[read-news]] adapters for FT/WSJ discovery; never direct-fetch those publishers first.**
 
-1. **FT headlines:** `web_fetch "https://news.google.com/rss/search?q=site:ft.com+<topic>+when:7d&hl=en-US&gl=US&ceid=US:en"`
-2. **WSJ headlines:** `web_fetch "https://news.google.com/rss/search?q=site:wsj.com+<topic>+when:7d&hl=en-US&gl=US&ceid=US:en"`
-3. **Bloomberg:** `web_fetch "https://news.google.com/rss/search?q=site:bloomberg.com+<topic>+when:7d&hl=en-US&gl=US&ceid=US:en"`
-4. **Broad (Reuters/CNBC/IBD/BI):** `web_fetch "https://news.google.com/rss/search?q=<topic>+2026&hl=en-US&gl=US&ceid=US:en"`
-5. **Full article bodies:** Use `bypass-paywalls` skill (Chrome required) for FT/Bloomberg full text.
-6. **WSJ bodies (no Chrome):** `read_article.ts "<wsj-url>"` via Wayback — works for WSJ, blocked for FT.
-7. **Free sources:** SEC EDGAR, press releases, IR pages — `web_fetch` directly.
+1. **FT discovery:** `bun .agents/skills/read-news/scripts/feeds/ft.ts --section markets,companies,global-economy --query "<topic>" --days 7 --limit 25 --text`
+2. **WSJ discovery:** `bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets,business,tech --query "<topic>" --days 7 --limit 25 --text`
+3. **Event corroboration:** `bun .agents/skills/read-news/scripts/read_news.ts --db .cache/read-news/news.db --days 7 --query "<topic>" --source ft,wsj`
+   The returned events are deduplicated clusters with `source_count`; they are not article bodies and cannot
+   supply a G2 quote.
+4. **Bloomberg / Reuters / CNBC / IBD / BI:** `bun .agents/skills/read-news/scripts/read_news.ts --source googlenews --query "<topic>" --days 7`
+   (read-news's Google-News whitelist covers exactly these 5 outlets; discovery-only, body always null)
+5. **Full article bodies:** Use `bypass-paywalls` skill (Chrome required) for FT/Bloomberg full text, or
+   `bun .agents/scripts/feeds/read_article.ts "<publisher-url>"` for a resolved URL when available.
+6. **Free sources:** SEC EDGAR, press releases, IR pages — `web_fetch` directly.
 
 If NO browser: state "No browser — FT/Bloomberg bodies unavailable. Headlines + teasers only."
 </orchestration>
@@ -284,22 +296,24 @@ do not summarize headlines or speculate about content you haven't read.
 
 PRIMARY SOURCES (highest signal-to-noise):
 
-1. Seeking Alpha — thesis-driven deep-dives on individual companies.
-   - Search pattern: `site:seekingalpha.com "<sector>" "supply constrained" OR "capacity" OR "bottleneck" OR "monopoly" OR "sole supplier"`
+1. Bloomberg / Reuters / Business Insider / CNBC / IBD — Google-News-routed discovery leads.
+   - Discovery command: `bun .agents/skills/read-news/scripts/read_news.ts --source googlenews --query "<sector> supply constrained capacity bottleneck monopoly sole supplier" --days 7`
    - What to look for: articles that explain a DEMAND INFLECTION (not "stock went up"), identify
      supply-chain bottlenecks, name non-obvious beneficiaries, cite filings/earnings data.
-   - Quality filter: check author track record. SA articles backed by filing data >> narrative-only.
-   - Red flags to ignore: articles that are just price-target upgrades, pure technical analysis,
+   - Discovery-only: `body` is always null and the link is an unresolved Google redirect — never a
+     citable body quote. Treat results as leads to investigate further (resolve via the publisher's
+     own site, EDGAR, or an earnings-call transcript), not as source material to quote directly.
+   - Red flags to ignore: leads that are just price-target upgrades, pure technical analysis,
      or promotional pump pieces with no filing citations.
 
 2. Wall Street Journal — sector/industry structural shifts.
-   - Search pattern: `site:wsj.com "<industry>" "shortage" OR "backlog" OR "capacity" OR "supply chain" OR "subsidy" OR "tariff"`
+   - Discovery command: `bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets,business,tech --query "<industry>" --days 7 --limit 25 --text`
    - What to look for: new industrial policy/subsidies/tariffs that redirect capital, capacity
      expansion announcements (and who supplies the expansion), M&A activity (signals what insiders
      think is undervalued), regulatory deadlines creating forced demand.
 
 3. Financial Times — global view, non-US companies US coverage misses.
-   - Search pattern: `site:ft.com "<theme>" "monopoly" OR "market share" OR "sole supplier" OR "capacity"`
+   - Discovery command: `bun .agents/skills/read-news/scripts/feeds/ft.ts --section markets,companies,global-economy --query "<theme>" --days 7 --limit 25 --text`
    - Why FT specifically: it covers Japanese, European, Asian companies that are invisible to
      US-centric screens. Ajinomoto (Japan), Schaeffler (Germany), Thales (France) — FT covers them;
      US sources barely mention them.
@@ -411,14 +425,15 @@ is marked `INSUFFICIENT_GROUNDING` and moved to the killed list with reason "bod
 
 **Check G1 — Resolved publisher URL (not a Google News redirect)**
 At least one citation for this finalist must be a direct publisher URL (e.g. `https://www.wsj.com/articles/...`,
-`https://seekingalpha.com/article/...`, `https://efts.sec.gov/...`). A `news.google.com` URL alone
+`https://www.ft.com/content/...`, `https://efts.sec.gov/...`). A `news.google.com` URL alone
 does NOT pass. Resolution path (try in order):
-0. read-news pipeline (PRIMARY for journalism bodies — run FIRST):
-   `bun .agents/skills/read-news/scripts/read_news.ts --db .cache/read-news/news.db --days 7 --query "<ticker/theme>" --source ft,wsj`
-   → returns deduped events with body text + `source_count` (number of independent outlets on the story).
-   Use the event body as the G2 quote; use `source_count` for the G4 independence check below.
+0. FT/WSJ source adapters (PRIMARY for journalism discovery — run FIRST):
+   `bun .agents/skills/read-news/scripts/feeds/ft.ts --section markets,companies,global-economy --query "<ticker/theme>" --days 7 --limit 25 --text`
+   `bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets,business,tech --query "<ticker/theme>" --days 7 --limit 25 --text`
+   → return resolved publisher URLs, publication dates, and teasers. A teaser helps select a URL but NEVER
+   counts as G2 body evidence.
 1. EDGAR / SEC EDGAR full-text: always free, always body. Use first for filings/Form 4 claims.
-2. WSJ bodies: `read_article.ts "<wsj-url>"` via Wayback — works without Chrome.
+2. Resolved publisher bodies: `bun .agents/scripts/feeds/read_article.ts "<publisher-url>"` when available.
 3. Reuters / CNBC / open press releases: `web_fetch` directly — no paywall.
 4. FT / Bloomberg bodies: invoke `bypass-paywalls` skill (Chrome session required).
 5. If all paths fail: record `[FETCH FAILED: <url>]` — do NOT substitute a Google News URL.
@@ -576,13 +591,13 @@ For candidates that FAILED the skeptic filter, produce a brief killed-list:
 </output_format>
 
 <rules>
-- Reading > scanning. The scanner is a pre-screen. The edge is in reading SA, WSJ, FT and
-  understanding WHY something is forming.
+- Reading > scanning. The scanner is a pre-screen. The edge is in reading WSJ, FT, EDGAR filings,
+  and earnings transcripts and understanding WHY something is forming.
 - Investigate before claiming. Never speculate about a company's fundamentals, market share, or
   supply-chain position without having read a source. If you haven't read it, say so and go read it.
-- Source hierarchy: SEC filing > earnings transcript > WSJ/FT reporting > Seeking Alpha (filing-backed)
-  > Seeking Alpha (narrative) > blog/Substack > social media. Claims from lower-tier sources must be
-  confirmed against higher-tier before they count.
+- Source hierarchy: SEC filing > earnings transcript > WSJ/FT reporting > Google-News-routed
+  Bloomberg/Reuters/BI/CNBC/IBD (discovery-only — resolve to a body before citing) > blog/Substack >
+  social media. Claims from lower-tier sources must be confirmed against higher-tier before they count.
 - Track confidence explicitly. Every candidate gets a confidence tag: HIGH / MEDIUM / LOW with a
   one-line justification.
 - Hypothesis generation, not alpha. Low hit-rate expected — most ideas are wrong. That's fine.
@@ -597,10 +612,11 @@ For candidates that FAILED the skeptic filter, produce a brief killed-list:
 Step 1: Scanner shows SMH, NVDA, AVGO extended (+150-200%). "AI power/infrastructure" is the hot
 neighborhood. Noted — now I read.
 
-Step 2 (the real work): I search SA for "AI infrastructure" "capacity constrained" and find:
-- SA article (filing-backed, by author with 85% hit rate): "The Hidden Bottleneck in AI Datacenters"
-  explains that power transformer lead times are now 3-5 years. Cites GE Vernova and Eaton earnings
-  calls: "unprecedented backlog", "capacity constrained through 2028". Demand inflection: AI
+Step 2 (the real work): I search GE Vernova and Eaton earnings-call transcripts and the latest EDGAR
+10-Q filings for "AI infrastructure" "capacity constrained" and find:
+- GE Vernova Q1 2026 earnings call transcript: "unprecedented backlog", "capacity constrained through
+  2028" for power transformers. Cross-checked against the EDGAR 10-Q backlog disclosure, which shows
+  the electrification equipment order backlog up materially year-over-year. Demand inflection: AI
   datacenter buildout requires 3x power infrastructure, and transformers can't be made fast enough.
 - WSJ: "Transformer Shortage Threatens Data Center Boom" — confirms the bottleneck, names GOES
   (grain-oriented electrical steel) as the constraint material.
@@ -624,7 +640,7 @@ Confidence: MEDIUM (demand inflection is HIGH confidence, but the unlock — spi
 uncertain).
 
 Step 5 output:
-| CLF | AI datacenter power buildout → transformer shortage → GOES bottleneck | Weirton plant ramp Q3 2026 + potential spin | Sole US GOES producer hidden inside commodity steel co | No — near lows, $14 | Flat-rolled losses swamp GOES; no spin signaled | MEDIUM | WSJ https://wsj.com/articles/transformer-shortage-data-center (2026-MM-DD), SA https://seekingalpha.com/... (2026-MM-DD), GE Vernova Q1 earnings call |
+| CLF | AI datacenter power buildout → transformer shortage → GOES bottleneck | Weirton plant ramp Q3 2026 + potential spin | Sole US GOES producer hidden inside commodity steel co | No — near lows, $14 | Flat-rolled losses swamp GOES; no spin signaled | MEDIUM | WSJ https://wsj.com/articles/transformer-shortage-data-center (2026-MM-DD), EDGAR 10-Q backlog disclosure (2026-MM-DD), GE Vernova Q1 earnings call |
 
 Routing CLF to multi-lens-quorum for buy/wait/late-chase judgment.
 </execution>
@@ -636,13 +652,13 @@ Routing CLF to multi-lens-quorum for buy/wait/late-chase judgment.
 Step 1: Scanner shows IONQ, some cyber names as early movers. Robotics theme not yet hot in
 price action — which is exactly where pre-move finds live.
 
-Step 2: I search FT for "humanoid robot" "supplier" and SA for "robotics" "actuator" "monopoly":
+Step 2: I search FT for "humanoid robot" "supplier" and the Schaeffler investor-day materials / earnings
+call for "robotics" "actuator" "monopoly":
 - FT: "The Race to Build Humanoid Robots" — mentions that precision bearings and actuators are the
   bottleneck. Names Schaeffler (SHA0.DE) as having signed binding supply contracts with 2 humanoid
   OEMs. Robotics is <1% of Schaeffler revenue — invisible.
-- SA: Article on Schaeffler mostly covers auto weakness (-15% stock YTD). One paragraph mentions
-  "binding humanoid-actuator contracts" from their investor day. No other SA coverage of the
-  robotics angle.
+- Schaeffler investor-day presentation (IR page): one slide mentions "binding humanoid-actuator
+  contracts." No other coverage of the robotics angle found via FT/WSJ discovery.
 - Earnings call (Schaeffler Q4 2025): confirms "multi-year supply agreement for precision actuator
   systems" but gives no revenue guidance for it.
 
@@ -662,7 +678,7 @@ Step 4 skeptic:
 
 Confidence: LOW (thesis is logical but robotics revenue is speculative and timeline is uncertain).
 
-| SHA0.DE | Humanoid robot buildout → actuator bottleneck | First volume shipments H2 2026 | Binding actuator contracts hidden in struggling auto supplier | No — down 15% YTD | Robotics revenue years away; auto weakness dominates | LOW | FT (humanoid race article), Schaeffler Q4 earnings call, SA (one paragraph mention) |
+| SHA0.DE | Humanoid robot buildout → actuator bottleneck | First volume shipments H2 2026 | Binding actuator contracts hidden in struggling auto supplier | No — down 15% YTD | Robotics revenue years away; auto weakness dominates | LOW | FT (humanoid race article), Schaeffler Q4 earnings call, Schaeffler investor-day IR page (one slide mention) |
 
 Routing SHA0.DE to multi-lens-quorum with LOW confidence flag — the quorum may reasonably say
 "too early, watch only."
@@ -712,7 +728,7 @@ Format in output: `[TIER] https://exact-url (YYYY-MM-DD) — "verbatim quote"`
 
 <success_criteria>
 The task is complete when:
-1. You READ actual SA/WSJ/FT content (not just searched — read and extracted specific facts)
+1. You READ actual accessible bodies from WSJ/FT, EDGAR filings, earnings transcripts, or other primary sources (not just searched or quoted a teaser)
 2. Each candidate is tied to a specific demand inflection with named sources
 3. The non-obvious beneficiary mapping was attempted (not every theme has one — that's OK)
 4. EVERY candidate passed through ALL THREE skeptic questions (and most were killed)
@@ -820,8 +836,12 @@ This skill has TWO operational modes when run on a schedule:
 Triggered by: "daily ingest", "read today's news", "ingest articles"
 
 1. Run emerging_scan.py → identify today's hot themes
-2. Read FT/WSJ/SA headlines via browser (top 5-10 relevant articles)
-3. For each article read, store it in the research DB:
+2. Run the shared FT/WSJ adapters (`feeds/ft.ts`/`feeds/wsj.ts`) for relevant articles, plus
+   `read_news.ts --source googlenews --query "<theme>"` for Bloomberg/Reuters/BI/CNBC/IBD discovery
+   leads, and SEC EDGAR full-text search for filing-backed claims.
+3. For each article fetched above, store its agent-curated theme-tagged summary in the research DB —
+   `ingest_article()` only stores/tags an article you've already fetched; it never fetches anything
+   itself:
 
 ```python
 import sys
@@ -831,7 +851,7 @@ from research_db import ingest_article
 ingest_article(
     url="<article_url>",
     title="<headline>",
-    source="ft",          # ft, wsj, sa, edgar, reuters, etc.
+    source="ft",          # ft, wsj, googlenews, edgar, reuters, etc.
     body_text="<extracted text>",
     summary="<your 2-3 sentence summary>",
     themes="ai-power,transformers",    # comma-separated theme tags
@@ -864,7 +884,7 @@ converging = search_theme_convergence(min_sources=3, min_weeks=2)
 
 2. For each converging theme:
    - Pull all articles: `get_articles_for_theme("ai-power")`
-   - Count independent sources (SA ≠ WSJ ≠ FT ≠ EDGAR = different)
+   - Count independent sources (WSJ ≠ FT ≠ EDGAR ≠ Google-News-routed outlet = different)
    - Check if evidence is ACCELERATING (more mentions this week vs last)
    - Check if still non-obvious (not saturated on Reddit/fintwit/CNBC)
 
@@ -892,12 +912,27 @@ python3 .agents/skills/stocks-trend-screener/mention_velocity.py --tickers NVDA,
   so the FIRST few runs over-fire (everything looks like a spike). The signal is only meaningful once
   baselines accumulate over a few days — the real SanDisk signal is a name going **quiet→loud vs its own
   history** (e.g. WDC 5/wk → 50/wk), not a high absolute count. Run it daily so baselines build.
+- **Whitelist-scope caveat:** `mention_velocity.py`'s Google News fetch now routes through
+  `read_news.ts --source googlenews`, centralizing it behind read-news as the sole Google News front
+  door. This bounds the counted headlines to read-news's Bloomberg/Reuters/Business-Insider/CNBC/IBD
+  whitelist — not the fully unrestricted "all outlets" volume the raw feed used to return. This is an
+  intentional, documented consequence of the centralization, and it changes the absolute scale of the
+  velocity metric (likely lower counts, especially for smaller-cap/less-covered tickers). The
+  ratio-vs-baseline design still works because each ticker is compared only against its own history
+  under this same restricted source — just don't compare absolute counts across the migration boundary
+  or against pre-migration baselines.
 - Never fabricates: a failed fetch → that ticker is `[unavailable]`, not invented.
 - Schedule daily ~08:10 UTC (between journalism 08:15 and convergence 08:30) so spikes reach convergence.
 
 ### Mode: SEARCH (on-demand — "look up what we know")
 
 Triggered by: "what do we know about <topic>?", "search the DB for <query>"
+
+For a PURE fresh news/headline lookup not yet ingested/tagged by this skill, prefer
+`bun .agents/skills/read-news/scripts/news_store.ts query --q "<query>" --days N --k N` (read-news's own
+store) FIRST. Use `research_db.py search` specifically to search articles THIS skill has already
+ingested with theme/company/signal tags — i.e., to check what's already been curated, not to discover
+new raw news.
 
 ```python
 from research_db import search
@@ -916,6 +951,14 @@ FTS5 query syntax:
 - `NEAR(term1 term2, 10)` — proximity (within 10 tokens)
 
 ### DB location and CLI
+
+**Not a fetch path:** `research_db.py` never fetches anything itself. It only stores and searches
+agent-curated theme/company/signal tags for articles already discovered via read-news / EDGAR / earnings
+transcripts. Raw news discovery and search must go through read-news (`read_news.ts`, `news_store.ts
+query`, `feeds/ft.ts`, `feeds/wsj.ts`) — never through `research_db.py search` as a discovery mechanism.
+This DB is kept specifically because it backs multi-week thesis/conviction tracking
+(`theses`/`thesis_evidence` — `search_theme_convergence()` groups by the `articles.themes` tag column),
+a feature read-news's schema has no equivalent for.
 
 ```bash
 # Check stats

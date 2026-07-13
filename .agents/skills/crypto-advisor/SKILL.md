@@ -234,22 +234,29 @@ Brief:
 
 **HARD RULE: call `web_fetch` on a real URL before citing it — OR cite a record from a feed script (`feeds/wsj.ts`/`feeds/ft.ts`/`read_news.ts`), which return real URLs + verbatim publisher teasers. A URL neither web_fetched nor returned by a feed script this run is NOT a source. A headline with no URL is a hallucination and invalidates the entire brief.**
 
-> **Known broken sources (never use):**
-> - `coindesk.com/search?q=...` — returns the same unrelated featured article regardless of query.
-> - `decrypt.co/tag/...` — 404 for most tokens.
-> - `cryptopanic.com/news/...` — returns only the page title, no articles.
-> Use the **two-step pattern**: (1) fetch a listing page for current article URLs, (2) fetch the article URL for the quote.
+> **Retired direct-fetch patterns (never `web_fetch` these):** `coindesk.com/search?q=...` (same unrelated
+> featured article regardless of query), `decrypt.co/tag/...` (404 for most tokens), `cryptopanic.com/news/...`
+> (title-only page, no articles). `read-news` is the sole crypto-journalism fetch front door (see below) — its
+> RSS-based adapters never hit these known-broken search/tag endpoints, so no manual listing→article workaround
+> is needed.
 
-**`web_fetch` ≥3 of these starting URLs** per token (applies to `analyse-macro`, `analyse-smartmoney`, and `analyse-defi` where applicable):
+**`web_fetch` ≥2 of these T1 starting URLs, plus the `read-news` call below for T2 journalism** per token
+(applies to `analyse-macro`, `analyse-smartmoney`, and `analyse-defi` where applicable):
 
 **On-chain data (T1 — try first):**
 - Fear & Greed: `https://api.alternative.me/fng/?limit=1` (JSON)
 - DeFiLlama chain: `https://defillama.com/chain/ethereum` | `.../solana` etc. (TVL, fees, revenue)
 - DeFiLlama protocol: `https://defillama.com/protocol/{slug}` e.g. `aave`, `uniswap`, `chainlink`
 
-**News discovery — two-step (T2):**
-- Step 1: fetch a **listing page** for current URLs: `https://www.coindesk.com/markets` (BTC/ETH/macro) · `https://www.coindesk.com/tech` (DeFi/protocol) · `https://www.theblock.co/latest` (broad).
-- Step 2: extract a token-relevant article URL from the listing, fetch it, quote its body. Cite the article URL, not the listing.
+**News discovery — read-news (T2, sole fetch front door for crypto journalism — never `web_fetch` CoinDesk,
+TheBlock, Decrypt, CoinTelegraph, BitcoinMagazine, CryptoPanic, or Google News directly):**
+```bash
+bun .agents/skills/read-news/scripts/read_news.ts --source coindesk,theblock,decrypt,cointelegraph,bitcoinmagazine --query "{TOKEN or theme}" --days 5
+```
+Each returned event's `url` field is a real, citable article URL — no separate listing→article step needed.
+`decrypt`, `coindesk`, `cointelegraph`, and `bitcoinmagazine` carry full body text (`content:encoded`) you can
+quote verbatim; `theblock` and `bloomberg` return title/summary only via this pipeline — cite those as
+headline-level T2, not a body quote. Narrow `--source` to fewer feeds when you only need one outlet.
 
 **Macro context — FT/WSJ via feed scripts (T2, for BTC/ETH & risk regime):** FT/WSJ listing pages are paywalled/bot-blocked — do NOT web_fetch them. Run the feed scripts; each prints real `wsj.com`/`ft.com` URLs + a verbatim 1-sentence teaser + date (the teaser IS a citable T2 quote). `--query` is AND-of-words — use ONE topic word (e.g. `bitcoin`, `Fed`, `crypto`) or omit it:
 ```bash
@@ -273,7 +280,9 @@ A descriptive summary ("protocol revenue confirmed", "GHO expansion ongoing") is
 **On-chain seat — tokenomics live check (DeFi tokens).** For any non-L1 token (not BTC/ETH/SOL/TON), `analyse-defi` must verify protocol mechanics via live fetch before writing the DeFi brief. **NEVER state a tokenomics claim (fee switch, buyback, burn, staking yield, revenue accrual) from memory — governance votes change protocol economics at any time.**
 
 1. `web_fetch https://defillama.com/protocol/{slug}` — check the **Protocol Revenue** row and the description for burns, buybacks, revenue distribution.
-2. If DeFiLlama shows non-zero revenue AND recall says "no accrual" → **you are stale**. Fetch the governance forum: `web_fetch https://www.theblock.co/search?query={TOKEN}+fee+switch` and `web_fetch https://gov.uniswap.org`.
+2. If DeFiLlama shows non-zero revenue AND recall says "no accrual" → **you are stale**. Check journalism
+   coverage via read-news: `bun .agents/skills/read-news/scripts/read_news.ts --source theblock,coindesk --query "{TOKEN} fee switch" --days 14`,
+   and check the governance forum directly: `web_fetch https://gov.uniswap.org`.
 3. Characterize mechanics only after the live fetch. Quote the source verbatim; cite the URL.
 
 **Rank sources by signal quality:**
@@ -635,7 +644,7 @@ BTC research sources:
   [T1] https://api.alternative.me/fng/?limit=1 — "value: 18, value_classification: Extreme Fear" → T1: hard numeric index with timestamp, directly measures crowd fear
   [T2] https://www.coindesk.com/markets/2026/06/21/bitcoin-options-traders-scrambling → "Bitcoin traders are scrambling to buy options bets that would pay off if the selloff deepens" → T2: named-source journalism, live positioning data
   [T3] https://www.coindesk.com/markets/2026/06/20/bitcoin-54k-analyst-forecast → "Bitcoin price may be headed to $54,000, says analyst who forecast October's all-time high" → T3: analyst opinion, useful for risk framing, no hard data
-  [FETCH FAILED: https://www.theblock.co/latest] — no BTC-specific articles visible
+  [UNAVAILABLE: read_news.ts --source theblock --query "bitcoin" — no BTC-specific events in the last 5 days]
 ```
 (DeFiLlama T1 example: `[T1] https://defillama.com/chain/ethereum — "Chain Revenue (24h)$65,225... App Revenue (24h)$1.1m... Bridged TVL$349.351b"` — exact metric string, not a paraphrase.)
 
@@ -647,7 +656,7 @@ Self-check before printing:
 - **Block 2 researcher recap present for every token** — 5 lines (Technical/On-Chain/DeFi/Macro/Smart Money), no line omitted
 - **Block 2 panel votes present for every token** — 6 lines (Graham/Buffett/Dalio/Druckenmiller/Alden/Burniske)
 - Every research source entry starts with `https://` followed by the **specific article URL** (not a listing/search page) — else remove it and mark INSUFFICIENT DATA
-- **Two-step verified**: news citations point to the article URL you fetched (step 2), not the listing page (step 1)
+- **read-news citations verified**: news citations use the `url` field returned by `read_news.ts` (or the `feeds/wsj.ts`/`feeds/ft.ts` scripts) directly — never a manually fetched listing/search page
 - **Block 2 inline links**: every news-based claim has `[source: https://...]` — scan each verdict; remove any fact with no source tag
 - A TradingView screenshot is embedded inline (via `view` tool on the `file_path`) for every token
 - **No source cited that was not actually fetched this run** — verify "did I web_fetch this exact URL, or did a feed script return it?" If neither, remove it
@@ -694,8 +703,8 @@ Verdict to critique:
 
 Task:
 1. Fetch and read:
-   a. web_fetch https://www.theblock.co/search?query={TOKEN}+crypto (recent news listing)
-   b. web_fetch the most relevant article URL from (a) — the one most likely to challenge the verdict
+   a. bun .agents/skills/read-news/scripts/read_news.ts --source theblock,coindesk,decrypt,cointelegraph,bitcoinmagazine --query "{TOKEN} crypto" --days 5 (recent news events)
+   b. Pick the event most likely to challenge the verdict — cite its `url` field directly (decrypt/coindesk/cointelegraph/bitcoinmagazine events carry quotable body text; theblock/bloomberg are headline-only, cite as headline-level)
    c. web_fetch https://defillama.com/protocol/{slug} (protocol metrics and revenue)
 2. Answer each question:
    Q1 DIRECTION: Does today's news point in the OPPOSITE direction from the signal?
@@ -710,7 +719,7 @@ Task:
       "always has been") about something governance or market conditions could change?
 
 Constraints: You are a devil's advocate — find problems, do not confirm. You have NO prior knowledge of
-this run; start fresh. You have only web_fetch, not TradingView — you read the world, not the chart.
+this run; start fresh. You have web_fetch and bash (for the read-news script), not TradingView — you read the world, not the chart.
 ```
 
 **4b. Print all critic reports** for all tokens in sequence.
@@ -732,7 +741,7 @@ After printing Block 3, run the `reference-validator` post-hook to verify every 
 ```json
 [
   {"token":"BTC","tier":"T1","url":"https://api.alternative.me/fng/?limit=1","quote":"value: 18, value_classification: Extreme Fear"},
-  {"token":"BTC","tier":"T2","url":"https://www.coindesk.com/search?q=bitcoin+ETF+2026","quote":"Bitcoin ETF products saw $218M outflow"},
+  {"token":"BTC","tier":"T2","url":"https://www.coindesk.com/markets/2026/06/20/bitcoin-etf-outflows-218m","quote":"Bitcoin ETF products saw $218M outflow"},
   ...
 ]
 ```

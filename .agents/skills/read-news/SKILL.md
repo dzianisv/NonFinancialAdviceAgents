@@ -42,15 +42,35 @@ failures come back in `unavailable` (loud) — never silently dropped.
 | Flag | Default | Meaning |
 |---|---|---|
 | `--db` | `.cache/read-news/news.db` (env `CRYPTO_NEWS_DB`) | SQLite file |
-| `--days` | `3` | recency window for new-since / query |
-| `--k` | `15` | max events returned by `--query` |
-| `--query` | `""` | if set → ranked relevant events; else → all new-since |
-| `--source` | all | CSV to restrict feeds, e.g. `--source ft,wsj` |
+| `--days` | `3` | recency window for new-since / query / discovery |
+| `--k` | `15` | max events returned by `--query` / per-asset queries |
+| `--query` | `""` | if set → ranked relevant events (also the Google News search topic); else → all new-since |
+| `--source` | all | CSV to restrict feeds, e.g. `--source ft,wsj` or `--source yahoo,googlenews` |
+| `--asset` | — | single ticker/symbol; also fetches the 5 keyless per-asset sources and queries by asset |
+| `--assets` | — | CSV batch form of `--asset`, e.g. `--assets AAPL,MSFT,NVDA`; coexists with `--asset` (merged) |
+| `--equities-only` | off | opt-in filter for an `--asset`/`--assets` run: drops CoinMarketCap (crypto-only per-asset source) and the 6 crypto-only RSS firehose feeds, unless `--source` was explicitly given (explicit `--source` always wins) |
 
 After the brief is written, mark events surfaced so they don't repeat next run:
 
 ```bash
 bun .agents/skills/read-news/scripts/news_store.ts --db .cache/read-news/news.db mark-surfaced --ids 1 4 --on 2026-06-15
+```
+
+### Batch equities and targeted discovery — CLI examples
+
+```bash
+# Existing single-asset form — TradingView, CoinMarketCap, Google Finance, Morningstar, Yahoo + firehose
+bun .agents/skills/read-news/scripts/read_news.ts --asset AAVE --days 7
+
+# New batch form — multiple equity tickers, skip irrelevant crypto/firehose sources
+bun .agents/skills/read-news/scripts/read_news.ts --assets AAPL,MSFT,NVDA --equities-only --days 5
+# → adds a `by_asset: {AAPL:[...], MSFT:[...], NVDA:[...]}` breakdown alongside the flat `events` union
+
+# Targeted publisher discovery via Google News (Bloomberg/Reuters/Business Insider/CNBC/IBD only)
+bun .agents/skills/read-news/scripts/read_news.ts --source googlenews --query "AI capex slowdown" --days 3
+
+# Yahoo Finance ticker-scoped headlines only
+bun .agents/skills/read-news/scripts/read_news.ts --source yahoo --asset AAPL --days 5
 ```
 
 ## Targeted single-source pulls (FT / WSJ on demand)
@@ -72,8 +92,10 @@ bun .agents/skills/read-news/scripts/feeds/wsj.ts --feed markets --days 5 --limi
   - **`articles_fts`** (FTS5) — BM25 over `title + summary` for named entities/tickers (`MSTR`, `$11B`, `ETF`).
   - **`events`** — one row per event cluster carrying cross-run state: `{first_seen, last_updated,
     sources(json), source_count, surfaced_to_panel_on}`.
-- `feeds/` — fetch + normalize adapters: `ft.ts`, `wsj.ts`, `crypto.ts` (7 generic-RSS feeds), unified by
-  `feeds/index.ts` → `fetchAllNews({sources?}) → {records, unavailable}`.
+- `feeds/` — fetch + normalize adapters: `ft.ts`, `wsj.ts`, `crypto.ts` (7 generic-RSS feeds), `markets.ts`
+  (TradingView, CoinMarketCap), `googlefinance.ts`, `morningstar.ts`, `yahoo.ts` (per-asset), `googlenews.ts`
+  (discovery-only) — unified by `feeds/index.ts` → `fetchAllNews({sources?, assets?, query?, days?}) →
+  {records, unavailable}`.
 
 ### Two-layer dedup
 1. **Exact** — canonical URL (utm/tracking stripped) **OR** `sha256(normalized(title+summary))` already
@@ -93,47 +115,37 @@ vector is stored on the event. If absent **or** the command errors, it silently 
 BM25 (FTS5) **fused with** near-dup-cluster Jaccard rank via **RRF** (reciprocal-rank fusion, k=60).
 Returns **events, not raw rows**.
 
-## News sources (keyless, verified 2026-06)
+## Source ownership — read-news is the sole fetch front door
 
-| Source | Signal | Notes |
+`read_news.ts` is the ONE place any skill/workflow fetches financial news from. Consumers
+([[narrative-news]], [[analyse-narrative]], `crypto-advisor`, `stocks-trend-screener`, etc.) must call
+`read_news.ts` and read its `{events}` / `{unavailable}` output — they must never scrape any of the sources
+below directly (no ad-hoc `curl`/`fetch` against FT, WSJ, TradingView, CoinMarketCap, Google Finance,
+Morningstar, Yahoo, or Google News from consumer code). Centralizing fetch here is what makes dedup,
+cross-run state, and the `[UNAVAILABLE]` honesty contract actually hold.
+
+## Source classes and access limits
+
+| Class | Sources | Access pattern |
 |---|---|---|
-| CoinDesk | ETF approvals, institutional, macro | Full RSS content |
-| Decrypt | DeFi, retail narrative, culture | Full RSS content |
-| CoinTelegraph | Broad crypto news, regulatory | Full RSS content |
-| The Block | Institutional, data-driven | Full RSS content |
-| Bitcoin Magazine | BTC-native, halving, protocol | Full RSS content |
-| Coinbase blog | Institutional research, policy | Via Google News proxy (direct 403) |
-| FT | Macro, rates, global risk-off | RSS teaser (paywall — headline only) |
-| WSJ | US regulatory, Fed, institutional | Dow Jones RSS |
-| Bloomberg | Rates, macro, ETF (podcast feed) | Best-effort — often 403 |
+| **Keyless firehose** (default `NEWS_FEEDS`, 9 sources, unchanged) | FT, WSJ, 6 crypto-only RSS (CoinDesk, Decrypt, CoinTelegraph, The Block, Bitcoin Magazine, Coinbase blog), Bloomberg markets RSS | Global feed, fetched every run unless `--source` restricts it |
+| **Keyless per-asset** (5 sources, ticker-scoped) | TradingView, CoinMarketCap (crypto-only), Google Finance, Morningstar, **Yahoo Finance (new)** | Opt-in via `--asset`/`--assets` + `--source`; one fetch per source per requested ticker |
+| **Keyless discovery-only** (1 source, query/topic-scoped) | **Google News (new)** | Targeted `site:` search restricted to Bloomberg/Reuters/Business Insider/CNBC/IBD; requires `--query` or an explicit `--asset`/`--assets` symbol as the search topic — refuses (`[UNAVAILABLE]`, no network call) rather than silently fanning out an unscoped firehose search over default tickers |
+| **Entitlement-gated / not integrated** | **JPMorgan and BofA research** | `[UNAVAILABLE - license required]`. No endpoint, no scraping, no paywall bypass, no unofficial reseller, no placeholder vendor claim exists or will be added until a licensed official feed is explicitly configured. This is a **permanent documented limitation**, not a TODO. |
+| **Explicitly excluded** | Seeking Alpha | Is not, and will not be, added as a source. |
 
-**Supplementary keyless sources (call directly when targeted fetch needed):**
-
-```bash
-# Google News RSS — on-demand entity search; also captures Reuters, AP
-curl -sL "https://news.google.com/rss/search?q=bitcoin+ETF+regulation+when:2d&hl=en-US&gl=US&ceid=US:en"
-
-# SEC EDGAR — hard primary-source 8-K filings (treasury buys, ETF S-1s, enforcement)
-curl -sL -A "research@example.invalid" \
-  "https://efts.sec.gov/LATEST/search-index?q=%22bitcoin%22&forms=8-K&startdt=$(date -v-7d +%Y-%m-%d)"
-
-# CoinGecko trending — retail attention / narrative-rotation proxy
-curl -sL "https://api.coingecko.com/api/v3/search/trending"
-
-# Fear & Greed Index — crowd sentiment cross-check
-curl -s "https://api.alternative.me/fng/?limit=7"
-
-# ETF flows — farside.co.uk is Cloudflare-gated (403 to curl).
-#   (a) read_news.ts events already contain ETF flow headlines, or
-#   (b) WebFetch/Chrome-CDP: https://farside.co.uk/btc/  (JS render required)
-```
+Google News is fundamentally a free-text SEARCH endpoint, not a firehose — there is no "fetch everything"
+mode, so it is kept out of the per-asset `MARKET_SOURCES` loop and out of `NEWS_FEEDS`. Calling
+`fetchAllNews({ sources: ["googlenews"] })` with neither `--query` nor `--asset`/`--assets` returns
+immediately with an `[UNAVAILABLE - no --query or --asset provided]` entry and makes zero network calls —
+it will never silently search the internal default crypto ticker list as bare text.
 
 **Source priority for narrative analysis:**
-1. `read_news.ts` — primary; run first, covers 9 feeds
-2. Google News RSS — targeted entity search and Reuters/AP coverage
-3. SEC EDGAR — hard, timestamped primary-source regulatory/treasury events
-4. CoinGecko trending — retail attention signal
-5. farside.co.uk — ETF flows; WebFetch/CDP path only (not curl-able)
+1. `read_news.ts` — primary; run first, covers the 9-feed firehose plus any per-asset/discovery sources requested
+2. `--source googlenews --query "..."` — targeted Bloomberg/Reuters/BI/CNBC/IBD entity search when the firehose misses a name
+3. SEC EDGAR (`analyse-fundamental` / direct `web_fetch`, not this pipeline) — hard, timestamped primary-source regulatory/treasury events
+4. CoinGecko trending (direct `web_fetch`, not this pipeline) — retail attention signal
+5. farside.co.uk — ETF flows; WebFetch/CDP path only (JS-rendered, not curl-able, not wired into this pipeline)
 
 ## Store commands
 
@@ -158,6 +170,33 @@ bun test ./.agents/skills/read-news/scripts/
 # reproduce them — the regression guard that lets the Python pipeline stay retired.
 ```
 
+## Citation and body rules — never fabricate
+
+The hard rule at the top of this doc ("never fabricate; `[UNAVAILABLE - paywall]` when no teaser exists")
+extends explicitly to every new source:
+- **Google News** links (`news.google.com/rss/articles/...`) are opaque Google-internal redirects. They are
+  **discovery pointers, never resolved/verified citations** — this adapter never claims otherwise, and never
+  fabricates a summary from the RSS `<description>` (which is just repeated anchor markup). `body` is always
+  `null` by construction.
+- **Yahoo Finance** `<link>` values ARE genuinely navigable citation URLs, but treat `source: "yahoo"` as
+  "Yahoo's aggregation of this story," not "the original outlet" — Yahoo sometimes hosts syndicated copies
+  rather than the true original publisher.
+- **Morningstar / Google Finance consensus** records now carry content-derived URL discriminators (a
+  `?h=<shortHash(...)>` query param appended to the same page URL) so that multiple distinct headlines
+  scraped off one shared page get distinct dedup keys instead of collapsing into one record — see the
+  same-page-dedup fix in `morningstar.ts`/`googlefinance.ts`. The discriminator changes the URL string for
+  storage/dedup purposes only; it still points at the same real page, so citation provenance for a human
+  reader is unchanged.
+
+## Boundary with `analyse-sellside`
+
+`read-news`'s Morningstar and Google Finance fetchers return **news headlines only**, for event clustering.
+Structured sell-side data — analyst consensus ratings, price targets, fair-value/moat scores — is owned by
+the separate `analyse-sellside` skill, which fetches its own data directly via `web_fetch` (not through this
+pipeline). `read-news` must never attempt to route or re-derive that structured data through its
+news-event clustering pipeline; if a workflow needs consensus ratings/price targets, call `analyse-sellside`
+directly instead of trying to mine it out of `read_news.ts` headlines.
+
 ## Fit
 
 `read_news.ts` (fetch + normalize via `feeds/`) → **`ingest`** (dedup + cluster) → **`new-since` / `query`**
@@ -166,24 +205,36 @@ priced-in judgment. This skill owns fetch + dedup + recency + cross-run state; i
 
 > Educational, not advice. Events are context + disconfirmation, never a trigger.
 
-## Per-Asset Market News Sources (2026-06)
+## Per-Asset Market News Sources (2026-07)
 
-Three new keyless per-asset market news fetchers were added in `scripts/feeds/markets.ts`.
+Five keyless, ticker-scoped market news fetchers live in `scripts/feeds/markets.ts`, `googlefinance.ts`,
+`morningstar.ts`, and `yahoo.ts` — plus a 6th, discovery-only source (`googlenews.ts`) that is query/topic
+driven rather than purely ticker-driven.
 
 | Source | Method | Keyless? | Per-asset tag | AI summary |
 |---|---|---|---|---|
 | TradingView | JSON API (v2 headlines + v3 story AST) | ✅ Yes | `relatedSymbols` mapped via `tvSymbolToAsset` | v3 story AST flattened to text |
-| CoinMarketCap | JSON API (resolve slug→id, then /content/v3/news) | ✅ Yes | Set to queried asset (CMC NER is noisy) | `meta.subtitle` teaser only |
+| CoinMarketCap | JSON API (resolve slug→id, then /content/v3/news) | ✅ Yes (crypto-only) | Set to queried asset (CMC NER is noisy) | `meta.subtitle` teaser only |
 | Google Finance | HTML scrape (regex external news URLs) | ✅ Yes | Ticker from query symbol | ❌ Client-rendered, blank |
+| Morningstar | HTML scrape | ✅ Yes | Ticker from query symbol | Headline only |
+| **Yahoo Finance (new)** | RSS (`feeds.finance.yahoo.com/rss/2.0/headline`) | ✅ Yes | Full requested symbol list tagged (imprecise on multi-symbol requests, same caveat pattern as CMC) | RSS `<description>` teaser or `[UNAVAILABLE - no teaser in feed]` |
+| **Google News (new, discovery-only)** | RSS search (`news.google.com/rss/search`) restricted to Bloomberg/Reuters/Business Insider/CNBC/IBD via `site:` | ✅ Yes | None — query/topic driven, not ticker-driven | Never — `body` always `null`, discovery pointer only |
 
 **Findings:**
-- TradingView and CoinMarketCap: keyless JSON, no browser required, full AI digest available.
-- Google Finance: keyless HTML scrape, headlines only, AI summary is client-rendered (unavailable to curl).
+- TradingView and CoinMarketCap: keyless JSON, no browser required, full AI digest available (TradingView).
+- Google Finance / Morningstar: keyless HTML scrape, headlines only, AI summary unavailable to curl.
+- Yahoo Finance: keyless RSS, genuinely navigable links, but an unofficial legacy route that could stop
+  working without notice.
+- Google News: keyless RSS search, publisher-whitelisted, discovery-only by design — never a resolved
+  citation, never a firehose.
 
 **Usage:**
 ```bash
-# Fetch news for a specific asset (TV + CMC + all RSS feeds), query by asset
+# Fetch news for a specific asset (5 per-asset sources + all RSS feeds), query by asset
 bun .agents/skills/read-news/scripts/read_news.ts --asset AAVE --days 7
+
+# Batch multiple assets, equities-focused (drops CoinMarketCap + crypto-only firehose)
+bun .agents/skills/read-news/scripts/read_news.ts --assets AAPL,MSFT,NVDA --equities-only --days 5
 
 # Query the store directly by asset after ingestion
 bun .agents/skills/read-news/scripts/news_store.ts by-asset --asset AAVE

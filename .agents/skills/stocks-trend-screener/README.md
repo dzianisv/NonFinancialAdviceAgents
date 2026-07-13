@@ -24,18 +24,17 @@ reject LAGGING / below-200d sectors"]
         CS2["Step 2 · Model knowledge
 draft 3-5 thesis candidates"]
 
-        subgraph CFEEDS ["Feed verify — parallel web_fetch"]
+        subgraph CFEEDS ["Feed verify — shared read-news adapters"]
             direction LR
-            DB2["research_db.py search"]
-            FT["Google News
-site:ft.com"]
-            WSJ["Google News
-site:wsj.com"]
-            BL["Google News
-site:bloomberg.com"]
-            GN["Google News
-broad search
-Reuters / CNBC / BI"]
+            DB2["research_db.py search
+own tagged corpus, not a live fetch"]
+            FT["FT adapter
+feeds/ft.ts"]
+            WSJ["WSJ adapter
+feeds/wsj.ts"]
+            GN["read_news.ts
+--source googlenews
+Bloomberg/Reuters/BI/CNBC/IBD"]
         end
 
         CDROP{"Result within 30 days?"}
@@ -48,7 +47,7 @@ Q4 Revenue accelerating?  NO = KILL"]
 2-sentence thesis, source, risk"]
 
         CS1 --> CS2 --> CFEEDS
-        DB2 & FT & WSJ & BL & GN --> CDROP
+        DB2 & FT & WSJ & GN --> CDROP
         CDROP -->|NO| TRASH1["dropped"]
         CDROP -->|YES| CS3
         CS3 -->|HIGH confidence| COUT
@@ -64,15 +63,13 @@ sector ETFs vs SPY
 
         subgraph RSUBS ["Step 2 · Parallel subagents — 1 per source x theme"]
             direction LR
-            SA["Seeking Alpha
-supply constrained
-bottleneck, monopoly"]
-            WSJ2["WSJ
-shortage, backlog
-capacity, tariff"]
-            FT2["FT
-market share
-sole supplier"]
+            GN2["read_news.ts
+--source googlenews
+Bloomberg/Reuters/BI/CNBC/IBD"]
+            WSJ2["WSJ adapter
+feeds/wsj.ts"]
+            FT2["FT adapter
+feeds/ft.ts"]
             EDGAR["SEC EDGAR
 10-Q / 10-K
 full-text search"]
@@ -89,7 +86,7 @@ all candidates, mandatory format, SKIP dominates"]
 table, killed list, all sources"]
 
         RS1 --> RSUBS
-        SA & WSJ2 & FT2 & EDGAR & F4 --> RS3
+        GN2 & WSJ2 & FT2 & EDGAR & F4 --> RS3
         RS3 --> RS4 --> RS5
     end
 
@@ -112,8 +109,10 @@ The agent runs a 5-step loop:
 
 1. **Pre-screen** — run `scripts/emerging_scan.py` to see which sectors are hot right now (directs
    *where* to read; it is not the answer).
-2. **Read journalism** — fan out subagents across Seeking Alpha / WSJ / FT / SEC filings / earnings
-   calls; extract specific facts (a quote, a number, a date) — no "citation theater".
+2. **Read journalism** — fan out subagents across the shared FT/WSJ feed adapters, Google-News-routed
+   Bloomberg/Reuters/BI/CNBC/IBD discovery, SEC filings, and earnings calls. The adapters provide
+   publisher URLs, dates, and teasers for discovery; finalists still need a body quote from a
+   resolved source — no "citation theater". Seeking Alpha is not automatable and is not used.
 3. **Map the non-obvious beneficiary** — obvious leader → scarce input → who controls it → does it
    hide in another sector.
 4. **Skeptic filter** — kill anything already priced (>150% in 12mo), with no concrete catalyst, or
@@ -172,7 +171,7 @@ is kept only if the rubric says it helped. The audit trail lives in `evals/score
 |------|------|
 | `SKILL.md` | the operating instructions the agent follows |
 | `scripts/emerging_scan.py`, `weekly_scout.py`, … | the quantitative pre-screen / radar |
-| `scripts/db/research_db.py` | SQLite + BM25 article store for the stateful modes |
+| `scripts/db/research_db.py` | SQLite + BM25 tagging/convergence store for the stateful modes — stores agent-curated theme/company tags for articles already fetched via read-news; NOT a fetch path itself; kept live because it backs multi-week thesis tracking (search_theme_convergence) which read-news's schema has no equivalent for |
 | `scripts/auto_research.py` | the self-improvement (keep/discard) harness |
 | `evals/RUBRIC.md`, `evals/cases/` | how the skill is scored, and on what |
 | `evals/scores.md`, `evals/iterations/` | the improvement history |

@@ -132,7 +132,7 @@ REASON: [Only if the draft cites defillama.com/protocol/aave with a verbatim dat
 CLAIM 3: "ETF outflows were $1.79B last week"
 STATUS: CHALLENGE
 REASON: No news URL cited.
-EVIDENCE NEEDED: web_fetch theblock.co or coindesk.com and find the verbatim ETF flow figure.
+EVIDENCE NEEDED: run bun .agents/skills/read-news/scripts/read_news.ts --source theblock,coindesk --query "ETF outflow" --days 3 and find the verbatim ETF flow figure in a returned event/teaser.
 
 VERDICT: BLOCKED (2 challenges)
 CIO must resolve claims 1 and 3 before presenting this response.

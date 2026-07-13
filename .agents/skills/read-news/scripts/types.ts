@@ -179,6 +179,16 @@ export function contentHash(title: string, summary: string): string {
   return h.digest("hex");
 }
 
+// ── Short hash (URL discriminator) ─────────────────────────────────────────
+// Used to append a content-derived, non-tracking discriminator query param to a
+// shared page URL so distinct content (e.g. distinct headlines scraped off the
+// same page, or a changed daily snapshot) doesn't collide in canonical_url dedup.
+export function shortHash(s: string, len = 10): string {
+  const h = new Bun.CryptoHasher("sha256");
+  h.update(s);
+  return h.digest("hex").slice(0, len);
+}
+
 // ── Date utilities ──────────────────────────────────────────────────────────
 
 export function toISO(dateStr: string): string {

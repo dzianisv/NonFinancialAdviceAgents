@@ -37,7 +37,7 @@ The `portfolio-monitor` script reads this file and fires alerts when your writte
 | analyse-smartmoney-ptr | none — scrapes Capitol Trades | Works out of the box; no signup |
 | feed-fomc | `web_fetch` (federalreserve.gov) | Works reliably |
 | analyse-smartmoney-polymarket | `web_fetch` (gamma-api.polymarket.com) | Works reliably |
-| trend-stock-research | `web_fetch` (FT/WSJ RSS) | Works reliably |
+| stocks-trend-screener | `read_news.ts --source googlenews` (read-news adapter) | Works reliably |
 | analyse-smartmoney-13f | `web_fetch` (sec.gov EDGAR) | Works reliably |
 
 **Notes:**
@@ -66,7 +66,7 @@ SIGNAL SKILLS:
   analyse-smartmoney-polymarket       (Polymarket + Kalshi + CME FedWatch — required by superforecasting)
   analyst-derivatives-positioning  (futures funding/OI, options skew/IV — required by superforecasting)
   feed-fomc                 (Fed statements + hawkish/dovish delta — required by macro-panel)
-  trend-stock-research         (FT / WSJ / Seeking Alpha journalism — paywall bypass built-in)
+  stocks-trend-screener         (FT / WSJ via read-news adapters — journalism-driven; Seeking Alpha excluded, not automatable)
   analyse-smartmoney-13f                    (institutional 13F buys, deduped — requires hedge-fund-13f-analysis)
   hedge-fund-13f-analysis      (EDGAR filing reader — required sub-skill of analyse-smartmoney-13f)
   analyse-smartmoney-ptr      (STOCK Act purchases, deduped)
@@ -110,8 +110,9 @@ C) POLYMARKET / PREDICTION MARKETS (analyse-smartmoney-polymarket):
    - Pull Kalshi economic event markets.
    - Output: top 5 markets by liquidity with crowd probability + what it means for equities.
 
-D) JOURNALISM SCAN (trend-stock-research — broad mandate):
-   - Read Financial Times markets section, WSJ markets, Seeking Alpha front page.
+D) JOURNALISM SCAN (stocks-trend-screener — broad mandate):
+   - Read Financial Times markets section and WSJ markets via the read-news feed scripts (Seeking Alpha
+     is not automatable and is excluded — no active SA fetch exists anywhere in this stack).
    - Goal this pass: not just trend stocks — surface the 3-5 macro/sector themes journalists
      are converging on RIGHT NOW. What sectors are getting attention? What catalysts are live?
    - Output: theme list, specific companies mentioned, any tickers worth routing to quorum.
@@ -218,8 +219,8 @@ JOB 1 — Daily 08:00 UTC (Mon–Fri):
   silent unless something important changed. One paragraph max."
 
 JOB 2 — Daily 08:15 UTC (Mon–Fri):
-  "Run trend-stock-research with a BROAD mandate: scan FT/WSJ/Seeking Alpha for the top 3
-  macro/sector themes journalists are writing about today. Extract any company tickers mentioned
+  "Run stocks-trend-screener with a BROAD mandate: scan FT/WSJ (via the read-news feed scripts) for the
+  top 3 macro/sector themes journalists are writing about today. Extract any company tickers mentioned
   as having live catalysts. Add to the weekly candidate pool. No recommendation yet — just collect."
 
 JOB 3 — Weekly Monday 09:00 UTC:

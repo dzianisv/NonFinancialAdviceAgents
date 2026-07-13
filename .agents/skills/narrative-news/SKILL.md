@@ -30,8 +30,8 @@ cross-run state.
 ## Pipeline — ONE deterministic command (preferred; reliable)
 
 Do NOT hand-orchestrate 8 WebFetch calls (that path is fragile and failed in iteration 1). Run the
-deterministic fetcher: it pulls every crypto-native RSS feed via urllib, normalizes, ingests (dedup +
-state), and returns the **ranked, question-relevant** deduped events in one shot.
+deterministic fetcher: it pulls every crypto-native RSS feed via the Bun/TypeScript `read-news` stack,
+normalizes, ingests (dedup + state), and returns the **ranked, question-relevant** deduped events in one shot.
 
 ```bash
 bun .agents/skills/read-news/scripts/read_news.ts \

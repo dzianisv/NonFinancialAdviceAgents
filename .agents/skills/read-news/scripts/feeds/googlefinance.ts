@@ -1,5 +1,5 @@
 import type { Article } from "../types";
-import { toISO } from "../types";
+import { toISO, shortHash } from "../types";
 
 // Asset → Google Finance quote symbol
 const GF_SYMBOL: Record<string, string> = {
@@ -27,9 +27,15 @@ const GF_SYMBOL: Record<string, string> = {
   AMD: "AMD:NASDAQ",
 };
 
-const KNOWN_STOCKS = new Set([
-  "AAPL","GOOGL","MSFT","NVDA","AMZN","META","TSLA","PYPL","AMD",
-]);
+/**
+ * Resolve an asset symbol to its exact Google Finance quote-symbol string.
+ * GF_SYMBOL is the single source of truth for "known" assets — it already fully
+ * resolves both crypto and stock symbols, so there's no need to guess asset class
+ * at lookup time. Returns null for anything not explicitly mapped.
+ */
+export function resolveGfSymbol(asset: string): string | null {
+  return GF_SYMBOL[asset.toUpperCase()] ?? null;
+}
 
 /**
  * Extract and evaluate an AF_initDataCallback({key: '<key>', ...}) blob from raw HTML.
@@ -107,6 +113,21 @@ function extractAnalystData(data: unknown): {
   };
 }
 
+/**
+ * Build the analyst-consensus synthetic article's URL.
+ *
+ * Uses ?view=analyst-consensus so canonicalUrl() produces a distinct key from
+ * the bare page URL (canonicalUrl strips # fragments but keeps query params,
+ * so this prevents the old-article exact-dedup collision). A content hash of
+ * the summary text is appended so identical consensus data still dedupes
+ * correctly across idempotent re-runs of the same day, but a genuinely
+ * changed snapshot (different buy/hold/sell/avgTarget) produces a new,
+ * distinct record instead of being silently dropped as a duplicate.
+ */
+export function buildConsensusUrl(pageUrl: string, summaryText: string): string {
+  return `${pageUrl}?view=analyst-consensus&h=${shortHash(summaryText)}`;
+}
+
 export async function fetchGoogleFinance(
   asset: string,
 ): Promise<{ source: string; articles: Article[]; errors: string[] }> {
@@ -114,14 +135,12 @@ export async function fetchGoogleFinance(
   const articles: Article[] = [];
   const upper = asset.toUpperCase();
 
-  // Resolve symbol — fallback to crypto pattern for unknown assets
-  let gfSymbol = GF_SYMBOL[upper];
+  // Resolve symbol — GF_SYMBOL is the single source of truth; refuse to guess
+  // asset class for unmapped symbols (previously fell back to a crypto pattern).
+  const gfSymbol = resolveGfSymbol(upper);
   if (!gfSymbol) {
-    if (KNOWN_STOCKS.has(upper)) {
-      errors.push(`googlefinance: no symbol mapping for stock ${upper}; add it to GF_SYMBOL`);
-      return { source: "googlefinance", articles, errors };
-    }
-    gfSymbol = `${upper}-USD:CURRENCY`;
+    errors.push(`googlefinance: [UNAVAILABLE - unknown symbol ${upper}; not in GF_SYMBOL map, refusing to guess whether it is a stock or crypto asset]`);
+    return { source: "googlefinance", articles, errors };
   }
 
   const pageUrl = `https://www.google.com/finance/quote/${encodeURIComponent(gfSymbol)}`;
@@ -193,15 +212,12 @@ export async function fetchGoogleFinance(
         const { consensus, buyCount, holdCount, sellCount, avgTarget, companyName, currency, totalCount } = analyst;
         const ratingStr = `${buyCount}B/${holdCount}H/${sellCount}S`;
         const ptStr = avgTarget ? `, avg target ${avgTarget}` : "";
-        // Use ?view=analyst-consensus so canonicalUrl() produces a distinct key from
-        // the bare page URL (canonicalUrl strips # fragments but keeps query params,
-        // so this prevents the old-article exact-dedup collision while still giving
-        // per-ticker canonical URL uniqueness for subsequent re-runs of the same ticker).
-        const consensusUrl = `${pageUrl}?view=analyst-consensus`;
         const summaryText =
           `${companyName || upper} (${upper}): ${totalCount} analysts — ` +
           `${buyCount} Buy, ${holdCount} Hold, ${sellCount} Sell. ` +
           (avgTarget ? `Avg 12-month price target: ${currency} ${avgTarget}.` : "");
+        // See buildConsensusUrl() doc comment for why summaryText is hashed into the URL.
+        const consensusUrl = buildConsensusUrl(pageUrl, summaryText);
         articles.push({
           source: "googlefinance",
           url: consensusUrl,

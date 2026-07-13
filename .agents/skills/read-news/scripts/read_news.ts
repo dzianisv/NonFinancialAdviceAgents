@@ -5,11 +5,15 @@
  * Flow: fetchAllNews → ingest (in-process) → query or newSince → print JSON.
  * Output keys: {fetched, feeds_ok, unavailable, events}.
  *
- * --asset <SYM>  also fetches TradingView + CMC for that asset and queries by asset.
+ * --asset <SYM>    also fetches per-asset market sources for that asset and queries by asset.
+ * --assets <CSV>   batch form of --asset; coexists with --asset (merged, deduped).
+ * --equities-only  opt-in filter: drops CoinMarketCap (crypto-only) from the per-asset sources
+ *                  and drops the crypto-only RSS firehose feeds, unless --source was explicitly
+ *                  given (an explicit --source always wins).
  */
 
 import { connect, ingest, query, newSince, queryByAsset } from "./news_store";
-import { fetchAllNews, NEWS_FEEDS } from "./feeds/index";
+import { fetchAllNews, NEWS_FEEDS, CRYPTO_SOURCES } from "./feeds/index";
 import type { Article } from "./types";
 
 // ── Arg parsing ──────────────────────────────────────────────────────────────
@@ -21,6 +25,8 @@ interface ReadNewsOpts {
   query?: string;
   sources?: string[];
   asset?: string;
+  assets?: string[];
+  equitiesOnly?: boolean;
 }
 
 interface ReadNewsResult {
@@ -28,11 +34,11 @@ interface ReadNewsResult {
   feeds_ok: number;
   unavailable: string[];
   events: unknown[];
+  by_asset?: Record<string, unknown[]>;
   note?: string;
 }
 
-function parseCliArgs(): ReadNewsOpts {
-  const args = process.argv.slice(2);
+export function parseCliArgsFromTokens(args: string[]): ReadNewsOpts {
   const opts: ReadNewsOpts = {};
 
   for (let i = 0; i < args.length; i++) {
@@ -48,13 +54,29 @@ function parseCliArgs(): ReadNewsOpts {
       opts.sources = args[++i].split(",").map((s) => s.trim()).filter(Boolean);
     } else if (args[i] === "--asset" && args[i + 1]) {
       opts.asset = args[++i];
+    } else if (args[i] === "--assets" && args[i + 1]) {
+      opts.assets = args[++i].split(",").map((s) => s.trim()).filter(Boolean);
+    } else if (args[i] === "--equities-only") {
+      opts.equitiesOnly = true;
     }
   }
 
   return opts;
 }
 
+function parseCliArgs(): ReadNewsOpts {
+  return parseCliArgsFromTokens(process.argv.slice(2));
+}
+
 // ── Core logic (exported for tests) ─────────────────────────────────────────
+
+// Crypto-only firehose feeds (excludes "bloomberg", which is general markets/macro, not crypto-specific)
+const CRYPTO_ONLY_SOURCES = new Set(CRYPTO_SOURCES.filter((s) => s !== "bloomberg"));
+
+// The 5 keyless per-asset sources fetched whenever --asset/--assets is used (see README.md/SKILL.md,
+// which document Yahoo Finance as one of the 5). Exported so tests can assert on it directly without
+// making network calls via runReadNews/fetchAllNews.
+export const DEFAULT_ASSET_SOURCES = ["tradingview", "coinmarketcap", "googlefinance", "morningstar", "yahoo"];
 
 export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResult> {
   const dbPath = opts.db ?? process.env.CRYPTO_NEWS_DB ?? ".cache/read-news/news.db";
@@ -63,16 +85,42 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
   const queryStr = opts.query ?? "";
   const sources = opts.sources;
 
+  // Merge --asset and --assets into one deduped, uppercased list. Using BOTH flags together is
+  // supported (merged), but the common case is either/or.
+  const assetList = Array.from(new Set([
+    ...(opts.assets ?? []),
+    ...(opts.asset ? [opts.asset] : []),
+  ].map((a) => a.toUpperCase())));
+
   let fetchSources = sources;
   let fetchAssets: string[] | undefined;
 
-  // When --asset is set, also pull market sources for that specific asset
-  if (opts.asset) {
-    fetchAssets = [opts.asset];
-    fetchSources = [...(sources ?? NEWS_FEEDS), "tradingview", "coinmarketcap", "googlefinance", "morningstar"];
+  // When --asset/--assets is set, also pull per-asset market sources for those assets
+  if (assetList.length > 0) {
+    fetchAssets = assetList;
+    let assetSources = DEFAULT_ASSET_SOURCES;
+    if (opts.equitiesOnly) {
+      // Opt-in: CoinMarketCap is crypto-only and always irrelevant noise for an equities-only query.
+      assetSources = assetSources.filter((s) => s !== "coinmarketcap");
+    }
+    const baseFirehose = sources ?? NEWS_FEEDS;
+    // Opt-in, and ONLY when the caller did not explicitly pass --source (an explicit --source
+    // always wins — we never silently override a user's explicit source list). Skips the
+    // crypto-only RSS firehose (decrypt/coindesk/cointelegraph/theblock/bitcoinmagazine/coinbase)
+    // for an equities-only asset query. This is a deliberate, documented, OPT-IN behavior change —
+    // by default (no --equities-only), the exact prior inclusive behavior is preserved unchanged.
+    const effectiveFirehose = (opts.equitiesOnly && !sources)
+      ? baseFirehose.filter((s) => !CRYPTO_ONLY_SOURCES.has(s))
+      : baseFirehose;
+    fetchSources = [...effectiveFirehose, ...assetSources];
   }
 
-  const { records, unavailable } = await fetchAllNews({ sources: fetchSources, assets: fetchAssets });
+  const { records, unavailable } = await fetchAllNews({
+    sources: fetchSources,
+    assets: fetchAssets,
+    query: queryStr || undefined,
+    days,
+  });
 
   if (records.length === 0) {
     return {
@@ -88,8 +136,25 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
   ingest(db, records as unknown as Record<string, unknown>[]);
 
   let events: unknown[];
-  if (opts.asset) {
-    events = queryByAsset(db, opts.asset, { days, k });
+  let byAsset: Record<string, unknown[]> | undefined;
+
+  if (assetList.length > 1) {
+    // Batch mode: query each requested asset, then union the resulting events (deduped by
+    // event_cluster_id) into the flat `events` array for simple consumers, PLUS an additive
+    // `by_asset` breakdown for asset-aware consumers. Purely additive — the singular --asset
+    // path below is untouched.
+    byAsset = {};
+    const seen = new Map<number, { event_cluster_id: number }>();
+    for (const a of assetList) {
+      const evs = queryByAsset(db, a, { days, k });
+      byAsset[a] = evs;
+      for (const e of evs) {
+        if (!seen.has(e.event_cluster_id)) seen.set(e.event_cluster_id, e);
+      }
+    }
+    events = Array.from(seen.values());
+  } else if (assetList.length === 1) {
+    events = queryByAsset(db, assetList[0], { days, k }); // identical call shape to the old opts.asset path
   } else if (queryStr) {
     events = query(db, queryStr, { days, k, sources });
   } else {
@@ -108,7 +173,8 @@ export async function runReadNews(opts: ReadNewsOpts = {}): Promise<ReadNewsResu
     unavailable,
     events,
   };
-  if (queryStr && !opts.asset && events.length === 0) {
+  if (byAsset) result.by_asset = byAsset;
+  if (queryStr && assetList.length === 0 && events.length === 0) {
     result.note = "INSUFFICIENT_DATA — no article cleared the relevance floor for this query"
       + (sources?.length ? ` within source(s) ${sources.join(",")}` : "") + "; do not guess.";
   }
