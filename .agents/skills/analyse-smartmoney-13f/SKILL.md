@@ -1,21 +1,6 @@
 ---
 name: analyse-smartmoney-13f
-description: >-
-  Watch recent 13F filings to PROPOSE new stock buy-candidates from what
-  super-investors just bought, DEEP-READ every interesting filing (compute Q/Q
-  deltas, infer WHY a manager bought), and cross-reference against the user's
-  portfolio — "scan recent 13F filings", "what did Burry/Buffett/Ackman just
-  buy", "propose stocks from 13F", "13F watchlist", "run the 13F watcher",
-  "what do hedge funds hold", "check the 13F", "who owns this stock", "what is
-  Buffett/Burry/Ackman/Tepper/Druckenmiller/Klarman/Li Lu/Tiger buying",
-  "which of my stocks do big managers hold", "is smart money buying X",
-  "13F overlap", or on a schedule/cron. Finds NEW initiations + cross-fund
-  conviction clusters, filters out puts/trims/exits, scores and tiers each
-  candidate, and DEDUPES against everything already recommended so the same
-  ticker is never proposed twice. Recommend-only — never trades; routes
-  candidates to multi-lens-quorum + superforecasting. Educational, not advice;
-  13F is a 45-day-lagged, long-only, US-equity snapshot — not a real-time
-  trade signal.
+description: "Watch recent 13F filings to PROPOSE new stock buy-candidates from what super-investors just bought, DEEP-READ every interesting filing (compute Q/Q deltas, infer WHY a manager bought), and cross-reference against the user's portfolio — \"scan recent 13F filings\", \"what did Buffett/Ackman just buy\", \"propose stocks from 13F\", \"13F watchlist\", \"run the 13F watcher\", \"what is Buffett/Klarman/Li Lu buying\", \"is Citadel/Millennium/Renaissance corroborating a name\", \"which of my stocks do big managers hold\", \"is smart money buying X\", or on a schedule/cron. Finds NEW initiations + cross-fund conviction clusters, filters out puts/trims/exits, scores and tiers each candidate, and DEDUPES against everything already recommended so the same ticker is never proposed twice. Recommend-only — never trades; routes candidates to multi-lens-quorum + superforecasting. Educational, not advice; 13F is a 45-day-lagged, long-only, US-equity snapshot — not a real-time trade signal."
 license: MIT
 compatibility: opencode
 metadata:

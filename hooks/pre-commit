@@ -1,0 +1,40 @@
+#!/bin/sh
+# Versioned git pre-commit hook. Enabled via: git config core.hooksPath hooks
+# Guards every commit against GitHub Copilot CLI (>=1.0.70) skill-loader failures:
+# any .agents/skills/<name>/SKILL.md whose frontmatter cannot be parsed, whose
+# name/description is missing or invalid, or whose description exceeds 1024 parsed
+# characters is SILENTLY dropped by Copilot at load time (it never appears in
+# `copilot skill list` and never loads). This hook runs the dependency-free
+# validator in --index (staged-snapshot) mode: it reads each canonical SKILL.md's
+# content from the git INDEX — i.e. what this commit will actually record — not
+# from the working tree, and blocks the commit on any failure.
+#
+# Naturally scoped: no-ops on any branch/worktree that lacks the validator script.
+# But when the validator IS present and Bun is missing, it FAILS LOUDLY rather than
+# skipping — the load guarantee is the whole point, so we never let a commit pass
+# unchecked just because the toolchain is absent.
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+validator="$root/.agents/scripts/skills/validate_skill_md.ts"
+
+# Scoped no-op: nothing to enforce on worktrees without the validator.
+[ -f "$validator" ] || exit 0
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "❌ pre-commit: bun is required to validate SKILL.md frontmatter but was not found on PATH."
+  echo "   The Copilot skill-loader guard cannot run without it. Install bun (https://bun.sh),"
+  echo "   or override with: git commit --no-verify  (NOT recommended — skips the guard)."
+  exit 1
+fi
+
+# --index gates the STAGED index snapshot — i.e. exactly what this commit will record —
+# not the working tree. This matters: an unstaged broken edit must not block an unrelated
+# commit, and a broken staged change must not slip through just because the working-tree
+# copy happens to be fixed. `copilot skill list` is skipped in this mode by design, since
+# it inspects the working tree (the wrong snapshot for a staged gate).
+if ! bun "$validator" --index; then
+  echo "❌ pre-commit: SKILL.md validation FAILED — one or more staged skills would not load in Copilot CLI."
+  echo "   Fix the frontmatter reported above, then re-run: bun $validator --index"
+  echo "   Override with --no-verify only if you know why (NOT recommended)."
+  exit 1
+fi
+exit 0

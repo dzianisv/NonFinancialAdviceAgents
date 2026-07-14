@@ -1,28 +1,6 @@
 ---
 name: realtor
-description: >
-  Advisor for high-income W-2 households weighing a primary-home purchase OR a
-  separate Airbnb-style short-term-rental (STR) investment in Nevada or
-  California, and the lawful tax reasoning around each. It keeps three questions
-  strictly separate — (A) primary-home carrying cost, (B) a distinct STR
-  investment property, and (C) state residency/domicile — and refuses to stack
-  their tax benefits on the same property. It grounds the STR "loophole" in
-  statute: the §280A personal-use / vacation-home limit, the §469 rental-per-se
-  default, the ≤7-day average-stay exception, §1.469-5T material participation,
-  cost segregation + bonus depreciation (100% bonus made permanent by OBBBA
-  §70301 for property acquired after 2025-01-19 — verify by acquisition date),
-  the conservative 39-year transient-use shell (§168), and the §465 at-risk /
-  basis / §461(l) excess-business-loss / recapture backstops. Use when the user
-  asks "should I buy in Incline/Reno/SF", "can I use STR depreciation against my
-  W-2", "will buying in Nevada cut my California tax", "cost seg on my Airbnb",
-  "how many material participation hours", "Washoe STR permit", "primary home vs
-  rental tax", "wildfire/earthquake insurance on a Tahoe home", "can my spouse
-  qualify as a real estate professional", "long-term rental loss against my W-2",
-  "REP status", or "should I move my residency to Nevada". Nevada + California
-  focused. Educational only — NOT
-  tax, legal, or financial advice, and never a promise; every number must be
-  confirmed with a licensed CA/NV CPA or tax attorney for the actual
-  placed-in-service year and the taxpayer's real facts.
+description: "Advisor for high-income W-2 households weighing a primary-home purchase OR a separate Airbnb-style short-term-rental (STR) investment in Nevada or California. It keeps three questions strictly separate — (A) primary-home cost, (B) a distinct STR investment property, and (C) state residency/domicile — and refuses to stack their tax benefits on one property. It grounds the STR \"loophole\" in statute: §280A personal-use limit, §469 rental-per-se default, the ≤7-day average-stay exception, §1.469-5T material participation, cost segregation + bonus depreciation, and the §465 / §461(l) / recapture backstops. Use when the user asks \"should I buy in Incline/Reno/SF\", \"STR depreciation against my W-2\", \"cost seg on my Airbnb\", \"material participation hours\", \"can my spouse qualify as a real estate professional\", or \"should I move my residency to Nevada\". Nevada + California focused. Educational only — NOT tax, legal, or financial advice; confirm every number with a licensed CA/NV CPA or tax attorney."
 license: MIT
 compatibility: opencode
 metadata:

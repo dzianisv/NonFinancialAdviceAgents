@@ -1,21 +1,6 @@
 ---
 name: analyse-smartmoney-options
-description: >
-  Use when a single-name analysis needs to read UNUSUAL OPTIONS FLOW — specific sweeps, blocks,
-  OTM call/put buildup, and strike-level volume vs open interest for a named ticker.
-  Trigger phrases: "unusual options activity in TICKER", "options flow read", "are there call sweeps
-  on X", "smart money options bets", "is someone loading calls/puts", "OTM call buildup", "large
-  options print", "sweep on X", "dark pool + options read".
-
-  SCOPE BOUNDARY — this skill owns TICKER-LEVEL unusual flow (specific prints, sweeps, blocks,
-  strike buildup on a named stock, ETF, or crypto options venue). It does NOT own aggregate
-  positioning: put/call ratios across the broad market, market-wide skew, dealer GEX, max pain, or
-  VIX/DVOL. Those belong to `analyse-smartmoney-positioning`. Do not double-count; a quorum should
-  assign one or the other, not both, for the same signal.
-
-  Educational, not advice; a lens, not gospel. Risk-neutral caution applies (options prices embed
-  the vol risk premium, not real-world probabilities). Signal-to-noise is very low — state that
-  honestly every time.
+description: "Use when a single-name analysis needs to read UNUSUAL OPTIONS FLOW — specific sweeps, blocks, OTM call/put buildup, and strike-level volume vs open interest for a named ticker. Trigger phrases: \"unusual options activity in TICKER\", \"options flow read\", \"are there call sweeps on X\", \"is someone loading calls/puts\", \"OTM call buildup\", \"large options print on X\". SCOPE BOUNDARY — this skill owns TICKER-LEVEL unusual flow (specific prints, sweeps, blocks, strike buildup on a named stock, ETF, or crypto options venue). It does NOT own aggregate positioning: put/call ratios across the broad market, market-wide skew, dealer GEX, max pain, or VIX/DVOL. Those belong to `analyse-smartmoney-positioning`. Do not double-count; a quorum should assign one or the other, not both, for the same signal. Educational, not advice; a lens, not gospel. Risk-neutral caution applies (options prices embed the vol risk premium, not real-world probabilities); signal-to-noise is very low — state that honestly."
 license: MIT
 compatibility: opencode
 metadata:
