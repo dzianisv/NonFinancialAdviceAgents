@@ -41,7 +41,10 @@ mkt version
 
 ## The advisor → alert contract
 An advisor sets an alert by calling `mkt-alert.ts add`. Every job MUST carry **reasoning**
-(the thesis) — that's the whole point; a price with no "why" is noise.
+(the thesis) — that's the whole point; a price with no "why" is noise. `store.ts`'s
+`normalizeReasoning()` enforces this: every job's `reasoning` is idempotently prefixed with
+`WHY SET:` (centrally, in `addJob()` — not just the CLI) so the rationale is unmistakable in
+`list` output, the fired notification, and the Watchlist sheet mirror.
 
 Job shape (stored in `.cache/mkt/agent-alerts.json` in the repo):
 ```jsonc
@@ -51,7 +54,7 @@ Job shape (stored in `.cache/mkt/agent-alerts.json` in the repo):
   "symbol": "AAVE-USD",
   "conditions": [{ "condition": "below", "value": 73 }],
   "match": "all",                   // only when >1 condition
-  "reasoning": "Denied Kraken-rumor pop fading; $73 = EMA20 reclaim + pre-pop base. Buy-zone tranche 1.",
+  "reasoning": "WHY SET: Denied Kraken-rumor pop fading; $73 = EMA20 reclaim + pre-pop base. Buy-zone tranche 1.",
   "channel": "telegram:@CryptoAiInvestor",  // telegram:<target> | ntfy:<topic> | email:<addr> | stdout
   "created": "2026-06-25T23:50:00Z",
   "expiry": "2026-07-31",           // optional; job inactive after
@@ -99,10 +102,11 @@ Notification text:
 ```
 🔔 mkt alert — AAVE-USD fired @ 72.84 (2026-06-26T07:02:47.501Z)
 Conditions: below:73=✓(price=72.84)
-WHY: Denied Kraken-rumor pop fading; $73 = EMA20 reclaim. Buy tranche 1.
+WHY SET: Denied Kraken-rumor pop fading; $73 = EMA20 reclaim. Buy tranche 1.
 📊 Analysis: https://telegra.ph/AAVE-analysis-2026-06-26
 ```
-(The `📊 Analysis:` line is omitted when no `--link` was provided.)
+(The `📊 Analysis:` line is omitted when no `--link` was provided. The reasoning is emitted
+as-is — it already begins `WHY SET:` — so the notification never doubles up as `WHY: WHY SET:`.)
 
 **check.ts coverage:** price (`above`/`below`) and indicators (`rsi_above`/`rsi_below`/
 `macd_cross`/`sma_cross_*`, computed from `mkt mcp query_history` closes) work in the
@@ -212,5 +216,5 @@ inject alerts via the webhook. Default to `127.0.0.1`. Never commit tokens — k
 
 ## Done = verified
 Before claiming an alert is set: run `bun mkt-alert.ts list` and confirm the job exists with
-its reasoning; run `bun check.ts --dry-run` and confirm it evaluates (and shows the WHY line
-on a fire). Tests stay green: `cd scripts && bun test`.
+its reasoning; run `bun check.ts --dry-run` and confirm it evaluates (and shows the `WHY SET:`
+line on a fire). Tests stay green: `cd scripts && bun test`.

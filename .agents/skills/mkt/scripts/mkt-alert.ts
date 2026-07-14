@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { addJob, loadJobs, removeJob, isActive, VALID_CONDITIONS, type AlertJob, type Cond } from "./store.ts";
+import { addJob, loadJobs, removeJob, isActive, normalizeReasoning, VALID_CONDITIONS, type AlertJob, type Cond } from "./store.ts";
 
 const args = process.argv.slice(2);
 const sub = args[0];
@@ -104,7 +104,10 @@ if (sub === "add") {
   for (const j of jobs) {
     const conds = j.conditions.map(c => `${c.condition}@${c.value}`).join(",");
     const status = isActive(j, now) ? "active" : "inactive";
-    const reason = j.reasoning.slice(0, 40) + (j.reasoning.length > 40 ? "…" : "");
+    // Normalize at display time so a stale legacy job (created before this
+    // rule, or edited outside addJob()) still shows "WHY SET:" in `list`.
+    const normalizedReasoning = normalizeReasoning(j.reasoning);
+    const reason = normalizedReasoning.slice(0, 40) + (normalizedReasoning.length > 40 ? "…" : "");
     console.log(
       j.id.padEnd(36) + " " +
       j.symbol.padEnd(10) + " " +

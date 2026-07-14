@@ -61,6 +61,8 @@ Conditions are written deterministically, e.g. `above:210`, `rsi_below(14):30`; 
 
 **Data Source rule:** any new `above`/`below` price alert requires OHLCV evidence in the Data Source column — same bar as `mkt-alert.ts --data-source`. Missing evidence is written as `[UNAVAILABLE]`, never left blank or guessed. Legacy alerts imported without recorded evidence are labeled `LEGACY — data source not recorded` and must be revalidated with a fresh OHLCV pull before they're allowed to drive a live action.
 
+**Reason rule — every alert must explicitly say why it was set:** the Reason / Thesis column (H) is mandatory and must begin `WHY SET:`, mirroring the mkt job's `reasoning` field, which `store.ts`'s `normalizeReasoning()` enforces (idempotent — never double-prefixed) on every job, whether created via `mkt-alert.ts add` or any other path into `addJob()`. The fired notification's WHY line begins `WHY SET:` for the same reason — a price with no stated "why" is noise, not a signal. A sheet row whose column H does not start `WHY SET:` is out of sync with its mkt job and must be fixed before the next review.
+
 **Before every `research-market-workflow` run:** read the Watchlist via `gws` and inject ALL `ACTIVE`/`PENDING*` rows into `args.prior_context`, THEN append the full `.agents/memory/YYYY-MM-DD.md` context underneath. The Watchlist supersedes memory as the source of truth for "what triggers exist right now" — memory stays the research history/narrative, not the trigger list.
 
 **Before every sheet write:**

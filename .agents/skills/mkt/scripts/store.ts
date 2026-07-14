@@ -55,6 +55,29 @@ function slug(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+// Durable rule: every mkt alert must explicitly say why it was set. All jobs
+// (existing and new) carry a reasoning string that begins with "WHY SET:" so
+// the trigger's rationale is unmistakable everywhere it's displayed or sent
+// (list output, notification text, Watchlist sheet mirror).
+const WHY_SET_PREFIX = "WHY SET:";
+
+/**
+ * Idempotently normalize a reasoning string so it begins with "WHY SET: ".
+ * - Trims surrounding whitespace.
+ * - Throws if the result is empty.
+ * - Returns unchanged (only trimmed) if it already starts with "WHY SET:"
+ *   (case-insensitive) — never double-prefixes.
+ * - Otherwise prepends "WHY SET: ".
+ */
+export function normalizeReasoning(reasoning: string): string {
+  const trimmed = (reasoning ?? "").trim();
+  if (!trimmed) throw new Error("reasoning is required and must be non-empty");
+  if (trimmed.slice(0, WHY_SET_PREFIX.length).toUpperCase() === WHY_SET_PREFIX) {
+    return trimmed;
+  }
+  return `${WHY_SET_PREFIX} ${trimmed}`;
+}
+
 function randChars(n = 4): string {
   return Math.random().toString(36).slice(2, 2 + n);
 }
@@ -84,6 +107,10 @@ export function addJob(partial: Omit<AlertJob, "id" | "created">): AlertJob {
     id: `${idBase}-${randChars(4)}`,
     created: new Date().toISOString(),
     ...partial,
+    // Central normalization: every creation path (CLI, workflow, script) is
+    // covered here, not just mkt-alert.ts, so the "WHY SET:" rule can't be
+    // bypassed by calling addJob() directly.
+    reasoning: normalizeReasoning(partial.reasoning),
     symbol: symbol.toUpperCase(),
   };
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { loadJobs, markFired, isActive, type AlertJob, type Cond } from "./store.ts";
+import { loadJobs, markFired, isActive, normalizeReasoning, type AlertJob, type Cond } from "./store.ts";
 import { rsi, macd, sma } from "./indicators.ts";
 
 const MKT_BIN = `${process.env.HOME}/.local/bin/mkt`;
@@ -282,10 +282,13 @@ async function main() {
 
     if (fires) {
       const ts = now.toISOString();
+      // Normalize at display time (covers stale legacy jobs) and emit the
+      // reasoning as-is — it already begins "WHY SET:", so no extra "WHY:"
+      // label is prepended (that would render as "WHY: WHY SET: ...").
       const msg =
         `🔔 mkt alert — ${job.symbol} fired @ ${data.price} (${ts})\n` +
         `Conditions: ${detail}\n` +
-        `WHY: ${job.reasoning}` +
+        `${normalizeReasoning(job.reasoning)}` +
         (job.analysisLink ? `\n📊 Analysis: ${job.analysisLink}` : "");
 
       console.log(`[${job.id}] FIRED — ${detail}`);

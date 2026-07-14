@@ -1,0 +1,23 @@
+====================================================================================================
+AAPL $272 ALERT -- EVIDENCE VERIFICATION (mkt alert id: aapl-below-272-awy9)
+====================================================================================================
+Source            : https://finance.yahoo.com/quote/AAPL/history
+Pulled at (UTC)   : 2026-07-14T05:09:11+00:00
+Completed-bar cutoff (sliced before any resample/rolling): 2026-07-10
+Bucket definition : $260 <= weekly close < $280
+Weekly window     : last 210 completed W-FRI bars ending on/before cutoff
+
+Metric                Alert-stated    auto_adjust=True    auto_adjust=False
+----------------------------------------------------------------------------------------------------
+Bucket count          17/210         18/210              17/210
+Daily 200-SMA         $272.45         $272.1              $272.45
+Weekly 50w SMA        $265.98         $265.57             $265.98
+Weekly 30w SMA        $275.47         $275.23             $275.47
+
+Weekly window used  : 2022-07-08 -> 2026-07-10 (210 bars)
+
+Price-level alerts (e.g. this $272 threshold) must track the actual quoted Close a human sees, so auto_adjust=False (unadjusted) is the correct convention here. Total-return backtests instead use auto_adjust=True (dividend-adjusted Close) because they simulate account growth including reinvested dividends. The two series diverge over long windows whenever dividends were paid without an offsetting split.
+
+====================================================================================================
+VERDICT: REPRODUCED (unadjusted Close matches alert-stated evidence)
+====================================================================================================
