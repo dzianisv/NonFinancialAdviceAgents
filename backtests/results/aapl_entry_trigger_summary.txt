@@ -1,0 +1,493 @@
+====================================================================================================
+AAPL ENTRY-TRIGGER GATE -- DOES WAITING FOR A TECHNICAL DIP BEAT IMMEDIATE ACTIVATION? (strategy-discovery-backtest)
+====================================================================================================
+
+AAPL Entry-Trigger Gate Backtest — Does Waiting for a Technical Dip Beat Immediate Activation?
+================================================================================================
+strategy-discovery-backtest gate for a NEW hypothesis, distinct from (and downstream of) the
+already-PASSed `aapl_weekly_dca_backtest.py` gate. That prior gate validated WHICH capped policy
+to run once the AAPL satellite is active (10% target / 15% ceiling, "Standard capped satellite").
+THIS gate asks a different, narrower question: **for that same approved policy, does adding a
+price-only ENTRY TRIGGER (wait for a technical pullback before starting to buy AAPL) beat simply
+activating immediately?** This operationalizes the `analyse-technical` lens's "pullback to a
+rising MA" / "RSI confirmation" entry heuristic as a mechanical, backtested rule instead of a
+narrative judgment call, per that skill's own instruction to "validate via
+analyse-systematic-trading [i.e. this gate] before sizing."
+
+>>> SURVIVORSHIP / SELECTION CAVEAT (carried over from the prior gate, holds regardless of
+    outcome) <<<
+AAPL was picked by the user WITH HINDSIGHT knowledge of its historical outperformance. Nothing
+below validates a forward, repeatable edge for AAPL itself — it describes what already happened
+to one stock. This gate can ONLY validate (or refute) an ENTRY-TIMING OVERLAY on a position the
+user has already decided to build (via the prior gate) — it is NEVER proof that AAPL has forward
+alpha, and it is NEVER proof that technical timing generalizes to other assets.
+
+--------------------------------------------------------------------------------------------------
+SPEC (predeclared before any data pull — every number below has a named CONFIG constant)
+--------------------------------------------------------------------------------------------------
+THE ONE ECONOMIC REASON AN EDGE MIGHT EXIST (Stage 0 of the gate, stated before touching data):
+  Trend-following / "buy the pullback within an uptrend" is the ONE technical-analysis family
+  with a robust (if modest) empirical base (per `analyse-technical`'s own honesty rules): buying
+  after price has already given back some gains (closed at/below a trailing moving average, or
+  short-term momentum has cooled per RSI) could plausibly reduce average cost basis vs. buying
+  every week regardless of price level, IF pullbacks are followed by mean-reversion more often
+  than by further, larger declines. This is a real, falsifiable hypothesis — not guaranteed to
+  hold, which is exactly what this gate tests, net of costs and lag.
+
+Universe / instruments: identical to the prior gate — AAPL (satellite candidate) + RSP (proxy for
+the user's existing ~$710,445 diversified stock sleeve — NOT literal RSP holdings).
+
+Initial state (identical at the start of EVERY window simulated — OOS headline, every rolling
+cohort, every crisis window — each is a FRESH account starting from this state at ITS OWN start
+date, matching the prior gate's already-approved initial state, never the live-date $289/$272
+AAPL/RSP quotes on the day this script happens to run):
+  - RSP-proxy stock sleeve  : $710,445
+  - Direct AAPL position    : $26        (negligible but tracked, never zeroed)
+  - New weekly contribution : $250       (decided at each complete Friday weekly close)
+
+APPROVED STANDARD POLICY (post-activation, reused verbatim from the PASSed prior gate — this
+gate does NOT re-litigate the policy itself, only WHEN it starts):
+  target 10% / hard ceiling 15% direct AAPL (of AAPL+RSP, pending cash excluded). Each week,
+  BEFORE deciding that week's $250, mark AAPL/RSP value from actual held shares (post any
+  settlement/trim). If weight < target, route enough of the $250 toward (never past) target:
+  solve x in (AAPL+x)/(AAPL+RSP+250) = target, x clipped to [0,250]; remainder -> RSP. If
+  weight >= target, 100% -> RSP. At every CALENDAR QUARTER-END (last complete weekly bar
+  on/before Mar/Jun/Sep/Dec), if AAPL weight > 15% ceiling, SELL AAPL down to EXACTLY the 10%
+  target (not the ceiling) and route (cost-adjusted) proceeds to RSP. This is the ONLY
+  rebalancing mechanism in this script, and it fires ONLY once a trial's policy is ACTIVE
+  (pre-activation, the trim mechanic does not exist — see below).
+
+Four trials — the ONLY thing that differs between them is WHEN the standard policy above
+switches on ("activates"). Before activation, 100% of every week's $250 goes to RSP (no AAPL
+buys at all — the tiny legacy $26 position just drifts in price, untouched); no quarter-end trim
+check happens pre-activation. ACTIVATION IS A ONE-TIME, STICKY REGIME SWITCH: once triggered, the
+standard policy runs for the remainder of that window, forever — even if the price signal later
+flips back to "false". This models an ENTRY-TIMING decision (when to START the satellite,
+matching `analyse-technical`'s framing of timing an entry into a position already justified on
+other grounds), NOT a continuous on/off rebalancing signal.
+  1. Immediate activation (benchmark) : standard policy active from week 0 of every window, no
+     waiting at all. This is the prior gate's already-PASSed "Standard capped satellite (10%/15%)"
+     variant, run unchanged, as the baseline every delayed trial must beat.
+  2. Wait for weekly close <= 20-week EMA (AAPL, point-in-time): activates at week t+1 where week
+     t is the first week whose COMPLETED Friday weekly close is <= AAPL's 20-week EMA as of that
+     same week's close (the EMA is a point-in-time trailing indicator using only data through
+     week t; see DATA/no-lookahead below).
+  3. Wait for daily close <= 50-day SMA (AAPL) AND daily Wilder RSI(14) < 50, both evaluated at
+     the completed Friday: activates at week t+1 where week t is the first week whose completed
+     Friday daily close is <= the 50-day SMA (point-in-time, trailing 50 daily bars through that
+     Friday) AND the daily Wilder RSI(14) (point-in-time, trailing) is < 50 on that same Friday.
+  4. Wait for weekly close <= 20-week EMA AND daily Wilder RSI(14) < 50 (trial 2's weekly
+     condition combined with trial 3's RSI sub-condition; does NOT require the 50-day SMA
+     condition).
+No-earlier-than-t+1 rule (structural, not a judgment call): a signal computed from week t's
+COMPLETED close can only switch the policy on starting week t+1's decision. It is IMPOSSIBLE,
+by construction (activation_start_index = signal_true_index + 1, asserted at runtime), for the
+same week's close that produced the signal to ALSO be the first week the standard policy buys
+AAPL under that signal — see self-checks.
+
+Delayed-fill / cash queue (identical mechanic to the prior gate, always on, for ALL FOUR
+trials): a contribution (or trim's proceeds) decided at week t's close becomes "pending cash",
+invested at week t+1's close (one full week settlement lag), modeled as an explicit
+per-instrument pending-cash queue. No shares may be created before their settlement week. Any
+still-pending cash at a window's final week remains uninvested CASH in terminal value.
+
+DATA / no-lookahead: yfinance AAPL & RSP, auto_adjust=True Close, longest common history,
+resampled to weekly Friday (W-FRI, last available close each week). A trailing weekly bucket is
+DROPPED if the raw daily data does not yet extend through that bucket's Friday (in-progress week
+— asserted programmatically). ALL THREE signal inputs (20-week EMA, 50-day SMA, Wilder RSI14)
+are computed as TRAILING indicators over AAPL's own FULL available daily/weekly price history
+(from the earliest AAPL daily bar, well before RSP's own history begins in ~2003) — deliberately
+NOT reset to zero warm-up at each window's own start date, because a real trailing indicator's
+value at any given calendar date reflects genuine, already-public market history as of that
+date, regardless of when a particular account happened to start; resetting it per-window would
+be a MORE artificial construction, not a more honest one. Each signal value at row t depends
+ONLY on price data at or before t (rolling/ewm windows, Wilder's recursive smoothing, and
+`Series.asof`, none of which look forward) — proven structurally by construction and verified
+empirically in self-checks (b) and (c) below.
+  IS  : 2003-01-01 (or first common date if later) -> 2015-12-31    (context only)
+  OOS : 2016-01-01 -> latest COMPLETE weekly close                   <- HEADLINE (verdict)
+  Rolling 5y cohorts : start 2005, 2010, 2015, 2020 (fresh state each, truncated at the earlier
+    of start+5y or the latest available data)
+  Rolling 10y cohorts: start first-common-year, 2005, 2010, 2013 (same truncation rule)
+  Crisis windows     : 2008 GFC (2007-10-01 -> 2009-03-31), 2020 COVID (2020-01-01 ->
+    2020-12-31), 2022 rate-hike bear (2022-01-01 -> 2022-12-31) — fresh state each.
+
+Costs (applied to EVERY buy/sell trade): base 2bps | stress 5bps | doubled-base stress 4bps |
+PLUS an extra 25bps stacked ONLY on top of the doubled 4bps base, applied only to trades
+EXECUTED in each trial's own worst-5%-return weeks (2-pass: identify worst-5% weeks from the
+doubled-cost run, then re-run with the extra cost stacked on those specific execution dates).
+The 1-week delayed fill is ALWAYS ON (structural, not a togglable stress). Predeclared threshold:
+stress terminal wealth for EACH delayed trial must not be more than
+MAX_STRESS_WEALTH_DEGRADATION_PCT worse than that SAME trial's own base-case terminal wealth,
+OOS headline window (a trial is compared against ITSELF across cost scenarios here, not against
+the immediate benchmark — the immediate-vs-delayed comparison is a separate PASS criterion below).
+
+Metrics contract (all net of costs unless noted):
+  - XIRR (money-weighted): weekly cashflow schedule of -$250 at every decision date, plus
+    +terminal_account_value folded into the final cashflow. DOCUMENTED SPEC DEVIATION (identical
+    to, and for the identical reason as, the prior gate): the initial $710,471 base IS included
+    as an additional t0 outflow, NOT omitted — omitting it produces a mathematically
+    ill-posed/meaningless IRR here (verified by hand: the $710k base dominates the $250/wk
+    stream, forcing the solver to misattribute nearly all terminal growth to the tiny weekly
+    stream, inflating IRR to >50%/yr for what is actually an ~11-14%/yr RSP-dominated period).
+    Solved via scipy.optimize.brentq with a widening-bracket fallback.
+  - Time-weighted weekly return series, annualized vol and Sharpe (blended risk-free rate per
+    AGENTS.md convention: 5% 1999-2005, 3% 2005-2020, 4% 2020-2026, blended by calendar-day
+    overlap).
+  - Contribution-adjusted max drawdown + time-in-drawdown (wealth-multiple series =
+    account_value / cumulative(initial + contributions to date)).
+  - ACTIVATION DELAY (new metric this gate introduces): number of weeks from a window's own
+    start until the standard policy switches on (0 for the immediate benchmark; "NEVER" if the
+    signal never fires within that window — tracked as its own rate, see below).
+  - NEVER-ACTIVATED RATE (new metric): across the 8 rolling cohorts (4x 5y + 4x 10y), the % of
+    cohorts in which a delayed trial's signal never fires at all before the cohort's own window
+    ends (100% - this = the ACTIVATION RATE used in the PASS threshold below).
+  - Max AND ending direct-AAPL weight, quarter-end trim count/$ and turnover (trim
+    dollar volume / average sleeve value).
+  - OOS-vs-IS decay: OOS XIRR minus IS XIRR per trial (context, not a PASS criterion by itself).
+
+Predeclared PASS thresholds for a delayed trigger (CONFIG constants, referenced by name in
+verdict logic; a delayed trial (2, 3, or 4) is judged against the immediate benchmark ONLY on
+the OOS headline window unless stated otherwise):
+  MAX_XIRR_SHORTFALL_PP        = 0.50  (delayed trial's OOS XIRR must not be more than this many
+                                         percentage points WORSE than the immediate benchmark's)
+  MIN_RISK_IMPROVEMENT_PCT     = 5.0   (delayed trial's OOS max-DD OR annualized vol must be
+                                         AT LEAST this % relatively BETTER (lower) than the
+                                         immediate benchmark's — only one of the two needs to
+                                         clear the bar)
+  MAX_STRESS_WEALTH_DEGRADATION_PCT = 1.0  (that trial's own stress-case OOS terminal wealth
+                                         must not be worse than its own base-case OOS terminal
+                                         wealth by more than this %)
+  MIN_COHORT_ACTIVATION_RATE_PCT = 80.0 (the trial's signal must actually fire — "effectively
+                                         activate" with at least 1 week to act before the
+                                         window's own end — in at least this % of the 8 rolling
+                                         5y+10y cohorts; below this, "waiting" too often means
+                                         "never buying AAPL at all", which is not a validated
+                                         entry-timing edge, it is an accidental all-RSP outcome)
+A delayed trial PASSES only if ALL FOUR conditions hold. Otherwise FAIL — "price-only waiting
+has no validated edge [here]", which per the strategy-discovery-backtest gate's own honesty
+rules is a valid, valuable result, not a failure to fix by loosening thresholds.
+
+DEFLATED SHARPE RATIO (DSR) — WHY IT IS A POOR STATISTICAL FIT HERE (per gate Stage 4, "deflate
+for the number of trials tried", trials = 4): a numeric DSR/PSR estimate under a naive N=4 iid
+Sharpe-under-luck model IS computed below for procedural completeness, but it is a POOR fit for
+this specific test, for three structural reasons stated up front (not discovered post-hoc): (1)
+the extreme-value asymptotics the DSR/PSR formulas rely on need a reasonably large N of trials
+to be statistically stable; N=4 is far too small for that approximation to mean much either way;
+(2) the 4 trials are NOT independent draws from a "strategy space" — trial 4 is LITERALLY the
+logical AND of trial 2's condition with trial 3's RSI sub-condition, and trial 3 and trial 4
+share that identical RSI14<50 sub-condition, so the "independent trials" assumption central to
+DSR is violated by construction, not by accident; (3) all 4 trials share the identical
+underlying asset (AAPL), identical post-activation account mechanics, and largely overlapping
+historical return streams once each activates — this is a nested ABLATION of ONE entry-timing
+idea (wait for a technical pullback, operationalized 3 ways) plus a no-wait control, not 4
+independently data-mined strategies pulled from a large search space, which is the actual
+overfitting scenario DSR was built to correct for. The real defense against overfitting in THIS
+gate is the OOS-headline + rolling-cohort walk-forward + stress-test discipline above, not the
+DSR number, which is reported only so "trials tried" is disclosed per the gate's honesty rules.
+
+Implementation self-checks (`--selfcheck`, and always run first inside a full run too):
+  (a) Wilder RSI(14)-style formula hand-verified against a fully hand-computed small synthetic
+      series (period=5 for tractable arithmetic) — Wilder's SMMA seeded with a SIMPLE average of
+      the first `period` gains/losses (per Wilder 1978 / the standard derivation), not pandas'
+      default `ewm` single-observation seeding, which is a measurably different (if
+      asymptotically converging) initialization — this script uses the textbook seeding.
+  (b) NO-SAME-BAR-ACTIVATION: a synthetic AAPL/RSP weekly series engineered so the signal first
+      turns true at a known week t proves activation_start_index == t+1 (never t or earlier), and
+      that the account's ACTUAL contribution routing at week t itself, and every week before it,
+      is 100% RSP / 0% AAPL — i.e. the week whose close TRIGGERS the signal is never itself the
+      week the account acts on it.
+  (c) NO-LOOKAHEAD / SHIFT-THE-FUTURE TEST: two synthetic price paths, IDENTICAL through week t,
+      that diverge only in weeks AFTER t+1 (one continues crashing, the other V-shape recovers),
+      prove the signal value at every week <= t is BYTE-IDENTICAL between the two paths — i.e.
+      changing the future cannot change a past/contemporaneous activation decision. This is a
+      strictly stronger, more direct proof of no-lookahead than the generic "shift signals +1
+      bar" heuristic from the gate's own SKILL.md (which is built for continuous vectorized
+      alpha signals); the substitution is deliberate and is exactly what an explicit
+      trailing-indicator + discrete-activation engine like this one needs.
+  (d) Delayed-fill settlement lag and calendar-quarter-end trim mechanics (reused, adapted from
+      the prior gate's already-verified engine) re-verified against a hand-constructed
+      engineered-rally synthetic series through this script's OWN simulate_entry_trigger_window().
+Determinism: two consecutive full runs must produce byte-identical
+backtests/results/aapl_entry_trigger_summary.txt (no wall-clock timestamps are written to that
+file). A raw-data cache at RAW_DATA_CACHE_PATH (outside this repo, under the user's home cache
+dir — not one of this script's owned repo deliverables) pins the exact downloaded yfinance bytes
+across separate CLI invocations for CACHE_MAX_AGE_HOURS hours, for the same reason documented in
+the prior gate (yfinance's auto_adjust=True close is recomputed server-side on every call and
+carries sub-cent jitter between live downloads). Delete the cache file to force a fresh download.
+
+====================================================================================================
+SELF-CHECKS (RSI hand-verify, no-same-bar-activation, shift-the-future no-lookahead, delayed-fill/trim mechanics -- all via this script's OWN production functions)
+====================================================================================================
+----------------------------------------------------------------------------------------------------
+[selfcheck a] Wilder RSI(14)-style formula vs a fully hand-computed synthetic series (period=5 for tractable by-hand arithmetic)
+----------------------------------------------------------------------------------------------------
+  [selfcheck a] PASS: RSI at index 5 = 77.7777777778 (expected 77.7777777778)
+  [selfcheck a] PASS: RSI at index 6 = 82.6086956522 (expected 82.6086956522)
+  [selfcheck a] PASS: RSI at index 7 = 58.6872586873 (expected 58.6872586873)
+  [selfcheck a] PASS: RSI at index 8 = 72.1354166667 (expected 72.1354166667)
+  [selfcheck a] PASS: RSI at index 9 = 76.8460914255 (expected 76.8460914255)
+  [selfcheck a] PASS: RSI is NaN for all indices before the seed position (no premature/invalid early value)
+----------------------------------------------------------------------------------------------------
+[selfcheck b+c] NO-SAME-BAR-ACTIVATION and SHIFT-THE-FUTURE (no-lookahead) tests, via compute_signals() + activation_index_for_trial() on a synthetic AAPL/RSP series
+----------------------------------------------------------------------------------------------------
+  [selfcheck b] PASS (2. Wait: weekly close <= 20wk EMA): signal first true at local week 15 (>= crash week 15, no early false trigger during the uptrend)
+  [selfcheck b] PASS (2. Wait: weekly close <= 20wk EMA): activation_start_index=16 == signal_true_index+1 exactly (no same-bar activation)
+  [selfcheck b] PASS (2. Wait: weekly close <= 20wk EMA): AAPL contribution decided is EXACTLY zero for every week 0..15 (through and including the signal week itself)
+  [selfcheck b] PASS (2. Wait: weekly close <= 20wk EMA): AAPL contribution decided at week 16 (first active week) = $250.0000 > 0 (activation actually takes effect the week immediately AFTER the triggering close)
+  [selfcheck b] PASS (3. Wait: daily close <= 50d SMA AND RSI14<50): signal first true at local week 15 (>= crash week 15, no early false trigger during the uptrend)
+  [selfcheck b] PASS (3. Wait: daily close <= 50d SMA AND RSI14<50): activation_start_index=16 == signal_true_index+1 exactly (no same-bar activation)
+  [selfcheck b] PASS (3. Wait: daily close <= 50d SMA AND RSI14<50): AAPL contribution decided is EXACTLY zero for every week 0..15 (through and including the signal week itself)
+  [selfcheck b] PASS (3. Wait: daily close <= 50d SMA AND RSI14<50): AAPL contribution decided at week 16 (first active week) = $250.0000 > 0 (activation actually takes effect the week immediately AFTER the triggering close)
+  [selfcheck b] PASS (4. Wait: weekly <=20wk EMA AND RSI14<50): signal first true at local week 15 (>= crash week 15, no early false trigger during the uptrend)
+  [selfcheck b] PASS (4. Wait: weekly <=20wk EMA AND RSI14<50): activation_start_index=16 == signal_true_index+1 exactly (no same-bar activation)
+  [selfcheck b] PASS (4. Wait: weekly <=20wk EMA AND RSI14<50): AAPL contribution decided is EXACTLY zero for every week 0..15 (through and including the signal week itself)
+  [selfcheck b] PASS (4. Wait: weekly <=20wk EMA AND RSI14<50): AAPL contribution decided at week 16 (first active week) = $250.0000 > 0 (activation actually takes effect the week immediately AFTER the triggering close)
+  [selfcheck c] PASS: ALL signal columns (weekly_close, ema20, daily_close, sma50, rsi14, sig_ema, sig_sma_rsi, sig_ema_rsi) for every week <= the crash week (2018-08-03) are BYTE-IDENTICAL between scenario A (flat post-crash) and scenario B (diverges to +150 from week 31 onward) -- changing the future cannot change a past/contemporaneous signal.
+----------------------------------------------------------------------------------------------------
+[selfcheck d] Delayed-fill settlement lag + calendar-quarter-end trim mechanics, via simulate_entry_trigger_window() (activation_start_index=0, i.e. the 'immediate' trial's exact code path)
+----------------------------------------------------------------------------------------------------
+  [selfcheck d] synthetic quarter-end enforcement bars: [('2021-03-31', '2021-03-26'), ('2021-06-30', '2021-06-25')]
+  [selfcheck d] PASS: initial AAPL weight = 10.0000% (target 10%)
+  [selfcheck d] PASS: pre-trim weight 22.18% > 15% ceiling the week before 2021-03-26 (breach confirmed)
+  [selfcheck d] PASS: trim fired at 2021-03-26 (gross $1955.56)
+  [selfcheck d] PASS: post-trim weight 10.0000% == target 10% (returned to TARGET, not ceiling)
+  [selfcheck d] PASS: cash decided for AAPL at week 2 ($25.0050) produces exactly +2.500000 shares at week 3's close (one-week lag confirmed)
+  [selfcheck d] PASS: cash decided for RSP at week 2 ($224.9950) produces exactly +2.249500 shares at week 3's close (one-week lag confirmed)
+
+All self-checks PASSED.
+
+====================================================================================================
+DOCUMENTED ASSUMPTIONS / SPEC DEVIATIONS (stated explicitly, per task instructions)
+====================================================================================================
+1. XIRR cashflow schedule DEVIATES from the literal spec text: the initial $710,471 base IS included as an additional t0 outflow (alongside week 0's -$250), not omitted -- identical treatment, and for the identical reason, as the prior (already-PASSed) aapl_weekly_dca_backtest.py gate: omitting it produces a mathematically ill-posed/meaningless IRR, since the pre-existing lump sum dominates the $250/wk stream.
+2. Signals (20wk EMA / 50d SMA / RSI14) are computed over AAPL's OWN FULL available daily/weekly history from its earliest downloaded bar (NOT reset to a fresh warm-up at each window's own start date) -- see module docstring 'DATA / no-lookahead' section for the rationale. This is deliberate and is re-verified structurally in self-checks (b)/(c).
+3. The illustrative chart uses the full common-history window (fresh initial state at first common date, base 2bps cost) purely for visualization; it is NOT the verdict window. All PASS/FAIL verdicts are based on the OOS-headline window (2016-01-01 -> latest complete week) as specified.
+4. DSR (Deflated Sharpe Ratio) is reported below for procedural completeness only and is a POOR statistical fit here (trials=4, non-independent by construction) -- see module docstring and the dedicated DSR section below for the full explanation.
+
+Loaded AAPL, RSP daily close data (auto_adjust=True, adjusted-close proxy).
+  AAPL: 1999-01-04 -> 2026-07-13  (6922 daily bars)
+  RSP: 2003-05-01 -> 2026-07-13  (5836 daily bars)
+  Last raw daily bar across all tickers: 2026-07-13
+  Dropping incomplete trailing week: last raw bar 2026-07-13 < weekly bucket label 2026-07-17 (current calendar week not yet closed -- bucket built from partial data, discarded).
+  Complete-weeks-only self-check PASSED: last weekly bucket label 2026-07-10 <= last raw daily bar 2026-07-13.
+  Common weekly history: 2003-05-02 -> 2026-07-10  (1211 weekly bars)
+====================================================================================================
+ENGINE-LEVEL DETERMINISM PROOF (same downloaded data, same process, simulation run TWICE)
+====================================================================================================
+Isolates CODE-level determinism (dict/set ordering, floating-point op order, no unseeded randomness) from DATA-SOURCE determinism (yfinance's auto_adjust=True close is recomputed server-side per call, hence the RAW_DATA_CACHE_PATH cache across separate CLI invocations -- see module docstring). This in-process check proves that GIVEN IDENTICAL input data, the engine is 100% deterministic.
+  ENGINE DETERMINISM CHECK PASSED: identical input data -> byte-identical numeric results across two in-process simulation runs (all trials, all fields, including activation indices).
+
+IS window (context only, not the verdict criterion): 2003-05-02 -> 2015-12-31
+OOS window: 2016-01-01 -> 2026-07-10   <-- HEADLINE (verdict window, fresh initial state at 2016-01-01)
+
+Initial state (identical at the start of EVERY window below): RSP-proxy sleeve $710,445 + direct AAPL $26 = $710,471 total, plus $250/week new money. Before activation: 100% of the $250 -> RSP.
+
+----------------------------------------------------------------------------------------------------
+QUARTER-END ENFORCEMENT DATES (OOS window, once a trial is ACTIVE) -- derived from real calendar quarter boundaries, NOT 'every 13 weeks':
+----------------------------------------------------------------------------------------------------
+  calendar quarter-end 2016-03-31 -> last complete weekly bar used: 2016-03-25
+  calendar quarter-end 2016-06-30 -> last complete weekly bar used: 2016-06-24
+  calendar quarter-end 2016-09-30 -> last complete weekly bar used: 2016-09-30
+  calendar quarter-end 2016-12-31 -> last complete weekly bar used: 2016-12-30
+  calendar quarter-end 2017-03-31 -> last complete weekly bar used: 2017-03-31
+  calendar quarter-end 2017-06-30 -> last complete weekly bar used: 2017-06-30
+  calendar quarter-end 2017-09-30 -> last complete weekly bar used: 2017-09-29
+  calendar quarter-end 2017-12-31 -> last complete weekly bar used: 2017-12-29
+  calendar quarter-end 2018-03-31 -> last complete weekly bar used: 2018-03-30
+  calendar quarter-end 2018-06-30 -> last complete weekly bar used: 2018-06-29
+  calendar quarter-end 2018-09-30 -> last complete weekly bar used: 2018-09-28
+  calendar quarter-end 2018-12-31 -> last complete weekly bar used: 2018-12-28
+  calendar quarter-end 2019-03-31 -> last complete weekly bar used: 2019-03-29
+  calendar quarter-end 2019-06-30 -> last complete weekly bar used: 2019-06-28
+  calendar quarter-end 2019-09-30 -> last complete weekly bar used: 2019-09-27
+  calendar quarter-end 2019-12-31 -> last complete weekly bar used: 2019-12-27
+  calendar quarter-end 2020-03-31 -> last complete weekly bar used: 2020-03-27
+  calendar quarter-end 2020-06-30 -> last complete weekly bar used: 2020-06-26
+  calendar quarter-end 2020-09-30 -> last complete weekly bar used: 2020-09-25
+  calendar quarter-end 2020-12-31 -> last complete weekly bar used: 2020-12-25
+  calendar quarter-end 2021-03-31 -> last complete weekly bar used: 2021-03-26
+  calendar quarter-end 2021-06-30 -> last complete weekly bar used: 2021-06-25
+  calendar quarter-end 2021-09-30 -> last complete weekly bar used: 2021-09-24
+  calendar quarter-end 2021-12-31 -> last complete weekly bar used: 2021-12-31
+  calendar quarter-end 2022-03-31 -> last complete weekly bar used: 2022-03-25
+  calendar quarter-end 2022-06-30 -> last complete weekly bar used: 2022-06-24
+  calendar quarter-end 2022-09-30 -> last complete weekly bar used: 2022-09-30
+  calendar quarter-end 2022-12-31 -> last complete weekly bar used: 2022-12-30
+  calendar quarter-end 2023-03-31 -> last complete weekly bar used: 2023-03-31
+  calendar quarter-end 2023-06-30 -> last complete weekly bar used: 2023-06-30
+  calendar quarter-end 2023-09-30 -> last complete weekly bar used: 2023-09-29
+  calendar quarter-end 2023-12-31 -> last complete weekly bar used: 2023-12-29
+  calendar quarter-end 2024-03-31 -> last complete weekly bar used: 2024-03-29
+  calendar quarter-end 2024-06-30 -> last complete weekly bar used: 2024-06-28
+  calendar quarter-end 2024-09-30 -> last complete weekly bar used: 2024-09-27
+  calendar quarter-end 2024-12-31 -> last complete weekly bar used: 2024-12-27
+  calendar quarter-end 2025-03-31 -> last complete weekly bar used: 2025-03-28
+  calendar quarter-end 2025-06-30 -> last complete weekly bar used: 2025-06-27
+  calendar quarter-end 2025-09-30 -> last complete weekly bar used: 2025-09-26
+  calendar quarter-end 2025-12-31 -> last complete weekly bar used: 2025-12-26
+  calendar quarter-end 2026-03-31 -> last complete weekly bar used: 2026-03-27
+  calendar quarter-end 2026-06-30 -> last complete weekly bar used: 2026-06-26
+
+----------------------------------------------------------------------------------------------------
+IN-SAMPLE (IS) -- base cost 2bps -- context only, NOT the gate criterion
+----------------------------------------------------------------------------------------------------
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 13.25% $3,829,452      $165,250   19.6% 58.09%     77.00%      17.50%       9.37%  3/$431,326    21.9%
+           2. Wait: weekly close <= 20wk EMA                    30 12.87% $3,676,924      $165,250   19.5% 57.28%     77.61%      16.86%       9.40%  3/$371,984    19.5%
+3. Wait: daily close <= 50d SMA AND RSI14<50                    15 12.97% $3,715,864      $165,250   19.5% 58.06%     76.85%      17.46%       9.28%  3/$399,075    20.8%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                    30 12.87% $3,676,924      $165,250   19.5% 57.28%     77.61%      16.86%       9.40%  3/$371,984    19.5%
+
+====================================================================================================
+OUT-OF-SAMPLE (OOS) -- HEADLINE RESULT -- base cost 2bps, always-on 1-week delayed fill
+====================================================================================================
+Blended OOS risk-free rate (AGENTS.md convention): 3.62%
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 13.47% $2,973,230      $137,500   18.0% 36.09%     73.45%      15.23%      11.33%  1/$113,048     7.2%
+           2. Wait: weekly close <= 20wk EMA                     1 13.46% $2,971,341      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,822     7.1%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     1 13.46% $2,971,341      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,822     7.1%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     1 13.46% $2,971,341      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,822     7.1%
+
+Sharpe (annualized, on the ACTUAL time-weighted return series, drift-aware, blended RF):
+  1. Immediate activation (benchmark, no wait)        Sharpe=0.590
+  2. Wait: weekly close <= 20wk EMA                   Sharpe=0.590
+  3. Wait: daily close <= 50d SMA AND RSI14<50        Sharpe=0.590
+  4. Wait: weekly <=20wk EMA AND RSI14<50             Sharpe=0.590
+
+====================================================================================================
+OOS COST SCENARIOS (base 2bps / stress 5bps / doubled-base 4bps) + worst-5%-week stress (doubled 4bps + extra 25bps stacked ONLY on each trial's own worst-5%-return weeks)
+====================================================================================================
+
+--- Base (2bps) ---
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 13.47% $2,973,230      $137,500   18.0% 36.09%     73.45%      15.23%      11.33%  1/$113,048     7.2%
+           2. Wait: weekly close <= 20wk EMA                     1 13.46% $2,971,341      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,822     7.1%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     1 13.46% $2,971,341      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,822     7.1%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     1 13.46% $2,971,341      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,822     7.1%
+
+--- Stress (5bps) ---
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 13.47% $2,972,951      $137,500   18.0% 36.10%     73.45%      15.23%      11.33%  1/$112,962     7.2%
+           2. Wait: weekly close <= 20wk EMA                     1 13.46% $2,971,117      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,811     7.1%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     1 13.46% $2,971,117      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,811     7.1%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     1 13.46% $2,971,117      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,811     7.1%
+
+--- Doubled-base (4bps) ---
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 13.47% $2,973,046      $137,500   18.0% 36.10%     73.45%      15.23%      11.33%  1/$112,991     7.2%
+           2. Wait: weekly close <= 20wk EMA                     1 13.46% $2,971,189      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,814     7.1%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     1 13.46% $2,971,189      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,814     7.1%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     1 13.46% $2,971,189      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,814     7.1%
+
+--- Doubled+Worst5%wk (4bps+25bps) ---
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 13.47% $2,972,974      $137,500   18.0% 36.10%     73.45%      15.23%      11.33%  1/$112,960     7.2%
+           2. Wait: weekly close <= 20wk EMA                     1 13.46% $2,971,139      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,810     7.1%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     1 13.46% $2,971,139      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,810     7.1%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     1 13.46% $2,971,139      $137,500   18.0% 36.10%     73.45%      15.18%      11.33%  1/$111,810     7.1%
+
+----------------------------------------------------------------------------------------------------
+STRESS WEALTH-DEGRADATION CHECK (OOS headline) -- threshold: MAX_STRESS_WEALTH_DEGRADATION_PCT = 1.0% (each trial's own stress terminal wealth must not be more than this % worse than that SAME trial's own base-case terminal wealth)
+----------------------------------------------------------------------------------------------------
+  1. Immediate activation (benchmark, no wait)        base=$2,973,230  stress=$2,972,974  degradation=0.009%  -> PASS
+  2. Wait: weekly close <= 20wk EMA                   base=$2,971,341  stress=$2,971,139  degradation=0.007%  -> PASS
+  3. Wait: daily close <= 50d SMA AND RSI14<50        base=$2,971,341  stress=$2,971,139  degradation=0.007%  -> PASS
+  4. Wait: weekly <=20wk EMA AND RSI14<50             base=$2,971,341  stress=$2,971,139  degradation=0.007%  -> PASS
+
+====================================================================================================
+ROLLING START-DATE COHORTS -- each a FRESH account from the same initial state, base cost 2bps
+====================================================================================================
+
+--- 5-year cohorts ---
+Cohort start Cohort end Truncated immediate delay(wk) immediate XIRR weekly_ema delay(wk) weekly_ema XIRR daily_sma_rsi delay(wk) daily_sma_rsi XIRR weekly_ema_rsi delay(wk) weekly_ema_rsi XIRR
+  2005-01-01 2010-01-01        no       0 (immediate)          4.48%                   15           4.18%                      13              4.23%                       15               4.18%
+  2010-01-01 2015-01-01        no       0 (immediate)         17.73%                    5          17.70%                       4             17.71%                        5              17.70%
+  2015-01-01 2020-01-01        no       0 (immediate)         10.50%                    3          10.48%                       1             10.50%                        3              10.48%
+  2020-01-01 2025-01-01        no       0 (immediate)         11.47%                    9          11.40%                       9             11.40%                        9              11.40%
+
+--- 10-year cohorts ---
+Cohort start Cohort end Truncated immediate delay(wk) immediate XIRR weekly_ema delay(wk) weekly_ema XIRR daily_sma_rsi delay(wk) daily_sma_rsi XIRR weekly_ema_rsi delay(wk) weekly_ema_rsi XIRR
+  2003-05-02 2013-05-02        no       0 (immediate)         13.36%                   30          12.87%                      15             13.00%                       30              12.87%
+  2005-01-01 2015-01-01        no       0 (immediate)         11.97%                   15          11.79%                      13             11.82%                       15              11.79%
+  2010-01-01 2020-01-01        no       0 (immediate)         14.10%                    5          14.06%                       4             14.07%                        5              14.06%
+  2013-01-01 2023-01-01        no       0 (immediate)         12.88%                    1          12.88%                       1             12.88%                        1              12.88%
+
+COHORT ACTIVATION RATE (n=8 cohorts: 4x 5y + 4x 10y) -- threshold MIN_COHORT_ACTIVATION_RATE_PCT = 80.0%
+  1. Immediate activation (benchmark, no wait)        activated in 8/8 cohorts (100.0%)  never-activated rate=0.0%
+  2. Wait: weekly close <= 20wk EMA                   activated in 8/8 cohorts (100.0%)  never-activated rate=0.0%
+  3. Wait: daily close <= 50d SMA AND RSI14<50        activated in 8/8 cohorts (100.0%)  never-activated rate=0.0%
+  4. Wait: weekly <=20wk EMA AND RSI14<50             activated in 8/8 cohorts (100.0%)  never-activated rate=0.0%
+
+====================================================================================================
+CRISIS WINDOWS -- each a FRESH account from the same initial state, base cost 2bps
+====================================================================================================
+
+--- 2008 GFC (2007-10-01 -> 2009-03-31) ---
+                                       Trial Activation delay (wk)    XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) -36.12%   $380,959       $19,500   37.2% 58.10%     98.72%       4.25%       4.20%        0/$0     0.0%
+           2. Wait: weekly close <= 20wk EMA                    16 -36.15%   $380,739       $19,500   37.3% 58.12%     98.72%       3.59%       3.55%        0/$0     0.0%
+3. Wait: daily close <= 50d SMA AND RSI14<50                    14 -36.14%   $380,803       $19,500   37.3% 58.12%     98.72%       3.69%       3.65%        0/$0     0.0%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                    16 -36.15%   $380,739       $19,500   37.3% 58.12%     98.72%       3.59%       3.55%        0/$0     0.0%
+
+--- 2020 COVID (2020-01-01 -> 2020-12-31) ---
+                                       Trial Activation delay (wk)   XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) 12.73%   $812,552       $13,000   39.0% 36.69%     82.69%       2.32%       2.32%        0/$0     0.0%
+           2. Wait: weekly close <= 20wk EMA                     9 12.54%   $811,220       $13,000   39.0% 36.71%     82.69%       1.84%       1.84%        0/$0     0.0%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     9 12.54%   $811,220       $13,000   39.0% 36.71%     82.69%       1.84%       1.84%        0/$0     0.0%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     9 12.54%   $811,220       $13,000   39.0% 36.71%     82.69%       1.84%       1.84%        0/$0     0.0%
+
+--- 2022 rate-hike bear (2022-01-01 -> 2022-12-31) ---
+                                       Trial Activation delay (wk)    XIRR Terminal $ New contrib $ Ann.vol  MaxDD Time-in-DD Max AAPL wt End AAPL wt Trims (n/$) Turnover
+1. Immediate activation (benchmark, no wait)         0 (immediate) -11.48%   $642,874       $13,000   22.7% 20.08%     98.08%       1.70%       1.69%        0/$0     0.0%
+           2. Wait: weekly close <= 20wk EMA                     9 -11.44%   $643,201       $13,000   22.7% 20.08%     98.08%       1.42%       1.42%        0/$0     0.0%
+3. Wait: daily close <= 50d SMA AND RSI14<50                     3 -11.47%   $642,984       $13,000   22.7% 20.08%     98.08%       1.60%       1.60%        0/$0     0.0%
+     4. Wait: weekly <=20wk EMA AND RSI14<50                     9 -11.44%   $643,201       $13,000   22.7% 20.08%     98.08%       1.42%       1.42%        0/$0     0.0%
+
+====================================================================================================
+OOS-vs-IS DECAY (context, not a standalone PASS criterion) -- OOS XIRR minus IS XIRR
+====================================================================================================
+                                       Trial IS XIRR OOS XIRR OOS-IS (pp)
+1. Immediate activation (benchmark, no wait)  13.25%   13.47%      0.22pp
+           2. Wait: weekly close <= 20wk EMA  12.87%   13.46%      0.59pp
+3. Wait: daily close <= 50d SMA AND RSI14<50  12.97%   13.46%      0.50pp
+     4. Wait: weekly <=20wk EMA AND RSI14<50  12.87%   13.46%      0.59pp
+
+====================================================================================================
+DEFLATED SHARPE RATIO (DSR) -- procedural completeness only, POOR STATISTICAL FIT here (see module docstring for the full 3-reason explanation: N=4 too small for the extreme-value asymptotics; trials are NOT independent -- trial 4 = trial 2 AND trial 3's RSI sub-condition; all 4 trials share the same asset/mechanics/overlapping history)
+====================================================================================================
+  Observed OOS Sharpe values across the 4 trials: [0.59, 0.59, 0.59, 0.59]
+  Cross-trial Sharpe std dev: 0.0002
+  E[max Sharpe | N=4 iid-normal trials] (Bailey & Lopez de Prado 2014 approximation): 0.0002
+  Max OBSERVED trial Sharpe: 0.5903  (vs E[max SR under luck alone] 0.0002 -- exceeds the naive luck-only benchmark, but see caveats above: this comparison is NOT treated as a PASS/FAIL criterion in this gate precisely because DSR is a poor fit for 4 non-independent, nested trials on one asset.
+
+====================================================================================================
+VERDICT -- PASS can ONLY validate a PRICE-ONLY ENTRY-TIMING OVERLAY on the ALREADY-APPROVED capped satellite policy, NEVER forward AAPL alpha and NEVER that technical timing generalizes beyond AAPL. AAPL was picked WITH HINDSIGHT knowledge of its historical outperformance. Excludes tax consequences entirely.
+====================================================================================================
+
+  1. Immediate activation (benchmark, no wait): BENCHMARK (not gated) -- the 3 delayed trials are judged against this immediate-activation baseline.
+
+  2. Wait: weekly close <= 20wk EMA:
+    (1) XIRR shortfall vs immediate: 0.007pp (threshold <= 0.50pp) -> PASS
+    (2) Risk improvement: maxDD -0.01% better, vol -0.01% better (threshold >= 5.0% on EITHER) -> FAIL
+    (3) Stress survival: own degradation 0.007% (threshold <= 1.0%) -> PASS
+    (4) Cohort activation rate: 100.0% (threshold >= 80.0%) -> PASS
+    => OVERALL: FAIL -- at least one condition failed above.
+
+  3. Wait: daily close <= 50d SMA AND RSI14<50:
+    (1) XIRR shortfall vs immediate: 0.007pp (threshold <= 0.50pp) -> PASS
+    (2) Risk improvement: maxDD -0.01% better, vol -0.01% better (threshold >= 5.0% on EITHER) -> FAIL
+    (3) Stress survival: own degradation 0.007% (threshold <= 1.0%) -> PASS
+    (4) Cohort activation rate: 100.0% (threshold >= 80.0%) -> PASS
+    => OVERALL: FAIL -- at least one condition failed above.
+
+  4. Wait: weekly <=20wk EMA AND RSI14<50:
+    (1) XIRR shortfall vs immediate: 0.007pp (threshold <= 0.50pp) -> PASS
+    (2) Risk improvement: maxDD -0.01% better, vol -0.01% better (threshold >= 5.0% on EITHER) -> FAIL
+    (3) Stress survival: own degradation 0.007% (threshold <= 1.0%) -> PASS
+    (4) Cohort activation rate: 100.0% (threshold >= 80.0%) -> PASS
+    => OVERALL: FAIL -- at least one condition failed above.
+
+  OVERALL: NONE of the 3 delayed-activation trials pass the predeclared bands -- price-only waiting has no validated edge here. This is a valid, valuable 'no edge found' result per the strategy-discovery-backtest gate's own honesty rules, not a failure to fix by loosening thresholds. Immediate activation (the already-approved policy from the prior gate) remains the recommendation.
+
+Saving chart to /Users/engineer/workspace/backtest/report/img/aapl_entry_trigger_backtest.png ... (illustrative full-history run, fresh state at 2003-05-02, base cost 2bps -- NOT the verdict window; verdict metrics use the OOS-headline fresh-start window reported above)
+  Chart saved.
