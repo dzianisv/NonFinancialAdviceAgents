@@ -57,7 +57,7 @@ DM format:
   Notes:
     - dip: -31% from 52w high, RISK_ON
     - journalism: 3 FT/WSJ mentions this week (AI supply chain)
-    - 13f: new Scion initiation, $5M+
+    - 13f: new Baupost initiation, $5M+
   → This is the SanDisk pattern. Run /multi-lens-quorum on [TICKER]? Reply YES.
 ```
 

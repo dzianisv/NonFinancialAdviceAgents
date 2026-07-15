@@ -6,4 +6,4 @@
 sheet_url: ""
 sheet_tab: "IBKR"
 portfolio_csv: ".cache/stocks-daily/portfolio.csv"
-hierarchy: "bsc"
+hierarchy: "panel"  # flipped bsc->panel 2026-07-10 per round-4 blind pairwise eval (see stocks-advisor SKILL.md default)

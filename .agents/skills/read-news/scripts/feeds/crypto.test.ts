@@ -117,9 +117,10 @@ test("body is null when hasContentEncoded=false even if content:encoded present"
 
 // ── Registry tests (no network) ─────────────────────────────────────────────
 
-test("NEWS_FEEDS contains all 9 feed names", () => {
+test("NEWS_FEEDS contains all 10 feed names", () => {
   expect(NEWS_FEEDS).toContain("ft");
   expect(NEWS_FEEDS).toContain("wsj");
+  expect(NEWS_FEEDS).toContain("bofainstitute");
   expect(NEWS_FEEDS).toContain("decrypt");
   expect(NEWS_FEEDS).toContain("coindesk");
   expect(NEWS_FEEDS).toContain("cointelegraph");
@@ -127,7 +128,7 @@ test("NEWS_FEEDS contains all 9 feed names", () => {
   expect(NEWS_FEEDS).toContain("bitcoinmagazine");
   expect(NEWS_FEEDS).toContain("coinbase");
   expect(NEWS_FEEDS).toContain("bloomberg");
-  expect(NEWS_FEEDS.length).toBe(9);
+  expect(NEWS_FEEDS.length).toBe(10);
 });
 
 test("CRYPTO_FEED_URLS has correct URLs including coinbase Google News proxy", () => {

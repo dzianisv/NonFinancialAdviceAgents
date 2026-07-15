@@ -93,7 +93,7 @@ const NEWS_SEATS = [
 ]
 const DESKS = [
   { desk: 'macro-regime',        prompt: 'You are the macro/regime analyst. Run /regime-detection AND /feed-fomc. Summary = regime (RISK_ON/NEUTRAL/RISK_OFF) + exposure dial + Fed tone/next-meeting. candidates: [] unless a regime/Fed shift implies a specific tilt.' },
-  { desk: 'institutional-flows', prompt: 'You are the institutional-flows analyst. Run /analyse-smartmoney-13f (Burry/Buffett/Ackman/Klarman/Li Lu). Return ONLY new, deduped institutional BUYS as candidates (source=13F, evidence=fund+filing). Drop puts/trims/exits. State the 45-day lag.' },
+  { desk: 'institutional-flows', prompt: 'You are the institutional-flows analyst. Run /analyse-smartmoney-13f. Conviction bucket (Buffett/Ackman/Klarman/Li Lu) drives candidates; institutional-flow bucket, verified top-5-by-AUM (Bridgewater/Millennium/Elliott Investment Management/Citadel Advisors/Man Group plc — see roster.json universe=top5-aum) is corroboration only — never a standalone candidate. Return ONLY new, deduped institutional BUYS as candidates (source=13F, evidence=fund+filing). Drop puts/trims/exits. State the 45-day lag.' },
   { desk: 'political-flows',     prompt: 'You are the political-flows analyst. Run /analyse-smartmoney-ptr (last 90d). Return only NEW deduped congressional PURCHASES as candidates (evidence=member+date+amount). State the 30-45d disclosure lag. If the source is rate-limited, say so and return [].' },
   ...NEWS_SEATS,
   { desk: 'equity-dips',         prompt: 'You are the equity dip analyst. Run /dip-scanner with --universe equity. Return HIGH/MEDIUM dips (>=25% below 52w high) as candidates (evidence=pct_from_high + 200dMA). Quality names only; a dip is a candidate, not a buy.' },

@@ -2,6 +2,7 @@ import { test, expect, describe, beforeAll, afterAll } from "bun:test";
 import { mkdirSync, rmSync, existsSync } from "node:fs";
 import { connect, ingest, query, newSince } from "./news_store";
 import { parseCliArgsFromTokens, DEFAULT_ASSET_SOURCES } from "./read_news";
+import { NEWS_FEEDS } from "./feeds/index";
 import type { Article } from "./types";
 
 const TEST_DIR = ".db/test-read-news";
@@ -115,7 +116,7 @@ describe("output shape contract", () => {
     const unavailable = ["bloomberg:ConnectionError", "wsj:TimeoutError"];
 
     // Simulate what read_news.ts builds
-    const NEWS_FEEDS_COUNT = 9; // matches NEWS_FEEDS.length from feeds/index.ts
+    const NEWS_FEEDS_COUNT = NEWS_FEEDS.length; // 10 feeds — matches feeds/index.ts NEWS_FEEDS
     const result = {
       fetched: records.length,
       feeds_ok: NEWS_FEEDS_COUNT - unavailable.length,
@@ -137,7 +138,7 @@ describe("output shape contract", () => {
 
     // Value sanity
     expect(result.fetched).toBe(3);
-    expect(result.feeds_ok).toBe(7);
+    expect(result.feeds_ok).toBe(NEWS_FEEDS_COUNT - 2);
     expect(result.unavailable).toHaveLength(2);
   });
 

@@ -13,7 +13,18 @@ export interface Article {
   title: string;         // cleaned title
   summary: string;       // RSS description/teaser
   body: string | null;   // full article body (null if paywalled)
-  published_at: string;  // ISO datetime
+  // ISO datetime of a VERIFIED publisher-provided publication date — parsed from a real
+  // machine-generated feed field (RSS pubDate, JSON-LD datePublished, etc.), never a fetch/
+  // ingest-time substitute. `null` when the source provides no such date at all (see
+  // `date_provenance`); a scraper MUST NOT invent one by falling back to `new Date()`.
+  published_at: string | null;
+  // Optional provenance flag for `published_at`. Omitted (undefined) is the legacy/default case —
+  // every pre-existing feed always hands back a real parsed date from its own feed data, so
+  // "source" is implied. Only set this explicitly to "unavailable" when the fetcher looked for a
+  // publisher date and found none — in that case `published_at` MUST be `null`, never a fetch-time
+  // stand-in. Consumers must treat `date_provenance === "unavailable"` (or `published_at === null`)
+  // as "no publication time known" and never display/sort it as if it were one.
+  date_provenance?: "source" | "unavailable";
   lang: string;          // default "en"
   tags: string[];        // from RSS categories
   assets: string[];      // normalized asset symbols this article is about, e.g. ["AAVE","BTC"]

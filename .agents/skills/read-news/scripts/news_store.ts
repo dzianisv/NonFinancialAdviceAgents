@@ -32,7 +32,10 @@ export interface Article {
   title: string;
   summary: string;
   body: string | null;
-  published_at: string;
+  // ISO datetime of a VERIFIED publisher date, or `null` when the source has none (see
+  // `date_provenance` and ingest()'s handling below). Never a fetch/ingest-time substitute.
+  published_at: string | null;
+  date_provenance?: "source" | "unavailable";
   lang: string;
   tags: string[];
   assets: string[];
@@ -48,12 +51,31 @@ export interface EventRecord {
   materiality: string | null;
   priced_in: string | null;
   surfaced_to_panel_on: string | null;
+  authoritative: boolean;
 }
 
 export interface IngestResult {
   new: number;
   duplicate: number;
   events_touched: number;
+}
+
+// ── Source authority ─────────────────────────────────────────────────────────
+// A small, explicit allowlist of source names treated as a higher-authority PRIMARY source —
+// official institutional research desks that publish their own data directly, NOT sell-side/
+// analyst coverage. "bofainstitute" (Bank of America Institute's public macro/consumer research,
+// see feeds/bofainstitute.ts) qualifies; BofA Global Research (sell-side, entitlement-gated, not
+// integrated — see SKILL.md) explicitly does NOT and must never be added here.
+//
+// Consumed in two places: eventDict() surfaces `authoritative: true` on any event citing one of
+// these sources, and query() adds AUTHORITY_BONUS to that event's RRF fusion score — a bounded
+// tie-breaker among already-relevant results, never enough to promote a genuinely less-relevant
+// match over a clearly better one (see AUTHORITY_BONUS comment below). Does not touch dedup
+// (Layer 1/2) or source_count — an authoritative source is just one more entry in `sources`.
+export const AUTHORITATIVE_SOURCES = new Set<string>(["bofainstitute"]);
+
+export function eventHasAuthoritativeSource(sources: string[]): boolean {
+  return sources.some((s) => AUTHORITATIVE_SOURCES.has(s));
 }
 
 // ── Text normalization ───────────────────────────────────────────────────────
@@ -249,16 +271,18 @@ export const openStore = connect;
 type Row = Record<string, unknown>;
 
 function eventDict(r: Row): EventRecord {
+  const sources = JSON.parse(r.sources as string) as string[];
   return {
     event_cluster_id: r.event_cluster_id as number,
     title: r.title as string,
     first_seen: r.first_seen as string,
     last_updated: r.last_updated as string,
-    sources: JSON.parse(r.sources as string) as string[],
+    sources,
     source_count: r.source_count as number,
     materiality: (r.materiality as string | null) ?? null,
     priced_in: (r.priced_in as string | null) ?? null,
     surfaced_to_panel_on: (r.surfaced_to_panel_on as string | null) ?? null,
+    authoritative: eventHasAuthoritativeSource(sources),
   };
 }
 
@@ -308,7 +332,19 @@ export function ingest(db: Database, records: Row[]): IngestResult {
     const sh = simhash(norm);
     const emb = embed(`${title}. ${summary}`);
     const src = ((rec.source as string) || "").trim() || "unknown";
-    const pub = (rec.published_at as string) || ts;
+    // A record's published_at may be a real publisher date, or null/absent with
+    // date_provenance === "unavailable" when the source has no verifiable publication date (e.g.
+    // bofainstitute pages carrying no datePublished — see feeds/bofainstitute.ts). `articlePub` is
+    // what actually gets persisted on the article row, and it MUST stay null in that case —
+    // substituting ingestion time here would be exactly the dishonest fetch-time-as-publish-time
+    // fabrication this store must never perform. `eventAnchorPub` is used ONLY to seed a *new*
+    // event's own `first_seen` bookkeeping column (our system's "when did we first see this
+    // story" timestamp, not a claimed publisher date) — falling back to ingestion time there is
+    // honest, since that genuinely is when we saw it.
+    const rawPub = rec.published_at as string | null | undefined;
+    const dateUnavailable = rec.date_provenance === "unavailable" || !rawPub;
+    const articlePub: string | null = dateUnavailable ? null : (rawPub as string);
+    const eventAnchorPub = dateUnavailable ? ts : (rawPub as string);
     const assets = normalizeAssets(rec.assets);
 
     // Layer 2: near-dup clustering
@@ -321,7 +357,7 @@ export function ingest(db: Database, records: Row[]): IngestResult {
       ).run(
         sh, norm,
         emb !== null ? JSON.stringify(emb) : null,
-        title, pub, ts,
+        title, eventAnchorPub, ts,
         JSON.stringify([src]), 1,
         (rec.materiality as string) ?? null,
         (rec.priced_in as string) ?? null,
@@ -341,7 +377,7 @@ export function ingest(db: Database, records: Row[]): IngestResult {
       "INSERT INTO articles(event_id, source, url, title, summary, published_at, lang, tags,"
       + " canonical_url, content_hash, simhash, assets, ingested_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
     ).run(
-      eventId, src, (rec.url as string) ?? null, title, summary, pub,
+      eventId, src, (rec.url as string) ?? null, title, summary, articlePub,
       (rec.lang as string) ?? null,
       JSON.stringify((rec.tags as string[]) || []),
       curl, chash, sh, JSON.stringify(assets), ts,
@@ -433,6 +469,20 @@ export function query(
 
   const byId: Record<number, Row> = {};
   for (const r of evRows) byId[r.event_cluster_id as number] = r;
+
+  // Authority tie-breaker (see AUTHORITATIVE_SOURCES / eventHasAuthoritativeSource above). Bonus
+  // is deliberately small relative to a single RRF term (1/61≈0.0164 at best rank) — enough to
+  // reorder near-ties among results that already cleared the BM25/Jaccard relevance bar, never
+  // enough to drag an irrelevant authoritative-source article above a clearly more relevant match.
+  const AUTHORITY_BONUS = 0.005;
+  for (const eidStr of Object.keys(score)) {
+    const eid = Number(eidStr);
+    const r = byId[eid];
+    if (!r) continue;
+    let srcs: string[] = [];
+    try { srcs = JSON.parse(r.sources as string) as string[]; } catch { /* leave empty */ }
+    if (eventHasAuthoritativeSource(srcs)) score[eid] += AUTHORITY_BONUS;
+  }
 
   const cutoff = opts.days ? new Date(Date.now() - opts.days * 86_400_000) : null;
   const out: (EventRecord & { score: number })[] = [];
@@ -534,12 +584,17 @@ export function markSurfaced(
 
 export function recentArticles(db: Database, source: string, days = 7): Article[] {
   const cutoff = new Date(Date.now() - days * 86_400_000).toISOString();
+  // `published_at >= ?` naturally excludes rows where published_at is NULL (SQLite treats any
+  // comparison against NULL as unknown/false) — i.e. articles whose publisher date is unverified
+  // (date_provenance "unavailable") are silently left out of a "recent" listing rather than being
+  // fabricated a fetch-time date just to pass this filter. That is the honest behavior: we cannot
+  // claim an article is "recent" by publisher date when no publisher date exists.
   const rows = db.prepare(
     "SELECT source, url, title, summary, published_at, lang, tags"
     + " FROM articles WHERE source = ? AND published_at >= ? ORDER BY published_at DESC",
   ).all(source, cutoff) as Array<{
     source: string; url: string; title: string; summary: string;
-    published_at: string; lang: string; tags: string;
+    published_at: string | null; lang: string; tags: string;
   }>;
   return rows.map((r) => ({
     source: r.source,

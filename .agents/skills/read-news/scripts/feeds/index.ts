@@ -19,6 +19,7 @@ import { fetchAllSections } from "./ft";
 import type { FtArticle } from "./ft";
 import { fetchAllFeeds } from "./wsj";
 import type { WsjArticle } from "./wsj";
+import { fetchBofaInstitute } from "./bofainstitute";
 import { fetchCryptoFeed, CRYPTO_FEED_URLS } from "./crypto";
 import {
   fetchTradingViewNews,
@@ -32,8 +33,11 @@ import { fetchGoogleNews, PUBLISHER_DOMAINS } from "./googlenews";
 
 export const CRYPTO_SOURCES = Object.keys(CRYPTO_FEED_URLS);
 
-// The default firehose — does NOT include market sources (per-asset, N×asset fetches)
-export const NEWS_FEEDS: string[] = ["ft", "wsj", ...CRYPTO_SOURCES];
+// The default firehose — does NOT include market sources (per-asset, N×asset fetches).
+// "bofainstitute" = Bank of America Institute's public macro/consumer research (keyless, sitemap-
+// driven) — NOT BofA Global Research (sell-side/analyst research), which remains entitlement-gated
+// and unintegrated. See SKILL.md "Source classes and access limits".
+export const NEWS_FEEDS: string[] = ["ft", "wsj", "bofainstitute", ...CRYPTO_SOURCES];
 
 // Known per-asset market sources
 const MARKET_SOURCES = new Set(["tradingview", "coinmarketcap", "googlefinance", "morningstar", "yahoo"]);
@@ -98,6 +102,10 @@ export async function fetchAllNews(opts?: {
       const { articles, errors } = await fetchAllFeeds();
       records.push(...articles.map(wsjToArticle));
       if (errors.length) unavailable.push(`wsj:${errors.join("; ")}`);
+    } else if (name === "bofainstitute") {
+      const { articles, errors } = await fetchBofaInstitute();
+      records.push(...articles);
+      if (errors.length) unavailable.push(`bofainstitute:${errors.join("; ")}`);
     } else if (CRYPTO_FEED_URLS[name] !== undefined) {
       const { articles, errors } = await fetchCryptoFeed(name);
       records.push(...articles);

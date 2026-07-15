@@ -1,18 +1,18 @@
 # read-news
 
-Local-first news cache that pulls 9 RSS firehose feeds plus 5 per-asset market sources (plus 1 discovery-only query source), deduplicates articles by exact URL/hash, clusters same-story multi-outlet coverage into events via fuzzy Jaccard similarity, tags articles by asset, and serves hybrid BM25+Jaccard+recency retrieval via Reciprocal Rank Fusion. Zero runtime deps: Bun + TypeScript + `bun:sqlite` (no npm packages). Educational tooling — see `SKILL.md` for agent-facing usage.
+Local-first news cache that pulls 10 RSS/HTML firehose feeds plus 5 per-asset market sources (plus 1 discovery-only query source), deduplicates articles by exact URL/hash, clusters same-story multi-outlet coverage into events via fuzzy Jaccard similarity, tags articles by asset, and serves hybrid BM25+Jaccard+recency retrieval via Reciprocal Rank Fusion. Zero runtime deps: Bun + TypeScript + `bun:sqlite` (no npm packages). Educational tooling — see `SKILL.md` for agent-facing usage.
 
-> Entitlement-gated sources (JPMorgan, BofA research) are `[UNAVAILABLE - license required]` — no endpoint, no scraping, no paywall bypass; Seeking Alpha is explicitly excluded and will not be added. See `SKILL.md`'s "Source classes and access limits" for the full statement.
+> Entitlement-gated sources (JPMorgan, BofA Global Research sell-side) are `[UNAVAILABLE - license required]` — no endpoint, no scraping, no paywall bypass; Seeking Alpha is explicitly excluded and will not be added. The public Bank of America **Institute** macro/consumer research feed (`bofainstitute`) is a different, non-gated product — see `SKILL.md`'s "Source classes and access limits" for the full statement distinguishing the two.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    F9["9 RSS firehose feeds
-(ft, wsj, decrypt, coindesk,
+    F9["10 firehose feeds
+(ft, wsj, bofainstitute, decrypt, coindesk,
 cointelegraph, theblock,
 bitcoinmagazine, coinbase, bloomberg)
-feeds/ft.ts · feeds/wsj.ts · feeds/crypto.ts"]
+feeds/ft.ts · feeds/wsj.ts · feeds/bofainstitute.ts · feeds/crypto.ts"]
     F5["5 per-asset market feeds
 (tradingview, coinmarketcap, googlefinance,
 morningstar, yahoo)
@@ -80,6 +80,7 @@ crypto-advisor · stocks-trend-screener"]
 |---|---|---|---|---|---|
 | `ft` | firehose | `https://www.ft.com/<section>?format=rss` | No | none | teaser or `[UNAVAILABLE - paywall]` (ft.ts:126) |
 | `wsj` | firehose | `https://feeds.a.dj.com/rss/<feed>.xml` | No | none | teaser or `[UNAVAILABLE - paywall]` (wsj.ts:143) |
+| `bofainstitute` | firehose, **higher-authority** | `institute.bankofamerica.com` sitemap.xml → per-page `<title>`/`<meta description>` scrape (bofainstitute.ts) | No | none | `body` always `null` (client-rendered content); public BofA **Institute** macro/consumer research — not BofA Global Research (sell-side, entitlement-gated, see below); `published_at` is `null` (`date_provenance: "unavailable"`) on every page today since BofA Institute publishes no `datePublished` metadata — never fetch time or the sitemap `<lastmod>`, see "Date semantics" below |
 | `decrypt` | firehose | `https://decrypt.co/feed` | No | none | full body in `content:encoded` |
 | `coindesk` | firehose | `https://www.coindesk.com/arc/outboundfeeds/rss/` | No | none | full body in `content:encoded` |
 | `cointelegraph` | firehose | `https://cointelegraph.com/rss` | No | none | full body in `content:encoded` |
@@ -110,12 +111,48 @@ Dedup unit behavior (news_store.test.ts:280, 369):
 - Single article + URL-dupe → `{ new: 1, duplicate: 1, events_touched: 0 }` (L1 exact-dup)
 - 3 similar articles (same event) → `{ new: 3, duplicate: 0, events_touched: 2 }`, 1 event with `source_count: 3` (L2 cluster)
 
+## Date semantics — `published_at` vs `date_provenance`
+
+`Article.published_at` (types.ts) is `string | null` — an ISO datetime of a **verified publisher
+date**, or `null` when no such date exists on the source. It is never a fetch/ingest-time
+substitute: a fetcher must not paper over a missing publisher date by writing `new Date()`. The
+optional `Article.date_provenance` field is `"source"` (a real parsed date — implied when the
+field is omitted, since every pre-existing feed always supplies one) or `"unavailable"` (no
+publisher date could be found; `published_at` must be `null`).
+
+`ingest()` (news_store.ts) honors this split end-to-end:
+- **`articles.published_at`** (the column consumers read as "this article's publication time")
+  stores the verified date, or SQL `NULL` when `date_provenance === "unavailable"` — never
+  ingestion time. The `articles` schema already allows `NULL` here (no migration needed).
+- **A new event's `first_seen`** (its own "when did our system first see this story" bookkeeping —
+  a distinct, legitimately-ours concern, not a claim about publisher time) still honestly falls
+  back to ingestion time when the founding article's date is unknown, since that genuinely is when
+  we saw it.
+- **`recentArticles()`**'s `published_at >= cutoff` filter naturally excludes `NULL`-dated rows
+  (SQLite treats any comparison against `NULL` as unknown) — an article with no verified date is
+  never backfilled into a "recent" listing just to pass the filter.
+
+**Bank of America Institute (`bofainstitute`) is the canonical example**: institute.bankofamerica.com
+pages carry no `datePublished`/`article:published_time`/similar metadata as of 2026-07 inspection.
+The sitemap's own `<lastmod>` is an UPDATE timestamp, not a publication date, and is used *only* as a
+freshness hint to pick which candidate pages to fetch — it is never stored on the `Article` or
+presented as `published_at`. When a page has no verifiable date, `bofainstitute.ts` sets
+`published_at: null`, `date_provenance: "unavailable"`, and keeps the article (dropping every
+dateless page would make a real, valuable primary-source feed useless). This gap is surfaced
+per-article, in-band, via those two fields — and is deliberately never pushed into the fetcher's
+`errors` array or `read_news.ts`'s top-level `unavailable` array / `feeds_ok` count, because an
+unverifiable publisher date is not a fetch failure: the fetch succeeded and a real (honestly
+null-dated) article was returned, so treating it as a broken feed would misrepresent a successful
+fetch. See `feeds/bofainstitute.ts`'s file header and `feeds/bofainstitute.test.ts` (live-network
+regression guard) for the full rationale.
+
 ## Retrieval
 
 **`query(db, q, {days?, k?})`** (news_store.ts:353–414) — RRF hybrid:
 - Lane A: `articles_fts MATCH ?` BM25 → deduplicated event IDs in BM25 order
 - Lane B: shingle-Jaccard rank of all events against normalized query
 - Fusion: `score[eid] += 1 / (KK + rank + 1)` where `KK = 60` (news_store.ts:385), sorted descending, capped at `k` (default 15), filtered by `last_updated >= now − days`
+- **Authority bonus**: events citing a source in `AUTHORITATIVE_SOURCES` (currently just `bofainstitute`, the public BofA Institute macro/consumer research feed) get an additive `AUTHORITY_BONUS = 0.005` on top of the fused score — a bounded nudge (~30% of one RRF rank term) that can reorder near-ties among already-relevant results but cannot promote an irrelevant authoritative-source match over a clearly better one. Also surfaced as `authoritative: boolean` on every `EventRecord`. Does not affect dedup/clustering or `source_count`.
 
 **`queryByAsset(db, asset, {days?, k?})`** (news_store.ts:419–441): joins `article_assets` → `articles` → `events` for the given ticker symbol; returns events ordered by `last_updated DESC`.
 
@@ -158,10 +195,10 @@ and `by_asset` is omitted.
 
 ## Adding a feed
 
-1. **Write fetcher** `scripts/feeds/<name>.ts` returning `Article[]` (types.ts:10). Required fields: `source`, `url`, `title`, `summary`, `body` (null if unavailable), `published_at` (ISO), `lang`, `tags`, `assets`. Never fabricate body; emit `[UNAVAILABLE - paywall]` in `summary` when no teaser exists.
+1. **Write fetcher** `scripts/feeds/<name>.ts` returning `Article[]` (types.ts:10). Required fields: `source`, `url`, `title`, `summary`, `body` (null if unavailable), `published_at`, `lang`, `tags`, `assets`. `published_at` is the ISO datetime of a **verified publisher-provided** publication date — parsed from real feed/page data (RSS `pubDate`, JSON-LD `datePublished`, etc.), never a fetch/ingest-time substitute. Set it to `null` (with optional `date_provenance: "unavailable"`) when the source has no such date at all — see "Date semantics" below. Never fabricate body; emit `[UNAVAILABLE - paywall]` in `summary` when no teaser exists.
 2. **Register in `feeds/index.ts`**: firehose feeds go in `NEWS_FEEDS` and get a `fetchCryptoFeed`-style branch in `fetchAllNews`. Per-asset feeds go in `MARKET_SOURCES` and require an asset loop (see `tradingview`/`coinmarketcap`/`googlefinance`/`morningstar`/`yahoo`). Free-text discovery/search feeds (query- or topic-scoped, not purely ticker-driven — see `googlenews`) go in `QUERY_SOURCES` instead and must refuse (`[UNAVAILABLE]`, no network call) rather than silently substituting a default ticker list when called with neither `opts.query` nor an explicit `opts.assets`. Firehose = global macro/crypto; per-asset = fetched once per symbol per run; query = fetched once per explicit query/topic.
 3. **Add `<name>.test.ts`** alongside the fetcher.
-4. **Keep golden-parity tests green** — `news_store.test.ts:768` defines the real gate: `GOLDEN_INGEST = { new: 15, duplicate: 1, events_touched: 2 }`. This reproduces the retired Python `news_store.py`'s exact dedup counts over a frozen parity fixture. The snapshot also covers `GOLDEN_NEW_SINCE_TITLES` (13 titles) and `GOLDEN_QUERY_TOP5` (lines 769–790). Additive schema changes must not alter any of these frozen values. (This gate lives entirely in `news_store.ts`/`news_store.test.ts`, neither of which this doc's `googlenews`/`yahoo`/`--assets`/`--equities-only` additions touch.)
+4. **Keep golden-parity tests green** — `news_store.test.ts:768` defines the real gate: `GOLDEN_INGEST = { new: 15, duplicate: 1, events_touched: 2 }`. This reproduces the retired Python `news_store.py`'s exact dedup counts over a frozen parity fixture. The snapshot also covers `GOLDEN_NEW_SINCE_TITLES` (13 titles) and `GOLDEN_QUERY_TOP5` (lines 769–790). Additive schema changes must not alter any of these frozen values — e.g. the `bofainstitute` firehose feed and its `AUTHORITATIVE_SOURCES`/`authoritative`/`AUTHORITY_BONUS` ranking addition touch `news_store.ts` directly but were verified not to change any golden value (none of the golden fixture's sources are in `AUTHORITATIVE_SOURCES`).
 
 ## Consumers
 

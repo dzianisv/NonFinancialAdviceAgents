@@ -118,9 +118,16 @@ D) JOURNALISM SCAN (stocks-trend-screener — broad mandate):
    - Output: theme list, specific companies mentioned, any tickers worth routing to quorum.
 
 E) 13F INSTITUTIONAL FILINGS (analyse-smartmoney-13f):
-   - Pull most recent 13F for: Burry/Scion (CIK 0001649339), Buffett/Berkshire (CIK 0001067983),
-     Ackman/Pershing Square (CIK 0001336528), Klarman/Baupost (CIK 0001061768),
-     Li Lu/Himalaya (CIK 0001709323).
+   - Pull most recent 13F for the CONVICTION bucket (drives scoring/tiering): Buffett/Berkshire Hathaway
+     Inc (CIK 0001067983), Ackman/Pershing Square Capital Management, L.P. (CIK 0001336528),
+     Klarman/Baupost Group LLC/MA (CIK 0001061768), Li Lu/Himalaya Capital Management LLC
+     (CIK 0001709323).
+   - Five verified top-5-by-AUM INSTITUTIONAL-FLOW managers (Bridgewater, Millennium, Elliott
+     Investment Management, Citadel Advisors, Man Group plc — see roster.json universe=top5-aum)
+     are also tracked, but for corroboration only — never independently actionable, capped
+     at 2 counted managers per candidate, and never used to create or promote a candidate on their
+     own. (Renaissance and Point72 remain tracked as general institutional-flow corroboration
+     managers but are no longer labeled top-5-by-AUM — corrected 2026-07-14.)
    - New initiations + adds only. Drop puts, trims, exits.
    - DEDUPE against ledger: python3 <skills>/analyse-smartmoney-13f/watch.py seen <TICKER>
    - Output: new candidates only (not previously recommended).
@@ -245,7 +252,7 @@ STANDING CONSTRAINTS
 - RECOMMEND-ONLY. Never place trades, never size a real order.
 - RISK_OFF regime → no new buys. Recommend reducing gross exposure.
 - Never re-propose a ticker already in the 13F or congressional dedup ledger.
-- Puts are bearish — never propose as buys (watch Burry's 13F carefully).
+- Puts are bearish — never propose as buys (watch for PUT lines from any tracked manager).
 - 13F lag = 45 days. STOCK Act lag = 30-45 days. State this in every brief.
 - Mark all unverifiable claims as `[unverified]`. Never fabricate data.
 - Every forecast must have a resolution date and an invalidation trigger (superforecasting rule).

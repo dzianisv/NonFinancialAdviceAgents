@@ -128,10 +128,10 @@ cross-run state, and the `[UNAVAILABLE]` honesty contract actually hold.
 
 | Class | Sources | Access pattern |
 |---|---|---|
-| **Keyless firehose** (default `NEWS_FEEDS`, 9 sources, unchanged) | FT, WSJ, 6 crypto-only RSS (CoinDesk, Decrypt, CoinTelegraph, The Block, Bitcoin Magazine, Coinbase blog), Bloomberg markets RSS | Global feed, fetched every run unless `--source` restricts it |
+| **Keyless firehose** (default `NEWS_FEEDS`, 10 sources) | FT, WSJ, **Bank of America Institute (new, higher-authority)**, 6 crypto-only RSS (CoinDesk, Decrypt, CoinTelegraph, The Block, Bitcoin Magazine, Coinbase blog), Bloomberg markets RSS | Global feed, fetched every run unless `--source` restricts it |
 | **Keyless per-asset** (5 sources, ticker-scoped) | TradingView, CoinMarketCap (crypto-only), Google Finance, Morningstar, **Yahoo Finance (new)** | Opt-in via `--asset`/`--assets` + `--source`; one fetch per source per requested ticker |
 | **Keyless discovery-only** (1 source, query/topic-scoped) | **Google News (new)** | Targeted `site:` search restricted to Bloomberg/Reuters/Business Insider/CNBC/IBD; requires `--query` or an explicit `--asset`/`--assets` symbol as the search topic — refuses (`[UNAVAILABLE]`, no network call) rather than silently fanning out an unscoped firehose search over default tickers |
-| **Entitlement-gated / not integrated** | **JPMorgan and BofA research** | `[UNAVAILABLE - license required]`. No endpoint, no scraping, no paywall bypass, no unofficial reseller, no placeholder vendor claim exists or will be added until a licensed official feed is explicitly configured. This is a **permanent documented limitation**, not a TODO. |
+| **Entitlement-gated / not integrated** | **JPMorgan and BofA Global Research** (sell-side/analyst research) | `[UNAVAILABLE - license required]`. No endpoint, no scraping, no paywall bypass, no unofficial reseller, no placeholder vendor claim exists or will be added until a licensed official feed is explicitly configured. This is a **permanent documented limitation**, not a TODO. **Not the same product** as the public Bank of America Institute feed above — see note below. |
 | **Explicitly excluded** | Seeking Alpha | Is not, and will not be, added as a source. |
 
 Google News is fundamentally a free-text SEARCH endpoint, not a firehose — there is no "fetch everything"
@@ -140,8 +140,25 @@ mode, so it is kept out of the per-asset `MARKET_SOURCES` loop and out of `NEWS_
 immediately with an `[UNAVAILABLE - no --query or --asset provided]` entry and makes zero network calls —
 it will never silently search the internal default crypto ticker list as bare text.
 
+**Bank of America Institute vs. BofA Global Research — do not conflate these.** `source: "bofainstitute"`
+is Bank of America **Institute** — BofA's public-facing macro/consumer research arm, published free at
+`institute.bankofamerica.com` (household spending, small-business, wealth transformation, sustainability
+studies from aggregated BofA transaction/deposit data). It is a different desk, a different product, and a
+different licensing status from BofA **Global Research** (BofA's sell-side equity/credit analyst research),
+which remains entitlement-gated per the row above and is **not** integrated. Never relabel one as the other
+in code, comments, docs, or downstream reports.
+
+**Higher-authority sources.** `news_store.ts` defines `AUTHORITATIVE_SOURCES` (currently just
+`"bofainstitute"`) — official primary-source institutional research that publishes its own proprietary
+data, as opposed to secondary reporting. Any event citing an authoritative source gets `authoritative: true`
+in its `EventRecord`, and `query()`'s RRF fusion score gets a small additive `AUTHORITY_BONUS` (`0.005`,
+≈30% of one RRF rank term). This is a bounded tie-breaker among results that already cleared the normal
+BM25/Jaccard relevance bar — it can reorder near-ties, it cannot promote an irrelevant authoritative-source
+match over a clearly more relevant one. It does not affect dedup/clustering or `source_count`, which are
+computed identically regardless of source.
+
 **Source priority for narrative analysis:**
-1. `read_news.ts` — primary; run first, covers the 9-feed firehose plus any per-asset/discovery sources requested
+1. `read_news.ts` — primary; run first, covers the 10-feed firehose plus any per-asset/discovery sources requested
 2. `--source googlenews --query "..."` — targeted Bloomberg/Reuters/BI/CNBC/IBD entity search when the firehose misses a name
 3. SEC EDGAR (`analyse-fundamental` / direct `web_fetch`, not this pipeline) — hard, timestamped primary-source regulatory/treasury events
 4. CoinGecko trending (direct `web_fetch`, not this pipeline) — retail attention signal
@@ -159,7 +176,11 @@ $S mark-surfaced --ids 1 4 --on 2026-06-15                # stamp surfaced; excl
 ```
 
 `records.json` is a JSON list of normalized records `{source, url, title, summary, published_at, lang,
-tags}` (optional `body`). `ingest` accepts a bare list or `{"records": [...]}`.
+tags}` (optional `body`). `ingest` accepts a bare list or `{"records": [...]}`. `published_at` is an
+ISO datetime of a **verified publisher date**, or `null` when the source has none (optional
+`date_provenance: "unavailable"` makes that explicit) — never a fetch/ingest-time substitute. See
+`read-news/README.md` "Date semantics" for the full contract and the `bofainstitute` feed as the
+canonical example of a source with no publisher-supplied dates.
 
 ## Self-test (run to verify the install)
 
@@ -187,6 +208,17 @@ extends explicitly to every new source:
   same-page-dedup fix in `morningstar.ts`/`googlefinance.ts`. The discriminator changes the URL string for
   storage/dedup purposes only; it still points at the same real page, so citation provenance for a human
   reader is unchanged.
+- **Bank of America Institute (`bofainstitute`)** pages carry no publisher-authored publication date
+  (no `datePublished`/`article:published_time`/similar metadata as of 2026-07 inspection). The rule
+  extends to dates, not just body/summary text: `published_at` is `null` (`date_provenance:
+  "unavailable"`) rather than a fabricated fetch-time or the sitemap's `<lastmod>` (an UPDATE
+  timestamp, never a publication date) relabeled as one. The article is still kept and ingested —
+  dropping every dateless page would make a real, valuable primary-source feed useless. The gap is
+  surfaced per-article, in-band, via `published_at: null` + `date_provenance: "unavailable"` on the
+  `Article` itself — and is deliberately never pushed into `errors`/the top-level `unavailable`
+  array, since an unverifiable publisher date is not a fetch failure and must not make a
+  successfully-fetched feed look broken. See `read-news/README.md` "Date semantics" and
+  `feeds/bofainstitute.ts`.
 
 ## Boundary with `analyse-sellside`
 

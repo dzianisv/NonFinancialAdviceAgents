@@ -1,7 +1,73 @@
 {
-  "burry": {"fund": "Scion Asset Management", "cik": "0001649339", "note": "files PUTS often — bearish, not buys; latest filing 2025Q3, no 2026Q1 13F as of 2026-06-15"},
-  "buffett": {"fund": "Berkshire Hathaway", "cik": "0001067983"},
-  "ackman": {"fund": "Pershing Square", "cik": "0001336528"},
-  "klarman": {"fund": "Baupost Group", "cik": "0001061768"},
-  "li-lu": {"fund": "Himalaya Capital", "cik": "0001709323"}
+  "_meta": {
+    "top5_aum_selection_criterion": "Verified top-5 global hedge funds by assets under management (AUM), cross-checked for an active SEC EDGAR Form 13F filer identity. CIKs and current 13F-HR filer status confirmed directly against SEC EDGAR (data.sec.gov/submissions) on 2026-07-14. AUM figures/dates sourced from firm disclosures, Reuters, and P&I (as compiled via cited secondary sources) — definitions vary (net investor capital vs total FUM vs regulatory AUM), so this is a best-effort ranking, not one standardized SEC metric. See per-manager 'note' fields below for citations and caveats.",
+    "correction_2026_07_14": "A prior draft tagged bridgewater/citadel/millennium/renaissance/point72 as 'top-5 hedge funds' without AUM verification. Corrected: renaissance (stale ~2021 AUM figure) and point72 (~$41.5B, clearly not top-5) are no longer tagged universe=top5-aum; elliott and man-group replace them based on verified figures. Both remain valid institutional-flow managers for corroborate."
+  },
+  "buffett": {
+    "fund": "Berkshire Hathaway Inc",
+    "cik": "0001067983",
+    "bucket": "conviction"
+  },
+  "ackman": {
+    "fund": "Pershing Square Capital Management, L.P.",
+    "cik": "0001336528",
+    "bucket": "conviction"
+  },
+  "klarman": {
+    "fund": "Baupost Group LLC/MA",
+    "cik": "0001061768",
+    "bucket": "conviction"
+  },
+  "li-lu": {
+    "fund": "Himalaya Capital Management LLC",
+    "cik": "0001709323",
+    "bucket": "conviction"
+  },
+  "bridgewater": {
+    "fund": "Bridgewater Associates, LP",
+    "cik": "0001350694",
+    "bucket": "institutional-flow",
+    "universe": "top5-aum",
+    "note": "Bridgewater's 13F only covers its long US-equity book; it misses the firm's dominant macro/rates/FX/commodities derivatives book entirely, so the 13F is a small, non-representative slice of the actual fund — not a read on Dalio's real macro view. Tracked here as one of the verified top-5 hedge funds by AUM (~$92B, 2025, Reuters)."
+  },
+  "citadel": {
+    "fund": "Citadel Advisors LLC",
+    "cik": "0001423053",
+    "bucket": "institutional-flow",
+    "universe": "top5-aum",
+    "note": "Citadel Advisors LLC is a multi-manager \"pod shop\" running dozens of independent internal books plus heavy options/hedges; a single 13F line aggregates many uncorrelated, frequently-offsetting bets, so ownership is statistical/aggregated noise, not one fund manager's thesis. Citadel Advisors LLC (the hedge fund, files 13F) is legally distinct from Citadel Securities (the market maker/broker-dealer) — never call Citadel Advisors a market maker. Tracked here as one of the verified top-5 hedge funds by AUM (~$67B+, Jan-2026, CNBC/LCH)."
+  },
+  "millennium": {
+    "fund": "Millennium Management LLC",
+    "cik": "0001273087",
+    "bucket": "institutional-flow",
+    "universe": "top5-aum",
+    "note": "Same multi-manager pod-shop structure as Citadel — dozens of independent books, options-heavy, aggregated 13F obscures any single thesis. Tracked here as one of the verified top-5 hedge funds by AUM (~$92B net investor capital, Jul-2026, mlp.com)."
+  },
+  "elliott": {
+    "fund": "Elliott Investment Management L.P.",
+    "cik": "0001791786",
+    "bucket": "institutional-flow",
+    "universe": "top5-aum",
+    "note": "Activist/event-driven multi-strategy fund — concentrated, high-conviction-looking positions (33 holdings, ~$20B reported 2026Q1), but tracked here as flow (not conviction) purely on the top-5-AUM selection criterion (~$80B, 2026), not a judgment that its 13F is statistical noise. Current EDGAR filer is Elliott Investment Management L.P. (CIK 0001791786, active); the predecessor entity Elliott Management Corp (CIK 0001048445) last filed for 2020Q3 and is not used."
+  },
+  "man-group": {
+    "fund": "Man Group plc",
+    "cik": "0001637460",
+    "bucket": "institutional-flow",
+    "universe": "top5-aum",
+    "note": "Man Group plc (London-listed) files a single group-level 13F under CIK 0001637460 covering its aggregate US 13(f) securities book across investment divisions (Man AHL, Man GLG, Man Numeric, etc.) — confirmed as an active 13F-HR filer on EDGAR (latest period 2026-03-31, filed 2026-05-15). Its ~$227.6B headline AUM (FY2025, man.com) is TOTAL funds under management, including long-only and private-markets assets beyond hedge-fund/liquid-alts strategies — not a pure hedge-fund AUM figure and not directly comparable to the other four managers' net-investor-capital figures. Tracked here as one of the verified top-5 by AUM per the criterion above; no substitute fund was used."
+  },
+  "renaissance": {
+    "fund": "Renaissance Technologies LLC",
+    "cik": "0001037389",
+    "bucket": "institutional-flow",
+    "note": "Systematic/quantitative shop — positions are statistically-driven signal outputs, not fundamental conviction; treat as pure flow. NOT tagged universe=top5-aum: its only sourced AUM figure (~$130B) is stale (P&I, 2021) — an unresolved discrepancy, not a confirmed current top-5 ranking."
+  },
+  "point72": {
+    "fund": "Point72 Asset Management, L.P.",
+    "cik": "0001603466",
+    "bucket": "institutional-flow",
+    "note": "Same multi-manager pod-shop structure as Citadel/Millennium — options-heavy, aggregated book, no single thesis. NOT tagged universe=top5-aum: sourced AUM (~$41.5B, late 2025, Wikipedia/firm) is well below the other four top-5 managers — a prior draft incorrectly included Point72 in a 'top-5' set; corrected 2026-07-14."
+  }
 }
