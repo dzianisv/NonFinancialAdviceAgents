@@ -4,6 +4,7 @@
 # Tickers can be overridden by passing args; defaults to SITC.
 export PATH="$HOME/.bun/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH"
 export CHROME="$HOME/.agents/skills/chrome-use/scripts/chrome-use"
+export TELEGRAM_PROFILE="${TELEGRAM_PROFILE:-raccoonfriendly}"
 REPO="/Users/engineer/workspace/backtest"
 TICKERS="${@:-SITC}"
 echo "===== $(date) ====="

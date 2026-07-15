@@ -10,12 +10,13 @@
  * What it watches (for liquidation stubs like SITC, where each special distribution can
  * re-price the stock by MORE or LESS than the payout — the only real edge in holding one):
  *   1. NEW distribution declared        → a history row we haven't seen before
- *   2. UPCOMING ex-date within N days    → last window to decide before you go ex
- *   3. POST-EX price reaction            → did the stock drop LESS than the payout?
+ *   2. UPCOMING action date within N days → record date for due-bill specials, ex-date otherwise
+ *   3. POST-PAYMENT exit window           → first run after payment, review selling the stub
+ *   4. POST-EX price reaction            → did the stock drop LESS than the payout?
  *      (dropping less than the cash you received = holding through the payout is accretive)
  *
  * Silent-unless-actionable: writes state + a log line every run, but only pings Telegram
- * when something changed or an ex-date is imminent. Pass --summary to force a status ping.
+ * when something changed or an action date is imminent. Pass --summary to force a status ping.
  *
  * Usage:
  *   bun dividend_watch.ts                 # default: SITC → Telegram "me"
@@ -36,6 +37,7 @@ const TG_CLI = join(homedir(), ".agents/skills/telegram-cli/telegram-cli.py");
 const TG_TARGET = process.env.TG_TARGET || "me";
 const STATE_DIR = join(homedir(), ".config/dividend-watch");
 const UPCOMING_DAYS = Number(process.env.UPCOMING_DAYS || 14);
+const ACTION_LEAD_DAYS = Number(process.env.ACTION_LEAD_DAYS || 7);
 
 interface DivRow {
   dt: string; // ex-dividend date YYYY-MM-DD
@@ -47,6 +49,8 @@ interface State {
   seenExDates: string[];
   priceLog: { date: string; price: number; prevClose: number; changePct: number }[];
   reactedExDates: string[]; // ex-dates we've already logged a post-ex reaction for
+  notifiedActionDates?: string[];
+  notifiedPostPayDates?: string[];
   lastRun: string;
 }
 
@@ -143,13 +147,51 @@ async function processTicker(ticker: string, forceSummary: boolean): Promise<voi
   }
   for (const r of history) seen.add(r.dt);
 
-  // 2) UPCOMING ex-date within the window (future or today).
+  const notifiedActionDates = new Set(st.notifiedActionDates || []);
+  const notifiedPostPayDates = new Set(st.notifiedPostPayDates || []);
+  if (!Array.isArray(st.notifiedPostPayDates)) {
+    // Migrate existing state without replaying every historical payment.
+    for (const r of history) {
+      if (r.pay && daysBetween(r.pay, now) < 0) {
+        notifiedPostPayDates.add(`${r.dt}|${r.record}|${r.pay}`);
+      }
+    }
+  }
+
+  // 2) Use the record date as the action date for due-bill specials. Selling during
+  //    the record-to-payment window transfers the distribution right to the buyer.
   for (const r of history) {
-    const d = daysBetween(r.dt, now);
-    if (d >= 0 && d <= UPCOMING_DAYS) {
+    const dueBillSpecial =
+      Boolean(r.dt && r.record && Date.parse(r.dt) > Date.parse(r.record)) &&
+      Boolean(r.pay && Date.parse(r.record) <= Date.parse(r.pay));
+    const actionDate = dueBillSpecial ? r.record : r.dt;
+    const actionDays = daysBetween(actionDate, now);
+    const actionKey = `${r.dt}|${r.record}|${r.pay}`;
+    if (
+      actionDate &&
+      actionDays >= 0 &&
+      actionDays <= Math.max(UPCOMING_DAYS, ACTION_LEAD_DAYS) &&
+      !notifiedActionDates.has(actionKey)
+    ) {
+      if (dueBillSpecial) {
+        alerts.push(
+          `⏰ ${ticker} record date in ${actionDays}d (${r.record}): ${r.amt}. Hold through payment ${r.pay}; do not sell during the due-bill window. Review selling on the next market session after payment.`
+        );
+      } else {
+        alerts.push(
+          `⏰ ${ticker} ex-date in ${actionDays}d (${r.dt}): ${r.amt}. Hold through the record date, then review selling.`
+        );
+      }
+      notifiedActionDates.add(actionKey);
+    }
+
+    // Notify once on the first run after payment so a scheduled daily check
+    // cannot miss the exit review if the payment date falls on a weekend/holiday.
+    if (r.pay && daysBetween(r.pay, now) < 0 && !notifiedPostPayDates.has(actionKey)) {
       alerts.push(
-        `⏰ ${ticker} ex-date in ${d}d (${r.dt}): ${r.amt}. Last window to decide before you go ex — you keep this payout if you hold through the record date, then can sell.`
+        `✅ ${ticker} payment date ${r.pay} has passed for ${r.amt}. Verify the cash posted, then review selling the stub on the next market session; ex-date ${r.dt || "unknown"}.`
       );
+      notifiedPostPayDates.add(actionKey);
     }
   }
 
@@ -180,6 +222,8 @@ async function processTicker(ticker: string, forceSummary: boolean): Promise<voi
   st.priceLog = st.priceLog.slice(-400);
   st.seenExDates = [...seen].sort();
   st.reactedExDates = [...reacted].sort();
+  st.notifiedActionDates = [...notifiedActionDates].sort();
+  st.notifiedPostPayDates = [...notifiedPostPayDates].sort();
   st.lastRun = now;
   await saveState(ticker, st);
 
