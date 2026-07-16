@@ -436,6 +436,7 @@ After loading $HIERARCHY_FILE, follow its steps exactly. The file contains the f
  Skeptic — Hunt lens            : {SKIP/WATCH/BUY} — {one line: strongest objection}
 
  CIO DECISION: {BUY / WATCH / SKIP / PASS}   (or ADD / HOLD / TRIM / EXIT on holdings path)
+ Timing      : {EVENT_SOON — earnings in {days}d ({date}); stage {ACTION} after print | N/A}
  Entry zone  : ${low}–${high}
  Trigger     : {bar-close above/below X on timeframe Y}
  Stop        : ${level} ({basis: support/MA/range})
@@ -753,6 +754,9 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       carry a one-line note and are listed, not dropped.
 - [ ] Each stock block ends with a concrete **entry zone + bar-close trigger + market-based stop** — never a
       vague "looks good". WATCH/SKIP names what would change it.
+- [ ] The **Timing line is present** whenever `days_to_earnings` (from `fundamentals.py`) is ≤10 trading
+      days out — `EVENT_SOON — earnings in {days}d ({date}); stage {ACTION} after print` — else `N/A`. This
+      is a non-gating annotation only; it never changes the scorecard ACTION (Step 0.82).
 - [ ] The technical seat **named a setup or said there is none**; no BUY without a live trigger.
 - [ ] The narrative seat cited ≥2 real article URLs it **actually web_fetched or got from the feed scripts**
       (`feeds/wsj.ts`/`feeds/ft.ts`).

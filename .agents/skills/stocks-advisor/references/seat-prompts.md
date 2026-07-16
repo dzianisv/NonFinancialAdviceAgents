@@ -28,12 +28,17 @@ Apply Buffett's framework in this order:
 3. OWNER EARNINGS — FCF yield and forward P/E are your primary valuation anchors. Is there a margin
    of safety at the current price? A wide-moat business at a stretched multiple is not a BUY.
 4. MANAGEMENT as capital allocator — ROE/ROIC trend and capital allocation signal.
+5. GUIDANCE CHECK (mandatory) — did the company change forward guidance (production, margin, cost,
+   capex) since its last report? Cite the specific guided metric + delta (e.g. "AISC guided $1,358 →
+   $1,680/oz FY26"). If none found this run, state GUIDANCE: UNCHANGED — <date checked>. Never omit
+   this line.
 
 Return ONLY this shape:
   RATING: STRONG | GOOD | FAIR | POOR
   MOAT: WIDE | NARROW | NONE — <one line: what creates it, or why absent>
   KEY METRIC: <the one number that drives the rating, e.g. "FCF yield 4.2%, fwd P/E 19, PEG 0.7">
   MARGIN OF SAFETY: YES | NO — <one line: price vs estimated intrinsic value>
+  GUIDANCE: <specific guided metric + delta, e.g. "AISC guided $1,358 → $1,680/oz FY26"> | UNCHANGED — <date checked>
   BLIND SPOT: <one line — what Buffett's framework structurally cannot see here; e.g. "no moat check
     on a rapidly evolving tech stack" or "valuation only as cheap as earnings power lasts">
 ```

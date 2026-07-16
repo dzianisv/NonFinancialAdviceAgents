@@ -109,6 +109,21 @@ def risk_flags(d, weight_pct):
         flags.append(f"⚠ CONCENTRATION {weight_pct:.0f}% of book")
     return flags
 
+def event_soon_flag(d, action):
+    """Non-gating earnings-timing annotation -- fires when a print is <=10 trading
+    days out (fundamentals.py's days_to_earnings, best-effort/yfinance-calendar-sourced).
+    NEVER feeds into decide(): the scorecard ACTION stays pure VALUE x TREND regardless
+    of this flag. Attaches a 'stage ACTION after print' note only when the ACTION is
+    already TRIM/ADD/EXIT -- it annotates the decided action, it does not decide it."""
+    days = _num(d, "days_to_earnings")
+    if days is None or days < 0 or days > 10:
+        return None
+    edate = d.get("next_earnings_date") or "date unknown"
+    flag = f"EVENT_SOON ({int(days)}d to earnings, {edate})"
+    if action in ("TRIM", "ADD", "EXIT"):
+        flag += f" — stage {action} after print"
+    return flag
+
 # ---- deterministic decision tree ------------------------------------------
 
 def decide(val, trend, qual, grow, weight_pct, mktcap, hold_only):
@@ -200,12 +215,18 @@ def run_one(d, pos, hold_only_arg=None):
     vS = score_valuation(d); tS = score_trend(d); qS = score_quality(d); gS = score_growth(d)
     action, basis = decide(vS[0], tS[0], qS[0], gS[0], weight, mktcap, ho)
     composite = vS[0]+tS[0]+qS[0]+gS[0]
+    # EVENT_SOON is a non-gating annotation ONLY -- it is computed from the ACTION
+    # decide() already returned and appended to flags; it never feeds back into decide().
+    flags = risk_flags(d, weight)
+    es = event_soon_flag(d, action)
+    if es:
+        flags.append(es)
     return {
         "symbol": sym, "price": _num(d,"price"), "action": action, "basis": basis,
         "composite": composite, "weight": weight, "pnl": p.get("pnl"),
         "hold_only": ho,
         "scores": {"valuation": vS, "trend": tS, "quality": qS, "growth": gS},
-        "flags": risk_flags(d, weight),
+        "flags": flags,
     }
 
 def main():

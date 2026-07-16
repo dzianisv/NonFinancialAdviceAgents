@@ -127,6 +127,23 @@ Columns: `SELL (source) | $ | → | BUY (accumulate) | $ | Why buy-side is the b
   and it may only be SOLD if its dollars are assigned to a specific BUY row (else label it "raise cash, no
   redeploy target yet").
 
+### (c.5) UPCOMING CATALYSTS
+Earnings-timing awareness, sourced from the scorecard's `days_to_earnings` / `next_earnings_date` /
+`weight` fields (`fundamentals.py` → `scorecard.py`, EVENT_SOON flag) — not a new data pull. Default
+window: next 14 days. Every holding with `days_to_earnings` in that window gets a row, ranked by
+weight desc (biggest positions first — an earnings print on a large weight matters more than on a
+rounding-error position). This is informational — it does NOT change any ACTION (EVENT_SOON is
+non-gating, see stocks-advisor scorecard.py); it exists so the user isn't surprised by a print.
+
+```
+UPCOMING CATALYSTS (next 14 days)
+Ticker  Company  Earnings date  Days  Weight%  Action  Note
+------  -------  -------------  ----  -------  ------  ----
+{TICK}  {Name}   {YYYY-MM-DD}   {N}   {W.W}    {ACTION} {stage ACTION after print | —}
+...
+```
+If nothing falls inside the window, print "No earnings prints in the next 14 days — see table above."
+
 ### (d) ACCUMULATE WATCH — undervalued, buy MORE only when a condition fires
 - Names that are undervalued but not buy-today (need a level/indicator trigger). Source: stocks-advisor
   Step 3.6 SETUP ALERTS. Columns: Asset | Exact condition | Then buy $N (funded by → SELL Y) | Thesis.
@@ -182,6 +199,9 @@ CHANNEL=$(grep '^channel_id:' .cache/stocks-daily/telegram.yaml 2>/dev/null | se
      fine; a padded 6-line block with "no data" filler is not.
 2. **Lead with an action summary, then group by action — not by ticker order.** A reader must get the whole
    picture from the first few lines without scrolling through prose.
+3. **Thread EVENT_SOON into the ACTION SUMMARY line.** For any SELL/TRIM/EXIT ticker that also carries an
+   EVENT_SOON flag (scorecard `flags`, from (c.5) UPCOMING CATALYSTS), append `— earnings in {N}d ({date})`
+   to that ticker's ACTION SUMMARY line so the reader knows a print is imminent before the trade settles.
 
 **4.5b — Build the message(s).** Use the exact stocks-advisor seat labels, each carrying its investor lens
 (see stocks-advisor's `references/seat-prompts.md`) — `Fundamental — Buffett lens` / `Technical —

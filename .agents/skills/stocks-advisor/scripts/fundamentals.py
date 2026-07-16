@@ -19,8 +19,13 @@ OUTPUT (written to {out-dir}/{symbol}.out.json, also printed to stdout):
   forward_pe, trailing_pe, peg_ratio, revenue_growth, earnings_growth,
   gross_margin, operating_margin, fcf, market_cap, fcf_yield, roe,
   short_percent, institutional_pct, recommendation_mean, analyst_count,
-  dd_from_52wh, vs_200d_ma, vs_50d_ma
+  dd_from_52wh, vs_200d_ma, vs_50d_ma,
+  next_earnings_date, days_to_earnings, earnings_date_confirmed
   (any field yfinance does not provide is emitted as null — never invented)
+
+  Earnings fields come from yfinance Ticker.calendar, which is BEST-EFFORT — like
+  the rest of this file it is point-in-time-unsafe and additionally can be stale
+  or entirely missing for small-caps and ADRs; never fabricate a date when absent.
 
   --out-dir defaults to .cache/stocks-advisor/fundamentals/ and is created if
   missing. Output NEVER lands next to the input file or inside this scripts/
@@ -32,6 +37,7 @@ USAGE:
 import json
 import os
 import sys
+from datetime import date, timedelta
 
 
 def pct(numer, denom):
@@ -53,6 +59,21 @@ def to_pct(frac, dp=1):
     if frac is None:
         return None
     return round(frac * 100, dp)
+
+
+def trading_days_between(start, end):
+    """Simple Mon-Fri weekday count from start to end (inclusive of end); None if
+    end is missing or already in the past. No holiday calendar, no numpy dependency
+    (numpy is not otherwise imported in this file) -- an approximation, not exact."""
+    if start is None or end is None or end < start:
+        return None
+    days = 0
+    d = start
+    while d < end:
+        d += timedelta(days=1)
+        if d.weekday() < 5:
+            days += 1
+    return days
 
 
 def fundamentals(symbol, period="1y"):
@@ -90,6 +111,27 @@ def fundamentals(symbol, period="1y"):
     market_cap = info.get("marketCap")
     fcf = info.get("freeCashflow")
 
+    # Earnings date: yfinance .calendar is BEST-EFFORT -- often stale or missing for
+    # small-caps/ADRs, and "Earnings Date" may come back as a multi-day estimated
+    # range rather than a single confirmed date; never fabricate, null on any failure.
+    next_earnings_date = None
+    days_to_earnings = None
+    earnings_date_confirmed = None
+    try:
+        cal = t.calendar or {}
+        edates = cal.get("Earnings Date")
+        if edates:
+            if not isinstance(edates, (list, tuple)):
+                edates = [edates]
+            edates = [e for e in edates if e is not None]
+            if edates:
+                e_lo, e_hi = min(edates), max(edates)
+                next_earnings_date = e_lo.isoformat()
+                earnings_date_confirmed = (e_hi - e_lo).days <= 1
+                days_to_earnings = trading_days_between(date.today(), e_lo)
+    except Exception:
+        pass  # keep all three null; never crash or fabricate on a data gap
+
     out = {
         "symbol": symbol,
         "company": info.get("longName") or info.get("shortName") or symbol,
@@ -124,6 +166,10 @@ def fundamentals(symbol, period="1y"):
         "dd_from_52wh": pct(price, hi),
         "vs_200d_ma": pct(price, ma200),
         "vs_50d_ma": pct(price, ma50),
+        # Earnings timing (best-effort, see comment above)
+        "next_earnings_date": next_earnings_date,
+        "days_to_earnings": days_to_earnings,
+        "earnings_date_confirmed": earnings_date_confirmed,
     }
     return out
 
