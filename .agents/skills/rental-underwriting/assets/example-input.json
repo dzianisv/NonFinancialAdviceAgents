@@ -1,0 +1,132 @@
+{
+  "as_of": "2026-07-13",
+  "label": "HYPOTHETICAL integration example (not live underwriting)",
+  "hypothetical": true,
+  "hold_years": 5,
+  "purchase": {
+    "address_label": "Hypothetical Tahoe townhome scenario for integration testing",
+    "purchase_price": 650000,
+    "cash_closing_costs": 15000,
+    "capitalizable_closing_costs": 6000,
+    "down_payment": 162500,
+    "annual_appreciation_rate": 0.025,
+    "selling_cost_rate": 0.07,
+    "loan": {
+      "annual_interest_rate": 0.0675,
+      "amortization_years": 30
+    }
+  },
+  "tax": {
+    "magi": 280000,
+    "federal_marginal_rate": 0.37,
+    "federal_capital_gains_rate": 0.2,
+    "federal_unrecaptured_1250_rate": 0.25,
+    "state_marginal_rate": 0.093,
+    "state_capital_gains_rate": 0.093,
+    "active_participation_ltr": true,
+    "state_active_participation_ltr": false,
+    "material_participation_str": true,
+    "average_guest_stay_nights": 4.5,
+    "rented_days": 240,
+    "personal_use_days": 8,
+    "land_value_share": 0.25,
+    "cost_seg_share": 0.22,
+    "cost_seg_recovery_years": 7,
+    "bonus_depreciation_rate": 1,
+    "bonus_eligibility_confirmed": true,
+    "state_bonus_conforms": false,
+    "state_str_nonpassive_treatment_confirmed": false,
+    "state_str_nonpassive": false,
+    "building_recovery_years_ltr": 27.5,
+    "building_recovery_years_str": 39,
+    "building_recovery_years_str_sensitivity": [
+      27.5,
+      39
+    ],
+    "at_risk_limit": 250000,
+    "release_suspended_losses_on_sale": true
+  },
+  "decision_hurdles": {
+    "minimum_dscr": 1.05,
+    "minimum_after_tax_irr": 0.08,
+    "minimum_year1_cash_on_cash": 0.03
+  },
+  "modes": {
+    "ltr": {
+      "enabled": true,
+      "legal": {
+        "status": "ALLOWED",
+        "jurisdiction_evidence": [
+          "HYPOTHETICAL: county long-term leasing allowed"
+        ],
+        "hoa_evidence": [
+          "HYPOTHETICAL: HOA docs permit leases >30 days"
+        ]
+      },
+      "revenue": {
+        "status": "HYPOTHETICAL",
+        "annual_gross_revenue": 31800,
+        "source_type": "estimate",
+        "notes": "HYPOTHETICAL: placeholder rent estimate for integration testing only."
+      },
+      "vacancy_rate": 0.06,
+      "other_income": 0,
+      "revenue_growth_rate": 0.03,
+      "expense_growth_rate": 0.03,
+      "expenses": {
+        "property_tax": 4200,
+        "insurance": 1200,
+        "hoa": 7512,
+        "utilities": 1200,
+        "management_fee_rate": 0.08,
+        "maintenance_rate": 0.07,
+        "capex_reserve_rate": 0.06,
+        "platform_fee_rate": 0,
+        "cleaning_fee_rate": 0,
+        "lodging_tax_rate": 0,
+        "lodging_tax_per_night": 0,
+        "fixed_other": 1000
+      }
+    },
+    "str": {
+      "enabled": true,
+      "legal": {
+        "status": "ALLOWED",
+        "jurisdiction_evidence": [
+          "HYPOTHETICAL: address-level permit path validated"
+        ],
+        "hoa_evidence": [
+          "HYPOTHETICAL: HOA/CC&R explicitly allow transient rentals"
+        ]
+      },
+      "revenue": {
+        "status": "HYPOTHETICAL",
+        "annual_gross_revenue": 80665,
+        "adr": 325,
+        "occupancy_rate": 0.68,
+        "available_nights": 365,
+        "source_type": "comps",
+        "comps_count": 4,
+        "notes": "HYPOTHETICAL: placeholder STR comps for integration testing only."
+      },
+      "vacancy_rate": 0,
+      "other_income": 0,
+      "revenue_growth_rate": 0.03,
+      "expense_growth_rate": 0.03,
+      "expenses": {
+        "property_tax": 4200,
+        "insurance": 2000,
+        "hoa": 5148,
+        "utilities": 3500,
+        "management_fee_rate": 0.18,
+        "maintenance_rate": 0.08,
+        "capex_reserve_rate": 0.07,
+        "platform_fee_rate": 0.03,
+        "cleaning_fee_rate": 0.08,
+        "lodging_tax_rate": 0.14,
+        "lodging_tax_per_night": 5,
+        "fixed_other": 1600
+      }
+    }
+  }
+}
