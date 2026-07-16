@@ -7,6 +7,12 @@
  * get bot-blocked (datacenter-IP 403s that hit curl). The same transport can later be
  * pointed at Fidelity behind the user's login for the authoritative distribution record.
  *
+ * Portable counterpart: this file is the macOS front-end (Bun + chrome-use + telegram-cli).
+ * The Hermes control-plane host has none of those (no Bun, no chrome-use, no user Telethon),
+ * so the same watcher is re-expressed in Python 3 stdlib at ./sitc_dividend_watch.py, which
+ * shares the identical state schema (seenExDates/notifiedActionDates/notifiedPostPayDates).
+ * Keep the two in sync when changing due-bill or idempotency semantics.
+ *
  * What it watches (for liquidation stubs like SITC, where each special distribution can
  * re-price the stock by MORE or LESS than the payout — the only real edge in holding one):
  *   1. NEW distribution declared        → a history row we haven't seen before
