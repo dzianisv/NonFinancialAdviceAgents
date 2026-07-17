@@ -303,6 +303,7 @@ interface Quote {
   closes: number[]; // full daily close series, oldest -> newest, nulls dropped
   asOf: string; // ISO timestamp of the latest close used
   rsi14: number;
+  high52: number; // max daily HIGH over the fetched (~1y) window
 }
 
 const quoteCache = new Map<string, Quote>();
@@ -311,7 +312,7 @@ const quoteErrors = new Map<string, string>();
 async function fetchYahooChart(symbol: string): Promise<Quote> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     symbol,
-  )}?interval=1d&range=6mo`;
+  )}?interval=1d&range=1y`;
   const resp = await fetch(url, {
     headers: { "User-Agent": YAHOO_USER_AGENT },
   });
@@ -326,6 +327,7 @@ async function fetchYahooChart(symbol: string): Promise<Quote> {
   }
   const timestamps: number[] = result.timestamp ?? [];
   const closesRaw: (number | null)[] = result.indicators?.quote?.[0]?.close ?? [];
+  const highsRaw: (number | null)[] = result.indicators?.quote?.[0]?.high ?? [];
   const closes: number[] = [];
   let lastTs = 0;
   for (let i = 0; i < closesRaw.length; i++) {
@@ -337,10 +339,20 @@ async function fetchYahooChart(symbol: string): Promise<Quote> {
   if (closes.length === 0) {
     throw new Error("no usable close prices returned");
   }
+  let high52 = -Infinity;
+  for (const h of highsRaw) {
+    if (h === null || h === undefined || Number.isNaN(h)) continue;
+    if (h > high52) high52 = h;
+  }
+  if (!Number.isFinite(high52)) {
+    // Fallback: no usable HIGH series returned -- use max close so the
+    // condition still degrades gracefully instead of throwing.
+    high52 = Math.max(...closes);
+  }
   const price = closes[closes.length - 1];
   const asOf = lastTs ? new Date(lastTs * 1000).toISOString() : new Date().toISOString();
   const rsi14 = computeRSI(closes, 14);
-  return { symbol, price, closes, asOf, rsi14 };
+  return { symbol, price, closes, asOf, rsi14, high52 };
 }
 
 /** Wilder's-smoothed RSI over `closes` (oldest -> newest) for the given period. */
@@ -400,9 +412,10 @@ type AtomicCondition =
   | { kind: "below"; value: number; raw: string }
   | { kind: "rsi_above"; period: number; value: number; raw: string }
   | { kind: "rsi_below"; period: number; value: number; raw: string }
+  | { kind: "pct_below_52wk_high"; pct: number; raw: string }
   | { kind: "date"; label: "record" | "payment"; date: string; raw: string };
 
-const MARKET_KINDS = new Set(["above", "below", "rsi_above", "rsi_below"]);
+const MARKET_KINDS = new Set(["above", "below", "rsi_above", "rsi_below", "pct_below_52wk_high"]);
 
 function parseAtomic(token: string): AtomicCondition {
   const t = token.trim();
@@ -418,6 +431,9 @@ function parseAtomic(token: string): AtomicCondition {
 
   m = t.match(/^rsi_below(?:\((\d+)\))?:(-?\d+(?:\.\d+)?)$/i);
   if (m) return { kind: "rsi_below", period: m[1] ? Number(m[1]) : 14, value: Number(m[2]), raw: t };
+
+  m = t.match(/^pct_below_52wk_high:(-?\d+(?:\.\d+)?)$/i);
+  if (m) return { kind: "pct_below_52wk_high", pct: Number(m[1]), raw: t };
 
   m = t.match(/^(record|payment):(\d{4}-\d{2}-\d{2})$/i);
   if (m) return { kind: "date", label: m[1].toLowerCase() as "record" | "payment", date: m[2], raw: t };
@@ -442,6 +458,8 @@ function describeAtomic(cond: AtomicCondition): string {
       return `RSI(${cond.period}) above ${cond.value}`;
     case "rsi_below":
       return `RSI(${cond.period}) below ${cond.value}`;
+    case "pct_below_52wk_high":
+      return `>=${cond.pct}% below 52wk high`;
     case "date":
       return `${cond.label} date ${cond.date} reached`;
   }
@@ -466,6 +484,18 @@ function evaluateAtomic(cond: AtomicCondition, quote: Quote | null, todayISO: st
     case "rsi_below": {
       const rsi = quote ? getRSI(quote, cond.period) : NaN;
       return { cond, met: !Number.isNaN(rsi) && rsi <= cond.value, actual: Number.isNaN(rsi) ? "n/a" : rsi.toFixed(1) };
+    }
+    case "pct_below_52wk_high": {
+      if (!quote || !Number.isFinite(quote.high52)) {
+        return { cond, met: false, actual: "n/a" };
+      }
+      const threshold = quote.high52 * (1 - cond.pct / 100);
+      const met = quote.price <= threshold;
+      return {
+        cond,
+        met,
+        actual: `price=${quote.price.toFixed(2)} high52=${quote.high52.toFixed(2)} threshold=${threshold.toFixed(2)}`,
+      };
     }
     case "date":
       return { cond, met: todayISO >= cond.date, actual: todayISO };
@@ -616,7 +646,7 @@ async function main() {
     try {
       const q = await getQuote(sym);
       console.log(
-        `  ${sym.padEnd(10)} price=${q.price.toFixed(2).padStart(10)}  RSI14=${q.rsi14.toFixed(1).padStart(5)}  asOf=${q.asOf}`,
+        `  ${sym.padEnd(10)} price=${q.price.toFixed(2).padStart(10)}  RSI14=${q.rsi14.toFixed(1).padStart(5)}  high52=${q.high52.toFixed(2).padStart(10)}  asOf=${q.asOf}`,
       );
     } catch (e) {
       console.log(`  ${sym.padEnd(10)} FETCH FAILED: ${e instanceof Error ? e.message : e}`);

@@ -97,6 +97,7 @@ Parsed from the `Conditions` column (`E`):
 | `below:<num>` | `price <= num` |
 | `rsi_above:<num>` or `rsi_above(<period>):<num>` | `RSI(period, default 14) >= num` |
 | `rsi_below:<num>` or `rsi_below(<period>):<num>` | `RSI(period) <= num` |
+| `pct_below_52wk_high:<pct>` | `price <= high52 * (1 - pct/100)` — fires when price has dropped at least `pct`% off the rolling 52-week high (max daily HIGH over the last ~1y) |
 | `record:<YYYY-MM-DD>` / `payment:<YYYY-MM-DD>` | fires on/after that UTC calendar date; no market data needed |
 | `A AND B` | both must hold — split on the literal string `" AND "` |
 
@@ -112,13 +113,14 @@ crashes the run.
 ## Market data
 
 `getQuote(symbol)` hits
-`https://query1.finance.yahoo.com/v8/finance/chart/<SYMBOL>?interval=1d&range=6mo`
+`https://query1.finance.yahoo.com/v8/finance/chart/<SYMBOL>?interval=1d&range=1y`
 with a browser `User-Agent`, takes the last non-null daily close as
-`price`, and computes `RSI(14)` (Wilder's smoothing) from the full close
-series. Each unique symbol is fetched once per run and cached; a
-symbol-level fetch failure only skips the rows that need that symbol's
-price/RSI (rows whose conditions are purely date-based never trigger a
-fetch at all).
+`price`, computes `RSI(14)` (Wilder's smoothing) from the full close
+series, and computes `high52` as the max daily **HIGH** (not close) over
+the returned ~1-year window (used by `pct_below_52wk_high`). Each unique
+symbol is fetched once per run and cached; a symbol-level fetch failure
+only skips the rows that need that symbol's price/RSI/high52 (rows whose
+conditions are purely date-based never trigger a fetch at all).
 
 Swap data sources by replacing `fetchYahooChart` / `getQuote` — nothing
 else in the script depends on Yahoo specifically.
