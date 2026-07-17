@@ -109,6 +109,47 @@ def risk_flags(d, weight_pct):
         flags.append(f"⚠ CONCENTRATION {weight_pct:.0f}% of book")
     return flags
 
+def check_exhaustion(d):
+    """Guard against the 'trend broken -> sell today' rules firing on a name that has
+    ALREADY crashed: deep drawdown + oversold RSI means the trend-exit was months ago,
+    not today, and a fresh sell/trim call now is selling INTO the hole, not managing
+    risk out of it.
+
+    Thresholds: RSI(14) < 40 (oversold-ish, not yet a V-bottom reversal, but no longer
+    momentum-driven selling either) AND drawdown from the 52-week high beyond -25%
+    (a shallow pullback is not exhaustion; a name cut by a quarter or more, with RSI
+    already washed out, is). Both numbers come straight from fundamentals.py -- no
+    TradingView dependency, so this also protects the fundamentals-only screen (Step
+    0.8) and DEGRADED_TECH mode, not just the deep-dive panel.
+
+    Returns a dict when exhausted (reason + concrete stop/bounce levels the scorecard
+    basis string can print), or None when the name is not in an exhausted state (the
+    normal trend/value/quality/growth rules then decide as before).
+    """
+    rsi = _num(d, "rsi14")
+    dd = _num(d, "dd_from_52wh")
+    if rsi is None or dd is None or not (rsi < 40 and dd <= -25):
+        return None
+
+    price = _num(d, "price")
+    ma50 = _num(d, "ma50")
+    ma200 = _num(d, "ma200")
+    stop = _num(d, "swing_low_20d")
+    if stop is None:
+        stop = _num(d, "52w_low")
+
+    # Bounce target = the nearest MA still above price (the MA it's below) -- the
+    # closer one is the more actionable near-term reclaim level, not the ultimate target.
+    candidates = [(name, lvl) for name, lvl in (("50d MA", ma50), ("200d MA", ma200))
+                  if lvl is not None and price is not None and lvl > price]
+    bounce_name, bounce_level = (min(candidates, key=lambda x: x[1]) if candidates else (None, None))
+
+    return {
+        "rsi": rsi, "dd": dd, "stop": stop,
+        "bounce_name": bounce_name, "bounce_level": bounce_level,
+        "reason": f"RSI {rsi:.0f} (oversold) after {dd:.0f}% drawdown from 52w high — exhaustion, not fresh momentum",
+    }
+
 def event_soon_flag(d, action):
     """Non-gating earnings-timing annotation -- fires when a print is <=10 trading
     days out (fundamentals.py's days_to_earnings, best-effort/yfinance-calendar-sourced).
@@ -126,8 +167,15 @@ def event_soon_flag(d, action):
 
 # ---- deterministic decision tree ------------------------------------------
 
-def decide(val, trend, qual, grow, weight_pct, mktcap, hold_only):
-    """Returns (action, basis). Order matters — first match wins."""
+def decide(val, trend, qual, grow, weight_pct, mktcap, hold_only, exh=None,
+           dd=None, vs200=None, vs50=None, gain_pct=None):
+    """Returns (action, basis). Order matters — first match wins.
+
+    dd / vs200 / vs50 / gain_pct are the raw position-context numbers the EARLY
+    TREND-BREAK EXIT (rule 0.7) needs: drawdown from the 52w high, distance vs the
+    200d/50d MA, and the unrealized gain% off cost basis. They default to None so
+    the tree degrades gracefully (rule 0.7 simply doesn't fire) when a caller has
+    no position/price context — every other rule is unchanged."""
     # 0. concentration override (risk management trumps thesis — applies even to a
     #    caller-flagged hold-only position: a 20%+ single-name weight is idiosyncratic
     #    risk regardless of mandate. For hold-only names, TRIM here means rotate within
@@ -135,6 +183,78 @@ def decide(val, trend, qual, grow, weight_pct, mktcap, hold_only):
     if weight_pct is not None and weight_pct >= 15:
         redeploy = " — rotate proceeds within the caller's hold-only mandate, not to cash" if hold_only else ""
         return "TRIM", f"single-name concentration {weight_pct:.0f}% > 15% cap — trim to manage risk, independent of thesis{redeploy}"
+
+    # 0.5 EXHAUSTION GUARD — a broken trend (trend<=-2, i.e. below BOTH the 50d and 200d
+    # MA) does not by itself mean "sell today". Rules 1/2/5 below all fire on trend<=-2
+    # and would call EXIT on a name that is simply trend-following-correct but already
+    # priced in. If the name is ALSO oversold + deep-drawdown (check_exhaustion), the
+    # trend-exit was months ago, not now: selling at RSI<40 after a >25% crash is selling
+    # LOW, not managing risk. Override to HOLD-with-a-stop / bounce-target instead of a
+    # fresh EXIT/TRIM call. This does NOT touch rule 3 (TRIM extended winners), which
+    # requires trend>=1 (uptrend) — structurally incompatible with an exhausted/crashed
+    # state, so genuinely extended names still trim exactly as before.
+    if trend <= -2 and exh is not None:
+        stop_txt = f"${exh['stop']:.2f} (recent swing low)" if exh.get("stop") is not None else "the recent swing low"
+        if exh.get("bounce_level") is not None:
+            bounce_txt = f"${exh['bounce_level']:.2f} ({exh['bounce_name']})"
+        else:
+            bounce_txt = "the MA it's below"
+        return "HOLD", (
+            f"EXIT MISSED, not EXIT NOW — {exh['reason']}. The trend-exit was months ago; "
+            f"selling into an oversold crash is selling low. HOLD with a stop below "
+            f"{stop_txt}, or trim into a bounce toward {bounce_txt}. Don't sell into the hole."
+        )
+
+    # 0.7 EARLY TREND-BREAK EXIT — the NEM/MRVL missed-exit fix, the whole point of this
+    # rule set. It fires the exit while it is STILL ACTIONABLE, before a rolling-over winner
+    # decays into the crashed/oversold state that the exhaustion guard (0.5) then locks into
+    # HOLD. On the drawdown timeline it sits strictly BETWEEN the healthy state and 0.5:
+    #   healthy (at highs, uptrend)                     -> rules 2/3 (HOLD / TRIM-if-heavy)
+    #   >>> trend just broke, drawdown STILL MODERATE   -> THIS rule (TRIM / EXIT)  <<<
+    #   already crashed (RSI<40 AND dd<=-25)            -> rule 0.5 exhaustion guard (HOLD)
+    # NON-OVERLAP with 0.5 is guaranteed on the DRAWDOWN axis alone: this rule requires
+    # dd > -25 (still shallow), 0.5 requires dd <= -25 — they cannot both be eligible for the
+    # same name regardless of RSI, so adding this rule cannot break the "don't sell the bottom"
+    # guard. And 0.5 is checked first, so even at the boundary the guard wins.
+    #
+    # Trigger = trend flipped down (price BELOW the 200d MA — the disciplined trend break NEM
+    # and MRVL both crossed) AND drawdown is still MODERATE (-25% < dd <= -8%: past noise at the
+    # very top, but not yet exhaustion) AND the position is DECISION-RELEVANT: weight-heavy
+    # and/or a large locked-in winner. The size×gain gate is what earns the whipsaw cost — it
+    # fires LOUDEST on big extended winners breaking down (the NEM signature: 8% of book, +100%)
+    # and stays SILENT on small/no-gain positions, where a 200d wobble is just noise.
+    #   TRIM = first/normal break of a still-intact-thesis winner — partial, protect the gain.
+    #   EXIT = confirmed breakdown (below BOTH 50d & 200d) AND deteriorating fundamentals
+    #          (declining EPS or shrinking revenue) — trend break + broken thesis, cut it.
+    # Honest limitation: trend-break exits WHIPSAW (a name can break the 200d and reclaim it).
+    # We accept that cost ONLY because the size×gain weighting confines the rule to positions
+    # where riding a +100% winner back to breakeven is the far more expensive error. This does
+    # NOT "never miss an exit"; it catches the actionable window NEM/MRVL blew through.
+    if vs200 is not None and dd is not None and vs200 < 0 and -25 < dd <= -8:
+        heavy = weight_pct is not None and weight_pct >= 5
+        big_winner = gain_pct is not None and gain_pct >= 50
+        sizeable_winner = (weight_pct is not None and weight_pct >= 3
+                           and gain_pct is not None and gain_pct >= 25)
+        if heavy or big_winner or sizeable_winner:
+            below_both = vs50 is not None and vs50 < 0
+            thesis_broken = qual <= -1 or grow <= -1
+            g = f"+{gain_pct:.0f}% gain" if gain_pct is not None else "unrealized winner"
+            w = f", {weight_pct:.0f}% of book" if weight_pct is not None else ""
+            if below_both and thesis_broken:
+                return "EXIT", (
+                    f"EARLY TREND-BREAK EXIT — broke below BOTH 50d & 200d with deteriorating "
+                    f"fundamentals while still only {dd:.0f}% off the 52w high ({g}{w}): confirmed "
+                    f"breakdown of a broken-thesis name — exit now, before it becomes the crashed "
+                    f"oversold name that can only be held. Trend-break exits can whipsaw; the size×gain "
+                    f"weight is why this one is worth acting on."
+                )
+            return "TRIM", (
+                f"EARLY TREND-BREAK EXIT (NEM/MRVL lesson) — {g}{w} just broke its 200d trend while "
+                f"still only {dd:.0f}% off its 52w high: MODERATE drawdown, NOT yet exhausted — this is "
+                f"the actionable exit window. TRIM now to protect the gain; do NOT wait for the -30/-42% "
+                f"oversold print, by then rule 0.5 correctly forbids selling the bottom. First break of a "
+                f"still-intact thesis = partial trim (whipsaw risk), not a full exit."
+            )
 
     # 1. genuine dead money / broken thesis: expensive OR shrinking, falling, deteriorating
     if trend <= -2 and qual <= -1 and val <= 0:
@@ -205,6 +325,17 @@ def load_positions(path, hold_only_arg=None):
         v["weight"] = (100.0*v["mv"]/total) if (total and v["mv"]) else None
     return out
 
+def _gain_pct(mv, pnl):
+    """Unrealized gain as % of COST BASIS (cost = mv - pnl), matching risk-desk's
+    computeGainPct. Feeds the early trend-break exit's size×gain relevance gate. None
+    when the position P&L context is missing or the cost basis is non-positive."""
+    if mv is None or pnl is None:
+        return None
+    cost = mv - pnl
+    if cost <= 0:
+        return None
+    return round(pnl / cost * 100.0, 1)
+
 def run_one(d, pos, hold_only_arg=None):
     hold_only_arg = hold_only_arg or set()
     sym = d.get("symbol","?")
@@ -213,7 +344,11 @@ def run_one(d, pos, hold_only_arg=None):
     mktcap = _num(d, "market_cap")
     ho = p.get("hold_only", False) or sym in hold_only_arg
     vS = score_valuation(d); tS = score_trend(d); qS = score_quality(d); gS = score_growth(d)
-    action, basis = decide(vS[0], tS[0], qS[0], gS[0], weight, mktcap, ho)
+    exh = check_exhaustion(d)
+    dd = _num(d, "dd_from_52wh"); vs200 = _num(d, "vs_200d_ma"); vs50 = _num(d, "vs_50d_ma")
+    gain_pct = _gain_pct(p.get("mv"), p.get("pnl"))
+    action, basis = decide(vS[0], tS[0], qS[0], gS[0], weight, mktcap, ho, exh,
+                           dd=dd, vs200=vs200, vs50=vs50, gain_pct=gain_pct)
     composite = vS[0]+tS[0]+qS[0]+gS[0]
     # EVENT_SOON is a non-gating annotation ONLY -- it is computed from the ACTION
     # decide() already returned and appended to flags; it never feeds back into decide().
@@ -221,6 +356,8 @@ def run_one(d, pos, hold_only_arg=None):
     es = event_soon_flag(d, action)
     if es:
         flags.append(es)
+    if exh is not None:
+        flags.append(f"⚠ EXHAUSTED: RSI {exh['rsi']:.0f}, {exh['dd']:.0f}% from 52w high")
     return {
         "symbol": sym, "price": _num(d,"price"), "action": action, "basis": basis,
         "composite": composite, "weight": weight, "pnl": p.get("pnl"),

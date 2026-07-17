@@ -321,16 +321,59 @@ tree, first match wins:
 | # | Condition | Action | Meaning |
 |---|---|---|---|
 | 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (if the caller flagged this position hold-only, TRIM means rotate within the caller's mandate rather than exit to cash — this skill has no default asset-class preference) |
-| 1 | downtrend + deteriorating EPS + not cheap | **EXIT** | thesis broken — genuine dead money |
+| 0.5 | trend = DOWNTREND (below 50d & 200d) **AND** exhausted (RSI(14) < 40 **AND** drawdown from 52w high ≤ −25%) | **HOLD** (with stop + bounce target) | **exhaustion guard** — the trend-exit was months ago, not today; EXIT/TRIM here would be selling into an already-crashed, oversold name. Overrides rules 1/2/5 below when it fires; does NOT touch rule 3 (needs an uptrend, structurally incompatible with exhaustion) |
+| 0.7 | price **below 200d MA** (trend broke) **AND** drawdown still MODERATE (−25% < dd ≤ −8%) **AND** decision-relevant (weight ≥ 5%, **or** gain ≥ 50%, **or** weight ≥ 3% & gain ≥ 25%) | **TRIM** (first break, thesis intact) / **EXIT** (also below 50d **AND** deteriorating EPS or shrinking rev) | **early trend-break exit — the NEM/MRVL missed-exit fix.** Fires the exit while STILL ACTIONABLE, before a rolling-over winner decays into the crashed state 0.5 then locks to HOLD. Sits strictly *between* healthy and 0.5 on the drawdown timeline. Non-overlap with 0.5 is guaranteed on the drawdown axis: this needs dd > −25%, 0.5 needs dd ≤ −25% — mutually exclusive, and 0.5 is checked first. The size×gain gate is what earns the whipsaw cost: loudest on big extended winners breaking down (NEM: 8% of book, +100%), silent on small/no-gain positions |
+| 1 | downtrend + deteriorating EPS + not cheap | **EXIT** | thesis broken — genuine dead money (but see 0.5 first: if the name is also exhausted, 0.5 wins) |
 | 2 | val ≥ 1 AND trend ≥ 1 AND qual ≥ 0 | **ADD** | cheap with the wind at its back |
 | 3 | uptrend + expensive | **TRIM** | extended winner — take partial, let rest run |
 | 4 | val ≥ 1 AND trend ≤ 0 | **WAIT** | cheap but falling — do NOT add to a knife; buy only on 200d reclaim or dated catalyst |
-| 5 | shrinking + not cheap + no trend | **EXIT** | no reason to own it |
+| 5 | shrinking + not cheap + no trend | **EXIT** | no reason to own it (but see 0.5 first) |
 | 6 | default | **HOLD** | fair / in-trend / no decisive edge (mega-cap → "index-like, consider RSP/VOO") |
 
 **Rule 4 (WAIT) is the flip-flop killer.** A cheap-but-downtrending value name (EPAM, ESTC, FIS, ACN, ADBE,
 PYPL…) lands here *stably*: never ADD (trend is against), never panic-EXIT (still cheap, not deteriorating).
 That answer does not move when the user pushes back, because it is computed, not argued.
+
+**Rule 0.5 (exhaustion guard) is the "don't sell at the bottom" fix.** A broken trend alone (below both MAs)
+is not a sell signal for TODAY — it says the sell signal already fired, weeks or months ago near the MA it
+broke. `decide()` conflating "trend is broken" with "sell now" produced a real incident: MRVL down -42% from
+its ~$330 top, RSI(14)≈36 (oversold), MACD histogram negative but flattening — the scorecard called EXIT/TRIM
+purely off the broken trend, i.e. recommending a market-sell into an already-crashed, oversold name (the
+disciplined trend-exit was near $280, months earlier). `check_exhaustion()` in `scripts/scorecard.py` computes
+RSI(14) (Wilder-smoothed, from `fundamentals.py`'s `rsi14` field — no TradingView dependency, so this also
+protects the fundamentals-only screen and DEGRADED_TECH mode) and drawdown-from-52w-high; when both cross the
+oversold/deep-drawdown thresholds, the action becomes `HOLD` with an explicit stop (`swing_low_20d`, a proxy
+for the recent swing low) and a bounce target (the nearer of ma50/ma200, i.e. "the MA it's below"), instead of
+EXIT/TRIM. A genuinely extended name (RSI high, near its 52w high, uptrend) never satisfies the RSI<40 half of
+the guard, so rule 3 (TRIM extended winners) is untouched.
+
+**Rule 0.7 (early trend-break exit) is the "catch the exit while it's still actionable" fix — the direct
+answer to the NEM/MRVL misses.** The exhaustion guard (0.5) is a *fallback*: "if you already missed the
+exit, don't sell the bottom." It is the wrong tool for catching the exit in the first place — by the time
+0.5 applies (RSI<40, dd≤−25%) the actionable moment is long gone. Rule 0.7 fires **earlier**, in the middle
+of the drawdown timeline: the moment a **heavy and/or large-winner** position **breaks its 200d trend** while
+the drawdown is **still moderate** (−25% < dd ≤ −8%). That is precisely the window both incidents blew
+through:
+- **NEM** — 8%+ of book, +100%+ gain, closed below its 200d, dd only ≈ −12%. Old tree: cheap + downtrend →
+  **Rule 4 WAIT**, and it scored WAIT for *weeks* while a doubled position rode all the way down. New: Rule
+  0.7 catches it at the 200d break and fires **TRIM** (protect the +100% gain) — before 0.5 ever engages.
+- **MRVL** — rolled below 50d then 200d from ~$330. The disciplined exit was *that rollover* (dd ≈ −15%, RSI
+  ≈ 50). The skill only said "trim" once MRVL was ≈$189 (−42%, RSI≈36) — far too late, and by then 0.5
+  correctly says HOLD. New: Rule 0.7 fires **TRIM** at the rollover, the real exit window.
+
+Ordering matters and is deliberate: **0.5 is checked before 0.7**, and their drawdown bands do not overlap
+(0.5: dd ≤ −25%; 0.7: dd > −25%), so 0.7 can never cause a sell into an already-crashed name — verified by
+the `MRVL-already-crashed` case (dd −42%, RSI 36) still returning HOLD after 0.7 was added. Rule 0.7 also
+does not touch the healthy state: a name at its highs in an uptrend has dd > −8% and price above the 200d, so
+neither trigger is met — it routes to rule 2/3/6 exactly as before.
+
+**Honest limitation — this whipsaws, and that is the accepted trade.** A 200d break can reclaim; Rule 0.7
+will sometimes trim a name that recovers. We accept that cost *only* because the **size×gain gate** confines
+the rule to positions where the opposite error — riding a +100% overweight winner back to breakeven — is far
+more expensive. Do **not** describe this rule as "never misses an exit." It catches the *actionable window*
+NEM and MRVL missed; it does not predict tops. First break of a still-intact thesis = **partial TRIM** (not a
+full exit); **EXIT** is reserved for a trend break that is *also* a broken thesis (below both MAs + declining
+EPS or shrinking revenue). Deterministic: same inputs → same action, like every other rule here.
 
 The seats (Step 2 hierarchy) then run on the deep-dive subset to supply **conviction, entry zone, trigger,
 stop, and invalidation** — but a seat may NOT overturn the scorecard ACTION. If a seat strongly disagrees,
@@ -808,6 +851,7 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 - [ ] **Citation audit tags present** — Skeptic's TAIL RISK and HISTORICAL ANALOG carry [LIVE]/[FILED]/[MEM] tags. Any [MEM]-only claim is flagged ⚠️[MEM-only] and the CIO addressed it in DISSENT LOGGED.
 - [ ] **Portfolio tail stress numbers present** — Skeptic output includes explicit -30% and -50% dollar impact at current weight for every BUY/ADD ticker (Step 2 Skeptic prompt).
 - [ ] **P0/P1/P2/P3 Execution Table present** — printed after SETUP ALERTS (Step 3.6); all BUY/ADD/EXIT/TRIM verdicts appear in the table with share counts, entry zones, triggers, and falsification conditions. No P0 without a named trigger already fired.
+- [ ] **Exit-watches registered for every held position** — a standing 200d-break (and, for large/overweight winners, a trailing) sell-alert per holding via `mkt-alert.ts`, so a Rule 0.7 trend break pings the user in real time between panel runs (the NEM/MRVL "keep watching" fix). See *Set an exit-watch*.
 
 ## Set a buy-alert (notify-me-when) — for WATCH verdicts
 
@@ -828,6 +872,37 @@ A scheduled `bun check.ts` (runtime cron) fires the notification with the reason
 hits. See `.agents/skills/mkt/SKILL.md` for trigger patterns and the per-runtime scheduler cookbook.
 Recommend-only and backtest-gated — an alert is a reminder to re-evaluate, not an order.
 
+## Set an exit-watch (sell/trim alert) — for HELD positions (MANDATORY per run)
+
+"Keep watching" is the whole point of the NEM/MRVL lesson: the missed exits happened *between* full panel
+runs. Rule 0.7 catches a trend-break **when you run the scorecard** — but a position can roll over on a
+Tuesday you didn't run it. So for **every held position** (not just WATCH names), register a **standing
+exit-watch** so the trend break pings the user in real time, with the exit thesis, the moment it happens —
+not weeks later when they next run a panel. This reuses the same `mkt-alert.ts` mechanism as buy-alerts; do
+**not** build a new scheduler.
+
+For each held position, register the exit level that would fire Rule 0.7 — its **200d MA** (the disciplined
+trend break), and for a large/overweight winner a **trailing level** below the recent price too:
+
+```bash
+cd .agents/skills/mkt/scripts
+# Trend-break exit-watch on a held winner (fires Rule 0.7 in real time):
+bun mkt-alert.ts add --desk stocks --symbol NEM \
+  --condition below --value 46.00 \
+  --data-source "200d MA = $46.00 from 250d TV/yfinance daily closes (as of <date>)" \
+  --reason "EXIT-WATCH: +100% winner, 8% of book. Close below 200d = Rule 0.7 early trend-break exit — TRIM to protect the gain, do NOT wait for the oversold print." \
+  --channel telegram:@CryptoAiInvestor --expiry 2026-12-31
+# Optional trailing-stop leg for a big winner (protect locked gains on a sharp reversal):
+#   --condition pct_down --value 12   (12% off the recent high)
+# 50d-break early warning (rolling over before the 200d):  --condition sma_cross_below --value 50 --period 50
+```
+
+Notes:
+- `below`/`above` price conditions **require `--data-source`** citing the OHLCV the level came from (mkt hard-fails otherwise) — quote the 200d level and its source.
+- Set the exit-watch even for **HOLD/WAIT-verdict** positions: the point is to catch the *transition* to a breakdown, which by definition hasn't happened yet at panel time.
+- The **`risk-desk`** skill (`.agents/skills/risk-desk/`) is the *always-on* companion: run it on a cron over the live positions book and it fires the same trend-break/winner-rollover breaches (its R1/R4) independently of any panel. Exit-watches (this section) + risk-desk (standing sweep) are belt-and-suspenders — register the alerts here, and let risk-desk poll the whole book. Neither replaces the other; both exist because NEM was missed by having *only* the on-demand picker.
+- Recommend-only and backtest-gated — an exit-watch is a reminder to re-evaluate size, not an order to sell.
+
 ## Done when
 
 - Each analyzed stock has a 6-seat panel → Skeptic challenge → CIO verdict → Risk Manager gate (if BUY/ADD),
@@ -839,6 +914,9 @@ Recommend-only and backtest-gated — an alert is a reminder to re-evaluate, not
 - The output is flagged as an educational, backtest-gated hypothesis — not advice.
 - The high-confidence RECAP + SETUP ALERTS table (Step 3.6) is printed last, splitting immediate
   high-conviction actions from buy-on-condition names.
+- For a holdings review, a **standing exit-watch** (200d-break / trailing sell-alert) was registered for
+  every held position via `mkt-alert.ts` (or delegated to the always-on `risk-desk` sweep) — so a trend
+  break fires in real time between runs, the NEM/MRVL "keep watching" requirement.
 - If `.cache/stocks-advisor/notion.yaml` is configured, a dated Notion page (title `YYYY-MM-DD <narrative>`,
   Step 5) was created and its URL returned; if not configured, publishing was skipped silently (not an error).
 - A **reasoning diagram** (Step 5.5) was produced by a delegated subagent — `$RUN_DIR/reasoning_diagram.mmd`

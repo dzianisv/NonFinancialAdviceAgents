@@ -19,9 +19,17 @@ OUTPUT (written to {out-dir}/{symbol}.out.json, also printed to stdout):
   forward_pe, trailing_pe, peg_ratio, revenue_growth, earnings_growth,
   gross_margin, operating_margin, fcf, market_cap, fcf_yield, roe,
   short_percent, institutional_pct, recommendation_mean, analyst_count,
-  dd_from_52wh, vs_200d_ma, vs_50d_ma,
+  dd_from_52wh, vs_200d_ma, vs_50d_ma, rsi14, swing_low_20d,
   next_earnings_date, days_to_earnings, earnings_date_confirmed
   (any field yfinance does not provide is emitted as null — never invented)
+
+  rsi14 / swing_low_20d exist so the scorecard's exhaustion guard (scripts/scorecard.py)
+  can tell "trend broken, about to roll over" apart from "trend broken, already crashed
+  and oversold" WITHOUT needing TradingView — this is the default fundamentals-only
+  screen (Step 0.8), so RSI must be computable from the same price history already
+  pulled here. rsi14 is Wilder-smoothed RSI(14) on daily closes; swing_low_20d is the
+  lowest daily LOW over the trailing 20 sessions (a stop-level proxy distinct from the
+  52w low, which is a real stop for a crashed name).
 
   Earnings fields come from yfinance Ticker.calendar, which is BEST-EFFORT — like
   the rest of this file it is point-in-time-unsafe and additionally can be stale
@@ -61,6 +69,33 @@ def to_pct(frac, dp=1):
     return round(frac * 100, dp)
 
 
+def compute_rsi14(closes):
+    """Wilder-smoothed RSI(14) from a pandas Series of daily closes.
+
+    Standalone (no TradingView dependency) so the fundamentals-only screen (Step 0.8)
+    and DEGRADED_TECH mode both get a real oversold read, not just MA distance. Uses
+    the standard Wilder method: seed the average gain/loss with a simple mean over the
+    first `period` deltas, then smooth every subsequent bar. Returns None (never a
+    fabricated number) when there isn't enough history.
+    """
+    period = 14
+    if closes is None or len(closes) < period + 1:
+        return None
+    delta = closes.diff().dropna()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    avg_gain = gain.rolling(period).mean()
+    avg_loss = loss.rolling(period).mean()
+    for i in range(period, len(gain)):
+        avg_gain.iloc[i] = (avg_gain.iloc[i - 1] * (period - 1) + gain.iloc[i]) / period
+        avg_loss.iloc[i] = (avg_loss.iloc[i - 1] * (period - 1) + loss.iloc[i]) / period
+    last_gain, last_loss = avg_gain.iloc[-1], avg_loss.iloc[-1]
+    if last_loss == 0:
+        return 100.0 if last_gain > 0 else 50.0
+    rs = last_gain / last_loss
+    return round(100 - (100 / (1 + rs)), 1)
+
+
 def trading_days_between(start, end):
     """Simple Mon-Fri weekday count from start to end (inclusive of end); None if
     end is missing or already in the past. No holiday calendar, no numpy dependency
@@ -91,6 +126,8 @@ def fundamentals(symbol, period="1y"):
 
     # Recompute MAs and 52w levels from history when possible — more transparent
     # than the .info rollups and resilient when those fields are missing.
+    rsi14 = None
+    swing_low_20d = None
     try:
         hist = t.history(period=period)
         if not hist.empty:
@@ -105,6 +142,10 @@ def fundamentals(symbol, period="1y"):
                 hi = float(closes.max())
             if lo is None:
                 lo = float(closes.min())
+            rsi14 = compute_rsi14(closes)
+            lows = hist["Low"].dropna()
+            if len(lows) >= 1:
+                swing_low_20d = float(lows.tail(20).min())
     except Exception:
         pass  # keep the .info values; never crash on a data gap
 
@@ -166,6 +207,8 @@ def fundamentals(symbol, period="1y"):
         "dd_from_52wh": pct(price, hi),
         "vs_200d_ma": pct(price, ma200),
         "vs_50d_ma": pct(price, ma50),
+        "rsi14": rsi14,
+        "swing_low_20d": round(swing_low_20d, 2) if swing_low_20d is not None else None,
         # Earnings timing (best-effort, see comment above)
         "next_earnings_date": next_earnings_date,
         "days_to_earnings": days_to_earnings,
