@@ -290,6 +290,13 @@ name does not scale (a 50-80 name book = thousands of MCP calls). So TradingView
 
 ## Step 0.82 — Deterministic verdict engine (MANDATORY — the ACTION comes from here, not from prose)
 
+**Risk overrides alpha.** This scorecard is a stock PICKER — it answers "is this a good time to add?" It
+is not a risk manager and has no opinion on whether an existing position is oversized or rolling over
+(the NEM incident: 8%+ of book, +100%+ gain, broken below 200d, scored WAIT for weeks because "cheap but
+downtrending" was the wrong question). `risk-desk` (`.agents/skills/risk-desk/`) runs the standing,
+always-on risk layer over HELD positions; its TRIM/REVIEW breaches override this scorecard's WAIT/HOLD on
+any position it also holds a view on — run it alongside this step, not instead of it.
+
 **Why this exists.** The 6-seat panel and the decision hierarchies aggregate *prose opinions*, which makes
 the final label depend on how the question was framed: "build the bear case" yields EXIT and "build the bull
 case" yields ADD on the identical stock. That flip-flop is a structural defect, not a one-off mistake. The
