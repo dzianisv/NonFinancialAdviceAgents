@@ -14,6 +14,10 @@ Script: `backtests/hedge_strategy_builder_backtest.py` (+ refined variant inline
 | SPY buy & hold (benchmark) | 15.0% | 0.88 | -33.7% | 11.9% | 0.73 | -24.5% | — | — |
 | **S2 refined: + idle cash in BIL** | **4.9%** | **0.82** | **-10.1%** | **8.4%** | **1.57** | **-4.8%** | 87 | 76% |
 
+Note: Trades and Win columns are full-period (2016–2026) figures — the script does not recompute
+per-trade stats for the OOS window alone. Equity-curve metrics (CAGR/Sharpe/maxDD) are properly
+split.
+
 ## Verdicts
 
 - **S1 FAIL.** Broke OOS: 2022 rate shock killed TLT as the defensive leg — momentum rotated into
@@ -26,7 +30,9 @@ Script: `backtests/hedge_strategy_builder_backtest.py` (+ refined variant inline
 ## S2 funded spec
 
 - Universe: SPY. Regime filter: close > 200-day SMA.
-- Entry: RSI(2) < 10 at close → buy next open, full sleeve notional ($10k).
+- Entry: RSI(2) < 10 at close → buy at the **next day's close** (script models close-to-close with a
+  1-bar delay; no look-ahead). Filling at next open instead would likely improve results slightly —
+  RSI-2 edge decays fast — so reported numbers are the conservative variant. Full sleeve notional ($10k).
 - Exit: close > 5-day SMA, or 10-trading-day time stop.
 - Idle cash: BIL/SGOV.
 - Observed per-trade risk ≈ 1-2% of sleeve; equity maxDD -10.1% full period.
