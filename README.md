@@ -738,6 +738,7 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 | `defi-portfolio-manager` | DeFi portfolio management |
 | `hedge-fund-13f-analysis` | 13F filings analysis |
 | `hedge-fund-manager` | Portfolio-level management and sizing |
+| `hedge-strategy-builder` | 3-stage strategy pipeline: generate 3 candidates → backtest (CAGR/Sharpe/DD/win rate) → risk-reward refinement |
 | `multi-lens-quorum` | Convene N lenses on a judgment call |
 | `portfolio-construction` | Portfolio construction and allocation |
 | `rebalancing` | Rebalancing logic |
