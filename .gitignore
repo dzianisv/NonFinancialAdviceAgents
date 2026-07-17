@@ -84,3 +84,19 @@ logs/
 !.cache/stocks-trend-screener/notion.yaml
 .env
 
+
+# session scratch — temp fetch/analysis outputs (never commit)
+*_tmp.json
+*_scratch.json
+.aave_news_tmp.json
+.hype_asset_news.json
+.hype_news_tmp.json
+.sol_news_output.json
+.uni_news_asset.json
+.uni_news_out.json
+news_out.json
+_scorecard.json
+_eth_news_scratch.json
+# local screenshots — never commit (PR/issue attachments only)
+screenshot_*.png
+screenshots/

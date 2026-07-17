@@ -19,7 +19,6 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 | "Find trending stocks" | `research-market-workflow` (`args.strategy: "trend-discovery"`) | quant pre-screen → EDGAR/WebSearch journalism fan-out → beneficiary mapping → skeptic |
 | "Review my whole book / trim losers" | `research-market-workflow` (`args.mode: "holdings-sweep"`) | full-book panel per held name → ADD/HOLD/TRIM/EXIT |
 | Buy/hold/size judgment | `multi-lens-quorum` skill | 4-7 independent lenses |
-| "When to buy / entry levels / support zones for X" | Pull OHLCV first → identify levels from data → set `mkt` alert with `--data-source` **AND** upsert the same trigger into the Watchlist sheet (see below) | Enforced in code: `mkt-alert.ts` rejects `above`/`below` price alerts with no `--data-source`. Pull `data_get_ohlcv` 210 weekly bars, bucket closes, cite N-week concentration or 200wMA. Neither side alone is complete — a mkt job with no sheet row is invisible to human review; a sheet row with no mkt job never fires. |
 | "Where does X go by [date]?" | `superforecasting` skill | logged to forecast-ledger for scoring |
 | Macro view | `macro-panel` skill | 9 investor-*/research-* thinker lenses |
 | Risk-on / risk-off | `regime-detection` skill | weighted signal ensemble |
@@ -30,12 +29,11 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 `stocks-trend-screener` finds WHICH names → `multi-lens-quorum` judges WHETHER/size → `superforecasting` times. Chain in that order.
 
 ## Watchlist sheet — canonical trigger registry
+Add alerts as a script on bun/typescript. Setup it on hermes-ai agent using telegram-cli @AflredAiBot.
+Use scheduled task https://hermes-agent.nousresearch.com/docs/user-guide/features/cron.
+Post to the new topic, like Market Alerts.
 
-The Google Sheet **Watchlist** tab is the canonical, human-readable registry of every asset trigger. `.cache/mkt/agent-alerts.json` is execution state for the `mkt`/`check.ts` alert engine — the thing that is evaluated and fires notifications. Both must stay synchronized: an ADD/UPDATE/REMOVE that touches one and not the other is an incomplete action.
-
-- **Spreadsheet:** https://docs.google.com/spreadsheets/d/1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8/edit
-- **Spreadsheet ID:** `1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8`
-- **Tab:** `Watchlist` — numeric `sheetId` **143777201**
+Also, keep updated the list of alerts on google sheet https://docs.google.com/spreadsheets/d/1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8/edit?gid=143777201#gid=143777201 tab watchlist.
 
 **Schema (columns A:R, 18 total):**
 
