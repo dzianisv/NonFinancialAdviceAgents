@@ -320,7 +320,8 @@ tree, first match wins:
 
 | # | Condition | Action | Meaning |
 |---|---|---|---|
-| 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (if the caller flagged this position hold-only, TRIM means rotate within the caller's mandate rather than exit to cash — this skill has no default asset-class preference) |
+| 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (if the caller flagged this position hold-only, TRIM means rotate within the caller's mandate rather than exit to cash — this skill has no default asset-class preference). **Fires for ETFs too** — a 20% single-ETF position is real concentration risk regardless of instrument type, so this is checked *before* the REVIEW_THESIS guard below |
+| 0.4 | **no fundamental basis** — `quote_type` is a fund/basket (ETF/MUTUALFUND/INDEX/…) **OR** every VALUE/QUALITY/GROWTH input is null | **REVIEW_THESIS** | **ETF / commodity / thematic basket guard.** These names have NO company fundamentals, so the VALUE×TREND spine collapses and the normal tree would decide them on TREND alone — a pure chart read (RSI/MA) on a multi-year macro thesis, which is noise. The technical verdict is SUPPRESSED; the own/trim decision is routed out as a thesis/macro call (`tradfi-portfolio-manager` for sleeve allocation, or `analyse-macro` / `narrative` for the theme). RSI/MA are reported in the basis as *staging context only, not the decision*. Detection reads `quote_type` first (fundamentals.py now emits it), falling back to the "all fundamental inputs null" test for older caches |
 | 0.5 | trend = DOWNTREND (below 50d & 200d) **AND** exhausted (RSI(14) < 40 **AND** drawdown from 52w high ≤ −25%) | **HOLD** (with stop + bounce target) | **exhaustion guard** — the trend-exit was months ago, not today; EXIT/TRIM here would be selling into an already-crashed, oversold name. Overrides rules 1/2/5 below when it fires; does NOT touch rule 3 (needs an uptrend, structurally incompatible with exhaustion) |
 | 0.7 | price **below 200d MA** (trend broke) **AND** drawdown still MODERATE (−25% < dd ≤ −8%) **AND** decision-relevant (weight ≥ 5%, **or** gain ≥ 50%, **or** weight ≥ 3% & gain ≥ 25%) | **TRIM** (first break, thesis intact) / **EXIT** (also below 50d **AND** deteriorating EPS or shrinking rev) | **early trend-break exit — the NEM/MRVL missed-exit fix.** Fires the exit while STILL ACTIONABLE, before a rolling-over winner decays into the crashed state 0.5 then locks to HOLD. Sits strictly *between* healthy and 0.5 on the drawdown timeline. Non-overlap with 0.5 is guaranteed on the drawdown axis: this needs dd > −25%, 0.5 needs dd ≤ −25% — mutually exclusive, and 0.5 is checked first. The size×gain gate is what earns the whipsaw cost: loudest on big extended winners breaking down (NEM: 8% of book, +100%), silent on small/no-gain positions |
 | 1 | downtrend + deteriorating EPS + not cheap | **EXIT** | thesis broken — genuine dead money (but see 0.5 first: if the name is also exhausted, 0.5 wins) |
@@ -333,6 +334,24 @@ tree, first match wins:
 **Rule 4 (WAIT) is the flip-flop killer.** A cheap-but-downtrending value name (EPAM, ESTC, FIS, ACN, ADBE,
 PYPL…) lands here *stably*: never ADD (trend is against), never panic-EXIT (still cheap, not deteriorating).
 That answer does not move when the user pushes back, because it is computed, not argued.
+
+**Rule 0.4 (REVIEW_THESIS) is the "an ETF gets no technical verdict" fix.** The scorecard's decision spine
+is VALUE × TREND, and VALUE/QUALITY/GROWTH come from `fundamentals.py`'s company financials. For an
+ETF / commodity basket / thematic fund those fields are ALL null, so `score_valuation/quality/growth` each
+return their neutral "no data" branch and the spine collapses — leaving TREND (RSI/MA distance) as the sole
+input. The old tree then emitted a confident-looking HOLD/TRIM that was really just a chart read on a
+multi-year macro thesis, where technicals are noise. **Worked example — URNM (Sprott Uranium Miners ETF):**
+its fundamentals were `fwd_pe=null, fcf_yield=null, earnings_growth=null, rev_growth=null, op_margin=null,
+roe=null` (only `rsi14`/`dd`/`vs_200d` had values), so the scorecard silently produced a technical-only
+HOLD on what is a uranium supply/demand cycle call — exactly the case SKILL.md's "individual stocks only"
+rule says belongs in `tradfi-portfolio-manager`, yet the scorecard scored it anyway. Rule 0.4 now detects
+this (via yfinance `quote_type`, or the null-fundamentals fallback) and returns **REVIEW_THESIS**: the
+technical verdict is suppressed and the name routes to `tradfi-portfolio-manager` (sleeve allocation) or
+`analyse-macro` / `narrative` (the commodity/theme thesis). RSI/MA are printed in the basis only as *staging
+context* for an eventual entry/exit, explicitly labeled NOT the own/trim decision. Ordering is deliberate:
+rule 0 (concentration) is checked FIRST so a >15% single-ETF position still TRIMs (that is risk management,
+valid for a basket), then 0.4 replaces rules 0.5/0.7/1-6 for any no-fundamental-basis name. A normal stock
+with real fundamentals never triggers 0.4 and is completely unaffected.
 
 **Rule 0.5 (exhaustion guard) is the "don't sell at the bottom" fix.** A broken trend alone (below both MAs)
 is not a sell signal for TODAY — it says the sell signal already fired, weeks or months ago near the MA it
@@ -832,6 +851,11 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       view, dispersion, momentum) was applied. Cached at `$RUN_DIR/{TICKER}/seat_sellside.json`.
 - [ ] Portfolio sizing/concentration was deferred to `stock-chair`; ETF allocation to
       `tradfi-portfolio-manager`. This skill stayed on individual-stock entries only.
+- [ ] **No ETF / thematic-basket / commodity name received a technical-only verdict** (Step 0.82 rule 0.4):
+      any name with no company fundamentals (`quote_type` = ETF/MUTUALFUND/INDEX, or all VALUE/QUALITY/GROWTH
+      inputs null — e.g. URNM) returned **REVIEW_THESIS**, not a HOLD/TRIM off RSI/MA, and was routed to
+      `tradfi-portfolio-manager` / `analyse-macro`. Concentration TRIM (rule 0, ≥15%) may still fire for such
+      names — that is risk management, not a fundamental verdict.
 - [ ] Prior research reports in `.cache/stocks-advisor/research/` checked for context if relevant (human-readable history, not verdict inputs)
       stances flagged low-confidence.
 - [ ] A consolidated **SOURCES & DATA** appendix is printed (Step 3.5) listing every web_fetched news/filing

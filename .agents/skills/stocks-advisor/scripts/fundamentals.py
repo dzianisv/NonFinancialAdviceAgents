@@ -15,7 +15,7 @@ INPUT (JSON file passed as argv[1]):
   {"symbol": "AVGO", "period": "1y"}
 
 OUTPUT (written to {out-dir}/{symbol}.out.json, also printed to stdout):
-  symbol, company, price, 52w_high, 52w_low, ma50, ma200,
+  symbol, company, quote_type, long_name, sector, price, 52w_high, 52w_low, ma50, ma200,
   forward_pe, trailing_pe, peg_ratio, revenue_growth, earnings_growth,
   gross_margin, operating_margin, fcf, market_cap, fcf_yield, roe,
   short_percent, institutional_pct, recommendation_mean, analyst_count,
@@ -176,6 +176,14 @@ def fundamentals(symbol, period="1y"):
     out = {
         "symbol": symbol,
         "company": info.get("longName") or info.get("shortName") or symbol,
+        # Instrument classification — the cleanest signal that a name is a
+        # fund/basket (ETF/MUTUALFUND/INDEX) with NO company-level fundamentals for
+        # the scorecard's VALUE×TREND spine. quoteType for a common stock is "EQUITY".
+        # scorecard.py's REVIEW_THESIS guard reads quote_type first, then falls back
+        # to the "all fundamental inputs null" test when quote_type is absent.
+        "quote_type": info.get("quoteType"),
+        "long_name": info.get("longName"),
+        "sector": info.get("sector"),
         "price": round(price, 2) if price is not None else None,
         "52w_high": round(hi, 2) if hi is not None else None,
         "52w_low": round(lo, 2) if lo is not None else None,

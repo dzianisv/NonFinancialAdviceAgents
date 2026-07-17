@@ -165,10 +165,41 @@ def event_soon_flag(d, action):
         flag += f" — stage {action} after print"
     return flag
 
+# ---- no-fundamental-basis detection (ETF / commodity / thematic basket) ----
+# quoteType values that are baskets, not operating companies — yfinance reports
+# these for ETFs, mutual funds and indices. An EQUITY (common stock) never lands here.
+FUND_QUOTE_TYPES = ("ETF", "MUTUALFUND", "INDEX", "CURRENCY", "COMMODITY")
+# The fundamental fields that actually FEED the four sub-scores: score_valuation
+# (fcf_yield, forward_pe), score_quality (earnings_growth, operating_margin, roe),
+# score_growth (revenue_growth), plus eps if present. trailing_pe is DELIBERATELY
+# excluded: no sub-score reads it, and yfinance reports a weighted trailing P/E for
+# ETFs (URNM: 9.93) that is NOT a company fundamental — including it would let one
+# unused field mask a basket with no real fundamental basis.
+FUND_BASIS_FIELDS = ("fcf_yield", "forward_pe", "earnings_growth",
+                     "revenue_growth", "operating_margin", "roe", "eps")
+
+def no_fundamental_basis(d):
+    """Detect a name for which the VALUE×TREND scorecard has no fundamental basis —
+    an ETF / commodity / thematic basket. Robust two-part test:
+
+      Primary  — quote_type is a fund/basket type (ETF/MUTUALFUND/INDEX/...). This is
+                 the cleanest signal; fundamentals.py now emits quote_type from yfinance.
+      Fallback — works even when quote_type is absent (older caches): every field that
+                 drives the four sub-scores is null, so there is nothing to score on.
+
+    Returns (True, reason) when there is no fundamental basis, else (False, None)."""
+    qt = str(d.get("quote_type") or "").upper()
+    if qt in FUND_QUOTE_TYPES:
+        return True, f"instrument type {qt}"
+    if all(_num(d, f) is None for f in FUND_BASIS_FIELDS):
+        return True, "all valuation/quality/growth inputs null (no company fundamentals)"
+    return False, None
+
 # ---- deterministic decision tree ------------------------------------------
 
 def decide(val, trend, qual, grow, weight_pct, mktcap, hold_only, exh=None,
-           dd=None, vs200=None, vs50=None, gain_pct=None):
+           dd=None, vs200=None, vs50=None, gain_pct=None,
+           no_basis=False, no_basis_reason=None, rsi=None):
     """Returns (action, basis). Order matters — first match wins.
 
     dd / vs200 / vs50 / gain_pct are the raw position-context numbers the EARLY
@@ -183,6 +214,39 @@ def decide(val, trend, qual, grow, weight_pct, mktcap, hold_only, exh=None,
     if weight_pct is not None and weight_pct >= 15:
         redeploy = " — rotate proceeds within the caller's hold-only mandate, not to cash" if hold_only else ""
         return "TRIM", f"single-name concentration {weight_pct:.0f}% > 15% cap — trim to manage risk, independent of thesis{redeploy}"
+
+    # 0.4 NO-FUNDAMENTAL-BASIS GUARD — REVIEW_THESIS. An ETF / commodity / thematic
+    # basket has NO company fundamentals: score_valuation/quality/growth all return the
+    # neutral "no data" branch, so the VALUE×TREND spine collapses and rules 0.5/0.7/1-6
+    # would decide the name on TREND alone — i.e. a pure chart read (RSI/MA) on a
+    # multi-year macro/thematic thesis, which is noise. That silent degeneration to a
+    # technical-only verdict is the bug this guard fixes. We SUPPRESS the technical verdict
+    # and emit REVIEW_THESIS so the caller routes the own/trim call to a thesis/macro
+    # analysis instead.
+    #
+    # ORDERING — deliberately AFTER rule 0 (concentration) and BEFORE everything else:
+    #   * Rule 0 (weight ≥ 15%) is a pure RISK-MANAGEMENT trim that is valid for an ETF
+    #     too — a 20% single-ETF position is real concentration risk regardless of whether
+    #     the name has company fundamentals — so it must still fire for baskets. Hence 0
+    #     comes first.
+    #   * Rules 0.5/0.7/1-6 all lean on trend/value/quality; NONE may fire on a
+    #     no-fundamental-basis name. Hence this guard sits immediately after rule 0 and
+    #     replaces the entire normal tree for these names.
+    if no_basis:
+        tech_bits = []
+        if dd is not None: tech_bits.append(f"{dd:.0f}% from 52w high")
+        if vs200 is not None: tech_bits.append(f"{vs200:+.0f}% vs 200d")
+        if rsi is not None: tech_bits.append(f"RSI {rsi:.0f}")
+        tech = "; ".join(tech_bits) if tech_bits else "n/a"
+        why = f" ({no_basis_reason})" if no_basis_reason else ""
+        return "REVIEW_THESIS", (
+            f"No fundamental basis{why} — ETF/commodity/thematic basket. The VALUE×TREND "
+            f"scorecard does not apply; the own/trim decision is a macro/thesis call — route to "
+            f"tradfi-portfolio-manager for sleeve allocation, or analyse-macro / narrative for the "
+            f"commodity/theme thesis. Technical-only verdict SUPPRESSED — RSI/MA reported for staging "
+            f"only, not as the decision. Technical state [{tech}] is context for staging an entry/exit, "
+            f"NOT the own/trim decision."
+        )
 
     # 0.5 EXHAUSTION GUARD — a broken trend (trend<=-2, i.e. below BOTH the 50d and 200d
     # MA) does not by itself mean "sell today". Rules 1/2/5 below all fire on trend<=-2
@@ -347,8 +411,11 @@ def run_one(d, pos, hold_only_arg=None):
     exh = check_exhaustion(d)
     dd = _num(d, "dd_from_52wh"); vs200 = _num(d, "vs_200d_ma"); vs50 = _num(d, "vs_50d_ma")
     gain_pct = _gain_pct(p.get("mv"), p.get("pnl"))
+    nb, nb_reason = no_fundamental_basis(d)
+    rsi = _num(d, "rsi14")
     action, basis = decide(vS[0], tS[0], qS[0], gS[0], weight, mktcap, ho, exh,
-                           dd=dd, vs200=vs200, vs50=vs50, gain_pct=gain_pct)
+                           dd=dd, vs200=vs200, vs50=vs50, gain_pct=gain_pct,
+                           no_basis=nb, no_basis_reason=nb_reason, rsi=rsi)
     composite = vS[0]+tS[0]+qS[0]+gS[0]
     # EVENT_SOON is a non-gating annotation ONLY -- it is computed from the ACTION
     # decide() already returned and appended to flags; it never feeds back into decide().
@@ -358,6 +425,9 @@ def run_one(d, pos, hold_only_arg=None):
         flags.append(es)
     if exh is not None:
         flags.append(f"⚠ EXHAUSTED: RSI {exh['rsi']:.0f}, {exh['dd']:.0f}% from 52w high")
+    if nb:
+        qt = d.get("quote_type")
+        flags.append(f"⚠ NO FUNDAMENTAL BASIS ({nb_reason}) — {('type ' + str(qt)) if qt else 'null fundamentals'}; verdict is a thesis/macro call, not VALUE×TREND")
     return {
         "symbol": sym, "price": _num(d,"price"), "action": action, "basis": basis,
         "composite": composite, "weight": weight, "pnl": p.get("pnl"),
@@ -396,7 +466,7 @@ def main():
             continue
         results.append(run_one(d, pos, hold_only_arg))
     # sort: actionable first (ADD, TRIM, EXIT, WAIT) then HOLD, by weight
-    order = {"ADD":0,"TRIM":1,"EXIT":2,"WAIT":3,"HOLD":4,"INSUFFICIENT_DATA":5}
+    order = {"ADD":0,"TRIM":1,"EXIT":2,"WAIT":3,"REVIEW_THESIS":4,"HOLD":5,"INSUFFICIENT_DATA":6}
     results.sort(key=lambda r:(order.get(r["action"],9), -(r["weight"] or 0)))
     print(f"{'TICKER':7} {'PX':>8} {'WT%':>5} {'CMP':>4}  {'ACTION':6}  BASIS")
     print("-"*120)
