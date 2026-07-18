@@ -601,23 +601,58 @@ Asset   Action            Why (one line, plain English)
 ...
 ```
 
-**SETUP ALERTS — buy/sell only when a condition fires.** Every WATCH name with a *defined* trigger (a price
-reclaim, a level, an indicator like RSI) goes here — not as a buy-now. State the exact condition and the
-action it unlocks. Register these with the `mkt` skill so the user is pinged with the thesis when the
-condition hits (see *Set a buy-alert*).
+**SETUP ALERTS — buy/sell only when a condition fires. These are AUTO-REGISTERED, not offered.** Every
+WATCH/WAIT name with a *defined, falsifiable* trigger (a price reclaim, a level, an indicator like RSI, or a
+dated earnings catalyst) goes here — not as a buy-now. State the exact condition and the action it unlocks.
+The watch **is the deliverable**: after the per-name verdicts, the skill immediately wires each one so the
+user gets pinged when the trigger fires — no manual "want me to set this up?" step. Do NOT stop at printing
+the table; the table is a *receipt* of what was armed.
+
+**Precision over recall (mandatory guard).** Only auto-register a WATCH/WAIT that has a CONCRETE, falsifiable
+trigger. A WATCH with no defined trigger ("looks interesting, keep an eye on it") is **NOT armed** — list it
+in the report as "no trigger, not armed" rather than spamming a meaningless alert. Alert fatigue is the
+failure mode; precision beats recall. Every armed alert carries the **conviction grade** and the **thesis
+text** in its `--reason`.
+
+**Trigger-TYPE routing (the important nuance — a price alert cannot judge a semantic condition):**
+- **Mechanical trigger** — a price reclaim, a level break, an RSI/MA/MACD condition → register a
+  `mkt-alert.ts` price/indicator alert (`above`/`below`/`sma_cross_above`/`sma_cross_below`/`rsi_below` etc.,
+  with `--data-source` for any `above`/`below` price level as mkt requires). Example: NBIS "reclaims 50d MA"
+  → `--condition sma_cross_above --value 50 --period 50`. See *Set a buy-alert*.
+- **Event / semantic trigger** — a WAIT-for-earnings condition that a number cannot decide ("beats AND holds",
+  "organic reaccelerates", "guide raised") → a price alert CANNOT evaluate this. Register it as a **scheduled
+  re-evaluation** dated to the day after the print: schedule (or emit a ready-to-run spec for) a re-run of
+  `stocks-advisor` on that ticker. This routes to a Claude Code **scheduled routine / the mkt-daemon**, NOT a
+  price threshold — because judging "did it beat and hold" needs re-running the panel, not comparing one
+  number. Never encode a semantic condition as a dumb price level. See *Schedule an event re-eval*.
 
 ```
 SETUP ALERTS ({DATE})
-Asset   Condition (exact)               Then do        Thesis (one line)
------   -----------------               -------        -----------------
-{TICK}  close > ${level} (reclaim)      BUY {zone}     {≤12-word reason}
-{TICK}  RSI(14) < 30 / pullback ${lvl}  ADD            {≤12-word reason}
+Asset   Trigger (exact)                 Type        Then do        Armed via                    Thesis (one line)
+-----   ---------------                 ----        -------        ---------                    -----------------
+{TICK}  close > ${level} (reclaim)      mechanical  BUY {zone}     mkt-alert.ts sma_cross_above {≤12-word reason}
+{TICK}  RSI(14) < 30 / pullback ${lvl}  mechanical  ADD            mkt-alert.ts rsi_below       {≤12-word reason}
+{TICK}  beats & holds after {earn date} event       RE-EVAL        scheduled re-eval {date+1}   {≤12-word reason}
+{TICK}  (no defined trigger)            —           —              NOT ARMED                    watch only, no ping
 ...
 ```
 
 A name is in RECAP **or** SETUP ALERTS, never both — high-confidence-now and buy-on-condition are mutually
-exclusive. After printing SETUP ALERTS, offer to register them via the `mkt` skill. Required in BOTH normal
-and DEGRADED_TECH mode; in DEGRADED mode the alert conditions are MA/price levels (no live bar-close trigger).
+exclusive. Auto-registration runs in BOTH normal and DEGRADED_TECH mode; in DEGRADED mode the mechanical
+conditions are MA/price levels (no live bar-close trigger). After wiring, print the **ALERTS ARMED** summary
+(below) reporting what was registered — do not ask permission first.
+
+**ALERTS ARMED — report what was wired (print immediately after SETUP ALERTS).** This is the confirmation the
+watches exist, so the user never has to run a manual step:
+
+```
+ALERTS ARMED ({DATE})
+Ticker  Mechanism                       Trigger                       Channel                  Conviction  Status
+------  ---------                       -------                       -------                  ----------  ------
+{TICK}  mkt-alert.ts (price/indicator)  sma_cross_above 50d           telegram:@...            4/5         ARMED
+{TICK}  scheduled re-eval (mkt-daemon)  re-run panel {date+1}         claude-code routine      3/5         SCHEDULED
+{TICK}  —                               no defined trigger            —                        2/5         NOT ARMED (why)
+```
 
 **EXECUTION TABLE — P0/P1/P2/P3 (Soros format — cross-portfolio priority, runs after SETUP ALERTS)**
 
@@ -876,25 +911,68 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 - [ ] **Portfolio tail stress numbers present** — Skeptic output includes explicit -30% and -50% dollar impact at current weight for every BUY/ADD ticker (Step 2 Skeptic prompt).
 - [ ] **P0/P1/P2/P3 Execution Table present** — printed after SETUP ALERTS (Step 3.6); all BUY/ADD/EXIT/TRIM verdicts appear in the table with share counts, entry zones, triggers, and falsification conditions. No P0 without a named trigger already fired.
 - [ ] **Exit-watches registered for every held position** — a standing 200d-break (and, for large/overweight winners, a trailing) sell-alert per holding via `mkt-alert.ts`, so a Rule 0.7 trend break pings the user in real time between panel runs (the NEM/MRVL "keep watching" fix). See *Set an exit-watch*.
+- [ ] **Every WATCH/WAIT with a defined trigger was auto-registered** — mechanical triggers (price reclaim / level / RSI / MA / MACD) armed via `mkt-alert.ts`; event/earnings/semantic triggers ("beats and holds", "reaccelerates") scheduled as a dated re-eval routine (mkt-daemon / Claude Code routine), NEVER encoded as a price threshold. WATCH names with **no** defined trigger are listed as "not armed" (not spammed). Every armed alert carries a conviction grade + thesis text. See *Set a buy-alert* / *Schedule an event re-eval*.
+- [ ] **ALERTS ARMED summary printed** (Step 3.6) — reports each registered alert (mechanism, trigger, channel, conviction) plus which WATCH names were left un-armed and why. Registration was automatic, not offered.
 
-## Set a buy-alert (notify-me-when) — for WATCH verdicts
+## Set a buy-alert (notify-me-when) — AUTO-REGISTERED for every WATCH/WAIT with a mechanical trigger
 
-A WATCH verdict ("good company, wrong price — buy near $X / when RSI < V") is when to register a durable
-alert that pings the user **with your entry thesis** on trigger. Use the **`mkt`** skill — it carries the
-reasoning into the notification (mkt's native message cannot). Register the entry plan as a job:
+A WATCH/WAIT verdict ("good company, wrong price — buy near $X / when RSI < V / on a 50d reclaim") **auto-arms**
+a durable alert that pings the user **with your entry thesis** on trigger. This is not offered afterward — the
+skill registers it as soon as the verdict is set. Use the **`mkt`** skill — it carries the reasoning into the
+notification (mkt's native message cannot). Register the entry plan as a job:
 
 ```bash
 cd .agents/skills/mkt/scripts
 bun mkt-alert.ts add --desk stocks --symbol NVDA \
   --condition below --value 142 \
-  --reason "Buy-zone = prior breakout retest + 50d reclaim; add to core, not a new satellite." \
+  --data-source "50d MA = $142 from 60d TV/yfinance daily closes (as of <date>)" \
+  --reason "CONVICTION 4/5. Buy-zone = prior breakout retest + 50d reclaim; add to core, not a new satellite." \
   --channel telegram:@CryptoAiInvestor --expiry 2026-09-30
-# oversold add: --condition rsi_below --value 30 --period 14 --cooldown 21600
+# 50d-reclaim trigger:  --condition sma_cross_above --value 50 --period 50
+# oversold add:         --condition rsi_below --value 30 --period 14 --cooldown 21600
 ```
+
+**Precision guard (mandatory):** only auto-register when the trigger is CONCRETE and falsifiable (a price
+level, a reclaim, an RSI/MA/MACD condition). A WATCH with **no defined trigger** is left un-armed and listed
+as "no trigger, not armed" — never fire a meaningless alert (alert fatigue is the failure). Every armed alert
+**must** carry the **conviction grade** (e.g. `CONVICTION 4/5`) and the **thesis text** in `--reason`.
+
+**Mechanical only.** This path handles conditions a price/indicator engine can evaluate. A semantic condition
+("beats and holds", "organic reaccelerates") CANNOT be a `--value` threshold — route it to *Schedule an event
+re-eval* below instead. Never encode a semantic/earnings condition as a dumb price level.
 
 A scheduled `bun check.ts` (runtime cron) fires the notification with the reasoning when the zone/indicator
 hits. See `.agents/skills/mkt/SKILL.md` for trigger patterns and the per-runtime scheduler cookbook.
 Recommend-only and backtest-gated — an alert is a reminder to re-evaluate, not an order.
+
+## Schedule an event re-eval — AUTO-REGISTERED for every WAIT-on-catalyst (earnings/semantic) verdict
+
+A WAIT whose trigger is a **judgement about an event** — "buy if it beats AND holds after the Jul 29 print",
+"add if core organic reaccelerates at Q2" — cannot be armed as a price alert: no threshold can decide "did it
+beat and hold" or "did the narrative reaccelerate". Comparing one number would fire on a headline beat that
+the market sells, or miss a quiet beat with a raised guide. **The correct trigger is re-running the panel**,
+so the semantic condition auto-arms as a **dated re-evaluation** on the day after the catalyst, routed to a
+Claude Code **scheduled routine / the mkt-daemon** — NOT to `mkt-alert.ts`.
+
+Register it by scheduling (or emitting a ready-to-run spec for) a re-run of this skill on that ticker:
+
+```
+RE-EVAL SPEC (auto-scheduled)
+  ticker:   SOFI
+  when:     2026-07-30            # day AFTER the Jul 29 earnings print
+  route:    claude-code scheduled routine / mkt-daemon   (NOT a price alert)
+  action:   re-run stocks-advisor on SOFI; judge "beat AND held" from the panel, not a number
+  thesis:   CONVICTION 3/5. WAIT — only add if the print beats and the tape holds the gap; a
+            headline beat that fades is a NO. Semantic condition → needs the panel, not a threshold.
+  channel:  telegram:@CryptoAiInvestor
+```
+
+Emit this spec as the deliverable when the mkt-daemon/scheduler is not directly reachable — a paste-able,
+dated re-run instruction the user (or the daemon) can drop into a cron. Why this path exists: a price alert is
+structurally incapable of evaluating a semantic/earnings condition; forcing one into a `--value` would be a
+silent false trigger. The skill must route event triggers here and never to a price threshold.
+
+Recommend-only and backtest-gated — a scheduled re-eval is a reminder to re-run the panel, not an order.
 
 ## Set an exit-watch (sell/trim alert) — for HELD positions (MANDATORY per run)
 
@@ -938,6 +1016,12 @@ Notes:
 - The output is flagged as an educational, backtest-gated hypothesis — not advice.
 - The high-confidence RECAP + SETUP ALERTS table (Step 3.6) is printed last, splitting immediate
   high-conviction actions from buy-on-condition names.
+- **Every WATCH/WAIT with a defined trigger was auto-registered** — via `mkt-alert.ts` when the trigger is
+  mechanical (price reclaim / level / RSI / MA / MACD), or scheduled as a dated re-eval routine when the
+  trigger is event/earnings/semantic ("beats and holds", "reaccelerates"). Semantic conditions are never
+  encoded as a price threshold. WATCH names with no defined trigger are listed as not-armed (precision guard,
+  no alert spam). An **ALERTS ARMED** summary reports what was wired, the trigger, the channel, the conviction
+  grade, and which names were left un-armed and why. Registration is automatic — not offered afterward.
 - For a holdings review, a **standing exit-watch** (200d-break / trailing sell-alert) was registered for
   every held position via `mkt-alert.ts` (or delegated to the always-on `risk-desk` sweep) — so a trend
   break fires in real time between runs, the NEM/MRVL "keep watching" requirement.
