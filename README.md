@@ -564,9 +564,9 @@ npx skills add dzianisv/financial-advisor-agents
 That's the whole setup. **You don't run a workflow or type a slash command** — the skills route themselves from what you say. After install, just ask:
 
 ```
-"Should I buy the dip on BTC today?"          → crypto-dip-scanner / analyse-onchain
+"Should I buy the dip on BTC today?"          → dip-scanner / analyse-onchain
 "What did Buffett just buy?"                   → analyse-smartmoney-13f
-"Run the weekly committee."                    → agentic-fund-orchestration
+"Run the weekly committee."                    → hedge-fund-manager
 "What's the market regime right now?"          → regime-detection
 "What would Lyn Alden think of this?"          → investor-lyn-alden
 "Is there a multi-source convergence signal?"  → signal-convergence-alert
@@ -664,11 +664,9 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 |---|---|
 | `analyse-smartmoney-13f` | Watch 13F filings, surface new initiations + cross-fund conviction clusters; dedupes candidates |
 | `analyse-smartmoney-ptr` | Congressional stock trades feed |
-| `crypto-dip-scanner` | Daily BTC/ETH/SOL/BNB/AVAX dip scanner; alerts on -30%+ from 52w high + extreme fear |
-| `dip-screener` | Equity dip screener |
+| `dip-scanner` | Unified equity (S&P 100) + crypto (BTC/ETH/SOL/BNB/AVAX) dip scanner with alerts |
 | `dip-tranches-strategy` | Staged entry / tranche sizing for dip entries |
 | `feed-fomc` | Fed FOMC calendar, statement, and dot-plot monitor |
-| `liveness-monitor` | Monitors that scheduled jobs are running; DMs on stale job |
 | `portfolio-monitor` | Portfolio state monitor |
 | `analyse-smartmoney-polymarket` | Polymarket / Kalshi odds for macro/market events |
 | `regime-detection` | Market regime classifier (risk-on / risk-off / transition) |
@@ -680,21 +678,19 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 |---|---|
 | `crypto-liquidity-data` | Crypto liquidity and ETF flow data seat |
 | `crypto-onchain-data` | On-chain valuation data (MVRV-Z, NUPL, etc.) |
-| `analyst-derivatives-positioning` | Derivatives and options positioning data seat |
+| `analyse-smartmoney-positioning` | Derivatives and options positioning data seat |
 
-### News feeds (feed-*)
+### News feeds
+
+Per-outlet `feed-*` adapters (CoinDesk, CoinTelegraph, Decrypt, The Block, Bitcoin Magazine,
+Coinbase, Bloomberg, FT, WSJ) were consolidated into `read-news` — the single front door that
+fetches, normalizes, and dedupes the financial-news pipeline. Remaining standalone feeds:
 
 | Skill | Description |
 |---|---|
-| `feed-bitcoinmagazine` | Bitcoin Magazine RSS/API adapter |
-| `feed-coinbase` | Coinbase blog + institutional research / "Coinbase Bytes" first-party adapter (via Google News proxy) |
-| `feed-coindesk` | CoinDesk RSS/API adapter |
-| `feed-cointelegraph` | CoinTelegraph RSS/API adapter |
-| `feed-decrypt` | Decrypt RSS/API adapter |
-| `feed-theblock` | The Block RSS/API adapter |
-| `feed-bloomberg` | Bloomberg macro/finance headline adapter |
-| `feed-ft` | Financial Times headline adapter |
-| `feed-wsj` | Wall Street Journal headline adapter |
+| `feed-cpi` | CPI release calendar and print monitor |
+| `feed-fomc` | Fed FOMC calendar, statement, and dot-plot monitor |
+| `read-news` | Unified news front door — fetch + normalize + dedupe all outlets |
 
 ### Research desks & chairs
 
@@ -705,7 +701,7 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 | `crypto-chair` | Crypto committee chair; portfolio-aware buy/sell decision |
 | `stock-chair` | Equity committee chair; portfolio-aware buy/sell decision |
 | `research-manager` | Intake/triage desk head; discovers skills live, assembles the research desk for any query |
-| `narrative-news` | Consumes feed-* adapters → deduped events with priced-in tags |
+| `narrative-news` | Consumes `read-news` output → deduped events with priced-in tags |
 | `crypto-news-store` | Dedup/state store for crypto news events |
 
 ### Analyst lenses (analyst-* / investor-* / research-*)
@@ -734,9 +730,7 @@ Full spec: [`docs/crypto-advisor-panel.prd.md`](docs/crypto-advisor-panel.prd.md
 
 | Skill | Description |
 |---|---|
-| `agentic-fund-orchestration` | Top-level agentic hedge-fund orchestration playbook |
 | `defi-portfolio-manager` | DeFi portfolio management |
-| `hedge-fund-13f-analysis` | 13F filings analysis |
 | `hedge-fund-manager` | Portfolio-level management and sizing |
 | `hedge-strategy-builder` | 3-stage strategy pipeline: generate 3 candidates → backtest (CAGR/Sharpe/DD/win rate) → risk-reward refinement |
 | `multi-lens-quorum` | Convene N lenses on a judgment call |
