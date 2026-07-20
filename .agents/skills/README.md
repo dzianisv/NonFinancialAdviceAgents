@@ -578,6 +578,7 @@ robinhood-connector ───── Robinhood agentic MCP (notification → live
 
 | Skill | Role | Cadence |
 |-------|------|---------|
+| [stock-forecast-analysis](stock-forecast-analysis/SKILL.md) | TipRanks-style AI Analyst Report conductor — 0-100 rating + AI price target + full section stack (financials/technicals/earnings/peers) over analyse-* seats | on-demand |
 | [analyse-smartmoney](analyse-smartmoney/SKILL.md) | Smart-money family orchestrator — runs all spokes and consolidates signals | on-demand |
 | [analyse-smartmoney-13f](analyse-smartmoney-13f/SKILL.md) | Pull new institutional 13F buys; dedupe ledger | weekly |
 | [analyse-smartmoney-13d](analyse-smartmoney-13d/SKILL.md) | Real-time SEC 13D/13G activist filings (>5% stake) | weekly |
