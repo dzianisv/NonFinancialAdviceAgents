@@ -85,7 +85,7 @@ If forward EPS is `UNAVAIL`, widen the target to a range and say so — never in
 3. **Score each sub-score 0-100** per `references/02`; mark missing ones `UNAVAIL` and re-normalize weights.
 4. **Compose the 0-100 rating**, label the outlook bucket, compute **confidence** from coverage.
 5. **Build the AI price target** + Action; place it next to the analyst consensus with the gap.
-6. **Write the narrative sections** (Summary, Positive/Negative Factors, per-section blocks) — every load-bearing figure cited to a page fetched **this run**.
+6. **Write the narrative sections** in the TipRanks section order (Summary → Positive/Negative Factors → vs-SPY Snapshot → Forecast → Business Overview → Earnings Call → Financial Statement Overview + Breakdown table → Technical → Risk → Peers → Corporate Events), each sub-score shown as `<number> <word-label>`, every load-bearing figure cited to a page fetched **this run**.
 7. **Peer comparison** — run steps 2-4 on 3-5 named peers (lighter pass) to place the ticker's rating in context.
 8. **Skeptic gate (mandatory — hard invariant #6).** Spawn the `skeptic` skill on the target, the sub-scores, and any guidance/mechanics claims. Present only after PASS or all challenges resolved with fetched data.
 9. **Emit the output contract**, dated, with the AI-generated caveat and invalidation.
@@ -98,48 +98,123 @@ If forward EPS is `UNAVAIL`, widen the target to a range and say so — never in
 - Missing section = `UNAVAIL` (loud) + re-normalize; never a silent 0.
 - If <2 seats return real data: output `INSUFFICIENT_DATA` — no rating, no target.
 
-## Output contract
+## Sub-score → word label (TipRanks prints a word next to every number)
+
+TipRanks never shows a bare number; each 0-100 sub-score carries a sentiment word (live NVDA: Income `98 Very Positive`, Balance `94 Very Positive`, Cash Flow `96 Very Positive`). Reproduce that. The bands are **ours** (inferred — TipRanks doesn't publish them); state so once per run:
+
+| Sub-score | Label |
+|---|---|
+| **>=85** | Very Positive |
+| **70-84** | Positive |
+| **45-69** | Neutral |
+| **30-44** | Negative |
+| **<30** | Very Negative |
+
+The headline 0-100 rating keeps the **outlook** words (>=70 Outperform · 40-69 Neutral · <40 Underperform). Peer overall ratings in the peer table use the same outlook words.
+
+## What each seat must return to fill the TipRanks layout
+
+The terse "1-3 driver numbers" is not enough to render the report the way the page looks. Each seat returns its sub-score **plus** the display fields below (all cited, this run). Missing field = `UNAVAIL` (loud), never blank.
+
+- **`analyse-fundamental` (financials):** the three sub-scores + the **multi-year Breakdown table** — TTM and up to 5 fiscal years for: Total Revenue, Gross Profit, EBITDA, Net Income, Total Assets, Cash & ST Investments, Total Debt, Total Liabilities, Stockholders Equity, Free Cash Flow, Operating Cash Flow. TipRanks shows this exact grid.
+- **`analyse-fundamental` (snapshot + KPIs):** Market Cap, Dividend Yield, Avg Volume (3M), P/E, Beta, Revenue Growth, EPS Growth, Sector, Industry, Employees, Country; **Share Statistics** (EPS TTM, Shares Outstanding, 10/30-day avg volume); **Financial Highlights & Ratios** (PEG, P/B, P/S, P/FCF, EV/EBITDA, EV/Revenue).
+- **`analyse-fundamental` / profile (business overview):** a **Company Description** paragraph + a **How the Company Makes Money** paragraph (segments / revenue model).
+- **`analyse-technical`:** Sentiment word; Last Price; **Price Trends** 50/100/200-DMA each with value + Positive/Negative vs price; **Market Momentum** MACD/RSI/STOCH each with value + Positive/Negative/Neutral; a 2-3 sentence narrative like TipRanks writes.
+- **`hedgefund-jpmorgan-earnings`:** Earnings Call Date + quarter tag + Next Earnings Date; Sentiment word; a summary paragraph; **Positive Updates** and **Negative Updates** each as *named* items (bold title + figure); a **Company Guidance** paragraph of the actual guided figures.
+- **`analyse-sellside`:** the Forecast card — 1Y consensus target, upside %, Rating Consensus word, # Analysts, EPS Forecast (FY), Revenue Forecast (FY).
+- **Risk seat (EDGAR):** the TipRanks sentence form — "<Company> disclosed **N** risk factors in its most recent report; the most in the '<category>' category" + "Latest Risks Added: **N** New Risks" + any material flag.
+- **Peer seat:** each peer's overall 0-100 + outlook word, and a **Financial Indicators** table (Market Cap, P/E, ROE, Dividend Yield, Revenue Growth, EPS Growth), plus a Sector overall rating.
+- **Corporate events:** dated, sentiment-tagged 8-K-derived events.
+
+## Output contract (render in this TipRanks section order)
+
+Emit clean Markdown — headings, cards, and tables so it reads like the page. Every `[T?]` is a real citation to a page fetched this run.
 
 ```
-AI STOCK ANALYSIS — <TICKER> (<Company>)   as-of <date> · last $<price>
-Model: <the LLM/agent producing this>   (TipRanks lets you pick; we disclose ours)
+# <Company> (<TICKER>) — AI Stock Analysis        as-of <date> · <EXCH>:<TICKER> · last $<price>
+Model: <model producing this>  ·  AI-generated, may contain errors  ·  weights are OURS, not TipRanks'
+
+**Rating: <0-100>  <Outperform | Neutral | Underperform>**
+**Price Target: $<t>   ▲/▼ (<u>% <Upside|Downside>)**   ·   Action: <Reiterated | Raised | Lowered>   ·   Date: <mm/dd/yy>
+> vs Analyst Consensus $<c> (<consensus rating>, <n> analysts) — gap <g>%: <one-line why the AI target diverges>
+
+<Summary — 3-4 sentences: the drivers that lift the score and the offsets that cap it.>
+
+## Positive Factors
+**<Named factor>** — <2-3 sentences with the driving number.>
+**<Named factor>** — <2-3 sentences with the driving number.>
+
+## Negative Factors
+**<Named factor>** — <2-3 sentences with the driving number.>
+**<Named factor>** — <2-3 sentences with the driving number.>
+
+## <Company> vs. SPY — Snapshot
+Market Cap <> · Dividend Yield <> · Avg Volume (3M) <> · P/E <> · Beta <> · Revenue Growth <> · EPS Growth <> · Sector <> · Industry <> · Employees <> · Country <>   [T?]
+**Share Statistics:** EPS (TTM) <> · Shares Outstanding <> · 30-Day Avg Volume <>
+**Financial Highlights & Ratios:** PEG <> · P/B <> · P/S <> · P/FCF <> · EV/EBITDA <> · EV/Revenue <>   [T?]
+
+## Forecast  (analyst consensus — context, NOT the AI target)
+1Y Price Target $<c> · Upside <u>% · Rating Consensus <Strong Buy..Sell> · # Analysts <n> · EPS Forecast (FY) <> · Revenue Forecast (FY) <>   [T?]
+
+## Business Overview & Revenue Model
+**Company Description:** <what the company does.>
+**How the Company Makes Money:** <segments / revenue model.>   [T?]
+
+## Earnings Call Summary — Sentiment <Positive | Neutral | Negative>
+Earnings Call Date: <date> (<Qx-FY>)  ·  Next Earnings Date: <date>
+<summary paragraph>
+**Positive Updates:** **<named>** — <figure/why>
+**Negative Updates:** **<named>** — <figure/why>
+**Company Guidance:** <the guided figures — revenue, margin, EBITDA, units, capital returns.>   [T?]
+
+## Financial Statement Overview
+<summary sentence on statement quality.>
+**Income Statement <0-100> <label>  ·  Balance Sheet <0-100> <label>  ·  Cash Flow <0-100> <label>**
+
+| Breakdown            | TTM | FY<y> | FY<y-1> | FY<y-2> | FY<y-3> |
+|----------------------|-----|-------|---------|---------|---------|
+| Total Revenue        |     |       |         |         |         |
+| Gross Profit         |     |       |         |         |         |
+| EBITDA               |     |       |         |         |         |
+| Net Income           |     |       |         |         |         |
+| Total Assets         |     |       |         |         |         |
+| Cash & ST Investments|     |       |         |         |         |
+| Total Debt           |     |       |         |         |         |
+| Stockholders Equity  |     |       |         |         |         |
+| Free Cash Flow       |     |       |         |         |         |
+| Operating Cash Flow  |     |       |         |         |         |
+[T?]
+
+## Technical Analysis — Sentiment <Bullish | Neutral | Bearish>
+Last Price <x>
+**Price Trends:** 50DMA <> (<Positive|Negative>) · 100DMA <> (<Positive|Negative>) · 200DMA <> (<Positive|Negative>)
+**Market Momentum:** MACD <> (<Positive|Negative>) · RSI <> (<Neutral|Overbought|Oversold>) · STOCH <> (<Neutral|Overbought|Oversold>)
+<2-3 sentence narrative read.>   [T?]
+
+## Risk Analysis
+<Company> disclosed <n> risk factors in its most recent report; the most in the "<category>" category. Latest Risks Added: <n> New Risks. <one-line material flag if any.>   [T?]
+
+## Peers Comparison — Overall Rating
+| Name   | Overall Rating       | Market Cap | P/E | ROE | Div Yield | Rev Growth | EPS Growth |
+|--------|----------------------|------------|-----|-----|-----------|------------|------------|
+| <TICKER> | <score> <outlook>  |            |     |     |           |            |            |
+| <peer> | <score> <outlook>    |            |     |     |           |            |            |
+Sector: <score>   [T?]
+
+## Corporate Events
+- <date> — <event> (<sentiment>)   [T?]
+
 ────────────────────────────────────────────────────────────
-RATING:   <0-100>  <OUTPERFORM | NEUTRAL | UNDERPERFORM>   (>=70 / 40-69 / <40)
-AI PRICE TARGET:  $<t>  (▲/▼ <u>% vs $<price>)   Action: <Reiterated|Raised|Lowered>
-   vs Analyst Consensus: $<c> (<rating>, <n> analysts) — gap <g>%: <one-line why AI differs>
-
-SUMMARY: <2-3 sentences — what drives the score, what offsets it>
-
-POSITIVE FACTORS                          NEGATIVE FACTORS
-  • <Named driver>: <why>                   • <Named driver>: <why>
-  • <Named driver>: <why>                   • <Named driver>: <why>
-
-FINANCIAL STATEMENT OVERVIEW
-  Income Statement <0-100>  Balance Sheet <0-100>  Cash Flow <0-100>
-  <one-line summary + rev TTM / margin / net income / FCF / debt, cited>            [T?]
-TECHNICAL ANALYSIS  — Sentiment <Bullish|Neutral|Bearish>
-  last <x> | 50DMA <>(+/-) 100DMA <>(+/-) 200DMA <>(+/-) | MACD <>(+/-) RSI <> STOCH <>  [T?]
-VALUATION & KPIs
-  P/E <> PEG <> P/B <> P/S <> P/FCF <> | Div yld <> | Rev growth <> EPS growth <>      [T?]
-ANALYST FORECAST (context, not the AI target)
-  Consensus <Strong Buy..> | 1Y $<c> (<u>%) | <n> analysts | EPS FY <> | Rev FY <>     [T?]
-EARNINGS CALL SUMMARY — Sentiment <> (<call date>)
-  <2-3 lines: key positive + negative update + guidance figure>                        [T?]
-RISK ANALYSIS
-  <n> risk factors; top category <>; new risks <n>                                     [T?]
-PEER COMPARISON
-  <TICKER> <score> · <peer1> <score> · <peer2> <score> · <peer3> <score>              [T?]
-CORPORATE EVENTS
-  <date> — <event> (<sentiment>)                                                       [T?]
-
-SCORE COMPOSITION (transparent — our weights, TipRanks' undisclosed)
-  Financials 35% × <sub> · Earnings 20% × <sub> · Technicals 15% × <sub> ·
-  Valuation 15% × <sub> · Analyst 10% × <sub> · Risk/Events 5% × <sub>  = <0-100>
-CONFIDENCE: <HIGH|MED|LOW>  (coverage <N>/6 sub-scores)
-INVALIDATION: <the change that drops a bucket — e.g. "FY guidance cut or loss of 200-DMA → Neutral">
-NOTE: AI-generated, may contain errors. Section weights are OURS (inferred), not
-      TipRanks'. Educational only, not advice, NOT a trade trigger — route live orders
-      through strategy-discovery-backtest. Re-pull before acting.
+### Score Composition  (transparent — OUR weights; TipRanks' are undisclosed)
+Financials 35%×<sub> · Earnings 20%×<sub> · Technicals 15%×<sub> · Valuation 15%×<sub> · Analyst 10%×<sub> · Risk/Events 5%×<sub> = **<0-100>**
+Sub-score label bands (ours, inferred): >=85 Very Positive · 70-84 Positive · 45-69 Neutral · 30-44 Negative · <30 Very Negative
+Outlook buckets (ours, inferred): >=70 Outperform · 40-69 Neutral · <40 Underperform
+**Confidence:** <HIGH | MED | LOW>  (coverage <N>/6 sub-scores)
+**Invalidation:** <the change that drops a bucket — e.g. "FY guidance cut or loss of 200-DMA → Underperform">
+> **Disclaimer.** Automatically generated by an AI system; may contain inaccuracies — not financial
+> advice. The score, weights, and label bands are OURS (inferred from the report's emphasis), NOT
+> TipRanks'. Educational only, NOT a trade trigger — route live orders through
+> strategy-discovery-backtest. Re-pull before acting.
 ```
 
 **Confidence rule:** HIGH = 6/6 sub-scores present and financials+earnings agree in direction; MED = 4-5 present or mixed; LOW = 4 present or one sub-score dominates; `INSUFFICIENT_DATA` = <4 sub-scores or <2 seats returned data.
@@ -167,16 +242,55 @@ Rating = .35(96)+.20(90)+.15(50)+.15(45)+.10(85)+.05(70) = 33.6+18+7.5+6.75+8.5+
 AI target: fwd EPS 8.99 × justified P/E ~30 = $270; blended with price-drift and shrunk consensus → **~$235**, below the $309.94 consensus (AI discounts the premium valuation + weak technicals). Skeptic-gated before presenting.
 
 ```
-AI STOCK ANALYSIS — NVDA (Nvidia)   as-of 2026-07-20 · last $201.68
-RATING: 78 OUTPERFORM (>=70)   AI TARGET: ~$235 (▲16%)  Action: Reiterated
-  vs Consensus $309.94 (Strong Buy, 37) — gap −24%: AI discounts premium valuation + soft technicals
-FIN STMT: Income 98 · Balance 94 · Cash Flow 96 — best-in-class margins/FCF
-TECHNICAL: Neutral — below 50DMA, above 200DMA, MACD weak
-EARNINGS: Positive — Q2 guide $91B ±2%, $80B buyback
-SCORE COMP: Fin 35%×96 · Earn 20%×90 · Tech 15%×50 · Val 15%×45 · Analyst 10%×85 · Risk 5%×70 = 78
-INVALIDATION: FY guidance cut or loss of 200-DMA → Neutral
-NOTE: AI-generated; weights ours, not TipRanks'. Educational, not a trade trigger.
+# Nvidia (NVDA) — AI Stock Analysis        as-of 2026-07-20 · NASDAQ:NVDA · last $201.68
+Model: Claude (conductor) + section seats  ·  AI-generated, may contain errors  ·  weights are OURS
+
+**Rating: 78  Outperform**
+**Price Target: ~$235   ▲ (16% Upside)**   ·   Action: Reiterated   ·   Date: 07/20/26
+> vs Analyst Consensus $309.94 (Strong Buy, 37 analysts) — gap −24%: AI discounts premium valuation + soft technicals
+
+Nvidia scores highly on outstanding profitability, cash generation, and balance-sheet strength, reinforced
+by an earnings call that reaffirmed strong guidance and large shareholder returns. The offsets are weak
+near-term technical momentum (below key moving averages, negative MACD) and a premium valuation.
+
+## Positive Factors
+**Product Leadership** — Repeated benchmark dominance and the fastest product ramp signal a durable edge,
+driving preferential hyperscaler adoption, high switching costs, and platform lock-in.
+
+## Negative Factors
+**Premium Valuation** — At P/E ~31 and P/FCF ~47, the multiple already prices in years of flawless
+execution, leaving little margin for a demand air-pocket.
+
+## Financial Statement Overview
+Best-in-class margins, growth, and cash generation; main risk is sustainability of elevated margins.
+**Income Statement 98 Very Positive · Balance Sheet 94 Very Positive · Cash Flow 96 Very Positive**
+
+| Breakdown       | TTM     | Jan 2026 | Jan 2025 |
+|-----------------|---------|----------|----------|
+| Total Revenue   | 253.49B | 215.94B  | 130.50B  |
+| Net Income      | 159.61B | 120.07B  | 72.88B   |
+| Free Cash Flow  | 119.08B | 96.68B   | 60.85B   |
+[T1]
+
+## Technical Analysis — Sentiment Neutral
+Last Price 201.68
+**Price Trends:** 50DMA 209.81 (Negative) · 100DMA 198.51 (Positive) · 200DMA 192.20 (Positive)
+**Market Momentum:** MACD 0.15 (Negative) · RSI 48.22 (Neutral) · STOCH 72.47 (Neutral)
+Below the 50-DMA but above the 200-DMA with soft MACD → a Neutral trend read.  [T2]
+
+## Earnings Call Summary — Sentiment Positive
+Earnings Call Date: May 20 2026 (Q1-2027) · Next Earnings Date: Aug 26 2026
+**Company Guidance:** Q2 revenue $91B ±2%, non-GAAP gross margin ~75%, $80B buyback authorization, ~50% of
+FCF returned.  [T3]
+
+────────────────────────────────────────────────────────────
+### Score Composition (transparent — OUR weights; TipRanks' undisclosed)
+Financials 35%×96 · Earnings 20%×90 · Technicals 15%×50 · Valuation 15%×45 · Analyst 10%×85 · Risk/Events 5%×70 = **78**
+**Confidence:** HIGH (6/6 sub-scores)   **Invalidation:** FY guidance cut or loss of 200-DMA → Neutral
+> Disclaimer: AI-generated, may contain errors; weights/labels ours, not TipRanks'. Educational, not a trade trigger.
 ```
+(Live TipRanks shows 79 — same bucket, transparent composition. The full run renders every section above,
+each with its word-label and citation; this example is abridged.)
 </example>
 
 ## Honesty rules
@@ -192,4 +306,4 @@ NOTE: AI-generated; weights ours, not TipRanks'. Educational, not a trade trigge
 
 ## Done when
 
-The analysis (1) pinned ticker/company/date/price, (2) **reproduced every AI-report section** by routing to its seat via context-firewall subagents, (3) scored each section 0-100 and marked missing ones `UNAVAIL` + re-normalized, (4) composed a **0-100 rating + Outperform/Neutral/Underperform** with the transparent weight breakdown shown, (5) built the **AI's own price target + Action** and displayed it beside the analyst consensus with the gap, (6) ran a **peer comparison**, (7) passed the **skeptic gate**, and (8) emitted the output contract dated, with the AI-generated caveat, confidence, and invalidation — never presenting the rating as a recommendation.
+The analysis (1) pinned ticker/company/date/price, (2) **reproduced every AI-report section in TipRanks' order and visual style** (header rating card, Positive/Negative Factors as named titles, vs-SPY snapshot, Forecast card, Business Overview, Earnings Call with Positive/Negative Updates + Guidance, Financial Statement Overview with the multi-year Breakdown table, Technical, Risk, Peers table, Corporate Events) by routing to its seat via context-firewall subagents, (3) scored each section 0-100, **printed each as `<number> <word-label>`** (Very Positive…Very Negative), and marked missing ones `UNAVAIL` + re-normalized, (4) composed a **0-100 rating + Outperform/Neutral/Underperform** with the transparent weight breakdown shown, (5) built the **AI's own price target + Action** and displayed it beside the analyst consensus with the gap, (6) ran a **peer comparison**, (7) passed the **skeptic gate**, and (8) emitted the output contract dated, with the AI-generated caveat, confidence, and invalidation — never presenting the rating as a recommendation.
