@@ -1,0 +1,12 @@
+//@version=6
+indicator("Watchlist Alerts — GOOG", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: GOOG
+
+c0 = ta.crossunder(close, 320.0)
+alertcondition(c0, title="GOOG < 320", message="GOOG crossed below 320 — add/drip 310-320 zone review")
+plot(320.0, "lvl_320.0", color=color.new(color.green, 40))
+
+c1 = ta.crossover(close, 380.0)
+alertcondition(c1, title="GOOG > 380", message="GOOG crossed above 380 — review partial 20-25% trim")
+plot(380.0, "lvl_380.0", color=color.new(color.red, 40))

@@ -1,0 +1,8 @@
+//@version=6
+indicator("Watchlist Alerts — DLB", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: DLB
+
+c0 = ta.crossunder(close, 48.0)
+alertcondition(c0, title="DLB < 48", message="DLB crossed below 48 — reassess at 7/30 earnings")
+plot(48.0, "lvl_48.0", color=color.new(color.green, 40))
