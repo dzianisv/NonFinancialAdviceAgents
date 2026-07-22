@@ -530,6 +530,38 @@ async function postNotification(topic: string, title: string, body: string): Pro
   }
 }
 
+async function postTelegram(title: string, body: string): Promise<void> {
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  if (!token || !chatId) {
+    return; // Telegram delivery is opt-in via env; unset = skip silently.
+  }
+  const threadId = process.env.TELEGRAM_TOPIC_ID?.trim();
+  const payload: Record<string, unknown> = {
+    chat_id: chatId,
+    text: `*${title}*\n\n${body}`,
+    parse_mode: "Markdown",
+    disable_web_page_preview: true,
+  };
+  if (threadId && threadId.length > 0) {
+    payload.message_thread_id = Number(threadId);
+  }
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error(`[NOTIFY-FAILED] Telegram responded ${response.status} ${response.statusText} ${clip(detail)}`);
+    }
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error(`[NOTIFY-FAILED] Telegram ${msg}`);
+  }
+}
+
 async function main(): Promise<number> {
   const options = parseArgs(process.argv.slice(2));
   const date = new Date().toISOString().slice(0, 10);
@@ -672,9 +704,12 @@ async function main(): Promise<number> {
 
   const topicFromEnv = process.env.NTFY_TOPIC;
   const topic = topicFromEnv === undefined ? DEFAULT_NTFY_TOPIC : topicFromEnv.trim();
-  if (!options.noNotify && topic.length > 0) {
+  if (!options.noNotify) {
     const title = `Daily Opportunity Scan ${date}`;
-    await postNotification(topic, title, alertText);
+    if (topic.length > 0) {
+      await postNotification(topic, title, alertText);
+    }
+    await postTelegram(title, alertText);
   }
 
   if (options.emitJson) {
