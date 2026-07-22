@@ -4,8 +4,8 @@ import { $ } from "bun";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const REPO_ROOT = "/Users/engineer/workspace/backtest";
-const PYTHON = "/Users/engineer/.venv/bin/python3";
+const REPO_ROOT = process.env.SCAN_REPO_ROOT ?? "/Users/engineer/workspace/backtest";
+const PYTHON = process.env.SCAN_PYTHON ?? "/Users/engineer/.venv/bin/python3";
 const DEFAULT_NTFY_TOPIC = "mkt-dz-wl-eb53ce91";
 const UNIVERSE_PATH = resolve(
   REPO_ROOT,
