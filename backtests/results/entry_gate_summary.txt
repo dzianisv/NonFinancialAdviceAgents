@@ -1,0 +1,37 @@
+entry_gate_backtest.py — SUMMARY (DEAD IDEA — FAILED Law #0)
+Run: 2026-07-21 | Universe: stocks-trend-screener/scripts/universe.txt (~180 names) + SPY | 1993-2026
+
+HYPOTHESIS (user): "momentum is the best entry point." Test a per-name entry gate that
+classifies BUY_NOW (above rising 200d, near 50d, RSI 40-65, stage 2) vs WAIT_RECLAIM
+(below 200d or falling 200d), and see if it (1) discriminates forward returns and (2) works
+as a strategy. Fundamental-acceleration leg NOT tested (yfinance point-in-time-unsafe).
+
+DISCRIMINATIVE TEST (forward returns by cohort; 11,413-24,008 obs/cohort):
+  Horizon   BUY_NOW    WAIT_RECLAIM   Gap
+  1mo       1.95%      1.57%          +0.38pp (noise)
+  12mo      22.13%     27.37%         -5.24pp  (INVERTED — gate picks the worse cohort)
+  Hit-rates within ~2pp across all cohorts = indistinguishable.
+
+ECONOMIC TEST (monthly rebalance, net of 10bps round-trip):
+  Strategy                 CAGR     Sharpe   MaxDD
+  BUY_NOW gate             19.57%   0.82     -56.4%
+  EW whole universe        20.50%   0.89     -48.7%   <- gate is WORSE on both
+  SPY buy&hold              8.89%   0.41     -52.2%
+  Anti-thesis (deep dips)  28.47%   0.69     -71.4%   <- highest return, brutal DD
+  BUY_NOW invested 392/392 months (avg 30.5/182 names) — NEVER de-risks (2000/08/20/22).
+
+VERDICT: FAIL. Not a timing edge — a constant long-tilt on a survivorship-biased winners
+list re-labeled as a signal. The per-name gate is NOT a portfolio risk gate (always ~100%
+invested). Do NOT route capital through BUY_NOW/WAIT_RECLAIM or use it to rank/size buys.
+
+IMPLICATIONS:
+  - Discovery edge = fundamentals + smart-money + narrative convergence (existing pipeline),
+    NOT price momentum. (TipRanks: 6/8 Smart-Score factors non-price; leaders = insider/HF/fundamentals.)
+  - Entry: buying quality WEAKNESS (dip-scanner, anti-thesis had the highest CAGR) paired with
+    PORTFOLIO-level risk (regime-detection + sizing + drawdown control) beats a momentum entry filter.
+  - entry_timing.py kept only as DESCRIPTIVE trend context + invalidation levels.
+
+CAVEATS: universe.txt = today's winners projected backward (survivorship inflates all cohorts
+equally, doesn't explain the inversion); single-source yfinance; price-return only (no dividends);
+thin pre-2015 samples for recent IPOs; blended 3.5% risk-free (affects Sharpe level, not ranking).
+Files: backtests/entry_gate_backtest.py, report/img/entry_gate_backtest.png

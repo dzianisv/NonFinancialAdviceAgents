@@ -4,8 +4,20 @@ trend-scout entry_timing.py — list-level ENTRY TIMING + fundamental-accelerati
 
 Educational, not financial advice.
 
-This script is a timing FILTER (momentum/trend gate) for an existing candidate list;
-it does not discover new ideas.
+This script is DESCRIPTIVE trend context for an existing candidate list (where is the
+name vs its 200d/50d, what's the invalidation level). It does NOT discover new ideas.
+
+*** BACKTEST RESULT — DO NOT USE AS A RETURN-PREDICTIVE FILTER (2026-07-21) ***
+The BUY_NOW vs WAIT_RECLAIM gate FAILED Law #0 (backtests/entry_gate_backtest.py,
+1993-2026, ~180-name universe). BUY_NOW did NOT beat WAIT_RECLAIM on forward returns;
+at 12mo it INVERTED (BUY_NOW 22.1% vs WAIT_RECLAIM 27.4%). As a monthly strategy it
+underperformed simply holding the whole universe on BOTH Sharpe (0.82 vs 0.89) and
+drawdown (-56% vs -49%), and stayed 100% invested through every crash (the per-name
+gate is not a portfolio risk gate). Conclusion: this is a constant long-tilt on a
+survivorship-biased winners list, not a timing edge. Use the verdicts ONLY as human-
+readable trend context + invalidation levels, NEVER to rank, gate, or size buys. Entry
+edge (if any) comes from buying quality weakness (dip-scanner) + PORTFOLIO-level risk
+(regime-detection/sizing), not from this momentum state.
 
 Fundamental fields are sourced from yfinance and are point-in-time-UNSAFE for
 backtesting (survivorship/restatement risk). For rigorous historical testing,
