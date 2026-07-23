@@ -1,0 +1,8 @@
+//@version=6
+indicator("Watchlist Alerts — SNDK", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: SNDK
+
+c0 = ta.crossunder(close, 788.13)
+alertcondition(c0, title="SNDK < 788.13", message="SNDK crossed below 788.13 — cut/tax-loss review on sustained daily")
+plot(788.13, "lvl_788.13", color=color.new(color.green, 40))

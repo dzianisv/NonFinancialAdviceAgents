@@ -1,0 +1,47 @@
+//@version=6
+// BTC Dip-Accumulation v1 — Bollinger-Band + RSI dip-buy strategy
+// Long-only mean-reversion: buy oversold dips, exit into strength or on stop.
+// Costs: 0.15% commission per side. 100% of equity, no pyramiding.
+// This is a FIRST-LOOK strategy on the TradingView tester — NOT the Law #0 gate.
+// The authoritative cost-aware backtest is backtests/btc_dip_accumulation_backtest.py.
+strategy("BTC Dip-Accumulation v1", overlay=true, initial_capital=100000, default_qty_type=strategy.percent_of_equity, default_qty_value=100, commission_type=strategy.commission.percent, commission_value=0.15, pyramiding=0, process_orders_on_close=true)
+
+// ---- Inputs ----
+rsiLen  = input.int(14, "RSI length")
+rsiBuy  = input.float(40, "RSI buy threshold")
+rsiExit = input.float(70, "RSI exit threshold")
+bbLen   = input.int(20, "BB length")
+bbMult  = input.float(2.0, "BB mult")
+smaFast = input.int(50, "SMA fast")
+smaSlow = input.int(200, "SMA slow")
+stopPct = input.float(12.0, "Stop-loss %") / 100.0
+
+// ---- Indicators ----
+rsi     = ta.rsi(close, rsiLen)
+basis   = ta.sma(close, bbLen)
+dev     = bbMult * ta.stdev(close, bbLen)
+upperBB = basis + dev
+lowerBB = basis - dev
+smaF    = ta.sma(close, smaFast)
+smaS    = ta.sma(close, smaSlow)
+
+// ---- Entry / Exit ----
+longEntry = ta.crossover(close, lowerBB) and rsi <= rsiBuy
+longExit  = ta.crossover(close, upperBB) or rsi >= rsiExit
+
+if longEntry
+    strategy.entry("Long", strategy.long)
+
+if strategy.position_size > 0
+    stopPrice = strategy.position_avg_price * (1.0 - stopPct)
+    strategy.exit("Stop/TP", from_entry="Long", stop=stopPrice, limit=upperBB)
+    if longExit
+        strategy.close("Long")
+
+// ---- Plots (context) ----
+plot(basis,   "BB basis", color=color.new(color.orange, 0))
+plot(upperBB, "BB upper", color=color.new(color.teal, 0))
+plot(lowerBB, "BB lower", color=color.new(color.teal, 0))
+plot(smaF,    "SMA50",    color=color.new(color.blue, 0))
+plot(smaS,    "SMA200",   color=color.new(color.red, 0))
+plotshape(longEntry, "Buy", shape.triangleup, location.belowbar, color.new(color.green,0), size=size.small)

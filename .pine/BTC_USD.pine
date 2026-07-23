@@ -1,0 +1,24 @@
+//@version=6
+indicator("Watchlist Alerts — BTC-USD", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: BTC-USD
+
+c0 = ta.crossunder(close, 57000.0)
+alertcondition(c0, title="BTC < 57000 (Reserve #1)", message="BTC crossed below 57000 — deploy $5k Reserve #1 (confirm weekly close)")
+plot(57000.0, "lvl_57000.0", color=color.new(color.green, 40))
+
+c1 = ta.crossunder(close, 50000.0)
+alertcondition(c1, title="BTC < 50000 (accum review)", message="BTC crossed below 50000 — accumulation review trigger")
+plot(50000.0, "lvl_50000.0", color=color.new(color.green, 40))
+
+c2 = ta.crossunder(close, 48000.0)
+alertcondition(c2, title="BTC < 48000 (Reserve #2)", message="BTC crossed below 48000 — deploy $5k Reserve #2")
+plot(48000.0, "lvl_48000.0", color=color.new(color.green, 40))
+
+c3 = ta.crossover(close, 80000.0)
+alertcondition(c3, title="BTC > 80000 (fold)", message="BTC crossed above 80000 — fold unused $10k reserves into DCA")
+plot(80000.0, "lvl_80000.0", color=color.new(color.red, 40))
+
+r4 = ta.rsi(close, 14)
+c4 = ta.crossunder(r4, 30)
+alertcondition(c4, title="BTC 14-RSI < 30", message="BTC 14-RSI crossed below 30 — accumulation review")

@@ -1,0 +1,241 @@
+{
+ "fetched": 138,
+ "feeds_ok": 5,
+ "unavailable": [],
+ "events": [
+  {
+   "event_cluster_id": 4568,
+   "title": "The GENIUS Act turns 1: State of Crypto",
+   "first_seen": "2026-07-19T18:30:00.000Z",
+   "last_updated": "2026-07-21T07:29:13.732Z",
+   "sources": [
+    "coindesk"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01538
+  },
+  {
+   "event_cluster_id": 3485,
+   "title": "US Treasury freezes over $130 million tied to Iran-linked crypto wallets",
+   "first_seen": "2026-07-15T08:44:27.000Z",
+   "last_updated": "2026-07-21T07:29:56.192Z",
+   "sources": [
+    "theblock",
+    "decrypt",
+    "cointelegraph",
+    "yahoo"
+   ],
+   "source_count": 4,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01429
+  },
+  {
+   "event_cluster_id": 4095,
+   "title": "Morgan Stanley Launches Bitcoin, Ethereum, and Solana Trading on E*Trade",
+   "first_seen": "2026-07-16T20:01:03.000Z",
+   "last_updated": "2026-07-17T17:04:23.813Z",
+   "sources": [
+    "decrypt",
+    "cointelegraph"
+   ],
+   "source_count": 2,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.0137
+  },
+  {
+   "event_cluster_id": 2658,
+   "title": "New MiCA regime in Europe, U.S. jobs report for June: Crypto Week Ahead",
+   "first_seen": "2026-06-29T09:08:25.000Z",
+   "last_updated": "2026-07-21T07:29:13.732Z",
+   "sources": [
+    "coindesk"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01316
+  },
+  {
+   "event_cluster_id": 4610,
+   "title": "Bitmine expands Ethereum treasury to 5.78 million ETH, repurchases 5.5 million shares",
+   "first_seen": "2026-07-20T13:43:15.000Z",
+   "last_updated": "2026-07-21T15:16:43.945Z",
+   "sources": [
+    "theblock",
+    "tradingview"
+   ],
+   "source_count": 2,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01266
+  },
+  {
+   "event_cluster_id": 3480,
+   "title": "Bitmine says ETH staking generated $45.7 million, accounting for 98% of quarterly revenue",
+   "first_seen": "2026-07-15T13:04:46.000Z",
+   "last_updated": "2026-07-21T15:16:43.945Z",
+   "sources": [
+    "theblock",
+    "cointelegraph",
+    "tradingview"
+   ],
+   "source_count": 3,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01235
+  },
+  {
+   "event_cluster_id": 4298,
+   "title": "Kaspersky identifies malware framework targeting crypto investors",
+   "first_seen": "2026-07-18T11:40:48.000Z",
+   "last_updated": "2026-07-18T17:00:24.772Z",
+   "sources": [
+    "cointelegraph"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.0122
+  },
+  {
+   "event_cluster_id": 4611,
+   "title": "Bernstein lifts Robinhood target to $160, sees prediction markets revenue overtaking crypto",
+   "first_seen": "2026-07-20T12:44:13.000Z",
+   "last_updated": "2026-07-21T07:29:13.732Z",
+   "sources": [
+    "theblock"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01205
+  },
+  {
+   "event_cluster_id": 4573,
+   "title": "Grayscale files S-1 for first US Worldcoin ETF",
+   "first_seen": "2026-07-21T03:56:10.000Z",
+   "last_updated": "2026-07-21T07:29:13.732Z",
+   "sources": [
+    "cointelegraph"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01111
+  },
+  {
+   "event_cluster_id": 4279,
+   "title": "Crypto Biz: When dollars disappear, stablecoins step in",
+   "first_seen": "2026-07-17T19:23:53.000Z",
+   "last_updated": "2026-07-17T19:50:01.813Z",
+   "sources": [
+    "cointelegraph"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.01087
+  },
+  {
+   "event_cluster_id": 4082,
+   "title": "Crypto-style derivatives reach AI compute ahead of planned CME and ICE futures: Bernstein",
+   "first_seen": "2026-07-17T12:48:20.000Z",
+   "last_updated": "2026-07-17T17:04:23.813Z",
+   "sources": [
+    "theblock"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.00935
+  },
+  {
+   "event_cluster_id": 4612,
+   "title": "Ethereum co-founder Vitalik Buterin ‘vibe-codes’ anonymous billboard demo with onchain moderation on Aztec",
+   "first_seen": "2026-07-20T11:24:22.000Z",
+   "last_updated": "2026-07-21T15:16:43.945Z",
+   "sources": [
+    "theblock",
+    "tradingview"
+   ],
+   "source_count": 2,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.00926
+  },
+  {
+   "event_cluster_id": 4081,
+   "title": "SBI Holdings completes majority acquisition of Singapore crypto platform Coinhako following MAS approval",
+   "first_seen": "2026-07-17T13:15:13.000Z",
+   "last_updated": "2026-07-17T17:04:23.813Z",
+   "sources": [
+    "theblock",
+    "cointelegraph"
+   ],
+   "source_count": 2,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.00847
+  },
+  {
+   "event_cluster_id": 4601,
+   "title": "Trump agrees to ethics provision as crypto bill inches closer to Senate vote",
+   "first_seen": "2026-07-21T00:58:26.000Z",
+   "last_updated": "2026-07-21T07:29:13.732Z",
+   "sources": [
+    "theblock"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.00794
+  },
+  {
+   "event_cluster_id": 4688,
+   "title": "Pakistan Launches Crypto Investigation Unit to Fight Money Laundering",
+   "first_seen": "2026-07-21T11:40:48.000Z",
+   "last_updated": "2026-07-21T15:03:34.507Z",
+   "sources": [
+    "decrypt"
+   ],
+   "source_count": 1,
+   "materiality": null,
+   "priced_in": null,
+   "surfaced_to_panel_on": null,
+   "authoritative": false,
+   "score": 0.00787
+  }
+ ]
+}

@@ -1,0 +1,8 @@
+//@version=6
+indicator("Watchlist Alerts — NVDA", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: NVDA
+
+c0 = ta.crossunder(close, 165.02)
+alertcondition(c0, title="NVDA < 165.02", message="NVDA crossed below 165.02 — full technical+fundamental review")
+plot(165.02, "lvl_165.02", color=color.new(color.green, 40))

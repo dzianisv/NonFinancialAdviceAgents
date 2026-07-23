@@ -1,0 +1,8 @@
+//@version=6
+indicator("Watchlist Alerts — ORCL", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: ORCL
+
+c0 = ta.crossover(close, 142.0)
+alertcondition(c0, title="ORCL > 142", message="ORCL crossed above 142 — entry on daily close >142")
+plot(142.0, "lvl_142.0", color=color.new(color.red, 40))

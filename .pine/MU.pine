@@ -1,0 +1,8 @@
+//@version=6
+indicator("Watchlist Alerts — MU", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: MU
+
+c0 = ta.crossunder(close, 486.58)
+alertcondition(c0, title="MU < 486.58", message="MU crossed below 486.58 — cut/tax-loss review on sustained daily")
+plot(486.58, "lvl_486.58", color=color.new(color.green, 40))

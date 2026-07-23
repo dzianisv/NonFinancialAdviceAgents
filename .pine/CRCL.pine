@@ -1,0 +1,8 @@
+//@version=6
+indicator("Watchlist Alerts — CRCL", overlay=true)
+// Auto-generated from Watchlist (Google Sheet gid=143777201). Canonical trigger store = mkt daemon https://mkt.agentlabs.cc/alerts; this Pine mirror gives a reliable TradingView push channel.
+// Generated 2026-07-21. Symbol: CRCL
+
+c0 = ta.crossunder(close, 60.0)
+alertcondition(c0, title="CRCL < 60", message="CRCL crossed below 60 — re-underwrite thesis")
+plot(60.0, "lvl_60.0", color=color.new(color.green, 40))
