@@ -1,0 +1,30 @@
+📊 Crypto Daily — 2026-07-24 | F&G 28 😨 Fear
+⚙️ Governor: F&G 28 → max 1 active buy
+Risk-off. BTC death cross active; the week's real signal is BTC→ETH ETF rotation.
+
+⚡ ACTION SUMMARY
+🟢 AAVE $94 BUY — TVL $14.6B, cheapest DeFi, only green name
+🔴 TON $1.44 TRIM — no catalyst, bleeding
+🟡 HYPE $59 WATCH — wait for $50-55 zone
+🟡 LINK $8.32 WATCH — oversold near 52w low
+🟡 BTC/ETH/SOL/UNI HOLD · JUP/PUMP/AERO sidelined
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔴 TRIM
+━━━━━━━━━━━━━━━━━━━━━━
+🔴 TON $1.44 — TRIM
+  📈 Technical:   Below all moving averages, -9.4% wk (downtrend, no floor forming).
+  ⛓ On-Chain:    -82.5% from ATH (near full round-trip — no accumulation base).
+  🏛 DeFi:        n/a — base-layer token, no protocol-fee accrual story.
+  🌍 Macro:       Risk-off (F&G 28 Fear) punishes low-catalyst alts hardest.
+  🐋 Smart Money: No visible accumulation; Telegram/Notcoin hype long faded.
+
+━━━━━━━━━━━━━━━━━━━━━━
+⭐ BUY ACTIVE (top 1 governor pick)
+━━━━━━━━━━━━━━━━━━━━━━
+🟢 AAVE $94.00 — BUY
+  📈 Technical:   +5% wk, only green in book (relative strength); base building.
+  ⛓ On-Chain:    -76% from 52w high but bounced off $88 (Jul-22 $85-90 call validated).
+  🏛 DeFi:        TVL $14.6B, MC/TVL ~0.1 (deeply cheap vs peers — earns real fees).
+  🌍 Macro:       Defensive quality name in a bearish tape (F&G 28 Fear).
+  🐋 Smart Money: Price rose into the $85-95 accumulation zone while alts fell.
