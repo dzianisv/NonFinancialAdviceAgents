@@ -128,12 +128,13 @@ Columns: `SELL (source) | $ | → | BUY (accumulate) | $ | Why buy-side is the b
   redeploy target yet").
 
 ### (c.5) UPCOMING CATALYSTS
-Earnings-timing awareness, sourced from the scorecard's `days_to_earnings` / `next_earnings_date` /
-`weight` fields (`fundamentals.py` → `scorecard.py`, EVENT_SOON flag) — not a new data pull. Default
+Earnings-timing awareness, sourced from triage's `days_to_earnings` / `next_earnings_date` /
+`weight` fields (`fundamentals.py` → `triage.py`, EVENT_SOON finding) — not a new data pull. Default
 window: next 14 days. Every holding with `days_to_earnings` in that window gets a row, ranked by
 weight desc (biggest positions first — an earnings print on a large weight matters more than on a
 rounding-error position). This is informational — it does NOT change any ACTION (EVENT_SOON is
-non-gating, see stocks-advisor scorecard.py); it exists so the user isn't surprised by a print.
+non-gating, see stocks-advisor triage.py — which ranks attention and never emits an action); it
+exists so the user isn't surprised by a print.
 
 ```
 UPCOMING CATALYSTS (next 14 days)
@@ -200,7 +201,7 @@ CHANNEL=$(grep '^channel_id:' .cache/stocks-daily/telegram.yaml 2>/dev/null | se
 2. **Lead with an action summary, then group by action — not by ticker order.** A reader must get the whole
    picture from the first few lines without scrolling through prose.
 3. **Thread EVENT_SOON into the ACTION SUMMARY line.** For any SELL/TRIM/EXIT ticker that also carries an
-   EVENT_SOON flag (scorecard `flags`, from (c.5) UPCOMING CATALYSTS), append `— earnings in {N}d ({date})`
+   EVENT_SOON finding (triage `fired`, from (c.5) UPCOMING CATALYSTS), append `— earnings in {N}d ({date})`
    to that ticker's ACTION SUMMARY line so the reader knows a print is imminent before the trade settles.
 
 **4.5b — Build the message(s).** Use the exact stocks-advisor seat labels, each carrying its investor lens

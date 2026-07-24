@@ -17,7 +17,7 @@ briefs were not produced this run, go back and produce them first; do not let a 
 **Layer 2 = the Investor Panel.** Six named investor seats read the **full** briefing (never a slice) and
 vote **independently and in parallel** — no seat sees another seat's vote before committing its own. A
 deterministic conviction-weighted quorum recipe (not a CIO's prose judgment) turns the six votes into a
-**CHAIN READ**. The printed **ACTION** is always the Step 0.82 scorecard's verbatim output — see §AUTHORITY.
+**CHAIN READ**. The panel's quorum ORIGINATES the printed **ACTION**, bounded by the SELL ORIGINATION RULE — see §AUTHORITY.
 
 ---
 
@@ -31,7 +31,7 @@ The briefing has **N = 6 sections**. Each is either populated with real, this-ru
 | 1 | Fundamentals | `fundamentals.py` (yfinance) — valuation, quality, growth, drawdown |
 | 2 | Technicals | TradingView `data_get_study_values` (RSI/BB/MACD/Volume) + MA levels, or DEGRADED_TECH trend-only |
 | 3 | Narrative / News | web_fetch + `feeds/wsj.ts` / `feeds/ft.ts` — theme phase, catalysts |
-| 4 | Smart-Money / Flows | insider (Form 4 via finviz), institutional ownership, 13F deltas |
+| 4 | Smart-Money / Flows | `scripts/smartmoney.py` — Form 4 open-market P/S via EDGAR (T+2), SC 13D/13G (T+5); 13F is 45d-stale CORROBORATION ONLY and may never originate a sell |
 | 5 | Sell-side / Consensus | analyst rating, PT dispersion, momentum (2-of-3 rule) |
 | 6 | Macro / Regime | Step 0.9 macro-regime paragraph — rates, USD, liquidity backdrop |
 
@@ -167,33 +167,42 @@ which terms fired (see Output shape) so the all-six-seats-to-one-number chain st
 
 ---
 
-## AUTHORITY (non-negotiable — matches Step 0.82 of `SKILL.md`, no override language anywhere in this file)
+## AUTHORITY (non-negotiable — matches Step 0.82 and §SELL ORIGINATION RULE of `SKILL.md`)
 
-- **The printed ACTION is always the Step 0.82 scorecard's verbatim output.** This hierarchy's quorum produces
-  a **CHAIN READ**, which is informational — a second, independently-computed opinion sitting next to the
-  scorecard, never a replacement for it.
-- **Divergence is logged, not resolved by prose.** When CHAIN READ disagrees with the scorecard ACTION, print
-  `DISSENT LOGGED` naming exactly which seats diverged and why (Hunt's dissent per rule 3 above always
-  appears here when applicable, whether or not it drove the disagreement).
-- **Reconcile note (mandatory whenever CHAIN READ ≠ ACTION).** Print one line immediately under `CHAIN READ`:
-  `(informational only; ACTION is the binding scorecard call — divergence from CHAIN READ is expected, not an
-  error)`. This line is required every time the two point different directions (e.g. `ACTION: HOLD` next to
-  `CHAIN READ: TRIM-leaning`) — without it, a reader (or judge) sees the two lines stacked with no bridge and
-  reads it as an unreconciled internal contradiction rather than the intended second opinion. This is a
-  wording note only — it does not grant this hierarchy any authority to change, soften, or re-derive ACTION;
-  ACTION still comes verbatim from Step 0.82, unmodified. Omit the line only when CHAIN READ and ACTION agree
-  in direction. Example:
+**INVERTED 2026-07-24.** This section used to read *"the printed ACTION is always the Step 0.82 scorecard's
+verbatim output"* and *"no seat vote, no CHAIN READ, and no quorum math may itself change the printed
+ACTION."* That is now wrong in both directions, and it was the mechanism by which a script's WAIT on NEM
+could not be corrected by any analyst who looked at it. **The script no longer emits an ACTION at all.**
+
+- **The PANEL originates the verdict.** The quorum's read IS the ACTION. There is no longer a competing
+  script ACTION, no CHAIN READ/ACTION split, and no "informational only" reconcile note — delete those from
+  any output template that still carries them.
+- **Step 0.82 supplies ATTENTION, not action.** `triage.py` returns `REVIEW_NOW | REVIEW | NO_ACTION` plus
+  the findings that produced it. Print the ATTENTION level and BASIS as INPUT provenance, never as a verdict.
+  A name arrives here because triage said *look*, and triage has no opinion on what you should conclude.
+- **SELL ORIGINATION RULE (binding, overrides the quorum arithmetic).** A `TRIM` or `EXIT` may be printed
+  only if at least one of the **Fundamentals (Buffett)**, **Narrative (Alden)** or **Smart-Money** seats
+  returned `THESIS_IMPAIRED: YES` **with stated evidence**. Print the originating seat and its evidence on
+  the ACTION line:
   ```
-  ACTION: HOLD
-  CHAIN READ: TRIM-leaning
-  (informational only; ACTION is the binding scorecard call — divergence from CHAIN READ is expected, not an
-  error)
+  ACTION: TRIM — ORIGINATED BY: Smart-Money (CFO open-market sale 12,400 sh @ $51.00, Form 4 filed
+  2026-07-19) | TIMING: Technical (scale out into the 50d retest ~$54)
   ```
-- **POLICY NOTE** carries any documented caller-mandate clamp applied to the ACTION this run (e.g. "caller
-  flagged hold-only — TRIM means rotate, not exit to cash"), or `"n/a"`.
-- **The only two sanctioned ACTION modifiers are (a) a documented caller-mandate clamp (POLICY NOTE) and
-  (b) the Risk Manager's hard gate below — which may only downgrade a BUY/ADD, never upgrade any ACTION.**
-  No seat vote, no CHAIN READ, and no quorum math may itself change the printed ACTION.
+  If no thesis seat returned `THESIS_IMPAIRED: YES`, the quorum **may not** print a sell no matter how
+  bearish the weighted leans are. The correct output is `WATCH` plus an armed alert naming the level and the
+  thesis question it would answer. A bearish lean built out of Technical + Cycle + Sell-side seats is
+  precisely the MRVL defect and must not be laundered through quorum math.
+- **Technicals are timing and stops only.** The Druckenmiller seat contributes `EXIT_TIMING` (how to exit,
+  once a thesis seat has called impairment) and a pre-declared `HARD STOP`. A stop firing prints as
+  `TRIM (RISK) — hard stop $X hit`, explicitly labeled a risk action, not a thesis conclusion.
+- **Concentration is the one non-thesis reason to reduce.** It prints as `TRIM (SIZING) — {weight}% of book`
+  and must never be described as a thesis call.
+- **Divergence is logged, not hidden.** Print `DISSENT LOGGED` naming which seats diverged and why (Hunt's
+  protected dissent per rule 3 always appears here when applicable).
+- **POLICY NOTE** carries any documented caller-mandate clamp applied this run (e.g. "caller flagged
+  hold-only — TRIM means rotate, not exit to cash"), or `"n/a"`.
+- **The Risk Manager's hard gate may only downgrade a BUY/ADD, never upgrade any ACTION, and never
+  manufacture a sell** — a risk downgrade of a BUY yields WATCH, not TRIM.
 - **DATA-COVERAGE GATE:** count how many of the 6 briefing sections (§Pre-Panel) are DARK this run. If **≥2 of
   6 are dark**, CHAIN READ is capped at `HOLD` (holdings path) or `WATCH` (watchlist path) regardless of what
   the weighted leans alone would otherwise produce, and the output block prints `DATA COVERAGE: N/M` (e.g.
@@ -234,10 +243,15 @@ Cache output: `echo '{risk_json}' > "$RUN_DIR/{TICKER}/seat_risk.json"`
 ## Output shape
 
 ```
-ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — Step 0.82 scorecard verbatim, or the Risk Manager's downgrade
-CHAIN READ: {BUY-leaning|SPLIT|SELL-leaning|UNCERTAIN}  or {ADD-leaning|SPLIT|EXIT-leaning|UNCERTAIN} — quorum's own read, informational only
-{print ONLY when CHAIN READ's direction ≠ ACTION's direction:}
-(informational only; ACTION is the binding scorecard call — divergence from CHAIN READ is expected, not an error)
+TRIAGE INPUT: {REVIEW_NOW|REVIEW|NO_ACTION} — {triage basis verbatim}   ← why this name is on the table. NOT a verdict.
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — the panel quorum's own call
+{for ANY TRIM or EXIT, this line is MANDATORY — an ACTION of TRIM/EXIT without it is INVALID:}
+ORIGINATED BY: {Fundamentals|Narrative|Smart-Money} — {THESIS_IMPAIRED evidence: metric/filing, number, date}
+TIMING: {Technical seat's exit path — how to execute, never whether}
+{for a sizing or stop reduction instead, print the class explicitly:}
+  TRIM (SIZING) — {weight}% of book        |        TRIM (RISK) — hard stop ${X} hit
+{if no thesis seat returned THESIS_IMPAIRED: YES, the ACTION may not be a sell — print instead:}
+  ACTION: WATCH — trend break with no thesis impairment; alert armed at ${level}
 
 SEAT VOTES
  Buffett (Quality/moat)         : OWN {YES/NO}  TODAY {ADD/HOLD/TRIM/EXIT}  CONV {H/M/L} — {≤3-line reason w/ provenance tags}
@@ -249,7 +263,7 @@ SEAT VOTES
  (every CONV above is a real weight, not decorative — each feeds QUORUM MATH below per rule 1)
 
 QUORUM MATH: own_lean = {sum shown per seat, all six, e.g. "(Buffett HIGH+3) + (Druckenmiller MED+2) + ... − (Hunt HIGH−3)"} = {total} | today_lean = {sum shown per seat, all six} = {total}
-DISSENT LOGGED: {Hunt's verbatim dissent when applicable, and any CHAIN-READ-vs-ACTION disagreement, naming the diverging seats}
+DISSENT LOGGED: {Hunt's verbatim dissent when applicable, and any seat disagreeing with the quorum, naming the diverging seats}
 POLICY NOTE: {caller-mandate clamp applied, or "n/a"}
 CONVICTION: {1–5}/5 — base 3 {+1 own_lean≥+6 if fired} {+1 leans agree in sign if fired} {−1 Hunt HIGH dissent if fired} {−1 gate capped if fired} {−1 PEG/FCF red flag if fired} — derived from the own_lean/today_lean sums above, i.e. all six seats' weights, not from Hunt's line alone
 Entry zone  : ${low}–${high}

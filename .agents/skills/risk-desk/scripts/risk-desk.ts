@@ -4,13 +4,15 @@
  *
  * The ALWAYS-ON risk layer, modeled on Citadel/Millennium central-risk-desk
  * mechanics. Runs deterministic risk rules over HELD positions -- independent
- * of any alpha/picker view (stocks-advisor's scorecard.py decide()). Risk
+ * of any alpha/picker view. (Historical note: stocks-advisor's scorecard.py
+ * decide() was removed 2026-07-24 — the picker layer now ranks attention only
+ * and emits no verdicts. This desk is unaffected: it was always independent.) Risk
  * overrides alpha: a stock the picker calls WAIT ("cheap, don't add") can
  * still be a TRIM from here if it's oversized, trending down, or a winner
  * rolling over.
  *
  * Origin story: NEM was 8.3% of book, +112% unrealized gain, and had broken
- * below its 200d MA for weeks. scorecard.py's decide() correctly scored it
+ * below its 200d MA for weeks. The old scorecard.py decide() scored it
  * WAIT under the picker's val/trend logic ("cheap, downtrending -- don't
  * catch the knife") -- a fine answer to "should I buy more?" and a useless
  * one to "should I still hold this much?". Nothing ever asked the second

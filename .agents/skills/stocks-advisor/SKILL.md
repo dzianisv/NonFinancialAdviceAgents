@@ -83,6 +83,56 @@ the discovered names.
    Sell-side=Street consensus) and label each seat line with its lens (§Output format per stock). A run whose
    output shows generic seat labels without lens names — or that skips loading the lens skills to save time —
    is non-compliant, not merely abbreviated.
+8. **SELL ORIGINATION RULE — technicals may not originate or decide a sell.** See the full rule below. This
+   is a hard constraint, not a preference. A TRIM or EXIT that cannot name a fundamentals / narrative /
+   smart-money seat finding the thesis impaired, with stated evidence, is a defect — delete it and print
+   WATCH instead.
+9. **No script may emit a verdict.** `scripts/triage.py` ranks ATTENTION only (REVIEW_NOW / REVIEW /
+   NO_ACTION). Verdicts come from the seats. The removed `scripts/scorecard.py` violated this and is now a
+   hard-fail shim; if you see it invoked anywhere, that call site is stale.
+
+---
+
+## SELL ORIGINATION RULE (hard constraint — read before any TRIM/EXIT)
+
+**Only a thesis seat may originate a sell.** A TRIM or EXIT is valid only if at least one of
+
+| Seat | What counts as thesis impairment |
+|---|---|
+| **Fundamentals** (Buffett lens) | deteriorating unit economics, margin compression, EPS/FCF decline, balance-sheet stress, ROIC below cost of capital, accounting red flags |
+| **Narrative / business** (Alden lens) | the reason you own it stopped being true — end-market gone, competitive moat breached, regulatory kill-shot, product/roadmap failure, management credibility loss |
+| **Smart-money / flows** | insiders selling on Form 4 (open-market S, not 10b5-1 auto), a 13D/G exit, sustained short-interest build with a stated reason, sponsor/anchor distribution |
+
+finds the thesis **impaired** AND states the evidence (a number, a filing, a URL, a dated event).
+
+**Technicals may NOT originate or decide a sell.** Price is demoted to exactly two roles:
+
+1. **Execution timing** — *after* a thesis seat has called impairment, the technical seat says when and how
+   to exit (levels, liquidity, scale-out path). It answers "how", never "whether".
+2. **A stated hard stop** — a pre-declared, pure risk-control level, printed as a number in advance. A stop
+   firing is a risk action, not a thesis conclusion; it must be labeled as such.
+
+**A technical break with no thesis impairment produces `WATCH` + an armed alert. Never a sell.** This is
+what the old rule 3 got wrong: MRVL received a TRIM for being "expensive + in an uptrend" — a multiple and a
+moving average, no seat, no evidence. That output was removed, not re-tuned.
+
+**How this is enforced mechanically.** Every `triage.py` finding carries a `class` and a
+`may_originate_sell` boolean:
+
+```
+class THESIS  → may_originate_sell: true  when FIRED  (fundamentals deterioration)
+class PRICE   → may_originate_sell: false ALWAYS      (trend break, drawdown, RSI, valuation multiple)
+class RISK    → may_originate_sell: false             (concentration → a SIZING action, not a thesis sell)
+class DATA    → may_originate_sell: false             (integrity/missingness → escalates attention only)
+```
+
+`record["sell_origination_eligible"]` lists the codes that *could* support a sell. **If that list is empty,
+no TRIM/EXIT may be printed for that name under any hierarchy, by any seat, for any reason** — the correct
+output is WATCH plus an armed alert. And even when it is non-empty, triage has only established that a
+thesis question exists; the seat must still do the work and state the evidence.
+
+**Concentration is the one non-thesis reason to reduce**, and it must be labeled `TRIM (SIZING)` with the
+weight number, never dressed up as a thesis call.
 
 ---
 
@@ -207,7 +257,7 @@ mkdir -p "$RUN_DIR"
 echo "Artifacts: $RUN_DIR"
 ```
 
-**Hard rule:** all fundamentals inputs/outputs and scorecard files live under `.cache/stocks-advisor/` —
+**Hard rule:** all fundamentals inputs/outputs and triage files live under `.cache/stocks-advisor/` —
 never write into the skill's own `scripts/` directory. `fundamentals.py` input JSONs go under
 `$RUN_DIR/{TICKER}/` (or any path under `.cache/stocks-advisor/`); its `--out-dir` flag must be passed (or
 left at its default, `.cache/stocks-advisor/fundamentals/`) so `*.out.json` never lands next to the input
@@ -288,119 +338,192 @@ name does not scale (a 50-80 name book = thousands of MCP calls). So TradingView
 
 ---
 
-## Step 0.82 — Deterministic verdict engine (MANDATORY — the ACTION comes from here, not from prose)
+## Step 0.82 — Triage: rank ATTENTION over the whole book (MANDATORY — this step emits NO verdicts)
 
-**Risk overrides alpha.** This scorecard is a stock PICKER — it answers "is this a good time to add?" It
-is not a risk manager and has no opinion on whether an existing position is oversized or rolling over
-(the NEM incident: 8%+ of book, +100%+ gain, broken below 200d, scored WAIT for weeks because "cheap but
-downtrending" was the wrong question). `risk-desk` (`.agents/skills/risk-desk/`) runs the standing,
-always-on risk layer over HELD positions; its TRIM/REVIEW breaches override this scorecard's WAIT/HOLD on
-any position it also holds a view on — run it alongside this step, not instead of it.
+**What changed and why (2026-07-24).** This step used to run `scripts/scorecard.py`, a static rule tree that
+printed an ACTION (HOLD/TRIM/EXIT/ADD/WAIT). That design failed twice on the same ticker and both failures
+were structural, not tuning problems:
 
-**Why this exists.** The 6-seat panel and the decision hierarchies aggregate *prose opinions*, which makes
-the final label depend on how the question was framed: "build the bear case" yields EXIT and "build the bull
-case" yields ADD on the identical stock. That flip-flop is a structural defect, not a one-off mistake. The
-fix is a deterministic scorecard: **same numbers → same action, every run, regardless of who is arguing or
-how the prompt is worded.** The seats add color, conviction, and invalidation conditions — they do **not**
-set the ACTION. The ACTION is the scorecard's output. This is non-negotiable; it is the whole point.
+- **NEM — an unreachable state.** NEM was a +119% winner trading below BOTH its 50d and 200d. Rule 0.5
+  (exhaustion HOLD) required `RSI < 40`; NEM's RSI was **47.9**. Rule 0.7 (early trend-break TRIM) required
+  `dd > −25%`; NEM's drawdown was **−29.6%**. It matched neither, fell through to rule 4, and the script
+  confidently printed **WAIT — "do nothing."** The entire quadrant `{dd ≤ −25% AND RSI ≥ 40}` had *no*
+  trend-break coverage at all. A rule tree with windowed guards is partial by construction; widening a
+  threshold would have moved the hole, not closed it.
+- **MRVL — a technical sell.** Rule 3 printed **TRIM** for "expensive + uptrend" — a multiple and a moving
+  average. No seat asked for it, no thesis was impaired, no evidence was stated.
 
-Run it on the full book (every name screened in Step 0.8) before any seat work:
+Both are the same root cause: **a script was making investment decisions.** The fix is not a better tree.
+The fix is that the script stops deciding.
+
+**The script's ONLY job now** is to guarantee that *every* position gets screened, and to rank which ones
+deserve a full analyst panel. Its output vocabulary is exactly three tokens:
+
+| Level | Meaning | What you do |
+|---|---|---|
+| **REVIEW_NOW** | material position with an open question | run the full seat panel this run — non-negotiable |
+| **REVIEW** | an open item exists but not at a size that demands a panel today | note it; panel if capacity allows |
+| **NO_ACTION** | every check evaluated and CLEAR (or fired but informational at this position size, and *named* in the basis) | nothing owed |
+
+**There is no HOLD, TRIM, EXIT, ADD, BUY, SELL or WAIT in this step's output.** If you see one, the run is
+non-compliant. Verdicts come from the seats (§Step 2), bounded by the §SELL ORIGINATION RULE.
 
 ```bash
 # positions.csv columns: Position,MarketValue,Unrealized_PnL  (ticker + MV used; MV gives concentration weights)
 # Target defaults to .cache/stocks-advisor/fundamentals/ (where fundamentals.py wrote its *.out.json files
-# in Step 0.8); --out-dir defaults to .cache/stocks-advisor/ for _scorecard.json. Both stay out of scripts/.
-python3 .agents/skills/stocks-advisor/scripts/scorecard.py .cache/stocks-advisor/fundamentals/ --positions <positions.csv>
+# in Step 0.8); --out-dir defaults to .cache/stocks-advisor/ for _triage.json. Both stay out of scripts/.
+python3 .agents/skills/stocks-advisor/scripts/triage.py .cache/stocks-advisor/fundamentals/ --positions <positions.csv>
 ```
 
-**Decision spine = VALUE × TREND** (academically backed: value alone catches falling knives; value + trend
-confirmation does not). Sub-scores from `fundamentals.py` fields only — valuation (FCF yield), trend (vs 50d
-& 200d MA), quality (op margin / ROE / EPS-growth; declining EPS = value-trap signature), growth (rev). The
-tree, first match wins:
+### Totality — the anti-unreachable-state design
 
-| # | Condition | Action | Meaning |
+There is **no decision tree and no first-match-wins ordering.** Every check in `CHECKS` runs on every name,
+independently, and each returns **exactly one** finding with status `FIRED | CLEAR | MISSING`. Therefore:
+
+- `len(record["findings"]) == len(CHECKS)` for every possible input. `scripts/test_triage.py` proves this by
+  enumerating the (drawdown × RSI × vs200 × vs50 × quote_type × position-context) grid — **97,020 inputs,
+  0 silent defaults.**
+- `NO_ACTION` is **not a fall-through.** It is emitted only when every check explicitly cleared, and the
+  basis string states how many checks were evaluated to get there.
+- The specific NEM hole is a named regression test: `test_old_scorecard_gap_is_now_covered` re-implements the
+  old rule 0.5 / 0.7 predicates, collects every grid input matching **neither** (79 of them), and asserts each
+  now surfaces as **REVIEW_NOW** with `TREND_BREAK_200D` FIRED. `check_trend_break_200d` fires on **any**
+  `vs_200d_ma < 0` — there is no drawdown window and no RSI window on it, so the hole cannot reopen.
+
+### The checks (all 12 run on every name, always)
+
+| Code | Class | Fires when | May originate a sell? |
 |---|---|---|---|
-| 0 | weight ≥ 15% of book | **TRIM** | concentration risk trumps thesis (if the caller flagged this position hold-only, TRIM means rotate within the caller's mandate rather than exit to cash — this skill has no default asset-class preference). **Fires for ETFs too** — a 20% single-ETF position is real concentration risk regardless of instrument type, so this is checked *before* the REVIEW_THESIS guard below |
-| 0.4 | **no fundamental basis** — `quote_type` is a fund/basket (ETF/MUTUALFUND/INDEX/…) **OR** every VALUE/QUALITY/GROWTH input is null | **REVIEW_THESIS** | **ETF / commodity / thematic basket guard.** These names have NO company fundamentals, so the VALUE×TREND spine collapses and the normal tree would decide them on TREND alone — a pure chart read (RSI/MA) on a multi-year macro thesis, which is noise. The technical verdict is SUPPRESSED; the own/trim decision is routed out as a thesis/macro call (`tradfi-portfolio-manager` for sleeve allocation, or `analyse-macro` / `narrative` for the theme). RSI/MA are reported in the basis as *staging context only, not the decision*. Detection reads `quote_type` first (fundamentals.py now emits it), falling back to the "all fundamental inputs null" test for older caches |
-| 0.5 | trend = DOWNTREND (below 50d & 200d) **AND** exhausted (RSI(14) < 40 **AND** drawdown from 52w high ≤ −25%) | **HOLD** (with stop + bounce target) | **exhaustion guard** — the trend-exit was months ago, not today; EXIT/TRIM here would be selling into an already-crashed, oversold name. Overrides rules 1/2/5 below when it fires; does NOT touch rule 3 (needs an uptrend, structurally incompatible with exhaustion) |
-| 0.7 | price **below 200d MA** (trend broke) **AND** drawdown still MODERATE (−25% < dd ≤ −8%) **AND** decision-relevant (weight ≥ 5%, **or** gain ≥ 50%, **or** weight ≥ 3% & gain ≥ 25%) | **TRIM** (first break, thesis intact) / **EXIT** (also below 50d **AND** deteriorating EPS or shrinking rev) | **early trend-break exit — the NEM/MRVL missed-exit fix.** Fires the exit while STILL ACTIONABLE, before a rolling-over winner decays into the crashed state 0.5 then locks to HOLD. Sits strictly *between* healthy and 0.5 on the drawdown timeline. Non-overlap with 0.5 is guaranteed on the drawdown axis: this needs dd > −25%, 0.5 needs dd ≤ −25% — mutually exclusive, and 0.5 is checked first. The size×gain gate is what earns the whipsaw cost: loudest on big extended winners breaking down (NEM: 8% of book, +100%), silent on small/no-gain positions |
-| 1 | downtrend + deteriorating EPS + not cheap | **EXIT** | thesis broken — genuine dead money (but see 0.5 first: if the name is also exhausted, 0.5 wins) |
-| 2 | val ≥ 1 AND trend ≥ 1 AND qual ≥ 0 | **ADD** | cheap with the wind at its back |
-| 3 | uptrend + expensive | **TRIM** | extended winner — take partial, let rest run |
-| 4 | val ≥ 1 AND trend ≤ 0 | **WAIT** | cheap but falling — do NOT add to a knife; buy only on 200d reclaim or dated catalyst |
-| 5 | shrinking + not cheap + no trend | **EXIT** | no reason to own it (but see 0.5 first) |
-| 6 | default | **HOLD** | fair / in-trend / no decisive edge (mega-cap → "index-like, consider RSP/VOO") |
+| `PRICE_INTEGRITY` | DATA | price absent/zero — the name was **not** screened | no |
+| `UPSTREAM_DATA_ERROR` | DATA | `fundamentals.py` recorded a fetch exception for this name — the null is a *broken fetch*, not a real absence of the value | no |
+| `NO_FUNDAMENTAL_BASIS` | DATA | `quote_type` is ETF/MUTUALFUND/INDEX/… — no company fundamentals exist, so route the own/trim call to `tradfi-portfolio-manager` / `analyse-macro`, never to a chart read | no |
+| `CONCENTRATION` | RISK | weight ≥ 15% of book | no — a **SIZING** action, label it `TRIM (SIZING)` |
+| `TREND_BREAK_200D` | PRICE | below the 200d, **at any drawdown, at any RSI** | **no** |
+| `TREND_BREAK_50D` | PRICE | below the 50d | **no** |
+| `DRAWDOWN` | PRICE | drawdown from 52w high past the band thresholds | **no** |
+| `MOMENTUM_STATE` | PRICE | RSI washed out or extended | **no** |
+| `THESIS_DETERIORATION` | **THESIS** | declining EPS / shrinking revenue / margin compression | **YES — routes to the fundamentals seat to adjudicate** |
+| `VALUATION_STRETCH` | PRICE | multiple/FCF-yield stretched | **no** (this is the removed rule 3) |
+| `SHORT_INTEREST` | DATA | short % of float elevated | no — routes to smart-money |
+| `EVENT_SOON` | DATA | earnings inside the window | no |
 
-**Rule 4 (WAIT) is the flip-flop killer.** A cheap-but-downtrending value name (EPAM, ESTC, FIS, ACN, ADBE,
-PYPL…) lands here *stably*: never ADD (trend is against), never panic-EXIT (still cheap, not deteriorating).
-That answer does not move when the user pushes back, because it is computed, not argued.
+Only `THESIS_DETERIORATION` is THESIS-class, so it is the only finding that can put a name on the
+sell-origination path — and even then triage has established only that *a question exists*. The seat must do
+the work and state the evidence. See §SELL ORIGINATION RULE.
 
-**Rule 0.4 (REVIEW_THESIS) is the "an ETF gets no technical verdict" fix.** The scorecard's decision spine
-is VALUE × TREND, and VALUE/QUALITY/GROWTH come from `fundamentals.py`'s company financials. For an
-ETF / commodity basket / thematic fund those fields are ALL null, so `score_valuation/quality/growth` each
-return their neutral "no data" branch and the spine collapses — leaving TREND (RSI/MA distance) as the sole
-input. The old tree then emitted a confident-looking HOLD/TRIM that was really just a chart read on a
-multi-year macro thesis, where technicals are noise. **Worked example — URNM (Sprott Uranium Miners ETF):**
-its fundamentals were `fwd_pe=null, fcf_yield=null, earnings_growth=null, rev_growth=null, op_margin=null,
-roe=null` (only `rsi14`/`dd`/`vs_200d` had values), so the scorecard silently produced a technical-only
-HOLD on what is a uranium supply/demand cycle call — exactly the case SKILL.md's "individual stocks only"
-rule says belongs in `tradfi-portfolio-manager`, yet the scorecard scored it anyway. Rule 0.4 now detects
-this (via yfinance `quote_type`, or the null-fundamentals fallback) and returns **REVIEW_THESIS**: the
-technical verdict is suppressed and the name routes to `tradfi-portfolio-manager` (sleeve allocation) or
-`analyse-macro` / `narrative` (the commodity/theme thesis). RSI/MA are printed in the basis only as *staging
-context* for an eventual entry/exit, explicitly labeled NOT the own/trim decision. Ordering is deliberate:
-rule 0 (concentration) is checked FIRST so a >15% single-ETF position still TRIMs (that is risk management,
-valid for a basket), then 0.4 replaces rules 0.5/0.7/1-6 for any no-fundamental-basis name. A normal stock
-with real fundamentals never triggers 0.4 and is completely unaffected.
+### Missing inputs may never be absorbed into a default
 
-**Rule 0.5 (exhaustion guard) is the "don't sell at the bottom" fix.** A broken trend alone (below both MAs)
-is not a sell signal for TODAY — it says the sell signal already fired, weeks or months ago near the MA it
-broke. `decide()` conflating "trend is broken" with "sell now" produced a real incident: MRVL down -42% from
-its ~$330 top, RSI(14)≈36 (oversold), MACD histogram negative but flattening — the scorecard called EXIT/TRIM
-purely off the broken trend, i.e. recommending a market-sell into an already-crashed, oversold name (the
-disciplined trend-exit was near $280, months earlier). `check_exhaustion()` in `scripts/scorecard.py` computes
-RSI(14) (Wilder-smoothed, from `fundamentals.py`'s `rsi14` field — no TradingView dependency, so this also
-protects the fundamentals-only screen and DEGRADED_TECH mode) and drawdown-from-52w-high; when both cross the
-oversold/deep-drawdown thresholds, the action becomes `HOLD` with an explicit stop (`swing_low_20d`, a proxy
-for the recent swing low) and a bounce target (the nearer of ma50/ma200, i.e. "the MA it's below"), instead of
-EXIT/TRIM. A genuinely extended name (RSI high, near its 52w high, uptrend) never satisfies the RSI<40 half of
-the guard, so rule 3 (TRIM extended winners) is untouched.
+The old file's `if fy is None: return 0, "valuation: no FCF data (neutral)"` is **banned**. A missing input
+now produces `status=MISSING`, **names the absent field**, and **raises** attention. Concretely:
 
-**Rule 0.7 (early trend-break exit) is the "catch the exit while it's still actionable" fix — the direct
-answer to the NEM/MRVL misses.** The exhaustion guard (0.5) is a *fallback*: "if you already missed the
-exit, don't sell the bottom." It is the wrong tool for catching the exit in the first place — by the time
-0.5 applies (RSI<40, dd≤−25%) the actionable moment is long gone. Rule 0.7 fires **earlier**, in the middle
-of the drawdown timeline: the moment a **heavy and/or large-winner** position **breaks its 200d trend** while
-the drawdown is **still moderate** (−25% < dd ≤ −8%). That is precisely the window both incidents blew
-through:
-- **NEM** — 8%+ of book, +100%+ gain, closed below its 200d, dd only ≈ −12%. Old tree: cheap + downtrend →
-  **Rule 4 WAIT**, and it scored WAIT for *weeks* while a doubled position rode all the way down. New: Rule
-  0.7 catches it at the 200d break and fires **TRIM** (protect the +100% gain) — before 0.5 ever engages.
-- **MRVL** — rolled below 50d then 200d from ~$330. The disciplined exit was *that rollover* (dd ≈ −15%, RSI
-  ≈ 50). The skill only said "trim" once MRVL was ≈$189 (−42%, RSI≈36) — far too late, and by then 0.5
-  correctly says HOLD. New: Rule 0.7 fires **TRIM** at the rollover, the real exit window.
+- A name whose `.out.json` is unreadable or contains an error → `REVIEW_NOW`, not skipped. (The old script
+  did `continue` on these; on 2026-07-24 that silently dropped **38 of 83** cached names, including SNDK.)
+- A held position with **no screen output at all** → a synthetic `REVIEW_NOW` record reading *"HELD POSITION
+  WITH NO SCREEN OUTPUT — it was NOT screened this run; this is not 'nothing to do'."* The old script simply
+  never mentioned those names. On 2026-07-24 there were **6** of them.
+- A position whose MarketValue/PnL will not parse → relevance `UNKNOWN`, which **escalates**. It is a data
+  failure, not a small position, and must never be graded down as one.
+- `positions.csv` parse errors are collected and printed, never swallowed by a bare `except`.
 
-Ordering matters and is deliberate: **0.5 is checked before 0.7**, and their drawdown bands do not overlap
-(0.5: dd ≤ −25%; 0.7: dd > −25%), so 0.7 can never cause a sell into an already-crashed name — verified by
-the `MRVL-already-crashed` case (dd −42%, RSI 36) still returning HOLD after 0.7 was added. Rule 0.7 also
-does not touch the healthy state: a name at its highs in an uptrend has dd > −8% and price above the 200d, so
-neither trigger is met — it routes to rule 2/3/6 exactly as before.
+Check the run's `data MISSING` count. If it is non-trivial, **re-run `fundamentals.py` before running the
+panel** — a panel over a book that was two-thirds unscreened is theatre.
 
-**Honest limitation — this whipsaws, and that is the accepted trade.** A 200d break can reclaim; Rule 0.7
-will sometimes trim a name that recovers. We accept that cost *only* because the **size×gain gate** confines
-the rule to positions where the opposite error — riding a +100% overweight winner back to breakeven — is far
-more expensive. Do **not** describe this rule as "never misses an exit." It catches the *actionable window*
-NEM and MRVL missed; it does not predict tops. First break of a still-intact thesis = **partial TRIM** (not a
-full exit); **EXIT** is reserved for a trend break that is *also* a broken thesis (below both MAs + declining
-EPS or shrinking revenue). Deterministic: same inputs → same action, like every other rule here.
+### Relevance grades urgency; it can never grade a finding out of existence
 
-The seats (Step 2 hierarchy) then run on the deep-dive subset to supply **conviction, entry zone, trigger,
-stop, and invalidation** — but a seat may NOT overturn the scorecard ACTION. If a seat strongly disagrees,
-it records the disagreement as the DISSENT field; it does not change the label. Print the scorecard ACTION
-and BASIS verbatim in each output block.
+Position size and locked-in gain decide *how loud* a finding is, never *whether it is reported*. The worst
+grading can do is move `REVIEW_NOW → REVIEW` on a small position, and a floor protects the checks that must
+never be quiet: `TREND_BREAK_200D`, `THESIS_DETERIORATION`, `CONCENTRATION`, `PRICE_INTEGRITY`. A FIRED
+finding graded to informational is still listed in `record["fired"]`, in `record["informational"]`, and by
+name in the basis string. Nothing vanishes.
 
-A CIO/hierarchy prose override of the scorecard ACTION is a defect, not a judgment call — the only sanctioned
-ACTION modifiers are documented caller-mandate clamps and the Risk Manager's downgrade gate.
+### What Step 0.82 hands to the seats
+
+For every name: `attention`, `basis`, the full `findings` array, `sell_origination_eligible`, and
+`route_to_seats`. Run the panel on the REVIEW_NOW set. Print the ATTENTION level and BASIS verbatim in each
+output block **alongside** the seat verdict — they are different things and must never be conflated.
+
+`risk-desk` (`.agents/skills/risk-desk/`) still runs the standing risk layer over HELD positions; it is a
+sizing/stop authority and its breaches are RISK-class actions, subject to the same labeling rule.
+
+---
+
+## Smart-money data path (MANDATORY — this seat may originate a sell, so its plumbing must work)
+
+**The 2026-07-24 failure.** The smart-money seat returned `INSUFFICIENT_DATA` on every name — not because
+the flows were ambiguous, but because **nothing was fetched.** The seat pointed at finviz (301s) and
+openinsider (403 since 2026-07-05), found neither, and quietly abstained. The panel silently lost a vote and
+nothing in the output revealed it. That is not survivable now that this is one of only three seats that may
+originate a sell.
+
+**Always run the fetcher first** — before any web_fetch, for every name going to the panel:
+
+```bash
+python3 .agents/skills/stocks-advisor/scripts/smartmoney.py {TICKER} --days 120 --json
+```
+
+It resolves the CIK from SEC `company_tickers.json`, pulls every Form 4 in the window from the EDGAR
+submissions API, parses the **raw** XML for open-market P/S transactions, runs an EDGAR full-text search for
+SC 13D/13G, and computes today's exact 13F staleness. Every source returns `OK | NO_DATA | MISSING(reason)`.
+
+> Note for anyone extending it: EDGAR's `primaryDocument` for a Form 4 is the **XSL-rendered HTML** view
+> (`xslF345X06/form4.xml`). Fetching that path returns HTML with zero `<nonDerivativeTransaction>` elements,
+> which parses to "no insider activity" — a false negative on a sell-originating seat. The script strips the
+> `xsl*/` prefix and asserts the body actually looks like Form 4 XML before parsing.
+
+### Source priority — LOW LAG FIRST. State the lag out loud.
+
+| Rank | Source | Lag | Role |
+|---|---|---|---|
+| 1 | **Form 4** insider transactions | **T+2 business days** | PRIMARY — deciding |
+| 2 | **13D / 13G** activist & 5% stakes | 13D T+5d; 13G varies | deciding |
+| 3 | **Short-interest CHANGE** | twice monthly, ~T+8d | supporting |
+| 4 | **Options flow / dark-pool** prints | near real-time | supporting — name the venue |
+| 5 | **13F** institutional holdings | **45 DAYS MINIMUM** | corroboration only |
+
+### The 13F rule (hard)
+
+**13F is due 45 calendar days after quarter end.** As of 2026-07-24 the newest FILED quarter is Q1'26
+(period ended 2026-03-31). **Q2'26 is NOT filed — it is due ~2026-08-14.** A 13F read today therefore
+describes positions **at least ~115 days old** that may have been fully unwound.
+
+- 13F may **CORROBORATE** a low-lag signal. It may **NEVER substitute** for one.
+- Never describe 13F holdings as "current", "recent" or "latest" positioning.
+- **Never originate a sell from 13F.** A 45-day-stale, long-only snapshot cannot establish that a thesis is
+  impaired today.
+- Print the staleness number the script computed, verbatim, whenever 13F is cited.
+
+### 10b5-1 vs open-market — the distinction that decides a sell
+
+A pre-scheduled **10b5-1** sale carries almost no thesis information: it was set months earlier, usually for
+diversification or taxes. A discretionary **open-market** sale by a named officer is real evidence. The
+script tags each transaction. **Never cite a 10b5-1 sale as evidence of thesis impairment.**
+
+Worked example, 2026-07-24: NEM showed 7 insider sells — **all 10b5-1, zero open-market** → weak, does not
+support a sell. MRVL showed 1 officer open-market sale of **$632,272** plus 6 scheduled → that single
+open-market line is the only one that could support a TRIM, and only alongside a stated thesis.
+
+### Missing is named, never silent
+
+If a source is unreachable, the seat reports it **by name with the reason**. It may not abstain, and it may
+not fold the failure into a generic `INSUFFICIENT_DATA`. Known-dead sources — report MISSING and move on,
+do not stall: `finviz.com` (301/blocked), `openinsider.com` (403 since 2026-07-05).
+
+SEC fair-access requires a User-Agent of the literal form `<name> <email>`; a browser UA and a parenthetical
+`tool/1.0 (contact ...)` form are **both** rejected with HTTP 403. Override via the `SEC_UA` env var.
+
+### A partial read is not a clean read
+
+Same rule one level down: an *incomplete* source must not present as a *complete* one. `smartmoney.py`
+reports `complete`, `filings_seen`, `filings_examined`, `filings_failed`, and prints `[OK/PARTIAL]` when
+they disagree; `dollar_totals_complete` is false whenever some transaction had unparseable share/price
+fields, which makes every dollar figure a **floor**, not a total. The seat must state PARTIAL in its verdict
+line and drop CONVICTION one step.
+
+Why: on 2026-07-24 the fetcher capped at the newest 25 Form 4s. MRVL had filed **43** in the window, so the
+seat saw **1** open-market officer sale (**$632,272**) and reported a confident `OK`. The full read is **5**
+sales totalling **$4,639,734** — a materially different evidence picture on a seat that is allowed to
+originate a sell. The cap is now `MAX_FORM4_FETCH = 100` and any truncation that still bites is named in
+`reason` and flips `complete` to false.
 
 ---
 
@@ -423,7 +546,7 @@ Available hierarchies (see `references/hierarchies/`). Scores from blind eval on
 
 | Name | Key mechanism | Eval score | Best for |
 |---|---|---|---|
-| `panel` (default, since round 4 — 2026-07-09) | Research desk briefing → 6 independent investor votes → conviction-weighted quorum; scorecard ACTION binding | **Pairwise winner, rounds 3+4** — not a /25 pointwise score; see caveat below. R3 patched-panel: 3–2 count AND panel margin 52.6–47.4 (modest, one win prompt-confounded). R4 (same 5 tickers, confound closed, 3-judge-majority upgrade, 15 judge votes): panel again 3–2 count, margin 53.05–46.95, 86.7% inter-judge agreement. Two consecutive rounds replicate within ~1pt of each other under different judge conditions — real, reproducible edge, not noise. Known open issue: mechanical conviction-boost rule miscalibrates HOLD confidence direction (patch-next, did not cost the round). | Full portfolio reviews and standard equity analysis — new default; named-investor-lens transparency, auditable per-seat OWN/TODAY votes, best-in-class dissent preservation |
+| `panel` (default, since round 4 — 2026-07-09) | Research desk briefing → 6 independent investor votes → conviction-weighted quorum; the quorum ORIGINATES the verdict, bounded by the SELL ORIGINATION RULE | **Pairwise winner, rounds 3+4** — not a /25 pointwise score; see caveat below. R3 patched-panel: 3–2 count AND panel margin 52.6–47.4 (modest, one win prompt-confounded). R4 (same 5 tickers, confound closed, 3-judge-majority upgrade, 15 judge votes): panel again 3–2 count, margin 53.05–46.95, 86.7% inter-judge agreement. Two consecutive rounds replicate within ~1pt of each other under different judge conditions — real, reproducible edge, not noise. Known open issue: mechanical conviction-boost rule miscalibrates HOLD confidence direction (patch-next, did not cost the round). | Full portfolio reviews and standard equity analysis — new default; named-investor-lens transparency, auditable per-seat OWN/TODAY votes, best-in-class dissent preservation |
 | `bsc` (prior default, demoted round 4) | Edge Gate + Skeptic [MEM audit] + P0/P1/P2/P3 | **25/25** (original pointwise eval); lost pairwise rounds 3 and 4 to `panel` on both count and margin | Still fully available via `--hierarchy bsc` — broad coverage, strong Edge Gate/Skeptic audit trail |
 | `bridgewater` | Skeptic → CIO → Risk Manager | 23/25 | Standard equity analysis — strong adversarialism without edge gate overhead |
 | `soros` | Macro thesis → Reflexivity → P0/P1/P2/P3 | 21/25 | Macro-driven positions where regime is the primary driver |
@@ -547,10 +670,11 @@ market-data point is traceable. Aggregate from every seat that fetched:
 
 1. **News / narrative sources** — every URL the narrative seat web_fetched OR got from the feed scripts
    (`feeds/wsj.ts`, `feeds/ft.ts`, `read_news.ts`). One per line: `[Tn] https://url (date) — "verbatim teaser/quote"`.
-2. **Smart-money / filing sources** — every URL the smart-money seat actually web_fetched. Insider
-   transactions (Form 4): **finviz.com/quote.ashx?t=TICKER is PRIMARY** (openinsider.com is secondary /
-   when-available — it has been 403-blocked since 2026-07-05). Other classes: 13f.info, EDGAR, capitoltrades,
-   marketbeat fallbacks. Retail crowd positioning (explicitly a WEAK signal — retail crowding, not
+2. **Smart-money / filing sources** — the `scripts/smartmoney.py` JSON plus every URL the seat additionally
+   web_fetched. Print each source with its STATUS and its LAG (see §Smart-money data path). A source that
+   was unreachable is listed **by name with the reason** (`Form 4: MISSING (EDGAR HTTP 503)`) — never
+   omitted and never collapsed into a bare `INSUFFICIENT_DATA`. The 13F staleness line is mandatory whenever
+   13F is cited at all. Retail crowd positioning (explicitly a WEAK signal — retail crowding, not
    institutional flow): call `python3 scripts/robinhood_top100.py --ticker TICKER` to check whether the name
    is in Robinhood's current Top-100-Most-Popular list; treat an `INSUFFICIENT_DATA` result as *absent* (not
    "no" and not an error to surface loudly), and never invent/fabricate a rank the script didn't return. One
@@ -781,25 +905,27 @@ Publishing is opt-in and silent-skip — never fail the run because of it.
 ## Step 5.5 — Reasoning diagram (MANDATORY when a report was produced; DELEGATE to one subagent)
 
 After the report exists (and the Notion page, if configured, is created), attach a **mermaid diagram of how
-the run reached its conclusions** — the decision flow the reader can audit: data inputs → deterministic
-scorecard ACTION → per-seat evidence → skeptic/dissent → final verdict + flip-trigger, per ticker.
+the run reached its conclusions** — the decision flow the reader can audit: data inputs → triage ATTENTION
+level → per-seat evidence → skeptic/dissent → originating seat → final verdict + flip-trigger, per ticker.
 
 **Delegate the WHOLE step to ONE subagent** (`/model sonnet`) — never build the diagram in the main
 orchestrator context (it re-reads the full report and would bloat the main context). The subagent:
 
 1. Reads `$RUN_DIR/report.md` (or the saved `.cache/stocks-advisor/research/<title>.md`) and
-   `$RUN_DIR/_scorecard.json`.
+   `$RUN_DIR/_triage.json`.
 2. Writes `$RUN_DIR/reasoning_diagram.mmd` — a mermaid `flowchart TD` with:
    - one subgraph per ticker containing **the full panel as desks**: one node per seat that ran, named
      by its investor lens per `references/seat-prompts.md` — e.g. `Buffett desk (Fundamental)`,
      `Druckenmiller desk (Technical)`, `Alden desk (Narrative)`, `Dalio desk (Cycle/Regime)`,
      `Smart-Money desk (flows)`, `Sell-side desk (Street consensus)` — each carrying its seat
      verdict + the key number it contributed ("Smart-$: CEO bought $1M — ACCUMULATING"), flowing into the
-     **Hunt desk / Skeptic** (strongest objection) → **CIO/scorecard decision node** (scorecard ACTION + basis —
-     labelled as the binding source) → DISSENT node when a seat disagreed (name the seat, show it was
-     overruled) → final verdict node with the flip-to-ADD/BUY trigger. The panel structure must be visible
+     **Hunt desk / Skeptic** (strongest objection) → **CIO decision node** (the quorum verdict + which seat
+     ORIGINATED it — for any TRIM/EXIT the diagram MUST name the fundamentals / narrative / smart-money seat
+     that found the thesis impaired, and the evidence; a sell node with no originating thesis seat is a
+     defect in the run, not a drawing choice) → DISSENT node when a seat disagreed (name the seat, show it
+     was overruled) → final verdict node with the flip-to-ADD/BUY trigger. The panel structure must be visible
      as a panel — seats are desks in a deliberation, not a flat evidence list;
-   - a shared top node for the run inputs (fundamentals.py / TradingView / scorecard) and a shared bottom
+   - a shared top node for the run inputs (fundamentals.py / TradingView / triage ATTENTION) and a shared bottom
      node for the report outputs;
    - seat nodes carry the load-bearing evidence ("div 6.65%, 127y streak", "insiders sold @62"), so the
      diagram answers *"why this verdict and who argued what"*, not just *"what ran"*;
@@ -849,6 +975,26 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 
 ## Self-check before printing the signal table
 
+**Gate 0 — the sell-origination audit. Do this FIRST and treat a failure as blocking, not cosmetic.**
+
+- [ ] **Every TRIM/EXIT names its originating seat and evidence.** For each sell in the table, point to the
+      `THESIS_IMPAIRED: YES` from the **fundamentals**, **narrative** or **smart-money** seat plus the stated
+      evidence (metric + delta, or filing + date + amount). A sell that cannot produce one is a **defect** —
+      delete it and print `WATCH` + an armed alert instead. This is the MRVL failure; do not re-ship it.
+- [ ] **No sell rests on price.** Grep your own output: if the justification is a moving average, a
+      drawdown, an RSI level, or a stretched multiple, it is not a sell. Technicals supply `TIMING` and a
+      stated `HARD STOP` only.
+- [ ] **Sizing and stop reductions are labeled as such** — `TRIM (SIZING) — {weight}% of book` and
+      `TRIM (RISK) — hard stop ${X} hit`. Neither may be presented as a thesis conclusion.
+- [ ] **No script verdict anywhere.** Step 0.82 prints `REVIEW_NOW | REVIEW | NO_ACTION` and nothing else.
+      If any output block shows a scorecard ACTION, a CHAIN-READ/ACTION split, or an "informational only"
+      reconcile note, the run used a stale template — fix it before printing.
+- [ ] **Triage covered the whole book.** `{n} names screened` matches the position count, and the
+      `data MISSING` count is stated. Any held position that produced no screen output is listed as
+      `REVIEW_NOW / NO_SCREEN_OUTPUT`, never silently absent.
+- [ ] **Smart-money actually ran.** `smartmoney.py` output exists for every panel name, each source carries
+      `OK | NO_DATA | MISSING(reason)` with its lag, and any 13F citation carries its staleness in days.
+
 - [ ] The report **OPENS with the 2–3 sentence prose RECAP** (highest-confidence buy/sell to take now +
       one-line reasoning + the market narrative in one sentence) before any per-stock block or the signal table.
 - [ ] **No seat line reads "carried from MM-DD" or "no data this run".** Reused verdicts print the actual
@@ -860,7 +1006,7 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       vague "looks good". WATCH/SKIP names what would change it.
 - [ ] The **Timing line is present** whenever `days_to_earnings` (from `fundamentals.py`) is ≤10 trading
       days out — `EVENT_SOON — earnings in {days}d ({date}); stage {ACTION} after print` — else `N/A`. This
-      is a non-gating annotation only; it never changes the scorecard ACTION (Step 0.82).
+      is a non-gating annotation only; it never decides anything (Step 0.82 emits attention, not actions).
 - [ ] The technical seat **named a setup or said there is none**; no BUY without a live trigger.
 - [ ] The narrative seat cited ≥2 real article URLs it **actually web_fetched or got from the feed scripts**
       (`feeds/wsj.ts`/`feeds/ft.ts`).
@@ -877,9 +1023,11 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       hypotheses to be backtested in `strategy-discovery-backtest`.
 - [ ] A TradingView screenshot is embedded inline per stock — UNLESS DEGRADED_TECH mode, where screenshots
       are skipped and each block is tagged DEGRADED.
-- [ ] The smart-money seat cited ≥1 real filing/trade URL it actually web_fetched (finviz PRIMARY for
-      insider transactions, openinsider secondary/when-available, 13f.info, EDGAR, capitoltrades), or
-      returned `NEUTRAL — INSUFFICIENT DATA`; no filing is fabricated.
+- [ ] The smart-money seat **ran `scripts/smartmoney.py`** and reported each source's status + lag. A bare
+      `INSUFFICIENT DATA` with no named source is NOT acceptable any more — that was the 2026-07-24 failure
+      (nothing was fetched and nobody could tell). Every unreachable source is named with its reason; no
+      filing is fabricated; any 13F citation carries its computed staleness in days and is labeled
+      corroboration, never the basis for a sell.
 - [ ] **The Sell-side seat ran on every deep-dive ticker** (or returned `INSUFFICIENT_DATA`), cited every
       analyst page it actually `web_fetch`ed (Yahoo/StockAnalysis.com/TipRanks/MarketBeat/Zacks/Morningstar),
       and did **NOT** assign BULLISH on the raw consensus rating level alone — the ≥2-of-3 rule (independent
@@ -977,7 +1125,7 @@ Recommend-only and backtest-gated — a scheduled re-eval is a reminder to re-ru
 ## Set an exit-watch (sell/trim alert) — for HELD positions (MANDATORY per run)
 
 "Keep watching" is the whole point of the NEM/MRVL lesson: the missed exits happened *between* full panel
-runs. Rule 0.7 catches a trend-break **when you run the scorecard** — but a position can roll over on a
+runs. Triage flags a trend-break **when you run it** — but a position can roll over on a
 Tuesday you didn't run it. So for **every held position** (not just WATCH names), register a **standing
 exit-watch** so the trend break pings the user in real time, with the exit thesis, the moment it happens —
 not weeks later when they next run a panel. This reuses the same `mkt-alert.ts` mechanism as buy-alerts; do

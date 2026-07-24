@@ -1,5 +1,27 @@
 # Hierarchy: Millennium Management
 
+> ## ⚠ AUTHORITY OVERRIDE (2026-07-24) — read before anything below
+>
+> This file was written when `scripts/scorecard.py` emitted the ACTION and every chain was forbidden from
+> setting it. **That script has been removed** (it printed WAIT on a broken-down +119% winner because the
+> position fell through an unreachable branch, and printed TRIM on a name purely for being expensive). Any
+> sentence below that says the ACTION "comes from the Step 0.82 scorecard", is "printed verbatim", or is
+> "never computed by this chain" is **STALE — this banner supersedes it.**
+>
+> - **This chain's own decision step ORIGINATES the ACTION.** There is no external ACTION to defer to, and
+>   `{SCORECARD_ACTION}` no longer exists as an input — do not template it in.
+> - **Step 0.82 now supplies ATTENTION only** (`REVIEW_NOW | REVIEW | NO_ACTION`, from `scripts/triage.py`)
+>   plus the findings behind it. Print it as input provenance. It is not a verdict and never was one to defer to.
+> - **SELL ORIGINATION RULE (binding).** A `TRIM`/`EXIT` may be printed only if the **fundamentals**,
+>   **narrative/business** or **smart-money/flows** seat found the thesis impaired, **with stated evidence**.
+>   Print `ORIGINATED BY: {seat} — {evidence}` on the ACTION line. **Technicals may not originate or decide a
+>   sell**: price is execution timing after a thesis seat has called impairment, or a pre-declared hard stop
+>   (which prints as `TRIM (RISK)`). A trend break with no thesis impairment is `WATCH` + an armed alert.
+>   Concentration prints as `TRIM (SIZING) — {weight}% of book`. See `SKILL.md` §SELL ORIGINATION RULE.
+> - A DISSENT that exists only because this chain disagreed with a script is now moot — log real seat
+>   disagreements instead.
+
+
 ## When to use
 Millennium's capital-allocator model — Englander does not trade; he allocates capital to 100+ independent PM pods. Use when the mandate is disciplined risk-budget management with automated hard stops, cross-pod diversification, and PM accountability by P&L. Best fit: portfolio with many independent positions where each position should be treated as an autonomous sub-portfolio bet, not a single-book thesis.
 
@@ -164,7 +186,7 @@ DIVERSIFICATION STATUS: {any correlation issues flagged}
 ## Output shape
 
 ```
-ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — from the Step 0.82 scorecard (never computed by this chain)
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — ORIGINATED BY this chain's decision step (see AUTHORITY OVERRIDE); for any TRIM/EXIT add `ORIGINATED BY: {thesis seat} — {evidence}`
 TICKER: {ticker}
 ALPHA SOURCE: {type — one sentence}
 CATALYST: {specific event}

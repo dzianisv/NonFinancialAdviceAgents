@@ -218,7 +218,7 @@ Runs **once** after the per-stock loop completes. A single `/model opus /effort 
 
 ## Step 5.5 — Reasoning diagram
 
-After the report (and Notion page) exists, one delegated subagent builds `$RUN_DIR/reasoning_diagram.mmd` — a mermaid flowchart of how the run reached each verdict (data → scorecard ACTION → decisive seat evidence → dissent → verdict + flip-trigger), renders it via mermaid-cli, appends the mermaid block to the report .md and the Notion page, and the orchestrator sends the .png to the user. Delegated so the main context never re-reads the full report.
+After the report (and Notion page) exists, one delegated subagent builds `$RUN_DIR/reasoning_diagram.mmd` — a mermaid flowchart of how the run reached each verdict (data → triage ATTENTION → decisive seat evidence → dissent → originating seat → verdict + flip-trigger), renders it via mermaid-cli, appends the mermaid block to the report .md and the Notion page, and the orchestrator sends the .png to the user. Delegated so the main context never re-reads the full report.
 
 ## Verdict rules
 
@@ -246,5 +246,8 @@ Smart-money is a conviction modifier (not a primary driver):
 |---|---|
 | `SKILL.md` | Full operating instructions with source citations |
 | `scripts/fundamentals.py` | yfinance data helper — writes `.cache/stocks-advisor/fundamentals/{TICKER}.out.json` (never into `scripts/`) |
-| `scripts/scorecard.py` | deterministic verdict engine — writes `.cache/stocks-advisor/_scorecard.json` (never into `scripts/`) |
+| `scripts/triage.py` | **attention ranker** — REVIEW_NOW/REVIEW/NO_ACTION over the whole book; writes `.cache/stocks-advisor/_triage.json` (never into `scripts/`). Emits no verdicts. |
+| `scripts/test_triage.py` | totality + no-verdict + incident-regression suite (enumerates ~97k inputs) |
+| `scripts/smartmoney.py` | low-lag disclosed-flow fetcher — EDGAR Form 4 (T+2) + SC 13D/13G; computes 13F staleness |
+| `scripts/scorecard.py` | **REMOVED 2026-07-24** — hard-fail shim. Was a verdict engine; emitted WAIT from an unreachable branch (NEM) and TRIM from pure technicals (MRVL). |
 | `references/seat-prompts.md` | Per-seat subagent prompt templates |

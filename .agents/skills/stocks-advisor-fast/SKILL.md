@@ -4,6 +4,8 @@ description: Analyze stocks with a strict buy/hold/sell framework that separates
 ---
 Create a table with stocks as columns.
 Use plain English. Keep it short. Be skeptical. Use current data. State the date and time of the data pull.
+Mark assets as red, yellow, green buy zones. Red - overvalued, yellow - fair value and no immediate upside, green - undervalued.
+
 For each stock, research:
 
 - Current price

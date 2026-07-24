@@ -1,27 +1,27 @@
 ---
 name: risk-desk
-description: "Always-on risk layer for HELD equity/crypto-beta positions, modeled on Citadel/Millennium central-risk-desk mechanics. Runs deterministic price/concentration/cluster rules over the live positions book, independent of any alpha view, and fires TRIM/REVIEW breaches that OVERRIDE stocks-advisor's scorecard WAIT/HOLD. Delivers via the watchlist-alerts sheet pipeline. Triggers: \"run risk desk\", \"check for trend breaks\", \"any positions breaching risk limits\", \"is anything oversized / rolling over\"."
+description: "Always-on risk layer for HELD equity/crypto-beta positions, modeled on Citadel/Millennium central-risk-desk mechanics. Runs deterministic price/concentration/cluster rules over the live positions book, independent of any alpha view, and fires TRIM (RISK) / REVIEW breaches independently of any thesis view. Delivers via the watchlist-alerts sheet pipeline. Triggers: \"run risk desk\", \"check for trend breaks\", \"any positions breaching risk limits\", \"is anything oversized / rolling over\"."
 license: MIT
 compatibility: opencode
 metadata:
   audience: equity-allocators
   domain: portfolio-risk-management
   role: risk-manager
-  source: "Built after the NEM incident (2026-06/07): scorecard.py scored NEM WAIT while it sat 8%+ of book, +100%+ gain, and broken below its 200d MA for weeks — nothing in the picker layer is designed to ask 'is this still sized right', only 'is this worth buying more of'."
+  source: "Built after the NEM incident (2026-06/07): the since-removed scorecard.py scored NEM WAIT while it sat 8%+ of book, +100%+ gain, and broken below its 200d MA for weeks — nothing in the picker layer asked 'is this still sized right', only 'is this worth buying more of'. The picker layer no longer emits verdicts at all (stocks-advisor Step 0.82 is now attention-ranking only); this desk remains the sizing/stop authority."
 ---
 
 # risk-desk
 
 ## risk-desk is NOT a picker
 
-`stocks-advisor`'s `scorecard.py` `decide()` answers one question: **is this a good time to add?**
+`stocks-advisor`'s removed the picker layer `decide()` answered one question: **is this a good time to add?**
 Its WAIT verdict ("cheap but downtrending — do not add") is the *correct* answer to that question and a
 *useless* answer to a completely different one that nothing else in the stack was asking: **is this
 position still sized right, given what it's already done?**
 
 `risk-desk` asks only the second question, continuously, over the positions actually held — not the
 universe of names being screened for entry. It has no opinion on valuation, growth, or thesis. It runs
-independently of the alpha view and, on held positions, **risk overrides alpha**: a scorecard WAIT or HOLD
+independently of the alpha view and, on held positions, **risk overrides alpha**: a panel WATCH or HOLD
 does not block a risk-desk TRIM/REVIEW from firing or being delivered. This mirrors how central risk desks
 at multi-strat funds (Citadel, Millennium) work — PMs pick names, but a separate, mechanical risk function
 polices size, drawdown, and correlation across the whole book regardless of what any PM's view is.
@@ -32,9 +32,11 @@ Risk Desk (always-on) → Delivery).
 ## The NEM case study (why this exists)
 
 Through late June 2026, NEM sat at **8.3–8.9% of book** with an unrealized gain the project's own memory
-logs recorded as **+112% to +120%**, and had rolled over below its 200-day moving average. `scorecard.py`
-correctly scored it **WAIT** — cheap valuation, downtrend, don't catch the knife — which is right for "should
-I buy more" and silent on "should I still hold this much." Nothing ever trimmed it.
+logs recorded as **+112% to +120%**, and had rolled over below its 200-day moving average. The
+since-removed `scorecard.py` scored it **WAIT** — cheap valuation, downtrend, don't catch the knife — which
+is right for "should I buy more" and silent on "should I still hold this much." Nothing ever trimmed it.
+(It recurred on 2026-07-24 for a different reason: NEM matched no rule at all and fell through to WAIT. That
+is why the picker layer no longer emits verdicts — see stocks-advisor Step 0.82.)
 
 Checked against live Yahoo data for this build: NEM's daily close **crossed below its 200d MA on
 2026-06-22** (with a brief false reclaim on 2026-06-15 after an earlier 2026-06-05 break), and was still
@@ -42,7 +44,7 @@ below on 2026-07-16, roughly **3–4 weeks** of an unaddressed trend break on a 
 points in that window, both oversized (5%+) and a large locked-in winner. Had `risk-desk` been running on a
 cron cadence alongside `watchlist-alerts`, **R1 (TREND_BREAK)**, **R3 (CONCENTRATION_REVIEW)**, and **R4
 (WINNER_ROLLOVER)** would all have fired within days of the 2026-06-22 break — independent of, and
-overriding, the scorecard's WAIT.
+overriding, the picker layer's do-nothing read.
 
 Caveat for the live verification run in this build (2026-07-16 positions snapshot): the `Unrealized_PnL`
 field for NEM in `positions_live_2026-07-16.csv` is `0`, which this script treats as **unknown, not a real

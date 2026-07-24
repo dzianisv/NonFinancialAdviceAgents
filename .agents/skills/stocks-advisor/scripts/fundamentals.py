@@ -114,6 +114,11 @@ def trading_days_between(start, end):
 def fundamentals(symbol, period="1y"):
     import yfinance as yf
 
+    # Reasons any field ended up null travel WITH the record. Swallowing them
+    # (`except: pass`) leaves a downstream reader unable to distinguish "this
+    # company has no FCF" from "the fetch broke" — the silent-default bug class.
+    data_errors = []
+
     t = yf.Ticker(symbol)
     info = t.info or {}
 
@@ -146,8 +151,10 @@ def fundamentals(symbol, period="1y"):
             lows = hist["Low"].dropna()
             if len(lows) >= 1:
                 swing_low_20d = float(lows.tail(20).min())
-    except Exception:
-        pass  # keep the .info values; never crash on a data gap
+    except Exception as e:
+        # keep the .info values; never crash on a data gap — but NAME the gap.
+        data_errors.append(f"history/{period}: {type(e).__name__}: {e} "
+                           f"(ma50/ma200/rsi14/52w/swing_low may be null)")
 
     market_cap = info.get("marketCap")
     fcf = info.get("freeCashflow")
@@ -170,11 +177,16 @@ def fundamentals(symbol, period="1y"):
                 next_earnings_date = e_lo.isoformat()
                 earnings_date_confirmed = (e_hi - e_lo).days <= 1
                 days_to_earnings = trading_days_between(date.today(), e_lo)
-    except Exception:
-        pass  # keep all three null; never crash or fabricate on a data gap
+    except Exception as e:
+        # keep all three null; never crash or fabricate on a data gap — but NAME it.
+        data_errors.append(f"calendar/earnings: {type(e).__name__}: {e} "
+                           f"(next_earnings_date/days_to_earnings null)")
 
     out = {
         "symbol": symbol,
+        # Non-empty means some field below is null for a KNOWN reason, not because
+        # the company lacks the datum. Consumers must surface this, not ignore it.
+        "data_errors": data_errors,
         "company": info.get("longName") or info.get("shortName") or symbol,
         # Instrument classification — the cleanest signal that a name is a
         # fund/basket (ETF/MUTUALFUND/INDEX) with NO company-level fundamentals for

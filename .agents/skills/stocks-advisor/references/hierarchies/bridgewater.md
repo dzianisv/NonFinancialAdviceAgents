@@ -1,5 +1,27 @@
 # Hierarchy: Bridgewater
 
+> ## ⚠ AUTHORITY OVERRIDE (2026-07-24) — read before anything below
+>
+> This file was written when `scripts/scorecard.py` emitted the ACTION and every chain was forbidden from
+> setting it. **That script has been removed** (it printed WAIT on a broken-down +119% winner because the
+> position fell through an unreachable branch, and printed TRIM on a name purely for being expensive). Any
+> sentence below that says the ACTION "comes from the Step 0.82 scorecard", is "printed verbatim", or is
+> "never computed by this chain" is **STALE — this banner supersedes it.**
+>
+> - **This chain's own decision step ORIGINATES the ACTION.** There is no external ACTION to defer to, and
+>   `{SCORECARD_ACTION}` no longer exists as an input — do not template it in.
+> - **Step 0.82 now supplies ATTENTION only** (`REVIEW_NOW | REVIEW | NO_ACTION`, from `scripts/triage.py`)
+>   plus the findings behind it. Print it as input provenance. It is not a verdict and never was one to defer to.
+> - **SELL ORIGINATION RULE (binding).** A `TRIM`/`EXIT` may be printed only if the **fundamentals**,
+>   **narrative/business** or **smart-money/flows** seat found the thesis impaired, **with stated evidence**.
+>   Print `ORIGINATED BY: {seat} — {evidence}` on the ACTION line. **Technicals may not originate or decide a
+>   sell**: price is execution timing after a thesis seat has called impairment, or a pre-declared hard stop
+>   (which prints as `TRIM (RISK)`). A trend break with no thesis impairment is `WATCH` + an armed alert.
+>   Concentration prints as `TRIM (SIZING) — {weight}% of book`. See `SKILL.md` §SELL ORIGINATION RULE.
+> - A DISSENT that exists only because this chain disagreed with a script is now moot — log real seat
+>   disagreements instead.
+
+
 ## When to use
 Baseline Bridgewater architecture — the original 23/25-scoring panel design. No edge gate, no citation tagging, no hard dollar-impact requirement on tail stress. Use when running a lighter adversarial pass without the Point72-derived edge filter layered on top.
 
@@ -66,7 +88,7 @@ ACTION vs SCORECARD: compare your CIO READ to the input `{SCORECARD_ACTION}`. If
   into the ACTION field. Never substitute your read for the scorecard's.
 
 Output exactly:
-ACTION: {SCORECARD_ACTION — printed verbatim from the Step 0.82 scorecard, never computed here}
+ACTION: {this chain's own ACTION; for TRIM/EXIT it MUST carry ORIGINATED BY: <fundamentals|narrative|smart-money> — <evidence>}
 CIO READ: {BUY|WATCH|SKIP}  or {ADD|HOLD|TRIM|EXIT} — your own believability-weighted read (informational; see DISSENT if it differs from ACTION)
 CONVICTION: {1–5}/5
 DATA COVERAGE: {N}/6 seats had real evidence this run — {name any seat that returned INSUFFICIENT_DATA/no-data
@@ -119,7 +141,7 @@ Cache output: `echo '{risk_json}' > "$RUN_DIR/{TICKER}/seat_risk.json"`
 ## Output shape
 
 ```
-ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — from the Step 0.82 scorecard, or the Risk Manager's downgrade
+ACTION: {BUY|WATCH|SKIP|PASS}   or {ADD|HOLD|TRIM|EXIT}   — originated by this chain, or the Risk Manager's downgrade (a downgrade yields WATCH/HOLD, never a sell)
 CIO READ: {BUY|WATCH|SKIP}  or {ADD|HOLD|TRIM|EXIT} — CIO's own believability-weighted read, informational only
 CONVICTION: {1–5}/5
 DISSENT LOGGED: {Skeptic's best objection, and any CIO-read-vs-ACTION disagreement — printed even when overruled}

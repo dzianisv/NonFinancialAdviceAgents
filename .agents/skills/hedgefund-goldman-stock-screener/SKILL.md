@@ -1,6 +1,6 @@
 ---
 name: hedgefund-goldman-stock-screener
-description: "Goldman-style senior-equity-analyst lens that turns a user's investment profile (risk tolerance, amount, horizon, sectors) into a screened top-10 equity shortlist. Per name: ticker, P/E vs sector, 5yr revenue trend, debt/equity health, dividend yield + payout sustainability, moat rating (weak/moderate/strong), 12-month bull/bear price targets, a 1-10 risk score with reasoning, and an entry zone + stop. Outputs a professional screening report plus a summary table. THIN WRAPPER — candidates come from a REAL screen run (stocks-trend-screener / dip-scanner) or the user's stated universe, and every per-name metric comes from stocks-advisor's fundamentals.py + scorecard, never invented. Triggers: \"screen stocks for me\", \"find me 10 stocks\", \"build a shortlist for my profile\", \"what should I buy given my risk tolerance\", \"top picks for my sectors\"."
+description: "Goldman-style senior-equity-analyst lens that turns a user's investment profile (risk tolerance, amount, horizon, sectors) into a screened top-10 equity shortlist. Per name: ticker, P/E vs sector, 5yr revenue trend, debt/equity health, dividend yield + payout sustainability, moat rating (weak/moderate/strong), 12-month bull/bear price targets, a 1-10 risk score with reasoning, and an entry zone + stop. Outputs a professional screening report plus a summary table. THIN WRAPPER — candidates come from a REAL screen run (stocks-trend-screener / dip-scanner) or the user's stated universe, and every per-name metric comes from stocks-advisor's fundamentals.py + triage, never invented. Triggers: \"screen stocks for me\", \"find me 10 stocks\", \"build a shortlist for my profile\", \"what should I buy given my risk tolerance\", \"top picks for my sectors\"."
 license: MIT
 compatibility: opencode
 metadata:
@@ -44,7 +44,7 @@ and did not survive out-of-sample (project memory: *scalable-alpha-mirage*). The
 ## No-fabrication guardrail (non-negotiable)
 
 Every price, multiple, growth number, yield, target, and risk score must come from one of: `fundamentals.py`
-+ `scorecard.py` (below), a REAL screen run (`stocks-trend-screener` / `dip-scanner`), the TradingView MCP,
++ `triage.py` (below), a REAL screen run (`stocks-trend-screener` / `dip-scanner`), the TradingView MCP,
 or a cited `web_fetch` (URL + date + verbatim quote). **No fabricated tickers** — candidates come from a real
 screen run or the user's stated universe. **If a metric is unavailable, print `INSUFFICIENT` for that cell —
 never estimate, interpolate, or recall a number from memory.** A name whose core metrics are all INSUFFICIENT
@@ -55,7 +55,8 @@ is dropped from the shortlist, not filled with plausible-looking values.
 - **Candidate discovery** → `stocks-trend-screener` (journalism/momentum-driven candidate generation) and/or
   `dip-scanner` (quality names ≥20/25/30% off the 52wk high). If the user gave an explicit universe, skip
   discovery and use it. Never assert a ticker from memory.
-- **Per-name metrics + the deterministic ACTION** → `stocks-advisor`'s `fundamentals.py` and `scorecard.py`.
+- **Per-name metrics** → `stocks-advisor`'s `fundamentals.py`. **Attention ranking** → its `triage.py`.
+  The ACTION is the analyst's, bounded by §SELL ORIGINATION RULE — no script emits one.
   Do NOT reimplement valuation/trend/quality scoring here.
 - **Sector allocation / sizing** is out of scope — defer to `tradfi-portfolio-manager`. This skill outputs an
   individual-name shortlist only.
@@ -80,11 +81,18 @@ is dropped from the shortlist, not filled with plausible-looking values.
      .cache/hedgefund-screener/AVGO.json --out-dir .cache/hedgefund-screener/fund/
    ```
    Gives price, fwd/trailing P/E, revenue_growth, margins, roe, fcf_yield, MAs, 52wk levels, analyst count.
-3. **Run the deterministic scorecard** over the whole candidate set for the framing-independent ACTION
-   (ADD/HOLD/WAIT/TRIM/EXIT) — the ACTION is the scorecard's, not prose:
+3. **Run triage** over the whole candidate set to rank ATTENTION — `REVIEW_NOW | REVIEW | NO_ACTION`.
+   **This is NOT a verdict step.** `scorecard.py` was removed on 2026-07-24 (it emitted actions from a
+   partial rule tree and printed WAIT on a name that had fallen through an unreachable branch); a script no
+   longer produces an ACTION here. Triage only tells you which names deserve the analyst grid first, and
+   surfaces names whose data is MISSING instead of silently dropping them.
    ```bash
-   /Users/engineer/.venv/bin/python3 .agents/skills/stocks-advisor/scripts/scorecard.py .cache/hedgefund-screener/fund/
+   /Users/engineer/.venv/bin/python3 .agents/skills/stocks-advisor/scripts/triage.py .cache/hedgefund-screener/fund/
    ```
+   The ACTION for each name comes from **your** analyst work in steps 4–6. If that work concludes TRIM or
+   EXIT, `stocks-advisor` SKILL.md §SELL ORIGINATION RULE binds: the sell must be originated by a
+   fundamentals / narrative / smart-money finding of thesis impairment with stated evidence. A weak chart or
+   a stretched multiple alone is `WATCH`, never a sell.
 4. **Fill the per-name analyst grid** (each field sourced as above; INSUFFICIENT if the source is silent):
    - **P/E vs sector** — the name's fwd P/E from fundamentals.py; the sector median from a **cited**
      `web_fetch` (or mark the comparison INSUFFICIENT if no sector figure is citable — do not invent a median).
@@ -127,7 +135,7 @@ AVGO    Broadcom   WAIT    31 (vs 28)     ↑ ~20% 1.1   1.2% (35%)     strong  
 <one compact block per shortlisted name: the analyst thesis, the moat rationale, the risk-score drivers,
  the target basis (cited), and the one condition that invalidates the thesis>
 
-DATA: fundamentals.py + scorecard.py + <screen source> + <cited fetches> | asof <date>
+DATA: fundamentals.py + triage.py + <screen source> + <cited fetches> | asof <date>
 Every pick is a backtest-gated hypothesis (strategy-discovery-backtest), not validated alpha.
 ```
 
