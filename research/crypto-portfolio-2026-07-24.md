@@ -4,14 +4,18 @@
 
 | Signal | Value | Regime |
 |---|---|---|
-| Fear & Greed | **28 (Fear)** | Risk-off |
+| Fear & Greed | **28 (Fear)** | Risk-off, ↓3 pts since Jul 22 |
 | BTC Death Cross (50/200) | **ACTIVE** | Bearish technical |
-| BTC vs 200wMA | −25.1% | Below value |
-| BTC Price | $63,912 | EMA20 $64.2k / SMA50 $63.1k / SMA200 $72.4k |
-| Lyn Alden (30d) | Fiscal dominance / Scarce asset hedge | BTC as hurdle |
-| Date | 2026-07-24 | — |
+| BTC vs EMA20 | **BELOW** | Short-term bearish |
+| BTC vs SMA50/SMA200 | ABOVE SMA50 / BELOW SMA200 | Mixed |
+| BTC vs 200wMA | −11.7% (estimated) | Below value |
+| BTC Price | **$63,922** | −49% from ATH |
+| BTC ETFs Jul 23 | **−$225M outflow** (ends 7d inflow streak) | Rotation risk |
+| ETH ETFs Jul 23 | **+$26.3M inflow** (5d streak) | Divergent strength |
+| 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
+| Oil (WTI) | **~$89** (CL=F, Iran tensions, +7% wk) | Inflation/geo headwind |
 
-**Regime: BEARISH.** F&G 28 = Fear, BTC below SMA200 ($72.4k). Cross-crypto correlation remains elevated. Short-term stabilization around $63k-$64k.
+**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI ~$89 (spiked toward $92-93 intraday on Iran-strike risk, up ~7% on the week — not $100).
 
 ---
 
@@ -21,15 +25,20 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$63,912** |
-| RSI (14) | 48.9 (neutral) |
-| MACD Hist | +120.5 (flattening) |
-| EMA20 / SMA50 | $64,255 / $63,103 |
-| SMA200 | $72,405 **(BELOW)** |
-| 52w High | $124,752 (−48.8% from ATH) |
+| Price | **$63,922** |
+| RSI (14) | 49.0 (neutral) |
+| MACD Hist | +154 (bullish, rising) |
+| EMA20 | $64,297 **(BELOW)** |
+| SMA50 | $63,158 **(ABOVE)** |
+| SMA200 | $72,449 **(BELOW)** |
+| Death Cross (50/200) | **Active** |
+| 52w High | $126,200 (−49.3%) |
+| 52w Low | $52,550 |
+| 200d Range | $57,800 → $97,924 → $63,922 |
 
-**Assessment:** BTC in rangebound consolidation between $62k and $65k. Death cross active (50d < 200d) signaling macro caution. Short-term support around 50d SMA ($63.1k). Institutional ETF flows remain subdued.
-**Verdict: HOLD — accumulate on dips toward $60k.**
+**Assessment:** BTC sideways in $59K-$67K range for 5 weeks straight (5 weekly closes: $59,577 → $63,650 → $63,780 → $64,723 → $63,922). A base, not a breakout. Volume declining — weekly volume dropped from 142K to 86K BTC. The ETF outflow day was large but context matters: still +$274M net for the week. BTC has been grinding lower from the $65-67K range, now trading below both EMA20 and the psychologically important $65K level.
+
+**Verdict HOLD — $60-62K is the accumulation zone. Below that, reassess open positions.**
 
 ---
 
@@ -37,14 +46,17 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$1,855.80** |
-| RSI (14) | 53.1 (neutral) |
-| EMA20 / SMA50 | $1,837.06 / $1,735.51 |
-| SMA200 | $2,153.01 **(BELOW)** |
-| 52w High | $4,831.35 (−61.7% from ATH) |
+| Price | **$1,855** |
+| 52w Range | $1,385 ↔ $4,957 |
+| % from 52w High | −62.6% |
+| 210d Performance | −32.4% |
+| Latest Weekly Close | $1,855 (down −0.9% from prev week $1,872) |
+| ETH ETF Flow | **+$26.3M** (5 consecutive days) |
+| ETH/BTC Ratio | 0.029 (multi-year low) |
 
-**Assessment:** ETH holding $1,800 support zone. Short-term moving averages (EMA20, SMA50) reclaimed. Staking yield ~3.4% and $3.1M/day base layer revenue provide fundamental floor.
-**Verdict: HOLD — $1,800 key support.**
+**Assessment:** ETH continues to diverge positively on ETF flows (5-day streak, $26.3M on Jul 23) vs BTC's $225M outflow. This is notable structural divergence — institutions are rotating INTO ETH via ETFs. However, spot price remains weak, ETH/BTC at 0.029 (compressed). The utility thesis (staking yields, L2 adoption, RWA tokenization) is gaining institutional traction even as speculative momentum remains absent.
+
+**Verdict HOLD — $1,800 is the key support. ETH ETF inflow divergence is a positive signal for relative outperformance.**
 
 ---
 
@@ -52,14 +64,16 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$73.85** |
-| RSI (14) | 43.2 (neutral-bearish) |
-| EMA20 / SMA50 | $76.43 / $73.46 |
-| SMA200 | $88.68 **(BELOW)** |
-| 52w High | $247.64 (−70.1% from ATH) |
+| Price | **$73.94** |
+| 52w Range | $60.13 ↔ $295.83 |
+| % from 52w High | −75.0% |
+| TVL | $4.9B |
+| 210d Volume Trend | Declining (19.9M → 7.1M weekly) |
+| Latest Weekly Close | $73.94 (down −3.2%) |
 
-**Assessment:** SOL testing $70-$74 base range. High-performance L1 activity remains strong, but price faces resistance at EMA20 ($76.43).
-**Verdict: HOLD — wait for $80 reclaim.**
+**Assessment:** SOL has been sliding for weeks, down 75% from highs. Volume declining every week since the mid-June peak — bearish. Stablecoins on Solana at $15B+ shows infrastructure is real, but token price disconnected from ecosystem growth. On-chain activity likely depressed as memecoin mania cooled.
+
+**Verdict HOLD — no accumulation signal until volume returns. $60 is the hard floor.**
 
 ---
 
@@ -67,13 +81,15 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$1.46** |
-| RSI (14) | 41.7 (bearish) |
-| EMA20 | $1.69 **(BELOW)** |
-| 52w High | $2.91 (−49.8% from high) |
+| Price | **~$1.44** |
+| ATH | $8.25 (−82.5%) |
+| 1y Change | −55.6% |
+| Market Cap | ~$3.9B |
+| 7d Change | −9.4% |
 
-**Assessment:** TON structure remains weak below EMA20 ($1.69). Durov legal proceedings and ecosystem deceleration weigh on sentiment.
-**Verdict: TRIM / AVOID.**
+**Assessment:** TON continues to bleed. Down another 9.4% this week. No positive catalysts visible — Telegram integration story is old news, Notcoin/HMSTR hype faded. Price below all relevant MAs.
+
+**Verdict TRIM — no catalyst, no bottom formation. Re-enter only if Telegram announces new crypto integration.**
 
 ---
 
@@ -81,13 +97,16 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$58.67** |
-| RSI (14) | 41.2 (bearish) |
-| EMA20 | $60.20 **(BELOW)** |
-| 52w High | $90.50 (−35.2% from high) |
+| Price | **$59.14** |
+| ATH | $76.87 (Jun 16, 2026 — 1 month ago) |
+| % from ATH | −23% |
+| Market Cap | $15B (#9) |
+| 7d Change | −10.8% |
+| 24h Range | $57.54 – $60.02 |
 
-**Assessment:** Hyperliquid perp DEX generates significant daily trading fees with 97% auto-buyback protocol mechanism. Deep value entry zone.
-**Verdict: BUY (small) — fee-buyback tokenomics.**
+**Assessment:** HYPE is pulling back from its ATH just one month ago (−23%). Still the #9 crypto by market cap at $15B. The pullback is healthy after the strong post-launch run-up. Perp DEX growth narrative intact. HYPE at $50-55 would be a strong accumulation zone — -28 to -35% from ATH with a growing protocol.
+
+**Verdict WATCH — $50-55 is the accumulation zone. Current $59 is above ideal entry. Perp DEX volumes key metric to monitor.**
 
 ---
 
@@ -95,14 +114,16 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$94.35** |
-| RSI (14) | 54.4 (neutral-bullish) |
-| EMA20 / SMA50 | $92.01 / $82.67 |
-| SMA200 | $105.17 **(BELOW)** |
-| 52w High | $357.24 (−73.8% from ATH) |
+| Price | **$94.00** |
+| 52w Range | $57.83 ↔ $399.85 |
+| % from 52w High | −76.5% |
+| TVL | $14.6B |
+| MC/TVL Ratio | ~0.1 |
+| Latest Weekly Close | $94 (up from $89.56 prev week, +5%) |
 
-**Assessment:** AAVE leading DeFi lending protocol with >$27B TVL. Generating $40M+/month in fees with active buy-and-distribute program. Above 20d/50d MAs.
-**Verdict: BUY (small) — real cashflow protocol.**
+**Assessment:** AAVE is the best risk/reward in the portfolio. $14.6B TVL (dominant lending protocol), token at $94 — MC/TVL ~0.1, deeply undervalued vs DeFi norms. Weekly chart shows a +5% gain this week while everything else is red — relative strength signal. Previous Jul 22 report had AAVE as "BUY ZONE" at $85-90 — this call is validated (price bounced from $88 to $94).
+
+**Verdict BUY ZONE — $85-95 accumulation. $14.6B TVL at 0.1 MC/TVL is deeply undervalued. Defensive quality in a bearish market.**
 
 ---
 
@@ -110,13 +131,15 @@
 
 | Metric | Value |
 |---|---|
-| Price | **$0.1855** |
-| RSI (14) | 40.5 (bearish) |
-| EMA20 | $0.2100 **(BELOW)** |
-| 52w High | $0.5300 (−65.0% from high) |
+| Price | **$0.186** |
+| 52w Range | $0.056 ↔ $1.44 |
+| % from 52w High | −87.1% |
+| 210d Volume Trend | Declining (123M → 54M weekly) |
+| Latest Weekly Close | $0.186 (−5.3%) |
 
-**Assessment:** Jupiter Solana super-app perps/lending/DCA aggregator. High volume but token faces unlock pressure.
-**Verdict: HOLD.**
+**Assessment:** JUP in free-fall territory, down 87% from highs. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
+
+**Verdict AVOID — downtrend intact, no reversal signal. Wait for volume base + ladder entry if ever.**
 
 ---
 
@@ -125,41 +148,45 @@
 | Metric | Value |
 |---|---|
 | Price | **$3.81** |
-| RSI (14) | 66.5 (bullish) |
-| EMA20 / SMA50 | $3.53 / $3.12 |
-| SMA200 | $3.59 **(ABOVE)** |
-| 52w High | $12.15 (−69.1% from ATH) |
+| 52w Range | $2.00 ↔ $19.47 |
+| % from 52w High | −80.4% |
+| Latest Weekly Close | $3.81 (+8.3% from $3.52 prev week) |
+| Volume Trend | Declining (24.9M → 13.8M weekly) |
 
-**Assessment:** Fee switch live (UNIfication), burning UNI via Firepit. Price above all key moving averages (EMA20, SMA50, SMA200) with strong RSI momentum.
-**Verdict: BUY (small) — fee burn active, bullish technicals.**
+**Assessment:** UNI saw a +8.3% weekly gain, best in the portfolio this week. The fee switch narrative is still alive. $3.81 is above the $3.00-3.50 support zone that held in recent weeks. However, volume is still declining. If fee switch is activated (even as a test), UNI could reprice significantly.
+
+**Verdict HOLD — fee switch catalyst is the only reason. Without it, follow LINK/JUP pattern lower.**
 
 ---
 
-### 9. AERO — Aerodrome
+### 9. AERO — Aerodrome Finance
 
 | Metric | Value |
 |---|---|
 | Price | **$0.416** |
-| RSI (14) | 44.0 (neutral) |
-| EMA20 | $0.440 **(BELOW)** |
-| 52w High | $1.05 (−60.4% from high) |
+| 52w Range | $0.410 ↔ $0.518 |
+| % from 52w High | −19.6% |
+| Weekly Volume | 774M AERO ($322M) |
+| Binance Listing | Recent |
 
-**Assessment:** Leading Base DEX with ve(3,3) tokenomics and real trading fee accrual. Consolidating.
-**Verdict: HOLD.**
+**Assessment:** AERO is newly listed on Binance — only 2 weekly bars available. Very early stage for this token. High volume relative to market cap suggests discovery phase. Base chain DEX leader (Aerodrome dominates Base TVL). The token is holding above $0.41 but hasn't built a track record.
+
+**Verdict WATCH — too early for conviction. Wait for 3+ months of price history to assess.**
 
 ---
 
-### 10. PUMP — Pump.fun
+### 10. PUMP — pump.fun
 
 | Metric | Value |
 |---|---|
-| Price | **$0.00182** |
-| RSI (14) | 38.0 (bearish) |
-| EMA20 | $0.00200 **(BELOW)** |
-| 52w High | $0.00680 (−73.2% from high) |
+| Price | **$0.001824** |
+| 52w Range | $0.000411 ↔ $0.00898 |
+| % from 52w High | −79.7% |
+| Weekly Volume | 27B tokens ($49M) |
 
-**Assessment:** Solana meme launchpad. Volume reflexive to meme activity which has slowed down.
-**Verdict: AVOID / TRIM.**
+**Assessment:** Micro-cap memecoin launchpad token. Down 80% from highs. Volume massive in token terms but trivial in USD — typical penny-token behavior. pump.fun protocol revenue is real ($500M+/year), but token accrual mechanics are unproven.
+
+**Verdict AVOID — speculative micro-cap, no edge for systematic sizing.**
 
 ---
 
@@ -168,70 +195,55 @@
 | Metric | Value |
 |---|---|
 | Price | **$8.32** |
-| RSI (14) | 53.0 (neutral) |
-| EMA20 / SMA50 | $8.24 / $7.91 |
-| SMA200 | $9.29 **(BELOW)** |
-| 52w High | $26.75 (−68.9% from ATH) |
+| 52w Range | $6.996 ↔ $30.94 |
+| % from 52w High | −73.1% |
+| Latest Weekly Close | $8.32 (−0.8% from $8.39) |
+| Volume Trend | Declining (13.8M → 5.7M weekly) |
 
-**Assessment:** Essential oracle infrastructure for RWA tokenization (Swift, Euroclear, JPMorgan). Above 20d/50d MAs.
-**Verdict: BUY (small) — RWA infrastructure leader.**
+**Assessment:** LINK verified at **$8.34** across three independent sources (CoinGecko, CoinPaprika, Yahoo) as of 2026-07-24 — the $8.32 weekly close is real. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.58 → $8.65 → $8.62 → $8.46 → $8.30). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
 
----
-
-## Signal Table
-
-```
-=== CRYPTO PORTFOLIO RUN — 2026-07-24 ===
-
-Token | Signal      | Valuation | Quorum | Bulls/Bears
-------|-------------|-----------|--------|------------
-BTC   | HOLD        | fair      | SPLIT  | 2 / 2
-ETH   | HOLD        | cheap     | SPLIT  | 2 / 2
-SOL   | HOLD        | cheap     | SPLIT  | 2 / 2
-TON   | AVOID       | elevated  | BEAR   | 1 / 3
-HYPE  | BUY (small) | cheap     | BULL   | 4 / 1
-AAVE  | BUY (small) | cheap     | BULL   | 4 / 1
-JUP   | HOLD        | cheap     | SPLIT  | 2 / 2
-UNI   | BUY (small) | cheap     | BULL   | 4 / 1
-AERO  | HOLD        | cheap     | SPLIT  | 2 / 2
-PUMP  | AVOID       | elevated  | BEAR   | 1 / 3
-LINK  | BUY (small) | cheap     | BULL   | 4 / 1
-```
+**Verdict WATCH — $8.34 confirmed (Jul 22's $16.73 was bad data, now corrected). Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
 
 ---
 
-## Daily Crypto Brief
+## CIO Synthesis
 
-📊 **Daily Crypto Brief — 2026-07-24** | F&G 28 😨 Fear
+### Tier Scoring (1-5)
 
-⚙️ **Governor:** F&G 28 → max 6 active buys
-Macro regime: Risk-off environment with BTC holding $63.9k support above 50d SMA. Real-yield DeFi tokens with fee-accrual mechanisms (AAVE, UNI, HYPE) showing relative strength.
+| Token | Fundamental | Technical | Macro | Catalyst | Conviction |
+|---|---|---|---|---|---|
+| **BTC** | ✅ (scarce) | ⚠️ (below EMA20/200) | ⚠️ (F&G 28) | ETF rotation uncertainty | **WAIT $60K** |
+| **ETH** | ✅ (TVL $41B) | ⚠️ (downtrend) | ⚠️ | ETH ETF streak diverging | **HOLD** |
+| **SOL** | ⚠️ (TVL real) | ❌ (volume dying) | ⚠️ | None visible | **HOLD** |
+| **TON** | ❌ | ❌ (below MAs) | ⚠️ | None | **TRIM** |
+| **HYPE** | ✅ (perp DEX) | ⚠️ (−23% from ATH) | ⚠️ | Pullback, healthy | **WATCH $50-55** |
+| **AAVE** | ✅✅ (TVL $14.6B) | ⚠️ (base building) | ⚠️ | MC/TVL 0.1 | **BUY ZONE** |
+| **UNI** | ⚠️ (fee switch) | ✅ (+8.3% wk) | ⚠️ | Fee switch narrative | **HOLD** |
+| **JUP** | ⚠️ (product OK) | ❌ (−87% from high) | ⚠️ | None | **AVOID** |
+| **AERO** | ⚠️ (too new) | ❌ (only 2 weeks) | ⚠️ | Binance listing | **WATCH** |
+| **PUMP** | ⚠️ (revenue real) | ❌ (penny token) | ⚠️ | None | **AVOID** |
+| **LINK** | ✅ (institutional) | ❌ (−73% from high) | ⚠️ | Oversold candidate | **WATCH** |
+### Key Portfolio Decisions
 
-⚡ **ACTION SUMMARY**
-🟢 **BUY (small)**: AAVE $94.35 — $27B TVL, $40M/mo fees, buy-distribute live [https://defillama.com/protocol/aave]
-🟢 **BUY (small)**: UNI $3.81 — Fee switch live, burning UNI via Firepit, above 200d SMA [https://defillama.com/protocol/uniswap]
-🟢 **BUY (small)**: HYPE $58.67 — 97% auto-buyback on perp DEX trading fees [https://defillama.com/protocol/hyperliquid]
-🟢 **BUY (small)**: LINK $8.32 — Swift / Euroclear RWA oracle backbone [https://chain.link]
+1. **Primary accumulator:** AAVE — strongest risk/reward again. $14.6B TVL at MC/TVL ~0.1. Price up +5% this week while everything else red — relative strength confirmed. $85-95 accumulation zone validated.
 
-━━━━━━━━━━━━━━━━━━━━━━
-🟢 **BUY (small)**
-- **AAVE** ($94.35): Leading lending protocol, $27B TVL, strong cashflows.
-- **UNI** ($3.81): UNIfication fee switch active, RSI 66.5, technical breakout above SMA200.
-- **HYPE** ($58.67): Hyperliquid perp DEX 97% fee buyback mechanics.
-- **LINK** ($8.32): Essential oracle infrastructure for institutional RWA tokenization.
+2. **Secondary watch:** HYPE pullback to $50-55 (−28-35% from ATH). Perp DEX growth narrative intact. Not time yet — wait for lower.
 
-━━━━━━━━━━━━━━━━━━━━━━
-🟡 **HOLD**
-- **BTC** ($63,912): Rangebound above $63k 50d SMA, death cross active.
-- **ETH** ($1,855.80): Reclaimed 20d/50d MAs, key $1,800 support holding.
-- **SOL** ($73.85): Base range testing around $73-$74.
-- **JUP** ($0.1855) | **AERO** ($0.416)
+3. **Trimming:** TON at $1.44 with −82.5% from ATH and no catalyst. Cut position size.
 
-━━━━━━━━━━━━━━━━━━━━━━
-🔴 **AVOID / TRIM**
-- **TON** ($1.46): Technical weakness below EMA20 ($1.69), legal FUD.
-- **PUMP** ($0.00182): Solana meme volume cooling off.
+4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH ($8.34 verified; Jul 22's $16.73 was bad data).
 
-📋 **Full report:** `research/crypto-portfolio-2026-07-24.md`
+5. **New insight:** ETH ETF divergence (+$26.3M, 5-day streak vs BTC's −$225M outflow) is the most interesting signal this week. Institutional rotation from BTC into ETH via regulated vehicles. ETH could be a relative outperformer.
 
-DYOR. Educational only. Not financial advice. #Bitcoin #DeFi #Crypto
+### Risk Overlay
+
+- F&G 28 (Fear), ↓3 pts from Jul 22. Market getting more scared.
+- BTC death cross active — alts highly correlated.
+- BTC ETF outflow day (−$225M) was large but BlackRock dominated (−$202.5M) — likely one large account rotating, not a structural shift.
+- Macro headwinds: US-Iran tensions, WTI ~$89 (spiked toward $92-93 intraday, +7% wk), 10Y yields at 18-month high (~4.70%), tariffs escalating.
+- ETH ETF divergence offers a potential rotation hedge within crypto.
+- No single asset should exceed 5-10% of crypto book at current regime.
+
+---
+
+*Report generated 2026-07-24. Data: TradingView MCP, CoinGecko, DeFiLlama, SoSoValue, Cointelegraph. Educational only.*
