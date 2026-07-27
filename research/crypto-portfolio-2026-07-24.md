@@ -15,7 +15,7 @@
 | 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
 | Oil (WTI) | **~$89** (CL=F, Iran tensions, +7% wk) | Inflation/geo headwind |
 
-**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI ~$89 (spiked toward $92-93 intraday on Iran-strike risk, up ~7% on the week — not $100).
+**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI CL=F closed $89.31 on Jul 24 (spiked to $92.19 on Jul 23 on Iran-strike risk, +7.1% vs prior week's $83.33 close — not $100). Brent BZ=F hit $100.69 intra-week but report scopes to WTI. Oil pulling back to $84.75 as of Jul 27.
 
 ---
 
@@ -200,9 +200,17 @@
 | Latest Weekly Close | $8.32 (−0.8% from $8.39) |
 | Volume Trend | Declining (13.8M → 5.7M weekly) |
 
-**Assessment:** LINK verified at **$8.34** across three independent sources (CoinGecko, CoinPaprika, Yahoo) as of 2026-07-24 — the $8.32 weekly close is real. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.58 → $8.65 → $8.62 → $8.46 → $8.30). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
+**Assessment:** LINK price as of 2026-07-24:
+| Source | Price | Type |
+|---|---|---|
+| CoinGecko (live) | **$8.80** | spot (Jul 27 fetch) |
+| CoinPaprika (live) | **$8.79** | spot (Jul 27 fetch) |
+| Yahoo close Jul 24 | **$8.33** | daily close |
+| Yahoo latest close | **$8.80** | daily close (Jul 27) |
 
-**Verdict WATCH — $8.34 confirmed (Jul 22's $16.73 was bad data, now corrected). Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
+The ~$0.47 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.80) is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.80 Jul 23-27). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
+
+**Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot bounced to $8.80 as of Jul 27. Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
 
 ---
 
