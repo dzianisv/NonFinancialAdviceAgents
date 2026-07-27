@@ -15,7 +15,7 @@
 | 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
 | Oil (WTI) | **~$89** (CL=F, Iran tensions, +7% wk) | Inflation/geo headwind |
 
-**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI CL=F closed $89.31 on Jul 24 (spiked to $92.19 on Jul 23 on Iran-strike risk, +7.1% vs prior week's $83.33 close — not $100). Brent BZ=F hit $100.69 intra-week but report scopes to WTI. Oil pulling back to $84.75 as of Jul 27.
+**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI CL=F closed $89.31 on Jul 24 (spiked to $92.19 on Jul 23 on Iran-strike risk, +7.1% vs prior week's $83.33 close — not $100). Brent BZ=F hit $100.69 intra-week but report scopes to WTI. Oil pulling back to $83.28 as of Jul 27 close (corrected 2026-07-27 from $84.75; verified against CL=F settlement series).
 
 ---
 
@@ -203,12 +203,15 @@
 **Assessment:** LINK price as of 2026-07-24:
 | Source | Price | Type |
 |---|---|---|
-| CoinGecko (live) | **$8.80** | spot (Jul 27 fetch) |
-| CoinPaprika (live) | **$8.79** | spot (Jul 27 fetch) |
+| OKX LINK-USDT (matching engine) | **$8.594** | spot (Jul 27 15:18 UTC) |
+| Kraken LINKUSD (matching engine) | **$8.5848** | spot (Jul 27 15:18 UTC) |
+| Coinbase LINK-USD | **$8.5815** | spot (Jul 27 15:18 UTC) |
+| CoinGecko (live) | **$8.60** | aggregate (Jul 27 15:17 UTC) |
 | Yahoo close Jul 24 | **$8.33** | daily close |
-| Yahoo latest close | **$8.80** | daily close (Jul 27) |
 
-The ~$0.47 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.80) is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.80 Jul 23-27). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
+**Corrected 2026-07-27 (analyse-onchain seat):** an earlier draft of this row listed Jul 27 spot as **$8.80**; four independent venues at 15:18 UTC say **$8.58–8.60** (max spread 0.22%). The $8.80 figure was stale/wrong by ~2.4% and has been replaced. Authoritative = OKX $8.594.
+
+The ~$0.26 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.594) is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.594 Jul 23-27). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
 
 **Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot bounced to $8.80 as of Jul 27. Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
 
@@ -239,7 +242,7 @@ The ~$0.47 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.80) is a Monday 
 
 3. **Trimming:** TON at $1.44 with −82.5% from ATH and no catalyst. Cut position size.
 
-4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH ($8.34 verified; Jul 22's $16.73 was bad data).
+4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH ($8.33 Jul 24 close confirmed; Jul 22's $16.73 was bad data; spot $8.594 as of Jul 27, verified across OKX/Kraken/Coinbase/CoinGecko).
 
 5. **New insight:** ETH ETF divergence (+$26.3M, 5-day streak vs BTC's −$225M outflow) is the most interesting signal this week. Institutional rotation from BTC into ETH via regulated vehicles. ETH could be a relative outperformer.
 
@@ -248,7 +251,7 @@ The ~$0.47 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.80) is a Monday 
 - F&G 28 (Fear), ↓3 pts from Jul 22. Market getting more scared.
 - BTC death cross active — alts highly correlated.
 - BTC ETF outflow day (−$225M) was large but BlackRock dominated (−$202.5M) — likely one large account rotating, not a structural shift.
-- Macro headwinds: US-Iran tensions, WTI ~$89 (spiked toward $92-93 intraday, +7% wk), 10Y yields at 18-month high (~4.70%), tariffs escalating.
+- Macro headwinds: US-Iran tensions, WTI CL=F $89.31 Jul 24 close (spiked $92.19 on Jul 23, +7% wk, pulling back to $83.28 Jul 27 close), 10Y yields at 18-month high (~4.70%), tariffs escalating.
 - ETH ETF divergence offers a potential rotation hedge within crypto.
 - No single asset should exceed 5-10% of crypto book at current regime.
 
