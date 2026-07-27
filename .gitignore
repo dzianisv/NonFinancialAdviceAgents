@@ -34,6 +34,7 @@ forecasts/
 
 # claude code session artifacts
 *.session.txt
+*.session
 .claude/*
 # ...but DO ship the dynamic workflow scripts so `git clone` exposes them as /commands
 !.claude/workflows/
@@ -75,6 +76,9 @@ logs/
 !.claude/settings.json
 !.opencode/
 !.opencode/plugins/
+
+# Generated portfolio position snapshots (stale by next run)
+positions_*.csv
 
 # Relocated skill runtime state + personal holdings under .cache/{skill}/ (public repo — never commit).
 # Intentionally NOT ignored (stay committed): .cache/analyst-smartmoney-*/ ledgers,
