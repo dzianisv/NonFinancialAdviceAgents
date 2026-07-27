@@ -213,7 +213,7 @@
 
 The ~$0.26 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.594) is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.594 Jul 23-27). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
 
-**Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot bounced to $8.80 as of Jul 27. Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
+**Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot bounced to $8.594 as of Jul 27 (verified across 4 venues). Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
 
 ---
 
