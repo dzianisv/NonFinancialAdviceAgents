@@ -12,10 +12,28 @@
 | BTC Price | **$63,922** | −49% from ATH |
 | BTC ETFs Jul 23 | **−$225M outflow** (ends 7d inflow streak) | Rotation risk |
 | ETH ETFs Jul 23 | **+$26.3M inflow** (5d streak) | Divergent strength |
+| ETF flows *as of Jul 27* (corrected) | ETH 5-day streak **SNAPPED Jul 25**, week closed red; BTC shed **−$465M over two days** (IBIT −$415M). **Both** BTC and ETH funds still extended **weekly** inflow streaks to **three**. | Divergence narrower than drafted |
 | 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
-| Oil (WTI) | **~$89** (CL=F, Iran tensions, +7% wk) | Inflation/geo headwind |
+| Oil (WTI) — *as drafted Jul 24* | **~$89** (CL=F, Iran tensions, +7% wk) | Inflation/geo headwind |
+| Oil (WTI) — **RESOLVED Jul 27 21:00Z** | **$81.85** (CL=F). Jul 24 close $89.31 → **−8.35% in one session**; now **BELOW** the Jul 17 pre-spike close of **$82.49** | **Headwind GONE — geo-premium fully round-tripped** |
+| Oil (Brent) — **RESOLVED Jul 27 21:00Z** | **$87.66** (BZ=F). Jul 24 close $96.78 → **−9.42%**; peak was $100.69 on Jul 23 | Same unwind, confirms it is not a WTI-only artifact |
 
-**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI CL=F closed $89.31 on Jul 24 (spiked to $92.19 on Jul 23 on Iran-strike risk, intraday high $93.50; +8.3% vs prior week's Jul 17 close of $82.49 — corrected 2026-07-27 from "$83.33 / +7.1%" — not $100). Brent BZ=F hit $100.69 intra-week but report scopes to WTI. Oil pulling back to $83.28 as of Jul 27 close (corrected 2026-07-27 from $84.75; verified against CL=F settlement series).
+**Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Divergence growing — BTC ETFs see largest single-day outflow in 2 weeks, while ETH ETFs extend streak to 5 days. **Corrected 2026-07-27: that ETH 5-day streak snapped on Jul 25 and the week closed red, while BTC funds shed −$465M over two days (IBIT −$415M) — yet BOTH complexes still logged a third consecutive WEEKLY inflow, so the "rotation out of BTC into ETH" read is weaker than drafted (https://cointelegraph.com/markets/ethereum-etfs-week-red-end-inflow-streak, https://www.coindesk.com/markets/2026/07/27/bitcoin-etfs-record-third-consecutive-weekly-inflows-despite-losses-of-usd465-million-to-end-week).** Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), WTI CL=F closed $89.31 on Jul 24 (spiked to $92.19 on Jul 23 on Iran-strike risk, intraday high $93.50; +8.3% vs prior week's Jul 17 close of $82.49 — corrected 2026-07-27 from "$83.33 / +7.1%" — not $100). Brent BZ=F hit $100.69 intra-week but report scopes to WTI.
+
+> **OIL-MACRO CONFLICT — RESOLVED 2026-07-27 21:00Z.** This report listed oil in TWO contradictory places: the Macro table said "~$89 … Inflation/geo headwind" while the body had drifted through $84.75 → $83.28 → $81.64 across successive patches. Both the table row and the body were stale. **Authoritative re-pull, Yahoo `CL=F` / `BZ=F`, regularMarketTime 2026-07-27T20:58Z: WTI $81.85, Brent $87.66.** The full daily series is now pinned so this cannot drift again:
+>
+> | Date | WTI CL=F | Brent BZ=F |
+> |---|---|---|
+> | Jul 16 (pre-spike) | 78.95 | 84.23 |
+> | Jul 17 (prior-wk close) | **82.49** | 88.10 |
+> | Jul 20 | 83.23 | 89.22 |
+> | Jul 21 | 84.91 | 91.01 |
+> | Jul 22 | 86.83 | 94.07 |
+> | Jul 23 (Iran-strike peak) | **92.19** | **100.69** |
+> | Jul 24 (report snapshot) | **89.31** | 96.78 |
+> | **Jul 27 (live 20:58Z)** | **81.85** | **87.66** |
+>
+> **The conflict resolves AGAINST the report's own bearish framing.** WTI at $81.85 is not merely "pulling back" — it is **below the $82.49 Jul 17 pre-spike close**, i.e. the entire Iran geo-premium has round-tripped and then some. "Oil = inflation/geo headwind" was a valid Jul 24 input and is a **dead** Jul 27 input. `Regime: BEARISH` was constructed from four legs (F&G 28, BTC death cross, 10Y ~4.70%, oil shock); **one of those four legs no longer exists**, and a second (the BTC→ETH ETF rotation) was downgraded above. The regime label is retained as BEARISH on the two surviving legs (F&G, death cross) but is explicitly **weaker than drafted** — do not cite oil as a bear input after 2026-07-27.
 
 ---
 
@@ -54,7 +72,7 @@
 | ETH ETF Flow | **+$26.3M** (5 consecutive days) |
 | ETH/BTC Ratio | 0.029 (multi-year low) |
 
-**Assessment:** ETH continues to diverge positively on ETF flows (5-day streak, $26.3M on Jul 23) vs BTC's $225M outflow. This is notable structural divergence — institutions are rotating INTO ETH via ETFs. However, spot price remains weak, ETH/BTC at 0.029 (compressed). The utility thesis (staking yields, L2 adoption, RWA tokenization) is gaining institutional traction even as speculative momentum remains absent.
+**Assessment:** ETH continues to diverge positively on ETF flows (5-day streak, $26.3M on Jul 23) vs BTC's $225M outflow. This is notable structural divergence — institutions are rotating INTO ETH via ETFs. **Downgraded 2026-07-27: the 5-day streak snapped Jul 25 and the ETH ETF week closed red; both BTC and ETH funds nonetheless extended weekly inflow streaks to three. The durable version of this claim is the RELATIVE one — ether funds drew nearly as much capital as bitcoin ETFs over three weeks on roughly one-eighth the net assets (https://www.theblock.co/post/409660/bitcoin-etf-weekly-trading-volume-falls-to-lowest-since-october-2024-as-ether-funds-lead-inflows-again) — not a live daily inflow streak.** However, spot price remains weak, ETH/BTC at 0.029 (compressed). The utility thesis (staking yields, L2 adoption, RWA tokenization) is gaining institutional traction even as speculative momentum remains absent.
 
 **Verdict HOLD — $1,800 is the key support. ETH ETF inflow divergence is a positive signal for relative outperformance.**
 
@@ -255,7 +273,7 @@ The ~$0.26 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.594) is a Monday
 
 4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH ($8.33 Jul 24 close confirmed; Jul 22's $16.73 was bad data; spot $8.594 as of Jul 27, verified across OKX/Kraken/Coinbase/CoinGecko).
 
-5. **New insight:** ETH ETF divergence (+$26.3M, 5-day streak vs BTC's −$225M outflow) is the most interesting signal this week. Institutional rotation from BTC into ETH via regulated vehicles. ETH could be a relative outperformer.
+5. **New insight (downgraded 2026-07-27):** ETH ETF divergence (+$26.3M, 5-day streak vs BTC's −$225M outflow) looked like the most interesting signal this week, but the streak snapped Jul 25 and ETH's week closed red while BTC shed −$465M over two days — **both** complexes still booked a third straight WEEKLY inflow. Keep the relative claim (ether funds ≈ bitcoin funds' capital on ~1/8 the assets over three weeks); drop the "live streak" framing. ETH may still be a relative outperformer, but this is no longer the week's cleanest signal.
 
 6. **New insight (analyse-defi seat, 2026-07-27) — value accrual is contracting across the whole book.** Every protocol token here has 30d-annualized revenue *below* its trailing-1y: **AAVE −61%, AERO −58%, JUP −54%, HYPE −44%, PUMP −26%.** UNI is the sole fee accelerator (~+32%), but holders capture only 3.49% of it. Ranked by *verified* buyback yield on market cap: **PUMP 20.6% > AERO 11.8% (ve-locked only) > JUP 4.2% > HYPE 3.4% > UNI 1.65% > LINK 0.9% > AAVE 0.0% (paused).** The book's cheap multiples are falling numerators, not discovered bargains — size for that.
 
@@ -266,9 +284,9 @@ The ~$0.26 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.594) is a Monday
 - F&G 28 (Fear), ↓3 pts from Jul 22. Market getting more scared.
 - BTC death cross active — alts highly correlated.
 - BTC ETF outflow day (−$225M) was large but BlackRock dominated (−$202.5M) — likely one large account rotating, not a structural shift.
-- Macro headwinds: US-Iran tensions, WTI CL=F $89.31 Jul 24 close (spiked $92.19 on Jul 23, +7% wk, pulling back to $83.28 Jul 27 close), 10Y yields at 18-month high (~4.70%), tariffs escalating.
-- ETH ETF divergence offers a potential rotation hedge within crypto.
-- **Oil geo-premium unwinding since the Jul 24 snapshot** — WTI $89.31 → $83.28 and Brent $96.78 → $89.56 by Jul 27 close. Marginal macro tailwind vs the report's bearish framing.
+- Macro headwinds: US-Iran tensions, WTI CL=F $89.31 Jul 24 close (spiked $92.19 on Jul 23, +7% wk, pulling back to **$81.64 Jul 27 intraday — corrected 2026-07-27 from "$83.28 close"; Jul 27 has not settled**), 10Y yields at 18-month high (~4.70%), tariffs escalating.
+- ETH ETF divergence offers a potential rotation hedge within crypto — **but sized down 2026-07-27: the daily inflow streak broke Jul 25 and both complexes still posted a third weekly inflow, so this is a relative-strength tilt, not an active rotation signal.**
+- **Oil geo-premium unwinding since the Jul 24 snapshot** — WTI $89.31 → **$81.64** and Brent $96.78 → **$87.50** as of Jul 27 intraday (re-verified 2026-07-27 against Yahoo `CL=F` / `BZ=F`; supersedes the earlier $83.28 / $89.56 pair, which was wrong by ~2%). Unwind is LARGER than drafted — a bigger macro tailwind against the report's bearish framing.
 - No single asset should exceed 5-10% of crypto book at current regime.
 - **AAVE-specific:** unresolved rsETH bad-debt allocation is a live balance-sheet risk, not just a paused-buyback issue. The pause exists precisely to preserve treasury capacity for a possible DAO-level response.
 
@@ -277,16 +295,34 @@ The ~$0.26 gap between Jul 24 close ($8.33) and Jul 27 spot ($8.594) is a Monday
 | # | Claim as drafted | Verified value | Source |
 |---|---|---|---|
 | 1 | LINK spot Jul 27 **$8.80** | **$8.594–8.611** (CoinGecko $8.60, Coinbase $8.597, Kraken $8.6051, OKX $8.611, CoinPaprika $8.6037; max spread 0.22%) | 5 venues, 15:22 UTC |
-| 2 | WTI Jul 27 **$84.75** | **$83.28** close | Yahoo `CL=F` daily |
+| 2 | WTI Jul 27 **$84.75**, then **$83.28** | **$81.64** intraday (NOT a settled close — Jul 27 still trading) | Yahoo `CL=F` daily, re-pulled 2026-07-27 |
+| 2b | Brent Jul 27 **$89.56** close | **$87.50** intraday | Yahoo `BZ=F` daily, re-pulled 2026-07-27 |
 | 3 | WTI prior-week close **$83.33** (+7.1%) | **$82.49** Jul 17 (+8.3%) | Yahoo `CL=F` daily |
 | 4 | AERO "only 2 weekly bars", 52w range **$0.410↔$0.518** | **365 daily points**, 365d range **$0.3018↔$1.4907**, ATH $2.32 (2024-12-07) | CoinGecko market_chart |
 | 5 | UNI fee switch "if activated" | **Live since 2025-12-28**, 11 chains, 3.49% realised capture | gov.uniswap.org t/26162 |
 | 6 | PUMP "accrual unproven", "$500M+/yr" | **$14,301,309/30d buyback, daily**; revenue 1y **$323,949,113** | DeFiLlama dailyHoldersRevenue |
 | 7 | AAVE "best risk/reward", buyback implied live | **Paused since 2026-04-19**, `holdersRevenue 30d= $0` | governance.aave.com t/24686 |
+| 8 | ETH ETF "5-day inflow streak" / BTC "−$225M" as live rotation signal | **Streak SNAPPED Jul 25**, ETH week closed red; BTC shed **−$465M over 2 days** (IBIT −$415M); **both** complexes still logged a **third consecutive weekly inflow** | cointelegraph.com/markets/ethereum-etfs-week-red-end-inflow-streak; coindesk.com/markets/2026/07/27/bitcoin-etfs-record-third-consecutive-weekly-inflows-despite-losses-of-usd465-million-to-end-week |
 | — | Binance LINK/AERO cross-check | **[FETCH FAILED: api.binance.com — HTTP 451 geo-restricted]** | not imputed |
 | — | AERO exact gross emission | **[FETCH FAILED: api.llama.fi/emission/aerodrome-v1 — HTTP 402]** → net-supply-delta proxy used, labelled | not imputed |
 
-**Gate status: PASS after correction.** 7 claims challenged, 7 resolved with live fetches, 2 failures recorded verbatim rather than guessed.
+**Gate status: PASS after correction.** 8 claims challenged, 8 resolved with live fetches, 2 failures recorded verbatim rather than guessed. Claim #8 was added by the adversarial verdict-critic pass on 2026-07-27.
+
+### Verdict-critic pass (2026-07-27) — BTC / ETH / SOL
+
+Adversarial re-verification of the current BTC-HOLD / ETH-HOLD / SOL-SELL verdicts against live primaries:
+
+| Claim | Live check | Result |
+|---|---|---|
+| ETH net-inflationary +0.85%/yr | 121,815,730 (06-27 15:00Z) → 121,884,168 (07-21 20:14Z), 24.22d = **+0.8467%/yr** (ultrasound.money) | **Reproduces exactly**; window ends 07-21 (6d stale) and burn is demand-dependent — chain fees are **+20.38% 7d** |
+| ETH 97.4% fee leak, $7.07M to L1 | L1 fees 30d **$7,066,764** vs chain fees 30d **$273,171,285** = 2.59% captured (DeFiLlama) | **Reproduces exactly**; P/S ≈ 2,707x |
+| SOL inflation 3.725%/yr, all to validators | Solana RPC `getInflationRate` epoch 1008: total **0.03724738633549205**, validator same, foundation **0.0** | **Reproduces exactly** — but it is a point on a ~−15%/yr disinflation schedule to a 1.5% floor, and is governance-mutable |
+| SOL "chain fees 30d $15.06M vs 1y $276.4M" | That is DeFiLlama's **L1 base-fee adapter** ($15,057,242 / $276,418,849). True **chain** fees are **$211,249,217/30d vs $4,139,945,000/1y**, change_7d **+19.85%** | **MISLABELLED** — understates network economics ~14x and hides rising weekly fees |
+| SOL Jito MEV −66% | $6,555,618/30d vs $233,299,225/1y = **−66.3%** run-rate | **Reproduces** — but Jito Labs just launched **JTX**, changing forward revenue base |
+| BTC Strategy 843,775 BTC @ $75,476, "~$9.3B underwater" | 843,775 × ($75,476 − $64,704) = **$9.089B** | Overstated ~$0.2B |
+| BTC Strategy cash build read as bearish | Strategy also tapped its $1B preferred buyback for the **first time** ($25M STRC); **Benchmark reiterates $570**, calling the cash reserve a *strengthening* of the BTC acquisition plan | **Contested interpretation**, not settled fact |
+
+**Missed catalysts flagged:** US-Iran strike pause repricing risk assets; BOE + BOJ decisions and Strategy earnings this week (not just the Jul 29 FOMC); Galaxy's dormant-BTC-at-4-year-low (rebuts the LTH distribution framing); **CLARITY Act collapse risk before the August recess** (largest live classification input for ETH and SOL); and for SOL a live adoption cluster — stablecoin supply crossing **$15Bn** first time, Jito JTX, LayerZero/Keeta tokenized bank deposits, Grayscale SOL staking cash distributions — which makes a **unanimous 6/6 bearish** quorum look correlated rather than independent.
 
 ---
 

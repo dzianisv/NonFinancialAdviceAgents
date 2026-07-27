@@ -28,7 +28,7 @@ We re-verified every protocol's tokenomics live this week instead of trusting la
 
 ⚠️ The whole book's revenue is contracting vs trailing-1y: AAVE −61%, AERO −58%, JUP −54%, HYPE −44%, PUMP −26%. Cheap multiples here are falling numerators, not bargains.
 
-Also corrected: LINK spot $8.80 → $8.60 (5 venues), WTI Jul-27 $84.75 → $83.28, and AERO's "only 2 weeks of history" (it has 2+ years; 52w range $0.30–$1.49).
+Also corrected: LINK spot $8.80 → $8.60 (5 venues), WTI Jul-27 $84.75 → $81.64 (re-verified 2026-07-27; an earlier fix to $83.28 was itself wrong), and AERO's "only 2 weeks of history" (it has 2+ years; 52w range $0.30–$1.49).
 
 Educational only. Not financial advice.
 ```
@@ -62,5 +62,5 @@ Every number above traces to a live fetch logged in `research/defi-brief-2026-07
 - UNI 3.49% → `gov.uniswap.org/t/26162` + `fees 30d= 93,240,408.55` vs `revenue 30d= 3,255,483`
 - PUMP 20.6% → `holdersRevenue 30d= 14,301,309` ÷ mcap `844,686,746` × 12.17
 - LINK $8.60 → CoinGecko 8.60 / Coinbase 8.597 / Kraken 8.6051 / OKX 8.611 / CoinPaprika 8.6037
-- WTI $83.28 → Yahoo `CL=F` Jul-27 close
+- WTI $81.64 → Yahoo `CL=F` Jul-27 intraday (NOT settled; `regularMarketPrice` 81.64, Jul-24 close 89.31). Brent `BZ=F` $87.50 intraday, Jul-24 close $96.78.
 - AERO history → CoinGecko `market_chart` 365 daily points, range $0.3018–$1.4907
