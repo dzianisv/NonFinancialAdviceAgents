@@ -152,7 +152,12 @@
 
 Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% protocol take, to treasury), GHO supply **$648,238,270**. Revenue run-rate is the worst-contracting in the book: 1y $117,285,863 vs 30d-annualized $45,760,537 = **−61%**.
 
-**Verdict BUY ZONE → downgrade to ACCUMULATE-WITH-CAVEAT, $85-95.** The protocol is genuinely cheap (0.10 MC/TVL, real treasury revenue, $648M GHO). But the token currently captures **zero** of that revenue, so the "defensive quality" framing overstates the case — this is a cheap protocol with a non-accruing token and unresolved bad-debt overhang, not a yielding asset. **The single highest-leverage catalyst to monitor in the entire book is an on-chain AIP restarting buybacks.** Size accordingly; do not treat as a buyback name until that vote lands.
+**VERDICT RE-DERIVED 2026-07-27/28 (verdict-critic pass) — BUY ZONE / ACCUMULATE-WITH-CAVEAT was too soft, downgraded to HOLD (existing) / AVOID (new capital).** Weighing the honest evidence, not softened language:
+- **Against accumulating:** buyback has been $0 for 99+ consecutive days (`holdersRevenue` 30d = $0, every day 2026-06-25→07-27, governance-confirmed at `governance.aave.com/t/24686`); revenue run-rate is the worst-contracting name in the entire 11-token book (−61% 30d-annualized vs trailing-1y); the rsETH bad-debt overhang from the April exploit is still unresolved on the balance sheet; and there is **no dated, binding restart mechanism** — only a forward-looking statement.
+- **The one governance signal that could flip this** — Aave founder Stani Kulechov stating on 2026-06-25 (`governance.aave.com/t/24936` post #16) that "new Aavenomics 3.0 will have immutable and automated buybacks" — is **intent, not a commitment**: no date, no Snapshot vote, no AIP number. It downgrades "no restart condition will ever exist" (too bearish) to "a restart is being designed" (still not investable), and does not by itself justify BUY ZONE.
+- **V4 deposit growth ($11.3M Apr 15 → $303M Jul 23, 11 cap-raise rounds + Avalanche launch)** is real protocol-level traction, but by design **V4 does not share revenue with AAVE token holders** — it strengthens the protocol's TVL/moat, not the token's cash-flow case. Growth in a bucket that doesn't accrue to the token is not a token-bullish catalyst.
+- **Cheap MC/TVL (0.10) is not a valuation edge when accrual is zero** — a cheap multiple on a non-existent numerator (holder revenue) is not a bargain, it is the market correctly pricing a paused income stream.
+- Net: the honest call is **HOLD for existing positions** (real $14.7B TVL, deep GHO stablecoin float, cheap balance-sheet multiples, and optionality if/when a dated buyback-restart AIP lands) but **AVOID adding new capital** at $85-95 on a "cheap defensive" thesis — that thesis requires live accrual, and there isn't any. This is a genuine downgrade from the panel's original BUY ZONE, not a wording change: **do not size AAVE as an accumulation candidate until a dated, on-chain AIP restarting buybacks actually passes.**
 
 ---
 
@@ -287,7 +292,7 @@ The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is 
 | **SOL** | ⚠️ (TVL real) | ❌ (volume dying) | ⚠️ | None visible | **HOLD** |
 | **TON** | ❌ | ❌ (below MAs) | ⚠️ | None | **TRIM** |
 | **HYPE** | ✅ (perp DEX) | ⚠️ (−23% from ATH) | ⚠️ | Pullback, healthy | **WATCH $50-55** |
-| **AAVE** | ✅✅ (TVL $14.6B) | ⚠️ (base building) | ⚠️ | MC/TVL 0.1 | **BUY ZONE** |
+| **AAVE** | ⚠️ (TVL $14.6B, but 0% accrual) | ⚠️ (base building) | ⚠️ | buyback restart UNDATED | **HOLD (existing) / AVOID (new)** |
 | **UNI** | ⚠️ (burn live, 3.49% capture) | ✅ (+8.3% wk) | ⚠️ | v4 fee vote (burn already live) | **HOLD** |
 | **JUP** | ⚠️ (product OK) | ❌ (−87% from high) | ⚠️ | None | **AVOID** |
 | **AERO** | ⚠️ (fees real, emission 1.9x) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
@@ -295,7 +300,7 @@ The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is 
 | **LINK** | ✅ (institutional) | ❌ (−73% from high) | ⚠️ | Oversold candidate | **WATCH** |
 ### Key Portfolio Decisions
 
-1. **Primary accumulator:** AAVE — $14.74B TVL at MC/TVL ~0.10, GHO $648M, price up +5% this week while everything else red. **Caveat added 2026-07-27: buybacks OFF since 2026-04-19 (governance-confirmed, `holdersRevenue 30d= $0`), no restart condition defined, revenue run-rate −61% vs trailing-1y.** Zone $85-95 holds on valuation, but this is a cheap protocol with a *non-accruing* token, not a yielding defensive asset. Restarting the buyback is the highest-leverage catalyst in the book.
+1. **AAVE re-derived, no longer the primary accumulator (2026-07-27/28, verdict-critic pass).** $14.74B TVL at MC/TVL ~0.10, GHO $648M, price up +5% this week while everything else red — but buybacks have been OFF since 2026-04-19 (governance-confirmed, `holdersRevenue 30d= $0`, 99+ days), revenue run-rate is the worst-contracting name in the book (−61% vs trailing-1y), and the only restart signal is an undated founder statement of intent, not a committed AIP. V4 deposit growth ($11.3M→$303M) is real but does not accrue to the token by design. **HOLD existing / AVOID adding new capital** — cheap multiples on zero accrual are not a bargain. This is a downgrade from the panel's original BUY ZONE call, not a caveat on it.
 
 2. **Secondary watch:** HYPE pullback to $50-55 (−28-35% from ATH). Perp DEX growth narrative intact. Not time yet — wait for lower.
 
