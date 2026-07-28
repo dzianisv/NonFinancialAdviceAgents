@@ -304,7 +304,7 @@ The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is 
 
 2. **Secondary watch:** HYPE pullback to $50-55 (−28-35% from ATH). Perp DEX growth narrative intact. Not time yet — wait for lower.
 
-3. **Trimming:** TON at $1.44 with −82.5% from ATH and no catalyst. Cut position size.
+3. **Trimming:** TON at $1.44 with −58.5% to −59.1% from its true 52w high ($3.57, corrected 2026-07-27/28 from a drafted −49.2%) and no catalyst. Cut position size.
 
 4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH ($8.33 Jul 24 close confirmed; Jul 22's $16.73 was bad data; spot $8.594 as of Jul 27, verified across OKX/Kraken/Coinbase/CoinGecko).
 
