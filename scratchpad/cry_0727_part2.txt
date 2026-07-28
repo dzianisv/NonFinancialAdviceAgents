@@ -1,0 +1,23 @@
+━━━━━━━━━━━━━━━━━━━━━━
+🟡 HOLD — the ones that changed
+━━━━━━━━━━━━━━━━━━━━━━
+
+🟡 UNI $3.84 — HOLD (the one bright spot)
+  📈 Technical: +28% in 30d, above ALL its average price lines — only name here with a real uptrend. Still 44% under its 4yr average ($6.82).
+  🏛 DeFi: The ONLY protocol earning MORE than last year (+32%). Burns ~847k UNI/month = 1.65%/yr of supply destroyed — the only shrinking coin supply in the book.
+  ⛓ On-Chain: Holders currently capture just 3.49% of fees, not the 17% headline — BUT the v4 fee switch cleared its first vote and went on-chain Jul 22. That would raise capture.
+  🌍 Macro: Pushed into tokenised stocks/bonds with Superstate, Securitize, Dowgo — real institutional growth.
+  ⚠️ Not a buy yet: 60x earnings after a +28% month, and a live proposal could DELETE the burn entirely.
+
+🟡 AAVE $99.85 — HOLD (was SELL — we were wrong)
+  🏛 DeFi: We said buybacks were paused 99 days. Wrong — the data shows a $576,537 payout on Jun 24. Real gap is ~33 days. And a Jun 25 statement promises "immutable and automated buybacks".
+  ⛓ On-Chain: What IS true: holders received $0 over the last 30 days. Fees down 62% — steepest fall here.
+  📈 Technical: Best week in the book, +11.5%, reclaimed $100. But still under its 1yr average ($104).
+  🌍 Macro: $14.7B locked against a $1.5B price tag — cheapest asset backing anywhere here, plus almost no dilution (96.4% of coins already issued).
+
+🟡 HYPE $58.30 — HOLD (was SELL — catalyst didn't survive checking)
+  🌍 Macro: We were told $817M unlocks Wed Jul 29. The maths doesn't work (2.8% of supply = $359M, not $817M) and another tracker says Aug 6 / $595M. Three conflicting numbers → we will NOT sell on an unverified date.
+  🏛 DeFi: Genuinely the best machine here — 99% of fees automatically buy HYPE = $439M/yr, no vote needed. But earnings down 44%.
+  ⛓ On-Chain: Only 23.3% of coins are in circulation — worst dilution setup in the book. A 3.4%/yr buyback can't absorb that.
+  🐋 Smart Money: $1.31B of open futures — ~54% of Bitcoin's, on a far smaller coin. Most leveraged name here.
+  📈 Technical: Real win — tokenised stocks became its biggest trading category, over half of weekly volume.

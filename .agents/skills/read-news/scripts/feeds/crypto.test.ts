@@ -134,7 +134,11 @@ test("NEWS_FEEDS contains all 10 feed names", () => {
 test("CRYPTO_FEED_URLS has correct URLs including coinbase Google News proxy", () => {
   expect(CRYPTO_FEED_URLS.coinbase).toContain("news.google.com");
   expect(CRYPTO_FEED_URLS.coinbase).toContain("coinbase.com");
-  expect(CRYPTO_FEED_URLS.bloomberg).toBe("https://www.bloomberg.com/feed/podcast/etf-report.xml");
+  // Bloomberg retired the ETF-report podcast feed (now HTTP 403); the markets
+  // news RSS is the live replacement wired in crypto.ts. Verified 2026-07-27:
+  //   https://www.bloomberg.com/feed/podcast/etf-report.xml -> 403
+  //   https://feeds.bloomberg.com/markets/news.rss          -> 301 (serves)
+  expect(CRYPTO_FEED_URLS.bloomberg).toBe("https://feeds.bloomberg.com/markets/news.rss");
   expect(CRYPTO_FEED_URLS.decrypt).toBe("https://decrypt.co/feed");
   expect(CRYPTO_FEED_URLS.coindesk).toBe("https://www.coindesk.com/arc/outboundfeeds/rss/");
 });

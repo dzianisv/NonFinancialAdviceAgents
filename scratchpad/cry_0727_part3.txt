@@ -1,0 +1,36 @@
+━━━━━━━━━━━━━━━━━━━━━━
+🟡 HOLD — majors & the rest
+━━━━━━━━━━━━━━━━━━━━━━
+
+🟡 BTC $64,704 — HOLD
+  📈 Technical: Sits just 1-2% above its 4-year average price ($63,526) — the tightest line in the sand in the book. We re-checked this against Kraken's own 669 weeks of data: it holds.
+  ⛓ On-Chain: Average buyer paid $52,468, so price is still 1.23x above what the crowd paid — NOT a bottom yet. Long-term holders are selling at an 11% loss.
+  🌍 Macro: Fed decides Wed with a 28-33% chance of a HIKE. Money supply +5.58%/yr and speeding up is the 2-3yr tailwind price hasn't discounted.
+  🐋 Smart Money: Michael Saylor's Strategy skipped buying a 5th week, and actually SOLD 3,588 BTC in early July. Sitting on $9.1B of losses, holding $3.75B in cash instead.
+
+🟡 ETH $1,930 — HOLD
+  ⛓ On-Chain: Supply now GROWS ~0.85%/yr — burning no longer offsets issuance. The "ultrasound money" case is off for now.
+  🏛 DeFi: $273M of fees earned on Ethereum in 30d but only $7.07M reaches ETH holders — 97.4% leaks to apps and layer-2s.
+  📈 Technical: 22% below its 4yr average ($2,482) — a deeper discount than Bitcoin's. Best momentum in the book (+20% in 30d).
+  🐋 Smart Money: ETF buying beat Bitcoin's 3-to-1 despite being 1/8 the size — but that daily streak snapped Jul 25. Options "max pain" at $1,800 pulls DOWN, 6.5% under price.
+
+🟡 PUMP $0.0021 — HOLD (do not chase)
+  🏛 DeFi: Buys back 20.6% of its own value per year — 6x the next best, every single day without a gap. Cheapest real cash here at 3.5x earnings.
+  📈 Technical: RSI 69 (near overbought) after +53% in 30d. That's why it's a hold, not a buy — you'd be chasing.
+  ⛓ On-Chain: The payout split has already changed TWICE (100%→0%→50%). One vote can zero the whole reason to own it.
+  🌍 Macro: Fairer than we first said — a real product ("BOOST" buyback-and-burn) launched Jul 21, not just an influencer's $1.5M bet.
+
+🟡 JUP $0.187 — HOLD
+  🏛 DeFi: 50% of revenue buys back JUP — automatic, not a promise. But 4.2%/yr doesn't beat a 4.37% government bond.
+  📈 Technical: Worst tape here, -18.8% in 30d, barely 0.7% above its 1yr average.
+  ⛓ On-Chain: Earnings halved (-54%) and 51.6% of coins still to be issued.
+  🐋 Smart Money: Correction — we cited futures funding at -25.94%. It's actually +1.97%. That bearish datapoint is dead.
+
+🔍 We ran 11 fact-checkers + an independent skeptic over our own conclusions. They found 11 defects and we flipped 2 SELLs to HOLD (AAVE, HYPE) because our facts were wrong. Corrections are in the full report.
+
+📅 Watch: Wed Jul 29 Fed decision · Thu Jul 30 inflation (PCE) + Coinbase & Strategy earnings · Fri Jul 31 FTX pays out ~$900M
+
+📋 Full report (5 research seats · 6 analyst lenses · every source linked):
+https://www.notion.so/3aaac25eb49f8122bb10d4e4d3ca0110
+
+DYOR. Educational only. Not financial advice. #Bitcoin #DeFi #Crypto

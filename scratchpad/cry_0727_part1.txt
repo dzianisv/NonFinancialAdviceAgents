@@ -1,0 +1,45 @@
+📊 Crypto Daily — 2026-07-27 | F&G 30 😰 Fear
+⚙️ Governor: F&G 30 → max 6 active buys
+🚫 ZERO buys today — first clean sweep. 11 tokens, 6 independent analyst lenses, not one bullish verdict. Reason isn't mood: 7 of 8 fee-earning protocols are earning LESS than a year ago, so the "cheap" prices are shrinking earnings, not bargains. Fed decides Wed — market now bets on a HIKE (69% odds of one in 2026), not a cut.
+
+⚡ ACTION SUMMARY
+🔴 SOL $75.52 SELL — 3.7%/yr new coins printed, fees falling
+🔴 TON $1.48 SELL — $77k of fees vs $4B price tag
+🔴 AERO $0.444 SELL — prints 2x faster than it pays out
+🔴 LINK $8.60 SELL — 114x earnings, dearest in book
+🟡 UNI $3.84 HOLD — only name earning MORE; watch fee vote
+🟡 AAVE $99.85 HOLD — pays holders $0 right now
+🟡 HYPE $58.30 HOLD — unlock date contradicted, downgraded
+🟡 BTC $64,704 HOLD — sits 1-2% over its 4yr floor
+🟡 ETH $1,930 HOLD — supply now grows, not shrinks
+🟡 PUMP $0.0021 HOLD — best cash yield, hottest tape, don't chase
+🟡 JUP $0.187 HOLD — real buyback, but earnings halved
+
+━━━━━━━━━━━━━━━━━━━━━━
+🔴 SELL
+━━━━━━━━━━━━━━━━━━━━━━
+
+🔴 SOL $75.52 — SELL
+  📈 Technical: 30% below its 4yr average price ($108), death cross on (short-term avg fell under long-term — bearish), RSI 48 (neither cheap nor hot).
+  ⛓ On-Chain: Network prints 3.725%/yr of new coins, all to validators — holders are diluted every year. Highest of any token here.
+  🏛 DeFi: Network fees $211M over 30d vs $4.1B over the year = running 39% below last year's pace. Counterweight: last 7 days +20%.
+  🌍 Macro: Stablecoins on Solana just crossed $15B for the first time — real adoption the bears didn't price.
+  🐋 Smart Money: Retail is crowded long (long/short 2.83, top of its range) while pros are being PAID to be short (funding -10%). Bad mismatch.
+
+🔴 TON $1.48 — SELL
+  📈 Technical: Below every average price line. True drawdown is -58.5% from its 1yr high $3.57 (we had this wrong at -49% — corrected).
+  🏛 DeFi: $77,181 of fees in 30 days against a $4.0B price tag — ~4,300x earnings. Worst by 100x of anything here. Value locked $64.9M = 0.15% of Ethereum's.
+  🌍 Macro: 47.6% of coins still not issued — that dilution is still ahead.
+  🐋 Smart Money: Zero open futures positions. Nobody is betting either way — the market stopped caring.
+
+🔴 AERO $0.444 — SELL
+  ⛓ On-Chain: Issues ~$8.1M of new coins per 30d but only pays out $4.2M — if you just hold, you're diluted ~9%/yr. The 11.8% "yield" only reaches you if you LOCK your coins.
+  🏛 DeFi: Fees down 54-58% vs last year. And Sept 2026 replaces the whole reward-voting system the payout runs on.
+  🌍 Macro: Our dilution estimate was actually TOO KIND — the data source excludes locked coins, so real dilution is worse.
+  🐋 Smart Money: Thin — $8.9M open futures, no news coverage at all this week.
+
+🔴 LINK $8.60 — SELL
+  📈 Technical: +15% in 30d but only +0.5% this week — momentum stalled. 31% below its 4yr average ($12.56).
+  🏛 DeFi: 114x earnings — twice as dear as the next name — for a 0.9%/yr buyback. Earnings only 12 months old, no track record.
+  🌍 Macro: Genuine win — Aave adopted its cross-chain tech Jul 21, Lombard Jul 23. Five bears all missed this.
+  🐋 Smart Money: A whale bought 1.58M LINK (~$13.2M) off Binance this week; ~25M left exchanges in a month.
