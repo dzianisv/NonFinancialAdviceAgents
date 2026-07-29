@@ -18,7 +18,9 @@
 | 8 | **UNI** | $3.81 | **HOLD** | → TRIM on weekly close < $3.61; EXIT on daily close < $3.25 after that; ADD only on a v4 fee vote reaching Snapshot with delegate sponsorship |
 | 9 | **AERO** | $0.416 | **WATCH (lock-only)** | Lock veAERO on weekly close > $0.4313; AVOID outright on daily close < $0.3018. Unlocked spot holders have no entry level |
 | 10 | **PUMP** | $0.001824 | **AVOID (risk, not accrual)** | Not price-invalidated upward. Only upgrade trigger is the 50% fee split surviving two consecutive quarters unchanged. Stay out below $0.001199 |
-| 11 | **LINK** | $8.32 | **WATCH** | → BUY (ladder start) on weekly close > $9.44; → AVOID on daily close < $7.19 |
+| 11 | **LINK** | $8.33 (Jul 24 close) · **$8.18 live 2026-07-29T21:03Z** | **WATCH** | → BUY (ladder start) on weekly close > $9.44; → AVOID on daily close < $7.19 (**close-basis** 52w low) |
+
+*Price column = 2026-07-24 close, the report's as-of date. LINK carries a live re-mark because it was the subject of a repeated price discrepancy (§A9); the drafted **$8.32** was a rounding of the $8.33 Jul 24 close and is superseded by the live figure for any action decision.*
 
 ---
 
@@ -170,8 +172,8 @@ Standard 52-week-high basis (not the ATH framing in the table above): **−62.8%
 | Metric | Value |
 |---|---|
 | Price | **$94.00** |
-| 52w Range | $57.83 ↔ $399.85 |
-| % from 52w High | −76.5% |
+| 52w Range (intraday) | **$57.82 ↔ $385.59** — 2-venue re-pull 2026-07-29: Coinbase $57.82–$385.59 / Kraken $57.94–$385.61. The drafted low **$57.83 was correct**; the drafted high **$399.85 is RETRACTED** (3.7% above any venue's 52w print, out-of-window). Matches the $385.59 already stated later in this section. |
+| % from 52w High | **−75.6%** (intraday, at this report's $94.00 snapshot price) — the drafted **−76.5% is RETRACTED**; it was derived from the bad $399.85 high. |
 | TVL | $14.6B |
 | MC/TVL Ratio | ~0.1 |
 | Latest Weekly Close | $94 (up from $89.56 prev week, +5%) |
@@ -215,7 +217,7 @@ Weighing the honest evidence, not softened language:
 > **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$0.1944**, SMA50 $0.2036, SMA200 $0.1911, 52w range $0.1418–$0.5586.
 > - **AVOID is invalidated (→ WATCH)** on a weekly close above **$0.2036** (SMA50) *with* rising volume — that is the "volume base" this verdict demands, stated as a number.
 > - **Thesis kill (→ EXIT any residual):** daily close below **$0.1418** (52w low). A new low on a −54% revenue run-rate is confirmation, not a dip.
-> - Note: the **−87% from high** figure above is measured from the **$2.00 ATH**, not the 52w high. On the report's standard 52w basis JUP is **−65.2%** from $0.5586. Same measurement-basis error class as the corrected TON figure.
+> - Note: JUP's **−87% from ATH** figure above is measured from the **$2.00 all-time high**, not the 52w high. On this report's standard 52w basis JUP is **−65.2% from its 52w high** of $0.5586. Same measurement-basis error class as the Toncoin drawdown corrected in the appendix.
 
 ---
 
@@ -224,8 +226,8 @@ Weighing the honest evidence, not softened language:
 | Metric | Value |
 |---|---|
 | Price | **$3.81** |
-| 52w Range | $2.00 ↔ $19.47 |
-| % from 52w High | −80.4% |
+| 52w Range (intraday) | **$2.316 ↔ $12.285** — 2-venue re-pull 2026-07-29: Coinbase $2.3160–$12.2850 / Kraken $2.3176–$12.2740. **Both drafted ends are RETRACTED**: the high $19.47 is 59% above any venue's 52w print and the low $2.00 is 14% below it — both out-of-window. Consistent with the $2.39–$12.15 stated later in this section (close basis). |
+| % from 52w High | **−69.0%** (intraday, at this report's $3.81 snapshot price; identical on both venues) — the drafted **−80.4% is RETRACTED**, derived from the bad $19.47 high. |
 | Latest Weekly Close | $3.81 (+8.3% from $3.52 prev week) |
 | Volume Trend | Declining (24.9M → 13.8M weekly) |
 
@@ -310,7 +312,7 @@ Weighing the honest evidence, not softened language:
 
 Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
 
-**Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.0% to $8.26. LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than PUMP's continuous daily prints.
+**Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.0% to $8.26. LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
 
 **Verdict WATCH — $8.33 Jul 24 close confirmed. Spot $8.26–8.28 as of 2026-07-29T15:12Z (3 venues, max spread 0.06%). Oversold candidate but no reversal signal yet — grinding closer to its 52w low strengthens "oversold, no demand," not weakens it.**
 
@@ -393,7 +395,9 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 
 **JUP's −65.2% is now independently verified on three venues, not inferred.** TON's drawdown is deeper than any figure previously published here: **−60.9% close / −62.8% intraday**, versus the −58.5%/−59.1% carried since Jul 27 — those were right when taken and went stale as price fell. Both tokens also show a deep downside wick (TON $0.554–0.563, JUP $0.0563 on Binance vs $0.1078 on Kraken); wicks are venue-specific and must never be cited as "the" 52w low without naming the venue.
 
-**Known validator limitation — date drift.** The gate recomputes drawdowns from the **live** price, while this report is a dated **2026-07-24 snapshot**. A correct as-of figure will therefore show as a MISMATCH once price moves (ETH's −62.6% is right at the snapshot price $1,855 and reads −61.8% at today's $1,894.46). Treat drawdown MISMATCHes on a dated report as *review prompts*, not proven errors; **level** claims (52w high/low) are unaffected because they do not depend on spot. Fixing this properly means passing the report date and pricing as-of that date.
+**Known validator limitations (2).** *(1) Quoted retractions.* The appendix correction table quotes each figure **as originally drafted** so the error stays auditable. The validator cannot distinguish a quoted-retracted number from a live claim, so those rows (AERO $0.410↔$0.518, UNI $2.00↔$19.47) are reported as MISMATCHes. They are **already retracted in the body** — deleting them to make the tool green would destroy the audit trail the tool exists to protect. A `<!-- retracted -->` exemption marker is the proper fix and is not yet built.
+
+*(2) Date drift.* The gate recomputes drawdowns from the **live** price, while this report is a dated **2026-07-24 snapshot**. A correct as-of figure will therefore show as a MISMATCH once price moves (ETH's −62.6% is right at the snapshot price $1,855 and reads −61.8% at today's $1,894.46). Treat drawdown MISMATCHes on a dated report as *review prompts*, not proven errors; **level** claims (52w high/low) are unaffected because they do not depend on spot. Fixing this properly means passing the report date and pricing as-of that date.
 
 **Enforcement:** `bun .agents/scripts/validate/drawdown_basis.ts <report.md>` parses every drawdown/range claim, requires an explicit basis, and recomputes it from one canonical per-token series, failing on any mismatch > 0.5pp. Wired as a pre-commit gate. It now passes **all 66 claims** in this document on the basis rule. *The earlier "45 of 63 failed" figure is retracted — it predated both the intraday-yardstick fix and the BTC/ETH/SOL corrections, and was inflated by a close-only yardstick comparing against intraday claims. The AERO and PUMP range rows it flagged are resolved (§A) — PUMP's high was correct, its low impossible; AERO's range was wrong but its drawdown right.*
 
@@ -431,6 +435,8 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 | WTI prior-week close **$83.33** (+7.1%) | **$82.49** Jul 17 (+8.3%) | 2026-07-27 | Yahoo `CL=F` daily |
 | ETH ETF "5-day inflow streak" / BTC "−$225M" as live rotation signal | **Streak SNAPPED Jul 25**, ETH week closed red; BTC shed **−$465M over 2 days** (IBIT −$415M); **both** complexes still logged a **third consecutive weekly inflow** | 2026-07-27 | cointelegraph.com/markets/ethereum-etfs-week-red-end-inflow-streak; coindesk.com/markets/2026/07/27/bitcoin-etfs-record-third-consecutive-weekly-inflows-despite-losses-of-usd465-million-to-end-week |
 | TON "zero token-specific journalism" (used to justify TRIM) | **Too strong** — the repo's `read_news.ts` store holds two TON-adjacent items dated Jul 21-22 (Telegram wallet rollout, STON.fi wire). Coverage is thin, not absent. Verdict unchanged | 2026-07-28 | repo `read_news.ts` store |
+| UNI 52w range **$2.00 ↔ $19.47**, −80.4% | **$2.316 ↔ $12.285** intraday (Coinbase / Kraken); **−69.0%** at the $3.81 snapshot. Both ends out-of-window; the high was 59% too high. Self-contradicted 11 lines later by "$2.39–$12.15" | Coinbase + Kraken daily candles, 2026-07-29 |
+| AAVE 52w high **$399.85**, −76.5% | **$385.59** intraday (Coinbase; Kraken $385.61); **−75.6%** at the $94.00 snapshot. Low $57.83 was correct. Self-contradicted later in the same section by "$385.59" | Coinbase + Kraken daily candles, 2026-07-29 |
 | Binance LINK/AERO cross-check | **[FETCH FAILED: api.binance.com — HTTP 451 geo-restricted]** | — | not imputed |
 | AERO exact gross emission | **[FETCH FAILED: api.llama.fi/emission/aerodrome-v1 — HTTP 402]** → net-supply-delta proxy used, labelled | — | not imputed |
 
