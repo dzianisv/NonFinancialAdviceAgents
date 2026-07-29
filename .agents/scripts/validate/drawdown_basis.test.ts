@@ -13,7 +13,11 @@ import {
   validateReport,
   parseClaims,
   resolveBasis,
+  formatReport,
+  productionFetcher,
+  statusLabel,
   MIN_SERIES_POINTS,
+  type CandlePoint,
   type SeriesFetcher,
   type SeriesPoint,
   type SeriesResult,
@@ -308,5 +312,217 @@ describe("parsing", () => {
     const md = report("TON", "| 52w High | $3.57 | −49.2% from high |");
     const dd = parseClaims(md).find((c) => c.kind === "drawdown")!;
     expect(dd.basis).toBe("UNKNOWN");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RULE 5 — compare like with like (intraday vs close)
+//
+// Reports quote INTRADAY extremes (TradingView/exchange candles); CoinGecko's
+// market_chart returns daily CLOSES only. Validating one against the other produced
+// systematic FALSE POSITIVES — measured on the real book:
+//   SOL  report 52w low $60.13 | Coinbase intraday $60.11 (CORRECT) | close-only $62.18
+//   AAVE report 52w low $57.83 | Coinbase intraday $57.82 (CORRECT) | close-only $60.79
+// while the genuine out-of-window errors must still fail:
+//   BTC low $52,550 vs intraday $57,717.55 · ETH low $1,385 vs $1,505 · SOL high
+//   $295.83 vs $253.61.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Builds daily candles whose intraday MIN/MAX are `lo`/`hi` while the CLOSE min/max
+ * are the tighter `closeLo`/`closeHi` — exactly the real-world gap that caused the
+ * false positives.
+ */
+function makeCandles(
+  n: number,
+  hi: number,
+  lo: number,
+  closeHi: number,
+  closeLo: number,
+  spot: number,
+): CandlePoint[] {
+  const base = Date.UTC(2025, 6, 28);
+  const mid = (closeHi + closeLo) / 2;
+  const pts: CandlePoint[] = [];
+  for (let i = 0; i < n; i++) pts.push({ t: base + i * DAY, l: mid, h: mid, c: mid });
+  pts[1] = { t: base + DAY, l: closeHi, h: hi, c: closeHi };
+  pts[2] = { t: base + 2 * DAY, l: lo, h: closeLo, c: closeLo };
+  pts[n - 1] = { t: base + (n - 1) * DAY, l: spot, h: spot, c: spot };
+  return pts;
+}
+
+/** SOL as measured: intraday low $60.11, close-only low $62.18, spot $184.00. */
+const SOL_SPOT = 184.0;
+const SOL_INTRADAY_LOW = 60.11;
+const SOL_CLOSE_LOW = 62.18;
+const SOL_INTRADAY_HIGH = 253.61;
+const SOL_CLOSE_HIGH = 250.0;
+
+const SOL_WITH_INTRADAY: SeriesResult = {
+  ok: true,
+  points: makeSeries(366, SOL_CLOSE_HIGH, SOL_CLOSE_LOW, SOL_SPOT),
+  candles: makeCandles(366, SOL_INTRADAY_HIGH, SOL_INTRADAY_LOW, SOL_CLOSE_HIGH, SOL_CLOSE_LOW, SOL_SPOT),
+  ath: 293.31,
+};
+
+describe("RULE 5 — intraday vs close, compared like with like", () => {
+  test("an INTRADAY-sourced 52w low that matches intraday but NOT close PASSES as OK[intraday] (the real SOL false positive)", async () => {
+    // $60.13 is 0.03% off the intraday low but 3.3% off the close-only low — the old
+    // close-only validator cried MISMATCH on a CORRECT report figure.
+    const md = report("SOL", "| 52w Low | $60.13 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ SOL: SOL_WITH_INTRADAY }) });
+
+    expect(rep.ok).toBe(true);
+    expect(statuses(rep.results)).toEqual(["OK"]);
+    const r = rep.results[0]!;
+    expect(r.verification).toBe("intraday");
+    expect(r.recomputedIntraday).toBeCloseTo(SOL_INTRADAY_LOW, 2);
+    expect(r.recomputedClose).toBeCloseTo(SOL_CLOSE_LOW, 2);
+    expect(r.detail).toContain("OK[intraday]");
+  });
+
+  test("the same AAVE low ($57.83 vs intraday $57.82 / close $60.79) also stops being a false positive", async () => {
+    const aave: SeriesResult = {
+      ok: true,
+      points: makeSeries(366, 350, 60.79, 240),
+      candles: makeCandles(366, 371.5, 57.82, 350, 60.79, 240),
+    };
+    const md = report("AAVE", "| 52w Low | $57.83 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ AAVE: aave }) });
+
+    expect(statuses(rep.results)).toEqual(["OK"]);
+    expect(rep.results[0]!.verification).toBe("intraday");
+  });
+
+  test("a claim matching NEITHER convention is a MISMATCH and reports BOTH recomputed values (the real SOL high $295.83 out-of-window error)", async () => {
+    const md = report("SOL", "| 52w High | $295.83 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ SOL: SOL_WITH_INTRADAY }) });
+
+    expect(rep.ok).toBe(false);
+    expect(statuses(rep.results)).toEqual(["MISMATCH"]);
+    const r = rep.results[0]!;
+    expect(r.detail).toContain("NEITHER");
+    // A human must be able to see the gap on BOTH conventions from the message alone.
+    expect(r.detail).toContain("253.61");
+    expect(r.detail).toContain("250.000");
+    expect(r.recomputedIntraday).toBeCloseTo(SOL_INTRADAY_HIGH, 2);
+    expect(r.recomputedClose).toBeCloseTo(SOL_CLOSE_HIGH, 2);
+  });
+
+  test("an out-of-window LOW (BTC $52,550 vs intraday $57,717.55) still FAILS — real errors stay caught", async () => {
+    const btc: SeriesResult = {
+      ok: true,
+      points: makeSeries(366, 126200, 60000, 118000),
+      candles: makeCandles(366, 126296, 57717.55, 126200, 60000, 118000),
+    };
+    const md = report("BTC", "| 52w Low | $52,550 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ BTC: btc }) });
+
+    expect(statuses(rep.results)).toEqual(["MISMATCH"]);
+    expect(rep.results[0]!.detail).toContain("57717.6");
+  });
+
+  test("a close-basis claim still passes, but is labelled OK[close] and names the intraday figure", async () => {
+    const md = report("SOL", "| 52w Low | $62.18 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ SOL: SOL_WITH_INTRADAY }) });
+
+    expect(statuses(rep.results)).toEqual(["OK"]);
+    expect(rep.results[0]!.verification).toBe("close");
+    expect(rep.results[0]!.detail).toContain("OK[close]");
+    expect(rep.results[0]!.detail).toContain("60.11");
+  });
+
+  test("a drawdown matching the intraday peak but not the close peak PASSES as OK[intraday]", async () => {
+    // spot 184.00 / intraday high 253.61 - 1 = -27.45%  |  / close high 250 - 1 = -26.40%
+    const md = report("SOL", "SOL is **−27.5% from 52w high**.");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ SOL: SOL_WITH_INTRADAY }) });
+
+    expect(statuses(rep.results)).toEqual(["OK"]);
+    expect(rep.results[0]!.verification).toBe("intraday");
+    expect(rep.results[0]!.recomputedIntraday).toBeCloseTo(-27.45, 1);
+    expect(rep.results[0]!.recomputedClose).toBeCloseTo(-26.4, 1);
+  });
+
+  test("a truncated INTRADAY window is not used as authoritative (it would understate the true extreme)", async () => {
+    const shortCandles: SeriesResult = {
+      ok: true,
+      points: makeSeries(366, SOL_CLOSE_HIGH, SOL_CLOSE_LOW, SOL_SPOT),
+      candles: makeCandles(120, SOL_INTRADAY_HIGH, SOL_INTRADAY_LOW, SOL_CLOSE_HIGH, SOL_CLOSE_LOW, SOL_SPOT),
+    };
+    const md = report("SOL", "| 52w Low | $60.13 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ SOL: shortCandles }) });
+
+    // Falls back to close, which $60.13 does NOT match → honest MISMATCH, not a pass
+    // on a 120-day intraday window that cannot represent a 52-week extreme.
+    expect(statuses(rep.results)).toEqual(["MISMATCH"]);
+    expect(rep.results[0]!.detail).toContain("120 candles");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RULE 5 + RULE 4 — honest degradation when intraday data is unavailable
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("RULE 5 — close-only degradation is labelled, never silently authoritative", () => {
+  const CG_ONLY: SeriesFetcher = async () => ({
+    ok: true,
+    points: makeSeries(366, SOL_CLOSE_HIGH, SOL_CLOSE_LOW, SOL_SPOT),
+  });
+
+  test("a token with NO Coinbase product falls back to close and is labelled close-only", async () => {
+    const fetcher = productionFetcher(CG_ONLY, {} /* no products */, async () => {
+      throw new Error("must not be called");
+    });
+    const md = report("SOL", "| 52w Low | $62.18 |");
+    const rep = await validateReport(md, { fetcher });
+
+    const r = rep.results[0]!;
+    expect(r.status).toBe("OK");
+    // NOT "close" — close data must never be presented as having verified intraday.
+    expect(r.verification).toBe("close-only");
+    expect(r.detail).toContain("intraday unverified");
+    expect(r.detail).toContain("no Coinbase product mapped");
+    expect(r.recomputedIntraday).toBeUndefined();
+    expect(statusLabel(r)).toBe("OK[close-only]");
+  });
+
+  test("a Coinbase FETCH FAILURE with CoinGecko succeeding must NOT silently pass as fully verified", async () => {
+    const fetcher = productionFetcher(CG_ONLY, { SOL: "SOL-USD" }, async () => {
+      throw new Error("HTTP 503 Service Unavailable for SOL-USD");
+    });
+    const md = report("SOL", "| 52w Low | $62.18 |");
+    const rep = await validateReport(md, { fetcher });
+
+    const r = rep.results[0]!;
+    expect(r.status).toBe("OK");
+    expect(r.verification).toBe("close-only");
+    // The failure REASON must be visible, per repo invariant #4 (loud degradation).
+    expect(r.detail).toContain("intraday unverified");
+    expect(r.detail).toContain("503");
+    expect(r.detail).toContain("SOL-USD");
+  });
+
+  test("close-only claims are surfaced in the human-readable report, not hidden among the passes", async () => {
+    const fetcher = productionFetcher(CG_ONLY, {}, async () => { throw new Error("nope"); });
+    const md = report("SOL", "| 52w Low | $62.18 |");
+    const rep = await validateReport(md, { fetcher });
+
+    const text = formatReport(rep, "fixture.md");
+    expect(text).toContain("OK[close-only]");
+    expect(text).toContain("intraday unverified");
+    expect(text).toContain("1 claim(s) passed on CLOSE data only");
+  });
+
+  test("a CoinGecko (close) failure is still a hard FETCH_FAILED even though Coinbase would work", async () => {
+    const fetcher = productionFetcher(
+      async () => ({ ok: false, error: "getaddrinfo ENOTFOUND api.coingecko.com" }),
+      { SOL: "SOL-USD" },
+      async () => makeCandles(366, SOL_INTRADAY_HIGH, SOL_INTRADAY_LOW, SOL_CLOSE_HIGH, SOL_CLOSE_LOW, SOL_SPOT),
+    );
+    const md = report("SOL", "| 52w Low | $60.13 |");
+    const rep = await validateReport(md, { fetcher });
+
+    expect(statuses(rep.results)).toEqual(["FETCH_FAILED"]);
+    expect(rep.failures[0]!.detail).toContain("[UNAVAILABLE]");
   });
 });

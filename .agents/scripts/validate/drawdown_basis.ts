@@ -16,14 +16,32 @@
  *
  *   RULE 1 (basis)     — every drawdown claim MUST disambiguate to 52w or ATH.
  *                        A bare "from high"/"from highs" is a FAIL (BASIS_MISSING).
- *   RULE 2 (recompute) — every claim is recomputed from ONE canonical daily-close
- *                        series per token and FAILS on mismatch beyond a tolerance
- *                        (default 0.5 percentage points).
+ *   RULE 2 (recompute) — every claim is recomputed and FAILS on mismatch beyond a
+ *                        tolerance (default 0.5pp / 1.0% for price levels).
  *   RULE 3 (window)    — the series must be >= 360 daily points. A short series is a
  *                        LOUD FAIL (SHORT_SERIES), never a silent pass. That truncated
  *                        window is literally incident #1.
  *   RULE 4 (honesty)   — a fetch error is FETCH_FAILED and fails the run. Missing data
  *                        is [UNAVAILABLE] and loud (repo invariant #4), never a skip.
+ *   RULE 5 (like-for-like) — reports quote INTRADAY extremes (TradingView/exchange
+ *                        candles). CoinGecko's market_chart returns daily CLOSES ONLY.
+ *                        Comparing an intraday claim against a close-only series
+ *                        produced systematic FALSE POSITIVES: SOL's true 52w intraday
+ *                        low is $60.11 (report said $60.13 — correct) but the close-only
+ *                        low is $62.18, so the validator wrongly cried MISMATCH. Same for
+ *                        AAVE ($57.82 intraday vs $60.79 close; report said $57.83).
+ *                        So: recompute BOTH conventions, pass on EITHER, and always SAY
+ *                        which one matched (`OK[intraday]` / `OK[close]`). A claim that
+ *                        matches NEITHER is a genuine MISMATCH and reports both values —
+ *                        which is how the real out-of-window errors stay caught (BTC low
+ *                        $52,550 vs $57,717.55 intraday; ETH low $1,385 vs $1,505.00;
+ *                        SOL high $295.83 vs $253.61 — all stated from OUTSIDE the 52w
+ *                        window). When no intraday source exists for a token the result
+ *                        is labelled `close-only, intraday unverified`, never silently
+ *                        treated as authoritative.
+ *
+ * Price sources: Coinbase Exchange daily candles (PRIMARY — carries true intraday
+ * low/high) with CoinGecko daily closes as the close-basis series and the fallback.
  *
  * Also validates stated 52w low / 52w high / 52w range levels against the same series.
  *
@@ -45,12 +63,25 @@
 
 export type SeriesPoint = { t: number; c: number };
 
+/** One daily candle carrying TRUE intraday extremes (Coinbase Exchange). */
+export type CandlePoint = { t: number; l: number; h: number; c: number };
+
 export type SeriesOk = {
   ok: true;
   /** Daily closes, oldest-first. Must be >= MIN_SERIES_POINTS or RULE 3 fails. */
   points: SeriesPoint[];
   /** All-time high in USD. Absent => any ATH-basis claim is [UNAVAILABLE] (loud). */
   ath?: number;
+  /**
+   * Daily candles with intraday low/high, oldest-first. PRIMARY yardstick: reports
+   * quote intraday extremes (TradingView/exchange candles), so validating them
+   * against a close-only series produces systematic FALSE POSITIVES.
+   * Absent => intraday could not be verified; every result derived from closes alone
+   * is labelled `close-only, intraday unverified` (repo invariant #4: honest degradation).
+   */
+  candles?: CandlePoint[];
+  /** Why intraday data is missing, when it is. Surfaced in the result detail. */
+  intradayError?: string;
 };
 export type SeriesErr = { ok: false; error: string };
 export type SeriesResult = SeriesOk | SeriesErr;
@@ -83,10 +114,25 @@ export type Status =
   | "ATH_UNAVAILABLE"
   | "NO_TOKEN";
 
+/**
+ * Which price convention actually backed an OK verdict.
+ *   "intraday"  — matched the true intraday extreme (candle low/high). Authoritative.
+ *   "close"     — matched the daily-close extreme, intraday data WAS available and
+ *                 disagreed; the claim is close-basis.
+ *   "close-only"— no usable intraday data; the claim is UNVERIFIED against intraday.
+ */
+export type Verification = "intraday" | "close" | "close-only";
+
 export type ClaimResult = {
   claim: Claim;
   status: Status;
+  /** The value that matched (or, on MISMATCH, the intraday-basis recompute). */
   recomputed?: number;
+  /** Intraday-basis recompute, when intraday data was available. */
+  recomputedIntraday?: number;
+  /** Close-basis recompute. Always present once a series was fetched. */
+  recomputedClose?: number;
+  verification?: Verification;
   detail: string;
 };
 
@@ -129,6 +175,25 @@ export const COINGECKO_IDS: Readonly<Record<string, string>> = {
   AERO: "aerodrome-finance",
   PUMP: "pump-fun",
   LINK: "chainlink",
+};
+
+/**
+ * Report symbol → Coinbase Exchange product id. This is the INTRADAY source: its daily
+ * candles carry true session low/high, which is the convention reports actually quote.
+ * A symbol absent from this map degrades to close-only (labelled), never silent.
+ */
+export const COINBASE_PRODUCTS: Readonly<Record<string, string>> = {
+  BTC: "BTC-USD",
+  ETH: "ETH-USD",
+  SOL: "SOL-USD",
+  TON: "TON-USD",
+  HYPE: "HYPE-USD",
+  AAVE: "AAVE-USD",
+  JUP: "JUP-USD",
+  UNI: "UNI-USD",
+  AERO: "AERO-USD",
+  PUMP: "PUMP-USD",
+  LINK: "LINK-USD",
 };
 
 /** Unicode minus (U+2212), ASCII hyphen, en-dash — all appear in real reports. */
@@ -358,6 +423,34 @@ export function seriesLow(points: SeriesPoint[]): number {
   return Math.min(...points.map((p) => p.c));
 }
 
+/** True intraday extremes from daily candles. */
+export function candleHigh(candles: CandlePoint[]): number {
+  return Math.max(...candles.map((p) => p.h));
+}
+export function candleLow(candles: CandlePoint[]): number {
+  return Math.min(...candles.map((p) => p.l));
+}
+
+/**
+ * Returns the usable intraday candles for a series, or undefined with the reason.
+ * A short candle window is NOT usable — a truncated intraday series would understate
+ * the true 52w extreme and turn a genuine out-of-window error into a false PASS.
+ */
+function usableCandles(
+  s: SeriesOk,
+  minPoints: number,
+): { candles?: CandlePoint[]; reason?: string } {
+  if (!s.candles || s.candles.length === 0) {
+    return { reason: s.intradayError ?? "no intraday source for this token" };
+  }
+  if (s.candles.length < minPoints) {
+    return {
+      reason: `intraday series has ${s.candles.length} candles, need >= ${minPoints}`,
+    };
+  }
+  return { candles: s.candles };
+}
+
 /**
  * Validates a markdown report. All recomputation for a given token comes from ONE
  * fetched series (fetched at most once per token per run) — that single-source rule is
@@ -437,8 +530,13 @@ export async function validateReport(
       continue;
     }
 
-    let recomputed: number;
+    const intraday = usableCandles(s, minPoints);
+    const unverifiedNote = intraday.reason
+      ? ` [close-only, intraday unverified: ${intraday.reason}]`
+      : "";
+
     if (claim.kind === "drawdown") {
+      // ATH basis has a single scalar peak — there is no close-vs-intraday choice.
       if (claim.basis === "ATH") {
         if (typeof s.ath !== "number" || !(s.ath > 0)) {
           results.push({
@@ -448,27 +546,85 @@ export async function validateReport(
           });
           continue;
         }
-        recomputed = drawdownFrom(s.points, s.ath);
-      } else {
-        recomputed = drawdownFrom(s.points, seriesHigh(s.points));
+        const rec = drawdownFrom(s.points, s.ath);
+        const d = Math.abs(rec - claim.value);
+        results.push(
+          d <= tolerance
+            ? { claim, status: "OK", recomputed: rec, detail: `OK[ATH] stated ${claim.value.toFixed(1)}% vs recomputed ${rec.toFixed(1)}% (Δ${d.toFixed(2)}pp)` }
+            : { claim, status: "MISMATCH", recomputed: rec, detail: `stated ${claim.value.toFixed(1)}% vs recomputed ${rec.toFixed(1)}% (Δ${d.toFixed(2)}pp > ${tolerance}pp)` },
+        );
+        continue;
       }
-      const delta = Math.abs(recomputed - claim.value);
-      results.push(
-        delta <= tolerance
-          ? { claim, status: "OK", recomputed, detail: `stated ${claim.value.toFixed(1)}% vs recomputed ${recomputed.toFixed(1)}% (Δ${delta.toFixed(2)}pp)` }
-          : { claim, status: "MISMATCH", recomputed, detail: `stated ${claim.value.toFixed(1)}% vs recomputed ${recomputed.toFixed(1)}% (Δ${delta.toFixed(2)}pp > ${tolerance}pp)` },
-      );
+
+      // 52w basis: the peak differs by convention, so recompute BOTH and pass on either.
+      const ddClose = drawdownFrom(s.points, seriesHigh(s.points));
+      const ddIntra = intraday.candles
+        ? drawdownFrom(s.points, candleHigh(intraday.candles))
+        : undefined;
+      const dClose = Math.abs(ddClose - claim.value);
+      const dIntra = ddIntra === undefined ? Infinity : Math.abs(ddIntra - claim.value);
+
+      if (dIntra <= tolerance) {
+        results.push({
+          claim, status: "OK", recomputed: ddIntra, recomputedIntraday: ddIntra,
+          recomputedClose: ddClose, verification: "intraday",
+          detail: `OK[intraday] stated ${claim.value.toFixed(1)}% vs intraday-basis ${ddIntra!.toFixed(1)}% (Δ${dIntra.toFixed(2)}pp)`,
+        });
+      } else if (dClose <= tolerance) {
+        results.push({
+          claim, status: "OK", recomputed: ddClose, recomputedIntraday: ddIntra,
+          recomputedClose: ddClose,
+          verification: intraday.candles ? "close" : "close-only",
+          detail: intraday.candles
+            ? `OK[close] stated ${claim.value.toFixed(1)}% vs close-basis ${ddClose.toFixed(1)}% (Δ${dClose.toFixed(2)}pp); intraday-basis is ${ddIntra!.toFixed(1)}%`
+            : `OK[close-only, intraday unverified] stated ${claim.value.toFixed(1)}% vs close-basis ${ddClose.toFixed(1)}% (Δ${dClose.toFixed(2)}pp)${unverifiedNote}`,
+        });
+      } else {
+        results.push({
+          claim, status: "MISMATCH",
+          recomputed: ddIntra ?? ddClose, recomputedIntraday: ddIntra, recomputedClose: ddClose,
+          detail:
+            `stated ${claim.value.toFixed(1)}% matches NEITHER convention — ` +
+            `intraday-basis ${ddIntra === undefined ? "[UNAVAILABLE]" : `${ddIntra.toFixed(1)}% (Δ${dIntra.toFixed(2)}pp)`}, ` +
+            `close-basis ${ddClose.toFixed(1)}% (Δ${dClose.toFixed(2)}pp); tolerance ${tolerance}pp${unverifiedNote}`,
+        });
+      }
       continue;
     }
 
-    // Price levels (52w low / 52w high).
-    recomputed = claim.kind === "low" ? seriesLow(s.points) : seriesHigh(s.points);
-    const relPct = Math.abs(recomputed - claim.value) / recomputed * 100;
-    results.push(
-      relPct <= priceTol
-        ? { claim, status: "OK", recomputed, detail: `stated $${claim.value} vs series $${recomputed.toPrecision(6)} (${relPct.toFixed(2)}%)` }
-        : { claim, status: "MISMATCH", recomputed, detail: `stated $${claim.value} vs series $${recomputed.toPrecision(6)} (${relPct.toFixed(2)}% > ${priceTol}%)` },
-    );
+    // Price levels (52w low / 52w high) — same like-for-like rule.
+    const lvlClose = claim.kind === "low" ? seriesLow(s.points) : seriesHigh(s.points);
+    const lvlIntra = intraday.candles
+      ? (claim.kind === "low" ? candleLow(intraday.candles) : candleHigh(intraday.candles))
+      : undefined;
+    const relClose = Math.abs(lvlClose - claim.value) / lvlClose * 100;
+    const relIntra = lvlIntra === undefined ? Infinity : Math.abs(lvlIntra - claim.value) / lvlIntra * 100;
+
+    if (relIntra <= priceTol) {
+      results.push({
+        claim, status: "OK", recomputed: lvlIntra, recomputedIntraday: lvlIntra,
+        recomputedClose: lvlClose, verification: "intraday",
+        detail: `OK[intraday] stated $${claim.value} vs intraday ${claim.kind} $${lvlIntra!.toPrecision(6)} (${relIntra.toFixed(2)}%)`,
+      });
+    } else if (relClose <= priceTol) {
+      results.push({
+        claim, status: "OK", recomputed: lvlClose, recomputedIntraday: lvlIntra,
+        recomputedClose: lvlClose,
+        verification: intraday.candles ? "close" : "close-only",
+        detail: intraday.candles
+          ? `OK[close] stated $${claim.value} vs close ${claim.kind} $${lvlClose.toPrecision(6)} (${relClose.toFixed(2)}%); intraday ${claim.kind} is $${lvlIntra!.toPrecision(6)}`
+          : `OK[close-only, intraday unverified] stated $${claim.value} vs close ${claim.kind} $${lvlClose.toPrecision(6)} (${relClose.toFixed(2)}%)${unverifiedNote}`,
+      });
+    } else {
+      results.push({
+        claim, status: "MISMATCH",
+        recomputed: lvlIntra ?? lvlClose, recomputedIntraday: lvlIntra, recomputedClose: lvlClose,
+        detail:
+          `stated $${claim.value} matches NEITHER convention — ` +
+          `intraday ${claim.kind} ${lvlIntra === undefined ? "[UNAVAILABLE]" : `$${lvlIntra.toPrecision(6)} (${relIntra.toFixed(2)}%)`}, ` +
+          `close ${claim.kind} $${lvlClose.toPrecision(6)} (${relClose.toFixed(2)}%); tolerance ${priceTol}%${unverifiedNote}`,
+      });
+    }
   }
 
   const failures = results.filter((r) => r.status !== "OK");
@@ -546,6 +702,88 @@ export function coingeckoFetcher(ids: Record<string, string> = COINGECKO_IDS): S
   };
 }
 
+/**
+ * The PRODUCTION fetcher: Coinbase daily candles (intraday extremes) layered onto the
+ * CoinGecko close series. Coinbase failing is NOT fatal — the close series still
+ * validates — but the failure reason is carried through so every affected result is
+ * labelled `close-only, intraday unverified` instead of silently passing as verified.
+ */
+export function productionFetcher(
+  closes: SeriesFetcher = coingeckoFetcher(),
+  products: Record<string, string> = COINBASE_PRODUCTS,
+  candles: (product: string) => Promise<CandlePoint[]> = fetchCoinbaseCandles,
+): SeriesFetcher {
+  return async (symbol: string): Promise<SeriesResult> => {
+    const base = await closes(symbol);
+    if (!base.ok) return base;
+
+    const product = products[symbol];
+    if (!product) {
+      return { ...base, intradayError: `no Coinbase product mapped for symbol ${symbol}` };
+    }
+    try {
+      const rows = await candles(product);
+      if (rows.length === 0) {
+        // The product exists but Coinbase served no candles (delisted / never traded
+        // over this window). Loud + specific, so nobody reads it as "verified".
+        return { ...base, intradayError: `Coinbase returned 0 candles for ${product}` };
+      }
+      return { ...base, candles: rows };
+    } catch (e) {
+      return {
+        ...base,
+        intradayError: `Coinbase candles for ${product}: ${e instanceof Error ? e.message : String(e)}`,
+      };
+    }
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Coinbase Exchange fetcher (the INTRADAY yardstick)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CB = "https://api.exchange.coinbase.com";
+
+/** Coinbase caps a candles response at ~300 rows, so 365 days needs two windows. */
+const CB_MAX_CANDLES_PER_REQ = 300;
+
+/** Fetches one window of daily candles. Rows are `[time, low, high, open, close, volume]`. */
+async function coinbaseWindow(product: string, startMs: number, endMs: number): Promise<CandlePoint[]> {
+  const url =
+    `${CB}/products/${product}/candles?granularity=86400` +
+    `&start=${new Date(startMs).toISOString()}&end=${new Date(endMs).toISOString()}`;
+  const r = await fetch(url, { headers: { accept: "application/json", "user-agent": "drawdown-basis-validator" } });
+  if (!r.ok) throw new Error(`HTTP ${r.status} ${r.statusText} for ${product}`);
+  const rows = (await r.json()) as unknown;
+  if (!Array.isArray(rows)) throw new Error(`unexpected candles payload for ${product}`);
+  return (rows as number[][]).map((row) => ({
+    t: row[0]! * 1000,
+    l: row[1]!,
+    h: row[2]!,
+    c: row[4]!,
+  }));
+}
+
+/**
+ * 365 days of daily candles with TRUE intraday low/high, paged over two windows to
+ * stay under Coinbase's ~300-candle response cap (verified: n=367 this way).
+ */
+export async function fetchCoinbaseCandles(
+  product: string,
+  now: number = Date.now(),
+): Promise<CandlePoint[]> {
+  const DAY_MS = 86_400_000;
+  const start = now - 366 * DAY_MS;
+  const split = start + CB_MAX_CANDLES_PER_REQ * DAY_MS - DAY_MS;
+  const [a, b] = await Promise.all([
+    coinbaseWindow(product, start, split),
+    coinbaseWindow(product, split, now),
+  ]);
+  const byTime = new Map<number, CandlePoint>();
+  for (const c of [...a, ...b]) byTime.set(c.t, c);
+  return [...byTime.values()].sort((x, y) => x.t - y.t);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CLI
 // ─────────────────────────────────────────────────────────────────────────────
@@ -560,22 +798,35 @@ const ICON: Record<Status, string> = {
   NO_TOKEN: "✗",
 };
 
+/** Display label: an OK verdict must SAY which price convention backed it. */
+export function statusLabel(r: ClaimResult): string {
+  if (r.status !== "OK") return r.status;
+  if (r.verification === "intraday") return "OK[intraday]";
+  if (r.verification === "close") return "OK[close]";
+  if (r.verification === "close-only") return "OK[close-only]";
+  return "OK";
+}
+
 export function formatReport(rep: ValidationReport, path: string): string {
   const out: string[] = [`drawdown-basis validation — ${path}`, ""];
   for (const r of rep.results) {
     const sym = r.claim.symbol ?? "?";
     out.push(
-      `${ICON[r.status]} ${r.status.padEnd(15)} L${String(r.claim.line).padStart(4)} ` +
+      `${ICON[r.status]} ${statusLabel(r).padEnd(15)} L${String(r.claim.line).padStart(4)} ` +
         `${sym.padEnd(5)} [${r.claim.basis}] ${r.claim.kind}  «${r.claim.raw.slice(0, 72)}»`,
     );
-    if (r.status !== "OK") out.push(`    → ${r.detail}`);
+    if (r.status !== "OK" || r.verification === "close-only") out.push(`    → ${r.detail}`);
   }
   out.push("");
+  const unverified = rep.results.filter((r) => r.status === "OK" && r.verification === "close-only").length;
   out.push(
     rep.ok
       ? `✓ all ${rep.results.length} claim(s) passed`
       : `✗ ${rep.failures.length} of ${rep.results.length} claim(s) FAILED`,
   );
+  if (unverified > 0) {
+    out.push(`⚠ ${unverified} claim(s) passed on CLOSE data only — intraday unverified`);
+  }
   return out.join("\n");
 }
 
@@ -594,7 +845,7 @@ async function main(argv: string[]): Promise<number> {
 
   const basisOnly = argv.includes("--basis-only");
   const rep = await validateReport(md, {
-    fetcher: basisOnly ? undefined : coingeckoFetcher(),
+    fetcher: basisOnly ? undefined : productionFetcher(),
     basisOnly,
     tolerance: flag("tolerance") ? Number(flag("tolerance")) : undefined,
     priceTolerancePct: flag("price-tolerance-pct") ? Number(flag("price-tolerance-pct")) : undefined,
