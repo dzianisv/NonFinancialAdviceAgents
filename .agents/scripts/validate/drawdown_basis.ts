@@ -198,7 +198,17 @@ export const COINBASE_PRODUCTS: Readonly<Record<string, string>> = {
 
 /** Unicode minus (U+2212), ASCII hyphen, en-dash — all appear in real reports. */
 const MINUS = "[−\\-–]";
-const NUM = "\\d+(?:[.,]\\d+)?";
+/**
+ * A USD/percent numeric token, with or without thousands separators, with or without
+ * a decimal tail. BOTH must compose: the old `\d+(?:[.,]\d+)?` matched `126,200` and
+ * `1505.00` but NOT `1,505.00` — on `$1,505.00` it stopped after `1,505`, so RE_RANGE
+ * never saw the `↔` and the entire range claim was DROPPED WITH NO WARNING (a claim
+ * that is not extracted is silently trusted — the worst failure mode of this tool).
+ *
+ * The grouped form is tried first but REQUIRES at least one comma group, so a plain
+ * `4956.78` cannot be mis-split into `495`; it falls through to the plain alternative.
+ */
+const NUM = "\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Small helpers
@@ -305,15 +315,28 @@ const RE_PROSE_PCT = new RegExp(
   "gi",
 );
 
-/** `| 52w Low | $52,550 |`, `| 52w High | $126,200 ... |` */
+/**
+ * `| 52w Low | $52,550 |`, `| 52w High | $126,200 ... |`,
+ * `| 52w Low (intraday) | $57,717.55 |`, `| ATH (corrected) — RESOLVED | $8.25 |`
+ *
+ * The label cell must still NAME a 52w/365d/ATH level, but a trailing qualifier
+ * (`(intraday)`, `(close)`, `(corrected)`, `(intraday, 3-venue)`, `— RESOLVED …`) is
+ * tolerated: previously `| 52w Low (intraday) |` made the whole row INVISIBLE, so the
+ * claim was never checked and silently trusted.
+ */
 const RE_TABLE_LEVEL = new RegExp(
-  `\\|\\s*\\*{0,2}\\s*(52\\s*-?\\s*w(?:eek)?|365\\s*-?\\s*d|ath|all\\s*-?\\s*time)\\s*(low|high)?\\s*\\*{0,2}\\s*\\|\\s*\\*{0,2}\\s*\\$(${NUM})`,
+  `\\|\\s*\\*{0,2}\\s*(52\\s*-?\\s*w(?:eek)?|365\\s*-?\\s*d|ath|all\\s*-?\\s*time)\\s*(low|high)?[^|]*\\|\\s*\\*{0,2}\\s*\\$(${NUM})`,
   "gi",
 );
 
-/** `| 52w Range | $1,385 ↔ $4,957 |` and prose `52w range $7.19–$26.73` */
+/**
+ * `| 52w Range | $1,385 ↔ $4,957 |`, prose `52w range $7.19–$26.73`,
+ * `| 52w Range (intraday) | **$1,505.00 ↔ $4,956.78** — … |`
+ * The gap allowance between `range` and the first `$` is wide enough for a
+ * parenthetical qualifier plus the cell boundary and bold markers.
+ */
 const RE_RANGE = new RegExp(
-  `(52\\s*-?\\s*w(?:eek)?|365\\s*-?\\s*d)\\s*range[^$\\n]{0,24}\\$\\*{0,2}(${NUM})\\*{0,2}\\s*(?:↔|–|—|-|to)\\s*\\*{0,2}\\$?(${NUM})`,
+  `(52\\s*-?\\s*w(?:eek)?|365\\s*-?\\s*d)\\s*range[^$\\n]{0,48}\\$\\*{0,2}(${NUM})\\*{0,2}\\s*(?:↔|–|—|-|to)\\s*\\*{0,2}\\$?(${NUM})`,
   "gi",
 );
 
@@ -372,7 +395,12 @@ export function parseClaims(markdown: string): Claim[] {
     for (const m of line.matchAll(RE_TABLE_LEVEL_PCT)) {
       const idx = m.index ?? 0;
       const basis = resolveBasis(m[1] ?? "");
-      push(idx, idx + m[0].length, "drawdown", basis, -Math.abs(num(m[3]!)));
+      // Claim ONLY the `(−49.4%)` parenthetical, not the whole row. Claiming the full
+      // span made this drawdown swallow the PRICE LEVEL in the same row (`$126,296`),
+      // so the level was never extracted and therefore never checked — the same
+      // silent-trust failure, one layer down.
+      const parenRel = m[0].lastIndexOf("(");
+      push(idx + (parenRel === -1 ? 0 : parenRel), idx + m[0].length, "drawdown", basis, -Math.abs(num(m[3]!)));
     }
     for (const m of line.matchAll(RE_PROSE_PCT)) {
       const idx = m.index ?? 0;
@@ -389,8 +417,16 @@ export function parseClaims(markdown: string): Claim[] {
       const lo = num(m[2]!);
       const hi = num(m[3]!);
       // Split the span so the low and the high are two INDEPENDENT claims that do not
-      // overlap each other (an overlap would silently drop one of them).
-      const sepRel = m[0].search(/↔|–|—|-|\bto\b/);
+      // overlap each other (an overlap would silently drop one of them). The separator
+      // is searched AFTER the first `$` so a hyphen in the label ("52-week Range") or
+      // in a qualifier cannot be mistaken for the range separator and skew the split.
+      const dollarRel = m[0].indexOf("$");
+      const sepRel = dollarRel === -1
+        ? m[0].search(/↔|–|—|-|\bto\b/)
+        : (() => {
+            const r = m[0].slice(dollarRel + 1).search(/↔|–|—|-|\bto\b/);
+            return r === -1 ? -1 : dollarRel + 1 + r;
+          })();
       const mid = sepRel === -1 ? idx + Math.floor(m[0].length / 2) : idx + sepRel;
       const basis = resolveBasis(m[1]!);
       push(idx, mid, lo <= hi ? "low" : "high", basis, lo);

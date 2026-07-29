@@ -316,6 +316,153 @@ describe("parsing", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SILENT NON-EXTRACTION — the worst failure mode: a claim the parser never sees
+// is a claim that is silently TRUSTED. Both defects below shipped live.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("silent non-extraction regressions", () => {
+  // DEFECT 1 — NUM could not parse a thousands separator TOGETHER WITH decimals.
+  // On `$1,505.00` it stopped after `1,505`, so RE_RANGE never saw the `↔` and the
+  // ENTIRE range claim vanished with no warning. Confirmed live: this exact report
+  // line produced ZERO extracted claims.
+  test("DEFECT 1: `$1,505.00 ↔ $4,956.78` extracts TWO level claims with full precision", () => {
+    const md = report(
+      "ETH",
+      "| 52w Range (intraday) | **$1,505.00 ↔ $4,956.78** — corrected 2026-07-24 |",
+    );
+    const claims = parseClaims(md);
+
+    const low = claims.find((c) => c.kind === "low");
+    const high = claims.find((c) => c.kind === "high");
+    expect(low).toBeDefined();
+    expect(high).toBeDefined();
+    expect(low!.value).toBe(1505.0);
+    expect(high!.value).toBe(4956.78);
+    expect(low!.basis).toBe("52w");
+    expect(high!.basis).toBe("52w");
+  });
+
+  test("DEFECT 1: `1,505.00` is NOT mis-parsed as 1 or 505 (no greedy mis-split)", () => {
+    const md = report("ETH", "| 52w Low | $1,505.00 |");
+    const claims = parseClaims(md).filter((c) => c.kind === "low");
+
+    expect(claims).toHaveLength(1);
+    expect(claims[0]!.value).toBe(1505.0);
+    expect(claims[0]!.value).not.toBe(1);
+    expect(claims[0]!.value).not.toBe(505);
+  });
+
+  test("DEFECT 1: comma+decimal values recompute correctly end-to-end", async () => {
+    const eth: SeriesResult = {
+      ok: true,
+      points: makeSeries(366, 4900, 1600, 3800),
+      candles: makeCandles(366, 4956.78, 1505.0, 4900, 1600, 3800),
+    };
+    const md = report("ETH", "| 52w Range | $1,505.00 ↔ $4,956.78 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ ETH: eth }) });
+
+    expect(statuses(rep.results)).toEqual(["OK", "OK"]);
+    expect(rep.results.every((r) => r.verification === "intraday")).toBe(true);
+  });
+
+  // DEFECT 2 — the level-row label had to be EXACTLY `52w Low`; a parenthetical made
+  // the row invisible. Confirmed live: the BTC `| 52w Low (intraday) |` row extracted
+  // nothing at all.
+  test("DEFECT 2: `| 52w Low (intraday) | $57,717.55 |` extracts ONE claim at full precision", () => {
+    const md = report("BTC", "| 52w Low (intraday) | $57,717.55 |");
+    const claims = parseClaims(md);
+
+    expect(claims).toHaveLength(1);
+    expect(claims[0]!.kind).toBe("low");
+    expect(claims[0]!.value).toBe(57717.55);
+    expect(claims[0]!.basis).toBe("52w");
+  });
+
+  test("DEFECT 2: every real-world label qualifier keeps the row visible", () => {
+    const variants: [string, number][] = [
+      ["| 52w Low (intraday) | $57,717.55 |", 57717.55],
+      ["| 52w Low (close) | $60,000 |", 60000],
+      ["| 52w High (corrected) | $126,296 |", 126296],
+      ["| 52w Low (intraday, 3-venue) | $57,717.55 |", 57717.55],
+      ["| 52w High — RESOLVED 2026-07-24 | $126,296 |", 126296],
+      ["| **52w Low (intraday)** | **$57,717.55** |", 57717.55],
+      ["| 365d High (intraday) | $126,296 |", 126296],
+    ];
+    for (const [row, expected] of variants) {
+      const claims = parseClaims(report("BTC", row)).filter(
+        (c) => c.kind === "low" || c.kind === "high",
+      );
+      expect({ row, n: claims.length }).toEqual({ row, n: 1 });
+      expect({ row, v: claims[0]!.value }).toEqual({ row, v: expected });
+    }
+  });
+
+  test("DEFECT 2: `| 52w High (intraday) | $126,296 (−49.4%) |` yields BOTH level and drawdown", () => {
+    const md = report("BTC", "| 52w High (intraday) | $126,296 (−49.4%) |");
+    const claims = parseClaims(md);
+
+    const high = claims.find((c) => c.kind === "high");
+    const dd = claims.find((c) => c.kind === "drawdown");
+    expect(high).toBeDefined();
+    expect(dd).toBeDefined();
+    expect(high!.value).toBe(126296);
+    expect(dd!.value).toBe(-49.4);
+    expect(dd!.basis).toBe("52w");
+  });
+
+  test("no regression: plain forms ($126,200 · $60.11 · 0.001199 · $4,957) still extract", () => {
+    expect(parseClaims(report("BTC", "| 52w High | $126,200 |"))[0]!.value).toBe(126200);
+    expect(parseClaims(report("SOL", "| 52w Low | $60.11 |"))[0]!.value).toBe(60.11);
+    expect(parseClaims(report("PUMP", "| 52w Low | $0.001199 |"))[0]!.value).toBe(0.001199);
+    expect(parseClaims(report("ETH", "| 52w Range | $1,385 ↔ $4,957 |")).map((c) => c.value))
+      .toEqual([1385, 4957]);
+    expect(parseClaims(report("JUP", "JUP is −65.2% from 52w high."))[0]!.value).toBe(-65.2);
+  });
+
+  /**
+   * THE GUARD FOR THE WHOLE CLASS. Individual value assertions cannot catch a claim
+   * that silently disappears — only a COUNT can. This fixture holds exactly 12 known
+   * claims across every supported form; if any future edit makes one invisible, this
+   * test fails even though every other assertion in the file still passes.
+   */
+  test("GUARD: a fixture with 12 known claims extracts EXACTLY 12 (silent-drop canary)", () => {
+    const md = [
+      "# Guard Fixture",
+      "",
+      "### 1. BTC — Bitcoin",
+      "",
+      "| 52w Low (intraday) | $57,717.55 |", //  1 low
+      "| 52w High (intraday) | $126,296 (−49.4%) |", //  2 high, 3 drawdown
+      "| % from 52w High | −49.4% |", //  4 drawdown
+      "BTC is −49.4% from 52w high today.", //  5 drawdown
+      "",
+      "### 2. ETH — Ethereum",
+      "",
+      "| 52w Range (intraday) | **$1,505.00 ↔ $4,956.78** |", //  6 low, 7 high
+      "| ATH | $4,891.70 (−23.0%) |", //  8 drawdown
+      "| % from ATH | −23.0% |", //  9 drawdown
+      "",
+      "### 3. PUMP — Pump.fun",
+      "",
+      "| 52w Low | $0.001199 |", // 10 low
+      "| 52w High (close) | $0.017 |", // 11 high
+      "PUMP is down 93% from highs.", // 12 drawdown (BASIS_MISSING, still a claim)
+    ].join("\n");
+
+    const claims = parseClaims(md);
+    const summary = claims.map((c) => `L${c.line}:${c.symbol}:${c.kind}:${c.value}`);
+    expect({ n: claims.length, summary }).toEqual({ n: 12, summary });
+    expect(claims).toHaveLength(12);
+    expect(claims.filter((c) => c.kind === "low")).toHaveLength(3);
+    expect(claims.filter((c) => c.kind === "high")).toHaveLength(3);
+    expect(claims.filter((c) => c.kind === "drawdown")).toHaveLength(6);
+    // Every claim must be attributed to a token — an unattributed claim cannot be
+    // recomputed, which is a different flavour of the same silent-trust problem.
+    expect(claims.every((c) => c.symbol !== null)).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // RULE 5 — compare like with like (intraday vs close)
 //
 // Reports quote INTRADAY extremes (TradingView/exchange candles); CoinGecko's
