@@ -306,11 +306,15 @@ Weighing the honest evidence, not softened language:
 
 | Venue | LINK/USD | Timestamp |
 |---|---|---|
-| Coinbase LINK-USD | **$8.264** | 2026-07-29T15:12:47Z |
-| Kraken LINKUSD | **$8.2592** | 2026-07-29T15:11Z |
-| CoinGecko | **$8.26** | 2026-07-29T15:11:30Z |
+| **CoinGecko** | **$8.19** | **2026-07-29T21:02Z** |
+| **Coinbase LINK-USD** | **$8.18** | **2026-07-29T21:03Z** |
+| **Kraken LINKUSD** | **$8.1777** | **2026-07-29T21:03Z** |
+| *— superseded 15:12Z snapshot below —* | | |
+| Coinbase LINK-USD | $8.264 | 2026-07-29T15:12:47Z |
+| Kraken LINKUSD | $8.2592 | 2026-07-29T15:11Z |
+| CoinGecko | $8.26 | 2026-07-29T15:11:30Z |
 
-Max spread **0.06%**. **Superseded — any downstream cite must use $8.18 @ 2026-07-29T21:03Z** (median of CoinGecko $8.19 / Coinbase $8.18 / Kraken $8.1777, max spread 0.15%; final resolution in §A9). The $8.26 @ 15:12Z figure below was canonical for its timestamp and is now stale by −1.0%. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
+**CANONICAL: $8.18 @ 2026-07-29T21:03Z** (median of 3 venues, max spread **0.15%**). Binance excluded — `api.binance.com` returned HTTP 451 geo-restriction, not imputed. The $8.26 @ 15:12Z snapshot above was correct for its timestamp and is now stale by −1.0%; final resolution in §A9. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
 
 **Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.0% to $8.26. LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
 
@@ -364,9 +368,9 @@ Max spread **0.06%**. **Superseded — any downstream cite must use $8.18 @ 2026
 - F&G 28 (Fear), ↓3 pts from Jul 22. Market getting more scared.
 - BTC death cross active — alts highly correlated.
 - BTC ETF outflow day (−$225M) was large but BlackRock dominated (−$202.5M) — likely one large account rotating, not a structural shift.
-- Macro headwinds: US-Iran tensions, 10Y yields at 18-month high (~4.70%), tariffs escalating, and **oil back ON as a headwind — WTI $85.41 / Brent $90.92 live 2026-07-29T15:02Z**, above their pre-spike closes after a full round-trip and reversal.
+- Macro headwinds: US-Iran tensions, 10Y yields at 18-month high (~4.70%), tariffs escalating, and **oil back ON as a headwind — WTI $84.56 / Brent $90.55 live 2026-07-29T20:53Z** (2 independent sources, ≤0.05% apart; supersedes the 15:02Z $85.41/$90.92 pair, §A2 Resolution 4), above their pre-spike closes after a full round-trip and reversal.
 - ETH ETF divergence offers a potential rotation hedge within crypto — **but this is a relative-strength tilt, not an active rotation signal**: the daily inflow streak broke Jul 25 and both complexes still posted a third weekly inflow.
-- **Oil round-tripped, then reversed — net headwind RESTORED.** WTI $89.31 (Jul 24) → $79.26 (Jul 28) → **$85.41** (Jul 29 live); Brent $96.78 → $84.09 → **$90.92**. Treat oil as a high-volatility, low-conviction leg in either direction, not as a durable input.
+- **Oil round-tripped, then reversed — net headwind RESTORED.** WTI $89.31 (Jul 24) → $79.26 (Jul 28) → $85.41 (Jul 29 15:02Z) → **$84.56** (Jul 29 20:53Z); Brent $96.78 → $84.09 → $90.92 → **$90.55**. Treat oil as a high-volatility, low-conviction leg in either direction, not as a durable input.
 - No single asset should exceed 5-10% of crypto book at current regime.
 - **AAVE-specific:** unresolved rsETH bad-debt allocation is a live balance-sheet risk, not just a paused-buyback issue. The pause exists precisely to preserve treasury capacity for a possible DAO-level response.
 
@@ -460,13 +464,14 @@ The oil macro input was "resolved" three times. Only the last is canonical. Kept
 | **Jul 27 close** | 82.61 | 88.36 |
 | **Jul 28 00:14Z live (then-canonical, NOW RETRACTED)** | ~~82.00~~ | ~~87.75~~ |
 | **Jul 28 close** | 79.26 | 84.09 |
-| **Jul 29 15:02Z live — CANONICAL** | **85.41** | **90.92** |
+| Jul 29 15:02Z live (then-canonical, SUPERSEDED) | 85.41 | 90.92 |
+| **Jul 29 20:53Z live — CANONICAL** | **84.56** | **90.55** |
 
 **Resolution 1 (2026-07-27).** The report listed oil in TWO contradictory places, and even after a first "resolution" pass the fix itself carried TWO more mutually inconsistent number pairs ($81.85/$87.66 in the macro table vs $81.64/$87.50 in the Risk Overlay and BTC/ETH/SOL critic sections) — a second live pull was ~2% off. That pass pinned the daily series above, which remains accurate.
 
 **Resolution 2 (2026-07-28T00:14Z) — WITHDRAWN.** Its conclusion, verbatim and struck: ~~"The conflict resolves AGAINST the report's own bearish framing. WTI at $82.00 is not merely 'pulling back' — it is below the $82.49 Jul 17 pre-spike close, i.e. the entire Iran geo-premium has round-tripped and then some. 'Oil = inflation/geo headwind' was a valid Jul 24 input and is a dead input as of this re-pull. One of the four bearish legs no longer exists."~~ **Withdrawn 2026-07-29.** Valid for roughly 24 hours. **Do not cite $82.00 or $87.75.**
 
-**Resolution 3 (2026-07-29T15:02Z) — CANONICAL.** The unwind overshot to **$79.26 on Jul 28** (a deeper round-trip than Resolution 2 captured), then **reversed +7.8% in one session to $85.41**. WTI is now **ABOVE** the $82.49 pre-spike close (+3.5%); Brent $90.92 is **above** its $88.10 pre-spike close (+3.2%). **The oil leg of `Regime: BEARISH` is restored.** The Jul 28 instruction "do not cite oil as a bear input" is **withdrawn** — it was correct for a 24-hour window and is wrong today.
+**Resolution 3 (2026-07-29T15:02Z) — SUPERSEDED by Resolution 4, direction upheld.** The unwind overshot to **$79.26 on Jul 28** (a deeper round-trip than Resolution 2 captured), then **reversed +7.8% in one session to $85.41**. WTI was **ABOVE** the $82.49 pre-spike close (+3.5%); Brent $90.92 **above** its $88.10 pre-spike close (+3.2%). **The oil leg of `Regime: BEARISH` is restored.** The Jul 28 instruction "do not cite oil as a bear input" is **withdrawn** — it was correct for a 24-hour window and is wrong today. *(Prices restated at 20:53Z by Resolution 4; the conclusion is unchanged.)*
 
 **Net effect on the regime call:** `BEARISH` was built on four legs (F&G 28, BTC death cross, 10Y ~4.70%, oil shock). Resolution 2 knocked out the oil leg and downgraded the ETF-rotation read; Resolution 3 **restores the oil leg**. Regime label **BEARISH stands, on firmer footing than the Jul 28 revision implied.** **No token verdict changes** followed from any of the three passes.
 
