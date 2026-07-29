@@ -470,6 +470,22 @@ The oil macro input was "resolved" three times. Only the last is canonical. Kept
 
 **Net effect on the regime call:** `BEARISH` was built on four legs (F&G 28, BTC death cross, 10Y ~4.70%, oil shock). Resolution 2 knocked out the oil leg and downgraded the ETF-rotation read; Resolution 3 **restores the oil leg**. Regime label **BEARISH stands, on firmer footing than the Jul 28 revision implied.** **No token verdict changes** followed from any of the three passes.
 
+**Confirmation 2026-07-29T20:53Z — the oil conflict is CLOSED.** Resolution 3 was pulled at 15:02Z from a single source (Yahoo). It has now been re-pulled ~6 hours later from **two independent sources**, and they agree to within 0.05%:
+
+| Metric | Yahoo (`query1.finance.yahoo.com/v8/finance/chart/`) | TradingEconomics (CFD) | Agreement |
+|---|---|---|---|
+| Brent front-month | **$90.55** @ 20:53Z | **$90.51**, +7.63% d/d | 0.04% |
+| WTI front-month (CL=F, Sep-26) | **$84.56** @ 20:53Z | **$84.60**, +6.74% d/d | 0.05% |
+
+Day ranges: Brent $84.95–91.05, WTI $79.92–85.57. 30-day direction, both sources independently: **Brent UP +23.8% / +24.1%** (73.15 on 2026-06-29 → 90.55); **WTI UP +19.5% / +21.7%**. Brent 52w high/low $126.10 / $58.72; WTI $119.48 / $54.98.
+
+**Cited driver (tradingeconomics.com/commodity/brent-crude-oil, 2026-07-29):** Brent +7%+ on the session, snapping a 3-day losing streak — US-Iran escalation (retaliation threat after an intercepted attack on US forces), Iran-backed drone strikes on Saudi Eastern Region oil facilities for a second straight day, Houthi/Hormuz transit-fee reports, and API crude inventories −3.3M bbl.
+
+**Verdict on the conflict:** the 20:53Z pull is **−1.0% (WTI) / −0.4% (Brent)** from the 15:02Z canonical figures — intra-session drift, not a contradiction. **The direction of the claim is confirmed by a second source and by a +24% 30-day trend: oil is a headwind, and it is ON.** WTI $84.56 remains **above** the $82.49 Jul 17 pre-spike close (+2.5%); Brent $90.55 remains **above** its $88.10 pre-spike close (+2.8%). The withdrawal of Resolution 2's "the oil leg no longer exists" stands. **Regime BEARISH, four legs intact. No token verdict changes.**
+
+*Honest caveat that survives this resolution: a leg that round-trips ±10% in three sessions and then rips +7% in one is a **high-volatility, low-conviction** input regardless of which direction it currently points. It is confirmed, not durable — size for volatility, not for direction.*
+
+
 ## A3. ETF-flow correction (2026-07-27)
 
 The drafted regime paragraph read the ETH 5-day inflow streak against BTC's −$225M outflow as a live "rotation out of BTC into ETH". **Corrected:** that ETH 5-day streak snapped on Jul 25 and the week closed red, while BTC funds shed −$465M over two days (IBIT −$415M) — yet BOTH complexes still logged a third consecutive WEEKLY inflow, so the rotation read is weaker than drafted (https://cointelegraph.com/markets/ethereum-etfs-week-red-end-inflow-streak, https://www.coindesk.com/markets/2026/07/27/bitcoin-etfs-record-third-consecutive-weekly-inflows-despite-losses-of-usd465-million-to-end-week).
@@ -577,6 +593,20 @@ This report carried **three mutually inconsistent "Jul 27 spot" figures** and as
 **LINK = $8.60–8.622 @ 2026-07-27T21:08Z (6 venues, max spread 0.26%).** All three earlier figures ($8.594 / $8.599 / $8.611) are consistent with this band and none was wrong; only the "authoritative single tick" framing was. The one figure that WAS wrong — $8.80 — remains retracted. Any downstream verdict may cite the band; no verdict may cite a single venue tick as *the* price.
 
 **Superseded 2026-07-29.** The §11 resolution above was correct **for its timestamp** and is not retracted, but LINK has since drifted **−4.0%** to **$8.26 @ 2026-07-29T15:12Z** (Coinbase $8.264 / Kraken $8.2592 / CoinGecko $8.26, max spread 0.06%). Verdict WATCH unchanged. Any downstream cite must use $8.26 @ Jul 29, not the Jul 27 band.
+
+**FINAL — 2026-07-29T21:03Z. CANONICAL for this report; the discrepancy is CLOSED.** A fourth, independent 3-venue pull at end-of-day:
+
+| Venue | LINK/USD | Timestamp |
+|---|---|---|
+| CoinGecko | $8.19 | 2026-07-29T21:02Z |
+| Coinbase LINK-USD | $8.18 | 2026-07-29T21:03Z |
+| Kraken LINKUSD | $8.1777 (bid 8.17402 / ask 8.17520) | 2026-07-29T21:03Z |
+
+Max spread **$0.0123 = 0.15%**. Binance returned HTTP geo-block ("Service unavailable from a restricted location") and is recorded as [UNAVAILABLE] rather than substituted silently — Kraken was added as the third venue in its place.
+
+**LINK = $8.18 (median of 3) @ 2026-07-29T21:03Z.** −1.0% from the 15:12Z mark, −2.35% on 24h (CoinGecko; Kraken 24h open $8.4344 → −3.0%), 24h range $8.1725–8.5019. CoinGecko 365d daily series: 52w high **$26.73 (2025-08-23, close basis)**, 52w low **$7.19 (2026-07-01, close basis)** — LINK is **−69.4% from its 52w high (close basis)** and **+13.8% above its 52w low (close basis)**, consistent with the intraday-basis −69.9% stated in §11 to within the basis difference.
+
+**Why this resolves rather than continues the discrepancy chain:** every pull from 15:12Z onward has agreed across venues to ≤0.15%, and the residual drift ($8.26 → $8.18) is **real market movement, not a data conflict** — a −1.0% move over 6 hours inside a −2.35% day. The earlier chain ($8.80, $16.73, the "authoritative single tick" framing) was a *methodology* failure; this is a price that moved. **No verdict change: LINK stays WATCH.** Both triggers remain untouched — the $9.44 weekly-close BUY trigger is 15.4% above spot, the $7.19 daily-close AVOID trigger is 12.1% below.
 
 The earlier draft of the §11 row listed Jul 27 spot as **$8.80**; four independent venues at 15:18 UTC said **$8.58–8.60** (max spread 0.22%). The $8.80 figure was stale/wrong by ~2.4% and was replaced. For reference, the four-venue Jul 27 15:17-15:18 UTC set was: OKX LINK-USDT $8.594, Kraken LINKUSD $8.5848, Coinbase LINK-USD $8.5815, CoinGecko (live) $8.60; Yahoo close Jul 24 was $8.33.
 
