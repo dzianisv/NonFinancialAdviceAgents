@@ -46,7 +46,10 @@ fi
 #   bun .agents/scripts/validate/drawdown_basis.ts <report.md>
 ddvalidator="$root/.agents/scripts/validate/drawdown_basis.ts"
 if [ -f "$ddvalidator" ]; then
-  staged_reports=$(git diff --cached --name-only --diff-filter=ACM -- 'research/*.md' 'crypto/*.md')
+  # ACMR (not ACM) + destination-path extraction — see changed_reports.sh for why: a
+  # rename-plus-edit is scored `R`, which `ACM` silently excluded, so re-dating a report
+  # (the normal way reports change here) bypassed this gate entirely.
+  staged_reports=$(bash "$root/.agents/scripts/validate/changed_reports.sh" --cached)
   ddfail=0
   for f in $staged_reports; do
     [ -f "$root/$f" ] || continue

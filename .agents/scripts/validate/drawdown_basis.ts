@@ -103,6 +103,11 @@ export type Claim = {
   basis: Basis;
   /** Drawdown: signed percent (always <= 0). Low/high: a USD price level. */
   value: number;
+  /**
+   * Set when the line names MORE THAN ONE known token, so no single attribution is
+   * defensible. An explicit AMBIGUOUS_TOKEN failure beats a confident wrong PASS.
+   */
+  ambiguousTokens?: string[];
 };
 
 export type Status =
@@ -112,6 +117,7 @@ export type Status =
   | "FETCH_FAILED"
   | "SHORT_SERIES"
   | "ATH_UNAVAILABLE"
+  | "AMBIGUOUS_TOKEN"
   | "NO_TOKEN";
 
 /**
@@ -210,6 +216,21 @@ const MINUS = "[−\\-–]";
  */
 const NUM = "\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?";
 
+/**
+ * Markdown emphasis / code-span delimiters that may sit BETWEEN the tokens of a claim.
+ *
+ * WHY: `**−62.8%** from its 52w high` bolds only the NUMBER, so a `**` lands between the
+ * `%` and the word `from`. The old prose regex demanded `%\s+(?:from|off|…)`, so that
+ * closing `**` killed the match and the claim was NEVER EXTRACTED — which means it was
+ * silently TRUSTED. Live in the shipped report, including a bare `(**−61.0%** from high)`
+ * that RULE 1 must reject; the gate instead announced "all 66 passed".
+ * Every existing test bolded the WHOLE phrase (`**−62.8% from 52w high**`), which leaves
+ * no delimiter mid-claim — which is exactly why this survived review.
+ */
+const EMPH = "[*_`]*";
+/** One-or-more separator run: whitespace and/or emphasis delimiters, in any order. */
+const SEP = "[*_`\\s]+";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Small helpers
 // ─────────────────────────────────────────────────────────────────────────────
@@ -283,8 +304,25 @@ export function contextFor(line: string, start: number, end: number): string {
 // Parsing
 // ─────────────────────────────────────────────────────────────────────────────
 
-const RE_HEADING_TOKEN = /^#{1,6}\s*(?:\d+\.\s*)?([A-Z]{2,6})\s*[—–-]/;
-const RE_ROW_TOKEN = /^\|\s*\*{0,2}([A-Z]{2,6})\*{0,2}\s*\|/;
+const RE_HEADING_TOKEN = new RegExp(
+  `^#{1,6}\\s*(?:\\d+\\.\\s*)?${EMPH}\\s*([A-Z]{2,6})\\s*${EMPH}\\s*[—–-]`,
+);
+/**
+ * A ticker occupying a WHOLE table cell, in ANY column — not just the first.
+ *
+ * WHY not first-cell-only: the report's own signal table is `| 1 | **BTC** | … |` (an
+ * index column), and peer-comparison rows put the ticker mid-row too. With a first-cell
+ * anchor those rows never re-attributed, so `sectionSymbol` leaked and a LINK claim
+ * sitting inside the SOL section was recomputed against SOL's series and stamped OK
+ * (−70.8% vs −70.5%, inside tolerance) — a CONFIDENT WRONG PASS, the worst outcome here.
+ */
+const RE_CELL_TOKEN = new RegExp(`\\|\\s*${EMPH}\\s*([A-Z]{2,6})\\s*${EMPH}\\s*(?=\\|)`, "g");
+/**
+ * A ticker as a standalone word, for PROSE lines (no table cells). Same purpose as
+ * RE_CELL_TOKEN: a claim on a line about LINK must never be recomputed against the
+ * enclosing section's SOL series.
+ */
+const RE_WORD_TOKEN = /\b([A-Z]{2,6})\b/g;
 
 /**
  * `| % from 52w High | −62.6% |`, `| % from ATH | −23% |`, `| % from High | −73% |`
@@ -309,9 +347,13 @@ const RE_TABLE_LEVEL_PCT = new RegExp(
  * and that phrasing is precisely how ATH-basis figures got mixed into 52w reports.
  * The qualifier group is deliberately permissive (its/the/true/standard/current/…)
  * so a missed claim — the silent failure we are fixing — cannot happen quietly.
+ * Every inter-token gap accepts markdown emphasis (`**`, `*`, `_`, backtick) as well as
+ * whitespace, because bolding ONLY the number (`**−61.0%** from high`) is common in real
+ * reports and used to make the whole claim invisible. See EMPH/SEP above.
  */
 const RE_PROSE_PCT = new RegExp(
-  `(${MINUS})?\\s*(${NUM})\\s*%\\s+(?:from|off|below|under)\\s+((?:its|the|their|true|standard|current|prior|recent|a)\\s+)*([^%.,;:)\\n]{0,28}?)(highs?|ath)\\b`,
+  `(${MINUS})?\\s*${EMPH}\\s*(${NUM})\\s*${EMPH}\\s*%${SEP}(?:from|off|below|under)${SEP}` +
+    `((?:its|the|their|true|standard|current|prior|recent|a)${SEP})*([^%.,;:)\\n]{0,28}?)(highs?|ath)\\b`,
   "gi",
 );
 
@@ -366,10 +408,21 @@ export function parseClaims(markdown: string): Claim[] {
       // false PASS, which is worse than an honest NO_TOKEN failure.
       sectionSymbol = null;
     }
-    const rowTok = line.match(RE_ROW_TOKEN);
-    // A `| **JUP** | …` row re-attributes only that line, not the section.
-    const symbol =
-      rowTok && COINGECKO_IDS[rowTok[1]!] ? rowTok[1]! : sectionSymbol;
+    // A row/line naming a token re-attributes ONLY that line, not the section. The token
+    // may sit in any column (`| 1 | **BTC** | …`), not just the first. Table cells win
+    // over a bare word match, because a cell IS the row's subject.
+    const cellTokens = [
+      ...new Set(
+        [...line.matchAll(RE_CELL_TOKEN)].map((m) => m[1]!).filter((t) => COINGECKO_IDS[t]),
+      ),
+    ];
+    const lineTokens = cellTokens.length
+      ? cellTokens
+      : [...new Set([...line.matchAll(RE_WORD_TOKEN)].map((m) => m[1]!).filter((t) => COINGECKO_IDS[t]))];
+    // Two different tokens on one line => no defensible attribution. Refuse, loudly:
+    // an explicit AMBIGUOUS_TOKEN failure is far better than a confident wrong PASS.
+    const ambiguousTokens = lineTokens.length > 1 ? lineTokens : undefined;
+    const symbol = ambiguousTokens ? null : (lineTokens[0] ?? sectionSymbol);
 
     const push = (start: number, end: number, kind: ClaimKind, basis: Basis, value: number) => {
       if (overlaps(claims, lineNo, start, end)) return;
@@ -382,6 +435,7 @@ export function parseClaims(markdown: string): Claim[] {
         kind,
         basis,
         value,
+        ...(ambiguousTokens ? { ambiguousTokens } : {}),
       });
     };
 
@@ -434,9 +488,17 @@ export function parseClaims(markdown: string): Claim[] {
     }
     for (const m of line.matchAll(RE_TABLE_LEVEL)) {
       const idx = m.index ?? 0;
-      const which = (m[2] ?? "").toLowerCase();
-      if (which !== "low" && which !== "high") continue;
-      push(idx, idx + m[0].length, which as ClaimKind, resolveBasis(m[1]!), num(m[3]!));
+      const basis = resolveBasis(m[1]!);
+      let which = (m[2] ?? "").toLowerCase();
+      if (which !== "low" && which !== "high") {
+        // `| ATH | $8.25 |` names no low/high word, yet an ATH *is* a high. The old code
+        // `continue`d here, so the report's TON ATH $8.25 and HYPE ATH $76.87 were never
+        // extracted and therefore silently trusted — the same silent-trust failure mode.
+        // A bare `| 52w | $x |` stays skipped: without low/high it is genuinely ambiguous.
+        if (basis !== "ATH") continue;
+        which = "high";
+      }
+      push(idx, idx + m[0].length, which as ClaimKind, basis, num(m[3]!));
     }
   });
 
@@ -538,6 +600,17 @@ export async function validateReport(
       results.push({ claim, status: "OK", detail: "basis explicit (recompute skipped: --basis-only)" });
       continue;
     }
+    if (claim.ambiguousTokens) {
+      results.push({
+        claim,
+        status: "AMBIGUOUS_TOKEN",
+        detail:
+          `[UNAVAILABLE] this line names ${claim.ambiguousTokens.join(" and ")} — refusing to ` +
+          `attribute the claim to one of them. Recomputing it against the wrong token's series ` +
+          `produces a CONFIDENT WRONG PASS; split the line or name the token explicitly.`,
+      });
+      continue;
+    }
     if (!claim.symbol) {
       results.push({
         claim,
@@ -629,6 +702,29 @@ export async function validateReport(
     }
 
     // Price levels (52w low / 52w high) — same like-for-like rule.
+    //
+    // ATH-basis levels FIRST: `claim.basis` was honoured for drawdowns but IGNORED here,
+    // so `| All-Time High | $8.25 |` was silently checked against the 52-WEEK high. A
+    // fixture with a 52w high of 8.25 and a true ATH of 100 PASSED — off by 12×. `s.ath`
+    // was fetched and never read. There is no close/intraday distinction for a scalar ATH.
+    if (claim.basis === "ATH" && claim.kind === "high") {
+      if (typeof s.ath !== "number" || !(s.ath > 0)) {
+        results.push({
+          claim,
+          status: "ATH_UNAVAILABLE",
+          detail: `[UNAVAILABLE] no ATH for ${claim.symbol} — cannot verify an ATH-basis level (never fall back to the 52w series)`,
+        });
+        continue;
+      }
+      const rel = (Math.abs(s.ath - claim.value) / s.ath) * 100;
+      results.push(
+        rel <= priceTol
+          ? { claim, status: "OK", recomputed: s.ath, detail: `OK[ATH] stated $${claim.value} vs ATH $${s.ath.toPrecision(6)} (${rel.toFixed(2)}%)` }
+          : { claim, status: "MISMATCH", recomputed: s.ath, detail: `stated $${claim.value} vs ATH $${s.ath.toPrecision(6)} (${rel.toFixed(2)}% > ${priceTol}%)` },
+      );
+      continue;
+    }
+
     const lvlClose = claim.kind === "low" ? seriesLow(s.points) : seriesHigh(s.points);
     const lvlIntra = intraday.candles
       ? (claim.kind === "low" ? candleLow(intraday.candles) : candleHigh(intraday.candles))
@@ -831,6 +927,7 @@ const ICON: Record<Status, string> = {
   FETCH_FAILED: "✗",
   SHORT_SERIES: "✗",
   ATH_UNAVAILABLE: "✗",
+  AMBIGUOUS_TOKEN: "✗",
   NO_TOKEN: "✗",
 };
 
@@ -866,11 +963,62 @@ export function formatReport(rep: ValidationReport, path: string): string {
   return out.join("\n");
 }
 
+/** Flags that consume the NEXT argv entry as their value. */
+const VALUE_FLAGS = new Set(["tolerance", "price-tolerance-pct"]);
+
+export type ParsedArgs = {
+  files: string[];
+  flags: Record<string, string | true>;
+};
+
+/**
+ * Splits argv into positional files and flags.
+ *
+ * WHY not `argv.filter(a => !a.startsWith("--"))`: that treats a flag's VALUE as a
+ * filename, so the documented `REPORT.md --tolerance 0.5` produced files=["REPORT.md",
+ * "0.5"], failed the `length !== 1` check and exited 2. Both documented tuning flags were
+ * therefore unusable — the tool could only ever run at its defaults.
+ * `--name=value` is accepted too.
+ */
+export function parseArgs(argv: string[]): ParsedArgs {
+  const files: string[] = [];
+  const flags: Record<string, string | true> = {};
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i]!;
+    if (!a.startsWith("--")) {
+      files.push(a);
+      continue;
+    }
+    const body = a.slice(2);
+    const eq = body.indexOf("=");
+    if (eq !== -1) {
+      flags[body.slice(0, eq)] = body.slice(eq + 1);
+      continue;
+    }
+    if (VALUE_FLAGS.has(body)) {
+      const v = argv[i + 1];
+      if (v === undefined || v.startsWith("--")) {
+        flags[body] = true; // missing value → surfaced as NaN below, never silently default
+      } else {
+        flags[body] = v;
+        i++; // consume the value so it is NOT mistaken for a filename
+      }
+      continue;
+    }
+    flags[body] = true;
+  }
+  return { files, flags };
+}
+
 async function main(argv: string[]): Promise<number> {
-  const files = argv.filter((a) => !a.startsWith("--"));
-  const flag = (name: string): string | undefined => {
-    const i = argv.indexOf(`--${name}`);
-    return i === -1 ? undefined : argv[i + 1];
+  const { files, flags } = parseArgs(argv);
+  const numFlag = (name: string): number | undefined => {
+    const v = flags[name];
+    if (v === undefined) return undefined;
+    if (v === true) throw new Error(`--${name} requires a numeric value`);
+    const n = Number(v);
+    if (!Number.isFinite(n)) throw new Error(`--${name} must be numeric, got "${v}"`);
+    return n;
   };
   if (files.length !== 1) {
     console.error("usage: bun drawdown_basis.ts <report.md> [--tolerance 0.5] [--price-tolerance-pct 1.0] [--basis-only] [--json]");
@@ -879,15 +1027,25 @@ async function main(argv: string[]): Promise<number> {
   const path = files[0]!;
   const md = await Bun.file(path).text();
 
-  const basisOnly = argv.includes("--basis-only");
+  const basisOnly = flags["basis-only"] === true;
+  let tolerance: number | undefined;
+  let priceTolerancePct: number | undefined;
+  try {
+    tolerance = numFlag("tolerance");
+    priceTolerancePct = numFlag("price-tolerance-pct");
+  } catch (e) {
+    console.error(e instanceof Error ? e.message : String(e));
+    return 2;
+  }
+
   const rep = await validateReport(md, {
     fetcher: basisOnly ? undefined : productionFetcher(),
     basisOnly,
-    tolerance: flag("tolerance") ? Number(flag("tolerance")) : undefined,
-    priceTolerancePct: flag("price-tolerance-pct") ? Number(flag("price-tolerance-pct")) : undefined,
+    tolerance,
+    priceTolerancePct,
   });
 
-  console.log(argv.includes("--json") ? JSON.stringify(rep, null, 2) : formatReport(rep, path));
+  console.log(flags["json"] === true ? JSON.stringify(rep, null, 2) : formatReport(rep, path));
   return rep.ok ? 0 : 1;
 }
 

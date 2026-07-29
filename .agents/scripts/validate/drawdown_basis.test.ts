@@ -12,6 +12,7 @@ import { test, expect, describe } from "bun:test";
 import {
   validateReport,
   parseClaims,
+  parseArgs,
   resolveBasis,
   formatReport,
   productionFetcher,
@@ -421,11 +422,11 @@ describe("silent non-extraction regressions", () => {
 
   /**
    * THE GUARD FOR THE WHOLE CLASS. Individual value assertions cannot catch a claim
-   * that silently disappears — only a COUNT can. This fixture holds exactly 12 known
+   * that silently disappears — only a COUNT can. This fixture holds exactly 13 known
    * claims across every supported form; if any future edit makes one invisible, this
    * test fails even though every other assertion in the file still passes.
    */
-  test("GUARD: a fixture with 12 known claims extracts EXACTLY 12 (silent-drop canary)", () => {
+  test("GUARD: a fixture with 13 known claims extracts EXACTLY 13 (silent-drop canary)", () => {
     const md = [
       "# Guard Fixture",
       "",
@@ -439,22 +440,38 @@ describe("silent non-extraction regressions", () => {
       "### 2. ETH — Ethereum",
       "",
       "| 52w Range (intraday) | **$1,505.00 ↔ $4,956.78** |", //  6 low, 7 high
-      "| ATH | $4,891.70 (−23.0%) |", //  8 drawdown
-      "| % from ATH | −23.0% |", //  9 drawdown
+      "| ATH | $4,891.70 (−23.0%) |", //  8 high (ATH LEVEL), 9 drawdown
+      "| % from ATH | −23.0% |", // 10 drawdown
       "",
       "### 3. PUMP — Pump.fun",
       "",
-      "| 52w Low | $0.001199 |", // 10 low
-      "| 52w High (close) | $0.017 |", // 11 high
-      "PUMP is down 93% from highs.", // 12 drawdown (BASIS_MISSING, still a claim)
+      "| 52w Low | $0.001199 |", // 11 low
+      "| 52w High (close) | $0.017 |", // 12 high
+      "PUMP is down 93% from highs.", // 13 drawdown (BASIS_MISSING, still a claim)
     ].join("\n");
 
     const claims = parseClaims(md);
-    const summary = claims.map((c) => `L${c.line}:${c.symbol}:${c.kind}:${c.value}`);
-    expect({ n: claims.length, summary }).toEqual({ n: 12, summary });
-    expect(claims).toHaveLength(12);
+    // The expected list is written out LITERALLY. It used to be
+    // `expect({ n, summary }).toEqual({ n: 12, summary })` — with `summary` on BOTH
+    // sides, which asserted nothing beyond the length the next line already asserted.
+    expect(claims.map((c) => `L${c.line}:${c.symbol}:${c.kind}:${c.value}`)).toEqual([
+      "L5:BTC:low:57717.55",
+      "L6:BTC:high:126296",
+      "L6:BTC:drawdown:-49.4",
+      "L7:BTC:drawdown:-49.4",
+      "L8:BTC:drawdown:-49.4",
+      "L12:ETH:low:1505",
+      "L12:ETH:high:4956.78",
+      "L13:ETH:high:4891.7",
+      "L13:ETH:drawdown:-23",
+      "L14:ETH:drawdown:-23",
+      "L18:PUMP:low:0.001199",
+      "L19:PUMP:high:0.017",
+      "L20:PUMP:drawdown:-93",
+    ]);
+    expect(claims).toHaveLength(13);
     expect(claims.filter((c) => c.kind === "low")).toHaveLength(3);
-    expect(claims.filter((c) => c.kind === "high")).toHaveLength(3);
+    expect(claims.filter((c) => c.kind === "high")).toHaveLength(4);
     expect(claims.filter((c) => c.kind === "drawdown")).toHaveLength(6);
     // Every claim must be attributed to a token — an unattributed claim cannot be
     // recomputed, which is a different flavour of the same silent-trust problem.
@@ -671,5 +688,237 @@ describe("RULE 5 — close-only degradation is labelled, never silently authorit
 
     expect(statuses(rep.results)).toEqual(["FETCH_FAILED"]);
     expect(rep.failures[0]!.detail).toContain("[UNAVAILABLE]");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADVERSARIAL-REVIEW REGRESSIONS (PR #95)
+//
+// Every case below was REPRODUCED against the shipped validator. Each one is a
+// SILENT failure — a claim the tool never saw, or worse, a confident WRONG PASS.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("B2 — a bold/italic/code-span percentage must still be extracted", () => {
+  // The old regex demanded `%\s+(?:from|off|…)`. A closing `**` between the `%` and the
+  // `from` killed the match, so the claim was never extracted and therefore silently
+  // trusted. Live at ~L133/137/391 of research/crypto-portfolio-2026-07-24.md.
+  // Every pre-existing test bolded the WHOLE phrase, which leaves no mid-claim
+  // delimiter — which is exactly why this survived review.
+  const cases: [string, number, string][] = [
+    ["TON is **−62.8%** from its 52w high", -62.8, "52w"],
+    ["TON is −62.8% from its 52w high", -62.8, "52w"], // control: unbolded
+    ["HYPE sits (**−61.0%** from 52w high) today", -61.0, "52w"],
+    ["JUP is *−90.3%* from ATH", -90.3, "ATH"],
+    ["JUP is _−90.3%_ from ATH", -90.3, "ATH"],
+    ["JUP is `−90.3%` from ATH", -90.3, "ATH"],
+    ["AAVE is **−23.0%** off its all-time high", -23.0, "ATH"],
+  ];
+
+  for (const [body, value, basis] of cases) {
+    test(`bolding ONLY the number still yields a claim: «${body}»`, () => {
+      const claims = parseClaims(report("TON", body)).filter((c) => c.kind === "drawdown");
+      expect({ body, n: claims.length }).toEqual({ body, n: 1 });
+      expect({ body, v: claims[0]!.value }).toEqual({ body, v: value });
+      expect({ body, b: claims[0]!.basis }).toEqual({ body, b: basis });
+    });
+  }
+
+  test("the shipped `(**−61.0%** from high)` is now CAUGHT as BASIS_MISSING", async () => {
+    // THE headline defect: a BARE "from high" — precisely what RULE 1 exists to reject —
+    // sat in the report while the gate announced "all 66 passed", because bolding the
+    // number made it invisible to the parser.
+    const md = report("TON", "| HYPE | Overbought (**−61.0%** from high) | TRIM |");
+    const rep = await validateReport(md, { basisOnly: true });
+
+    expect(rep.ok).toBe(false);
+    expect(statuses(rep.results)).toEqual(["BASIS_MISSING"]);
+    expect(rep.failures[0]!.claim.value).toBe(-61);
+  });
+
+  test("a bolded number does NOT double-count against the unbolded form", () => {
+    // The emphasis allowance must not make one claim match twice at overlapping spans.
+    expect(parseClaims(report("TON", "TON is **−62.8%** from its 52w high."))).toHaveLength(1);
+  });
+});
+
+describe("M8 — `| ATH | $8.25 |` level rows must extract", () => {
+  // `(low|high)?` was optional but a non-low/high match hit a bare `continue`, so the
+  // report's TON ATH $8.25 and HYPE ATH $76.87 were never verified. The GUARD fixture
+  // even baked the drop in (it counted `| ATH | $4,891.70 (−23.0%) |` as 1 claim).
+  test("`| ATH | $8.25 |` yields ONE high claim on the ATH basis", () => {
+    const claims = parseClaims(report("TON", "| ATH | $8.25 |"));
+    expect(claims).toHaveLength(1);
+    expect(claims[0]!.kind).toBe("high");
+    expect(claims[0]!.basis).toBe("ATH");
+    expect(claims[0]!.value).toBe(8.25);
+  });
+
+  test("every ATH label spelling extracts (HYPE $76.87 and friends)", () => {
+    const variants: [string, number][] = [
+      ["| ATH | $76.87 |", 76.87],
+      ["| All-Time High | $8.25 |", 8.25],
+      ["| all time | $8.25 |", 8.25],
+      ["| **ATH** | **$76.87** |", 76.87],
+      ["| ATH (corrected) — RESOLVED | $8.25 |", 8.25],
+    ];
+    for (const [row, expected] of variants) {
+      const claims = parseClaims(report("TON", row)).filter((c) => c.kind === "high");
+      expect({ row, n: claims.length }).toEqual({ row, n: 1 });
+      expect({ row, v: claims[0]!.value }).toEqual({ row, v: expected });
+      expect({ row, b: claims[0]!.basis }).toEqual({ row, b: "ATH" });
+    }
+  });
+
+  test("`| ATH | $8.25 (−82.5%) |` yields BOTH the level and the drawdown", () => {
+    const claims = parseClaims(report("TON", "| ATH | $8.25 (−82.5%) |"));
+    expect(claims.filter((c) => c.kind === "high")).toHaveLength(1);
+    expect(claims.filter((c) => c.kind === "drawdown")).toHaveLength(1);
+  });
+
+  test("a 52w row with NO low/high word stays skipped (genuinely ambiguous, not a guess)", () => {
+    expect(parseClaims(report("TON", "| 52w | $8.25 |"))).toHaveLength(0);
+  });
+});
+
+describe("M5 — an ATH-basis LEVEL must be checked against the ATH, not the 52w series", () => {
+  // `claim.basis` was honoured for drawdowns and IGNORED for low/high, and `s.ath` was
+  // fetched but never read — so an ATH level was silently validated against the 52-WEEK
+  // high. This fixture is off by 12× and used to PASS.
+  const ATH_TRAP: SeriesResult = { ok: true, points: makeSeries(366, 8.25, 1.0, 1.5), ath: 100 };
+
+  test("`| All-Time High | $8.25 |` on a series whose 52w high is 8.25 but ATH is 100 FAILS", async () => {
+    const md = report("TON", "| All-Time High | $8.25 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ TON: ATH_TRAP }) });
+
+    expect(rep.ok).toBe(false);
+    expect(statuses(rep.results)).toEqual(["MISMATCH"]);
+    expect(rep.failures[0]!.recomputed).toBe(100);
+    expect(rep.failures[0]!.detail).toContain("ATH");
+  });
+
+  test("a CORRECT ATH level passes and says it was the ATH that backed it", async () => {
+    const md = report("TON", "| ATH | $100.00 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ TON: ATH_TRAP }) });
+
+    expect(statuses(rep.results)).toEqual(["OK"]);
+    expect(rep.results[0]!.detail).toContain("OK[ATH]");
+  });
+
+  test("no ATH data => ATH_UNAVAILABLE, never a silent fallback to the 52w series", async () => {
+    const noAth: SeriesResult = { ok: true, points: makeSeries(366, 8.25, 1.0, 1.5) };
+    const md = report("TON", "| ATH | $8.25 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ TON: noAth }) });
+
+    expect(rep.ok).toBe(false);
+    expect(statuses(rep.results)).toEqual(["ATH_UNAVAILABLE"]);
+    expect(rep.failures[0]!.detail).toContain("[UNAVAILABLE]");
+  });
+
+  test("a 52w-basis level is UNAFFECTED by the presence of an ATH", async () => {
+    const md = report("TON", "| 52w High | $8.25 |");
+    const rep = await validateReport(md, { fetcher: fetcherFor({ TON: ATH_TRAP }) });
+    expect(statuses(rep.results)).toEqual(["OK"]);
+  });
+});
+
+describe("M4 — wrong-token attribution must never produce a confident PASS", () => {
+  // `sectionSymbol` leaked to every line until the next heading, and the row-token regex
+  // only fired when the ticker was the FIRST cell. So the report's own signal table
+  // (`| 1 | **BTC** | …`) and peer rows never re-attributed, and a LINK claim inside the
+  // SOL section was recomputed against SOL's series and stamped OK (−70.8% vs −70.5%).
+  test("a ticker in a NON-first cell re-attributes the row (`| 1 | **BTC** | …`)", () => {
+    const md = "### 1. SOL — Solana\n\n| 1 | **BTC** | −49.4% from 52w high | HOLD |\n";
+    const claims = parseClaims(md);
+    expect(claims).toHaveLength(1);
+    expect(claims[0]!.symbol).toBe("BTC");
+  });
+
+  test("a peer row for LINK inside the SOL section is attributed to LINK, not SOL", async () => {
+    const sol: SeriesResult = { ok: true, points: makeSeries(366, 250, 62.18, 73.5) }; // -70.6%
+    const link: SeriesResult = { ok: true, points: makeSeries(366, 26.73, 7.19, 8.28) }; // -69.0%
+    const md = "### 1. SOL — Solana\n\n| 3 | LINK | −70.8% from 52w high |\n";
+
+    const rep = await validateReport(md, { fetcher: fetcherFor({ SOL: sol, LINK: link }) });
+    expect(rep.results[0]!.claim.symbol).toBe("LINK");
+    // Against LINK's own series −70.8% is wrong; against SOL's it sneaks inside tolerance.
+    // The old code silently passed it. It must now FAIL.
+    expect(statuses(rep.results)).toEqual(["MISMATCH"]);
+  });
+
+  test("TWO different tickers on one line => AMBIGUOUS_TOKEN, never a coin-flip attribution", async () => {
+    const md = "### 1. SOL — Solana\n\n| **SOL** | vs | **LINK** | −70.8% from 52w high |\n";
+    const rep = await validateReport(md, {
+      fetcher: fetcherFor({ SOL: { ok: true, points: makeSeries(366, 250, 62.18, 73.5) } }),
+    });
+
+    expect(rep.ok).toBe(false);
+    expect(statuses(rep.results)).toEqual(["AMBIGUOUS_TOKEN"]);
+    expect(rep.failures[0]!.claim.symbol).toBeNull();
+    expect(rep.failures[0]!.detail).toContain("SOL");
+    expect(rep.failures[0]!.detail).toContain("LINK");
+  });
+
+  test("a PROSE line naming a foreign token re-attributes too (leak-proof outside tables)", () => {
+    const md = "### 1. SOL — Solana\n\nLINK is −70.8% from 52w high.\n";
+    expect(parseClaims(md)[0]!.symbol).toBe("LINK");
+  });
+
+  test("no regression: a line naming NO token still inherits the section symbol", () => {
+    const md = "### 1. SOL — Solana\n\n| 52w Low | $60.13 |\n";
+    expect(parseClaims(md)[0]!.symbol).toBe("SOL");
+  });
+});
+
+describe("m10 — an emphasised heading must still attribute its section", () => {
+  // `### 4. **TON** — Toncoin` yielded symbol=null, so EVERY claim in that section
+  // became NO_TOKEN — an entire token's figures went unverified.
+  const headings = [
+    "### 4. **TON** — Toncoin",
+    "### 4. TON — Toncoin",
+    "## *TON* — Toncoin",
+    "### 4. `TON` — Toncoin",
+    "#### **TON** – Toncoin",
+  ];
+  for (const h of headings) {
+    test(`«${h}» attributes its section`, () => {
+      const claims = parseClaims(`${h}\n\n| 52w Low | $1.00 |\n`);
+      expect({ h, s: claims[0]!.symbol }).toEqual({ h, s: "TON" });
+    });
+  }
+});
+
+describe("m9 — --tolerance / --price-tolerance-pct must be usable", () => {
+  // `argv.filter(a => !a.startsWith("--"))` treated a flag's VALUE as a filename, so the
+  // documented `REPORT.md --tolerance 0.5` gave files=["REPORT.md","0.5"] and exited 2.
+  test("a flag VALUE is not mistaken for a filename", () => {
+    const { files, flags } = parseArgs(["REPORT.md", "--tolerance", "0.5"]);
+    expect(files).toEqual(["REPORT.md"]);
+    expect(flags["tolerance"]).toBe("0.5");
+  });
+
+  test("both documented value flags parse together with boolean flags", () => {
+    const { files, flags } = parseArgs([
+      "REPORT.md", "--tolerance", "0.5", "--price-tolerance-pct", "1.0", "--basis-only", "--json",
+    ]);
+    expect(files).toEqual(["REPORT.md"]);
+    expect(flags).toEqual({
+      tolerance: "0.5",
+      "price-tolerance-pct": "1.0",
+      "basis-only": true,
+      json: true,
+    });
+  });
+
+  test("--name=value form works", () => {
+    const { files, flags } = parseArgs(["REPORT.md", "--tolerance=0.5"]);
+    expect(files).toEqual(["REPORT.md"]);
+    expect(flags["tolerance"]).toBe("0.5");
+  });
+
+  test("a value flag with a missing value does not swallow the next flag", () => {
+    const { files, flags } = parseArgs(["REPORT.md", "--tolerance", "--json"]);
+    expect(files).toEqual(["REPORT.md"]);
+    expect(flags["tolerance"]).toBe(true);
+    expect(flags["json"]).toBe(true);
   });
 });
