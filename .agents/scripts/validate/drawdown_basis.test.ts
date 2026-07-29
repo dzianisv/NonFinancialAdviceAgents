@@ -13,6 +13,10 @@ import {
   validateReport,
   parseClaims,
   parseArgs,
+  parseExemptions,
+  parseMarkerValues,
+  staleExemptionErrors,
+  valueMatches,
   resolveBasis,
   formatReport,
   productionFetcher,
@@ -920,5 +924,491 @@ describe("m9 — --tolerance / --price-tolerance-pct must be usable", () => {
     expect(files).toEqual(["REPORT.md"]);
     expect(flags["tolerance"]).toBe(true);
     expect(flags["json"]).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RETRACTION EXEMPTION MARKER — `<!-- retracted -->`
+//
+// The appendix correction table quotes each wrong figure AS DRAFTED so the error stays
+// auditable; the validator used to flag those quotes as MISMATCHes forever. The marker
+// exempts them — but it is a SUPPRESSION mechanism, so every test below is really a test
+// that the suppression cannot be applied broadly, silently, or with ambiguous scope.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("retraction exemption marker", () => {
+  /** UNI fixture: 52w intraday range $2.316 ↔ $12.285 — the drafted $2.00 ↔ $19.47 is wrong. */
+  const UNI_OK: SeriesResult = {
+    ok: true,
+    points: makeSeries(366, 12.285, 2.316, 3.81),
+    ath: 44.97,
+  };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  test("inline marker exempts ONLY its own line; the next line is still validated", async () => {
+    const md = report(
+      "UNI",
+      [
+        "| UNI 52w range $2.00 ↔ $19.47 | corrected above | <!-- retracted -->",
+        "| Live | 52w Range $2.00 ↔ $19.47 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    const exempt = rep.results.filter((r) => r.status === "RETRACTED");
+    const failed = rep.failures;
+    expect(exempt.length).toBe(2); // low + high on the marked line
+    expect(exempt.every((r) => r.claim.line === 5)).toBe(true);
+    // The UNMARKED line right after is still recomputed and still fails.
+    expect(failed.length).toBe(2);
+    expect(failed.every((r) => r.claim.line === 6 && r.status === "MISMATCH")).toBe(true);
+    expect(rep.ok).toBe(false);
+  });
+
+  test("block marker exempts claims between start/end; claims AFTER end are validated again", async () => {
+    const md = report(
+      "UNI",
+      [
+        "<!-- retracted:start -->",
+        "| UNI 52w range $2.00 ↔ $19.47 | as drafted |",
+        "<!-- retracted:end -->",
+        "| Live | 52w Range $2.00 ↔ $19.47 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.results.filter((r) => r.status === "RETRACTED").map((r) => r.claim.line)).toEqual([6, 6]);
+    expect(rep.failures.map((r) => r.claim.line)).toEqual([8, 8]);
+    expect(rep.failures.every((r) => r.status === "MISMATCH")).toBe(true);
+  });
+
+  test("UNCLOSED retracted:start is a HARD ERROR, not exempt-to-EOF", async () => {
+    const md = report(
+      "UNI",
+      [
+        "<!-- retracted:start -->",
+        "| UNI 52w range $2.00 ↔ $19.47 | as drafted |",
+        "| Live | 52w Range $2.00 ↔ $19.47 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.ok).toBe(false);
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("unclosed");
+    // Nothing is exempted: the rest of the file is STILL validated, so a forgotten
+    // closing comment cannot silently suppress every remaining claim.
+    expect(rep.exempted).toBe(0);
+    expect(rep.results.filter((r) => r.status === "RETRACTED").length).toBe(0);
+    expect(rep.failures.length).toBe(4);
+  });
+
+  test("nested/duplicate retracted:start is a hard error and does not widen the scope", async () => {
+    const md = report(
+      "UNI",
+      [
+        "<!-- retracted:start -->",
+        "| UNI 52w range $2.00 ↔ $19.47 | as drafted |",
+        "<!-- retracted:start -->",
+        "<!-- retracted:end -->",
+        "| Live | 52w Range $2.00 ↔ $19.47 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.ok).toBe(false);
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("nested");
+    // Defined behaviour: the duplicate start is IGNORED, the FIRST end closes the block,
+    // so the line after `end` is validated normally (the scope never widens silently).
+    expect(rep.results.filter((r) => r.status === "RETRACTED").map((r) => r.claim.line)).toEqual([6, 6]);
+    expect(rep.failures.map((r) => r.claim.line)).toEqual([9, 9]);
+  });
+
+  test("stray retracted:end (no open block) is a hard error", async () => {
+    const md = report("UNI", ["<!-- retracted:end -->", "| Live | 52w Range $2.00 ↔ $19.47 |"].join("\n"));
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.ok).toBe(false);
+    expect(rep.markerErrors[0]).toContain("stray");
+    expect(rep.exempted).toBe(0);
+  });
+
+  test("an exempted claim still APPEARS in results with RETRACTED status — never dropped", async () => {
+    const marked = report("UNI", "| UNI 52w range $2.00 ↔ $19.47 | quoted | <!-- retracted: quoted as drafted -->");
+    const unmarked = report("UNI", "| UNI 52w range $2.00 ↔ $19.47 | quoted |");
+
+    const a = await validateReport(marked, { fetcher: uniFetcher });
+    const b = await validateReport(unmarked, { fetcher: uniFetcher });
+
+    // Same CLAIM COUNT with and without the marker: exemption changes STATUS, not visibility.
+    expect(a.results.length).toBe(b.results.length);
+    expect(a.results.length).toBe(2);
+    expect(statuses(a.results)).toEqual(["RETRACTED", "RETRACTED"]);
+    expect(statuses(b.results)).toEqual(["MISMATCH", "MISMATCH"]);
+    expect(a.exempted).toBe(2);
+    // The reason and the marker provenance are carried through to the output.
+    expect(a.results[0]!.detail).toContain("quoted as drafted");
+    expect(a.results[0]!.claim.exemption).toMatchObject({ scope: "inline", markerLine: 5 });
+    // And the retracted rows are PRINTED, not hidden.
+    expect(formatReport(a, "R.md")).toContain("RETRACTED");
+  });
+
+  test("exempted claims do not fail the run when everything else is clean", async () => {
+    const md = report("UNI", "| UNI 52w range $2.00 ↔ $19.47 | quoted | <!-- retracted -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.ok).toBe(true);
+    expect(rep.failures).toEqual([]);
+  });
+
+  test("the summary reports the exemption count", async () => {
+    const md = report(
+      "UNI",
+      [
+        "| UNI 52w range $2.00 ↔ $19.47 | quoted | <!-- retracted -->",
+        "| 52w Low | $2.316 |",
+        "| 52w High | $12.285 |",
+        "| 52w Range | $2.316 ↔ $12.285 |",
+        "| ATH | $44.97 |",
+        "| 52w Range | $2.316 ↔ $12.285 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    const out = formatReport(rep, "R.md");
+
+    expect(rep.exempted).toBe(2);
+    expect(out).toContain(`⊘ ${rep.exempted} of ${rep.results.length} claim(s) EXEMPTED`);
+    // 2/9 = 22% — under the ceiling, so NO abuse warning here.
+    expect(out).not.toContain("WARNING");
+  });
+
+  test("the >25% abuse warning fires when exemptions dominate", async () => {
+    const md = report(
+      "UNI",
+      [
+        "| UNI 52w range $2.00 ↔ $19.47 | quoted | <!-- retracted -->",
+        "| 52w Low | $2.316 |",
+        "| 52w High | $12.285 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    const out = formatReport(rep, "R.md");
+
+    expect(rep.exempted).toBe(2);
+    expect(rep.results.length).toBe(4); // 50% exempted
+    expect(out).toContain("⚠ WARNING");
+    expect(out).toContain("50% of claims are exempted");
+  });
+
+  test("marker errors fail the run even when every claim passes", async () => {
+    const md = report("UNI", ["| 52w Low | $2.316 |", "<!-- retracted:end -->"].join("\n"));
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.failures).toEqual([]);
+    expect(rep.ok).toBe(false);
+    expect(formatReport(rep, "R.md")).toContain("MARKER_ERROR");
+  });
+
+  test("the marker also bypasses RULE 1 (basis) — a quoted retraction is verbatim", async () => {
+    const md = report("UNI", "UNI was drafted as **−80.4% from high** <!-- retracted: quoted as drafted -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(statuses(rep.results)).toEqual(["RETRACTED"]);
+    expect(rep.ok).toBe(true);
+    // …and the same text WITHOUT the marker still fails RULE 1, proving the bypass is
+    // the marker's doing and not a regression in the basis rule.
+    const bare = await validateReport(report("UNI", "UNI was drafted as **−80.4% from high**"), {
+      fetcher: uniFetcher,
+    });
+    expect(statuses(bare.results)).toEqual(["BASIS_MISSING"]);
+  });
+
+  test("the marker applies under --basis-only too (the pre-commit path)", async () => {
+    const md = report("UNI", "UNI was drafted as **−80.4% from high** <!-- retracted -->");
+    const rep = await validateReport(md, { basisOnly: true });
+    expect(statuses(rep.results)).toEqual(["RETRACTED"]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("parseExemptions maps scopes precisely and start/end are not read as inline", () => {
+    const { byLine, errors } = parseExemptions(
+      ["a", "<!-- retracted:start -->", "b", "<!-- retracted:end -->", "c <!-- retracted -->", "d"].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect([...byLine.keys()].sort((x, y) => x - y)).toEqual([2, 3, 4, 5]);
+    expect(byLine.get(3)).toMatchObject({ scope: "block", markerLine: 2 });
+    expect(byLine.get(5)).toMatchObject({ scope: "inline", markerLine: 5 });
+    expect(byLine.has(6)).toBe(false);
+  });
+
+  test("a report with no markers is completely unaffected", async () => {
+    const md = report("UNI", "| 52w Range | $2.316 ↔ $12.285 |");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.exempted).toBe(0);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.ok).toBe(true);
+    expect(formatReport(rep, "R.md")).not.toContain("EXEMPTED");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// VALUE-SCOPED RETRACTION MARKER — `<!-- retracted: $0.410, $0.518 -->`
+//
+// Line scope proved TOO BLUNT on the real document: the AERO appendix row carries the
+// CORRECTED range ($0.3018 ↔ $1.4907) in the SAME table row as the drafted one
+// ($0.410 ↔ $0.518), so a whole-line marker suppressed 6 claims when only 4 were quoted
+// retractions — silently switching OFF verification of two values that were correct.
+// Every test below is a test that a suppression marker cannot cost coverage it was not
+// explicitly asked to cost.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("value-scoped retraction marker", () => {
+  /** AERO as of the real report: 365d range $0.3018 ↔ $1.4907, spot $0.416 (−72.1%). */
+  const AERO_OK: SeriesResult = {
+    ok: true,
+    points: makeSeries(366, 1.4907, 0.3018, 0.416),
+    ath: 2.32,
+  };
+  const aeroFetcher = fetcherFor({ AERO: AERO_OK });
+
+  /** The exact shape of the real appendix row: drafted AND corrected range, one line. */
+  const AERO_ROW =
+    "| AERO 52w range $0.410 ↔ $0.518 | corrected: 365d range $0.3018 ↔ $1.4907 |";
+
+  test("REGRESSION: value scope exempts ONLY the drafted values — the corrected value on the SAME line is still verified", async () => {
+    const md = report(
+      "AERO",
+      `${AERO_ROW} <!-- retracted: $0.410, $0.518 — drafted values quoted verbatim -->`,
+    );
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    // Four claims parsed from the row; only the two DRAFTED ones are suppressed.
+    expect(rep.results.length).toBe(4);
+    expect(rep.exempted).toBe(2);
+    const retracted = rep.results.filter((r) => r.status === "RETRACTED").map((r) => r.claim.value);
+    expect(retracted.sort((a, b) => a - b)).toEqual([0.41, 0.518]);
+
+    // THE POINT OF THIS CHANGE: the corrected values were NOT suppressed — they were
+    // recomputed and they PASS. Under whole-line scope both of these vanished.
+    const checked = rep.results.filter((r) => r.status !== "RETRACTED");
+    expect(checked.map((r) => r.claim.value).sort((a, b) => a - b)).toEqual([0.3018, 1.4907]);
+    expect(statuses(checked)).toEqual(["OK", "OK"]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("a corrected value that is WRONG still fails, even though the line carries a marker", async () => {
+    // Same row, but the "corrected" high is bogus. A marker naming only the drafted
+    // values must not launder it — otherwise value scope is just line scope with extra
+    // steps.
+    const md = report(
+      "AERO",
+      "| AERO 52w range $0.410 ↔ $0.518 | corrected: 365d range $0.3018 ↔ $9.9999 |" +
+        " <!-- retracted: $0.410, $0.518 -->",
+    );
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    expect(rep.exempted).toBe(2);
+    expect(rep.failures.length).toBe(1);
+    expect(rep.failures[0]!.status).toBe("MISMATCH");
+    expect(rep.failures[0]!.claim.value).toBe(9.9999);
+    expect(rep.ok).toBe(false);
+  });
+
+  test("a listed value matching NOTHING on the line is a HARD ERROR (stale exemption)", async () => {
+    const md = report("AERO", `${AERO_ROW} <!-- retracted: $0.410, $0.777 -->`);
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("0.777");
+    expect(rep.markerErrors[0]).toContain("stale exemption");
+    // Only the value that DID match is exempted; $0.518 is no longer covered by the
+    // marker, so it is validated normally and fails — which is the correct, loud
+    // consequence of a marker that stopped naming it.
+    expect(rep.exempted).toBe(1);
+    expect(rep.failures.map((r) => r.claim.value)).toEqual([0.518]);
+    expect(rep.ok).toBe(false);
+    expect(formatReport(rep, "R.md")).toContain("MARKER_ERROR");
+  });
+
+  test("marker errors fail the run even when the stale value costs no coverage", async () => {
+    // Every real claim passes and every listed value that matters matched — the ONLY
+    // problem is the leftover $7.77. The run must still be red.
+    const md = report(
+      "AERO",
+      "| AERO 52w range $0.3018 ↔ $1.4907 | <!-- retracted: $7.77 -->",
+    );
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    expect(rep.failures).toEqual([]);
+    expect(rep.exempted).toBe(0);
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.ok).toBe(false);
+  });
+
+  test("a stale value in a BLOCK marker is an error; the block's other values still work", async () => {
+    const md = report(
+      "AERO",
+      [
+        "<!-- retracted:start — $0.410, $0.518, $7.77 -->",
+        "| AERO 52w range $0.410 ↔ $0.518 |",
+        "<!-- retracted:end -->",
+        "| AERO 365d range $0.3018 ↔ $1.4907 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("7.77");
+    expect(rep.exempted).toBe(2);
+    // The line AFTER the block is untouched and still verified.
+    expect(rep.results.filter((r) => r.status === "OK").length).toBe(2);
+    expect(rep.ok).toBe(false);
+  });
+
+  test("FALLBACK PRESERVED: a bare marker still exempts the WHOLE line, correct values included", async () => {
+    const md = report("AERO", `${AERO_ROW} <!-- retracted -->`);
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    // This is the blunt behaviour, retained deliberately — and it is exactly the
+    // over-suppression the value form exists to avoid: 4 exempted, 0 verified.
+    expect(rep.exempted).toBe(4);
+    expect(rep.results.every((r) => r.status === "RETRACTED")).toBe(true);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("a prose-only reason stays WHOLE-LINE — an incidental number does not silently narrow the scope", async () => {
+    const md = report(
+      "AERO",
+      `${AERO_ROW} <!-- retracted: drafted range quoted verbatim; only 2 weekly bars were claimed -->`,
+    );
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    // "2" carries no $ or %, so it is prose, not a listed value. Scope stays whole-line
+    // (and, crucially, no bogus stale-value MARKER_ERROR is raised for it).
+    expect(rep.exempted).toBe(4);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.results[0]!.claim.exemption?.values).toBeUndefined();
+  });
+
+  test("the output DISTINGUISHES value-scoped from whole-line exemptions", async () => {
+    const scoped = await validateReport(
+      report("AERO", `${AERO_ROW} <!-- retracted: $0.410, $0.518 -->`),
+      { fetcher: aeroFetcher },
+    );
+    const blunt = await validateReport(report("AERO", `${AERO_ROW} <!-- retracted -->`), {
+      fetcher: aeroFetcher,
+    });
+
+    const a = formatReport(scoped, "R.md");
+    const b = formatReport(blunt, "R.md");
+
+    expect(a).toContain("RETRACTED[value]");
+    expect(a).not.toContain("RETRACTED[line]");
+    expect(b).toContain("RETRACTED[line]");
+    expect(b).not.toContain("RETRACTED[value]");
+
+    // Per-claim detail names the matched value / says the suppression was blunt.
+    expect(scoped.results.find((r) => r.status === "RETRACTED")!.detail).toContain("value-scoped to 0.41");
+    expect(blunt.results[0]!.detail).toContain("whole-line (blunt");
+
+    // …and the summary line breaks the count down by scope.
+    expect(a).toContain("(2 value-scoped, 0 whole-line)");
+    expect(b).toContain("(0 value-scoped, 4 whole-line)");
+
+    expect(statusLabel(scoped.results.find((r) => r.status === "RETRACTED")!)).toBe("RETRACTED[value]");
+    expect(statusLabel(blunt.results[0]!)).toBe("RETRACTED[line]");
+  });
+
+  test("value parsing survives thousands separators, unicode minus, percent and emphasis", () => {
+    expect(parseMarkerValues("$1,505.00")).toEqual([1505]);
+    expect(parseMarkerValues("−80.4%")).toEqual([-80.4]);          // U+2212
+    expect(parseMarkerValues("-80.4%")).toEqual([-80.4]);          // ASCII hyphen
+    expect(parseMarkerValues("–80.4%")).toEqual([-80.4]);          // en-dash
+    expect(parseMarkerValues("**$19.47**")).toEqual([19.47]);
+    expect(parseMarkerValues("$0.410, $0.518")).toEqual([0.41, 0.518]);
+    expect(parseMarkerValues("$1,505.00 ↔ $4,956.78")).toEqual([1505, 4956.78]);
+    expect(parseMarkerValues("−80.4%, $2.00, $19.47 — drafted values quoted verbatim")).toEqual([
+      -80.4, 2, 19.47,
+    ]);
+    // Values are read ONLY from the head, before the first — / – / ;. Prose that quotes
+    // a number must not widen the marker's own scope — this is the real bug found when
+    // applying the markers to the shipped report.
+    expect(parseMarkerValues("$0.410, $0.518 — the corrected $0.3018 ↔ $1.4907 stays verified")).toEqual([
+      0.41, 0.518,
+    ]);
+    expect(parseMarkerValues("drafted range quoted verbatim; corrected value is $0.3018")).toBeUndefined();
+    // No sigil ⇒ not a value ⇒ whole-line fallback.
+    expect(parseMarkerValues("quoted as drafted, corrected above")).toBeUndefined();
+    expect(parseMarkerValues("only 2 weekly bars available")).toBeUndefined();
+    expect(parseMarkerValues(undefined)).toBeUndefined();
+  });
+
+  test("a leading dash is a SIGN when a digit follows it and a SEPARATOR when one does not", () => {
+    // En-dash plays both roles in real documents, so the distinction must be positional.
+    expect(parseMarkerValues("–80.4%")).toEqual([-80.4]);        // sign, glued to digits
+    expect(parseMarkerValues("— $0.410, $0.518")).toEqual([0.41, 0.518]); // separator
+    expect(parseMarkerValues("- $0.410")).toEqual([0.41]);
+    expect(parseMarkerValues("−80.4% — quoted as drafted")).toEqual([-80.4]);
+  });
+
+  test("matching is on the PARSED NUMBER and on absolute value (drawdowns are stored signed)", () => {
+    expect(valueMatches(1505, 1505.0)).toBe(true);
+    expect(valueMatches(-80.4, -80.4)).toBe(true);
+    expect(valueMatches(80.4, -80.4)).toBe(true);   // marker may omit the sign
+    expect(valueMatches(-80.4, 80.4)).toBe(true);
+    expect(valueMatches(0.41, 0.410)).toBe(true);
+    expect(valueMatches(0.41, 0.42)).toBe(false);
+    expect(valueMatches(1505, 1506)).toBe(false);
+  });
+
+  test("a `$1,505.00`-style marker matches a `$1,505.00`-style claim end to end", async () => {
+    const ETH_OK: SeriesResult = { ok: true, points: makeSeries(366, 4956.78, 1505.0, 3800), ath: 4956.78 };
+    const md = report(
+      "ETH",
+      "| ETH drafted 52w range $1,385.00 ↔ $4,957.00 | true 52w range $1,505.00 ↔ $4,956.78 |" +
+        " <!-- retracted: $1,385.00, $4,957.00 -->",
+    );
+    const rep = await validateReport(md, { fetcher: fetcherFor({ ETH: ETH_OK }) });
+
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.exempted).toBe(2);
+    expect(
+      rep.results.filter((r) => r.status === "RETRACTED").map((r) => r.claim.value).sort((a, b) => a - b),
+    ).toEqual([1385, 4957]);
+    expect(statuses(rep.results.filter((r) => r.status !== "RETRACTED"))).toEqual(["OK", "OK"]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("a value-scoped marker exempts a DRAWDOWN and leaves the corrected drawdown checked", async () => {
+    const md = report(
+      "AERO",
+      "AERO was drafted at **−19.6% from high**; the true figure is **−72.1% from its 52w high**." +
+        " <!-- retracted: -19.6% -->",
+    );
+    const rep = await validateReport(md, { fetcher: aeroFetcher });
+
+    expect(rep.exempted).toBe(1);
+    const retracted = rep.results.find((r) => r.status === "RETRACTED")!;
+    expect(retracted.claim.value).toBe(-19.6);
+    // The bare "from high" on the drafted quote is exempt from RULE 1 as well…
+    expect(retracted.status).toBe("RETRACTED");
+    // …while the corrected, basis-explicit figure is recomputed and passes.
+    const live = rep.results.filter((r) => r.status !== "RETRACTED");
+    expect(live.map((r) => r.claim.value)).toEqual([-72.1]);
+    expect(statuses(live)).toEqual(["OK"]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("staleExemptionErrors is silent when every listed value matches", () => {
+    const md = report("AERO", `${AERO_ROW} <!-- retracted: $0.410, $0.518 -->`);
+    expect(staleExemptionErrors(parseExemptions(md), parseClaims(md))).toEqual([]);
+  });
+
+  test("parseExemptions carries the listed values through to the exemption", () => {
+    const { byLine, errors } = parseExemptions("a <!-- retracted: $0.410, $0.518 -->");
+    expect(errors).toEqual([]);
+    expect(byLine.get(1)).toMatchObject({ scope: "inline", markerLine: 1, values: [0.41, 0.518] });
   });
 });
