@@ -62,6 +62,15 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 
 **Wrong-ticker trap:** Yahoo `AERO-USD` and `JUP-USD` resolve to **different assets** (AERO returns ~$0.0002 vs Aerodrome's $0.416; JUP returns ~$0.00001 vs Jupiter's $0.194). Do not cross-check these tickers on Yahoo — this is the same failure mode that produced the retracted $16.73 LINK print.
 
+**TON / JUP close-only gap — CLOSED 2026-07-29.** Coinbase carries <365d of TON candles and `JUP-USD` returns `[]`, so those two tokens previously passed on close data alone and were labelled *unverified*. Re-pulled from two additional public venues (Kraken `OHLC?interval=1440`, Binance `data-api.binance.vision` 1d klines — the main `api.binance.com` is HTTP 451 geo-restricted here). Both tokens passed a magnitude sanity check against spot before use, guarding the wrong-ticker trap below.
+
+| Token | 52w high (intraday) | 52w high (close) | Drawdown intraday | Drawdown close |
+|---|---|---|---|---|
+| TON | $3.745 Kraken / $3.749 Binance | $3.563 / $3.564 / $3.5722 CG | **−62.8%** (both venues identical) | **−60.9%** (3 venues) |
+| JUP | $0.5780 Kraken / $0.5784 Binance | $0.55946 / $0.5588 / $0.5586 CG | **−66.4%** | **−65.2%** (3 venues, exact) |
+
+**JUP's −65.2% is now independently verified on three venues, not inferred.** TON's drawdown is deeper than any figure previously published here: **−60.9% close / −62.8% intraday**, versus the −58.5%/−59.1% carried since Jul 27 — those were right when taken and went stale as price fell. Both tokens also show a deep downside wick (TON $0.554–0.563, JUP $0.0563 on Binance vs $0.1078 on Kraken); wicks are venue-specific and must never be cited as "the" 52w low without naming the venue.
+
 **Enforcement:** `bun .agents/scripts/validate/drawdown_basis.ts <report.md>` parses every drawdown/range claim, requires an explicit basis, and recomputes it from one canonical per-token series, failing on any mismatch > 0.5pp. Wired as a pre-commit gate. It currently flags **45 of 63** claims in this document — the AERO and PUMP 52w range rows (drafted from a different venue than the validator's series) are **unresolved and must be re-pulled from their original source before those numbers are cited**.
 
 ---
@@ -138,7 +147,7 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 
 **DRAWDOWN CORRECTED 2026-07-27, RE-VERIFIED LIVE 2026-07-28T00:25Z (verdict-critic pass).** This draft's ATH-based read above (−82.5% from $8.25) is not the standard 52-week-high framing used elsewhere in this report. On the standard 52w-high basis, freshly re-pulled from CoinGecko (`coins/the-open-network/market_chart`, 366 daily points, 2026-07-28T00:25:30Z): **365d high = $3.5722 (2025-08-02)**, current $1.4617, **= −59.1% from high** — consistent with the prior desk figure of $3.5747/−58.5% (0.07% venue variance) and materially worse than an earlier-drafted "−49.2%" figure that had circulated in a related briefing (the discrepancy traced to a truncated ~37-week price window on the venue used). Separately, the "zero token-specific journalism" framing used to justify TRIM is **too strong**: the repo's own `read_news.ts` store holds two TON-adjacent items dated Jul 21-22 (a Telegram wallet-rollout piece and a STON.fi wire release) — coverage is thin, not absent. Neither correction changes the verdict: fees $77,181/30d vs $3.9-4.0B mcap (~4,300x, worst in the book), TVL $64.9M (0.15% of Ethereum's), HL open interest $0 — the bear case is unchanged and, on the corrected drawdown, slightly worse than drafted.
 
-**Verdict TRIM — no catalyst, no bottom formation (confirmed −58.5% to −59.1% from true 52w high $3.57, not −49.2%). Re-enter only if Telegram announces new crypto integration.**
+**Verdict TRIM — no catalyst, no bottom formation. Drawdown VERIFIED 2026-07-29 across 3 venues: −62.8% intraday (Kraken $3.745 / Binance $3.749, identical) and −60.9% close-basis (Kraken $3.563 / Binance $3.564 / CoinGecko $3.5722). The earlier −58.5%/−59.1% figures were correct when taken and are now simply stale — price fell further. Not −49.2%. Re-enter only if Telegram announces new crypto integration.**
 
 > **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes):** spot **$1.3949**, SMA50 $1.5930, SMA200 $1.5570, 52w range **$1.2174**–$3.5722 (**−61.0%** from high — the drawdown has deepened from the −59.1% measured Jul 28).
 > - **TRIM completes (→ EXIT the rest):** daily close below **$1.2174** (52w low). At ~4,300x fees/mcap there is no accrual floor to catch it.
@@ -199,7 +208,7 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 | Metric | Value |
 |---|---|
 | Price | **$0.186** |
-| 52w Range | $0.056 ↔ $1.44 |
+| 52w Range — **VERIFIED 2026-07-29, 3 venues** | **intraday $0.0563 ↔ $0.5784** (Binance) / $0.1078 ↔ $0.5780 (Kraken) · **close-basis $0.1372 ↔ $0.5588**. The drafted low **$0.056 is CONFIRMED but venue-specific** — a Binance intraday wick; Kraken's low over the same window is $0.1078, ~1.9x higher. The drafted high **$1.44 is RETRACTED** — no venue prints above $0.5784 inside 52 weeks; $1.44 is an out-of-window (>52w) level. |
 | % from 52w High | −87.1% |
 | 210d Volume Trend | Declining (123M → 54M weekly) |
 | Latest Weekly Close | $0.186 (−5.3%) |
@@ -354,7 +363,7 @@ The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is 
 | **HYPE** | ✅ (perp DEX) | ⚠️ (−23% from ATH) | ⚠️ | Pullback, healthy | **WATCH $50-55** |
 | **AAVE** | ⚠️ (TVL $14.6B, but 0% accrual) | ⚠️ (base building) | ⚠️ | buyback restart UNDATED | **HOLD (existing) / AVOID (new)** |
 | **UNI** | ⚠️ (burn live, 3.49% capture) | ✅ (+8.3% wk) | ⚠️ | v4 fee vote (burn already live) | **HOLD** |
-| **JUP** | ⚠️ (product OK) | ❌ (**−65.2% from 52w high**; −87% is the ATH basis) | ⚠️ | None | **AVOID** |
+| **JUP** | ⚠️ (product OK) | ❌ (**−65.2% from 52w high, close basis — VERIFIED on 3 venues**; −66.4% intraday; −87% was the ATH basis) | ⚠️ | None | **AVOID** |
 | **AERO** | ⚠️ (fees real, emission 1.9x) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
 | **PUMP** | ✅ (20.6% buyback yield) | ❌ (penny token) | ⚠️ | Buyback live daily | **AVOID (risk, not accrual)** |
 | **LINK** | ✅ (institutional) | ❌ (**−69.9% from 52w high**, intraday basis) | ⚠️ | Oversold candidate | **WATCH** |
