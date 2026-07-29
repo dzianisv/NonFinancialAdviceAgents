@@ -243,8 +243,8 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 | Metric | Value |
 |---|---|
 | Price | **$0.416** |
-| 52w Range (corrected) | **$0.3018 ↔ $1.4907** |
-| % from 52w High | **−72.1%** |
+| 52w Range — **RESOLVED 2026-07-29, 2 venues** | **intraday $0.2723 ↔ $1.6000** (Coinbase AERO-USD daily candles, n=367) · **close-basis $0.2796 ↔ $1.5021** (Coinbase) / $0.3018 ↔ $1.4907 (CoinGecko). The drafted **$0.410 ↔ $0.518 is RETRACTED** — it matches no venue over any 52-week window. |
+| % from 52w High | **−73.9% intraday / −72.2% close** (Coinbase); −71.9% on the CoinGecko close series. The drafted −72.1% was **right on a close basis** — only the range row was wrong. |
 | ATH | **$2.32 (2024-12-07)** |
 | Weekly Volume | 774M AERO ($322M) |
 | TVL | $306,797,428 |
@@ -268,8 +268,8 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 | Metric | Value |
 |---|---|
 | Price | **$0.001824** |
-| 52w Range | $0.000411 ↔ $0.00898 |
-| % from 52w High | −79.7% |
+| 52w Range — **RESOLVED 2026-07-29, 2 venues** | **intraday $0.001150 ↔ $0.008999** (Coinbase PUMP-USD, n=367) · **close-basis $0.001200 ↔ $0.008623**. The drafted high **$0.00898 is CONFIRMED** (0.2% off Coinbase's intraday $0.008999 — it came from an intraday venue). The drafted low **$0.000411 is RETRACTED as impossible**: it sits *below PUMP's all-time low* of $0.00115473 (CoinGecko, set 2026-06-25). |
+| % from 52w High | **−79.0% intraday / −78.1% close** (Coinbase). The drafted −79.7% is within 0.7pp of the intraday figure — directionally sound, now pinned. |
 | Weekly Volume | 27B tokens ($49M) |
 
 **Assessment:** Memecoin launchpad token, down 79.7% from its 52w high. Volume massive in token terms but small in USD — typical penny-token behavior.
