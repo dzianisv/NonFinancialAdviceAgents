@@ -46,6 +46,26 @@
 
 ---
 
+---
+
+## Measurement convention (MANDATORY — added 2026-07-29, enforced in code)
+
+Every "% from high" and every 52w low/high in this document must state **both** its basis and its convention. Three shipped errors traced to leaving these implicit (TON −49.2%/−82.5%, JUP −87%, LINK −73.1%).
+
+| Axis | Options | This report's default |
+|---|---|---|
+| **Basis** | 52-week high vs all-time high (ATH) | **52-week high.** Any ATH figure must say "from ATH". |
+| **Convention** | intraday extreme vs daily-close extreme | **Stated per figure.** Close-basis is ~1pp shallower than intraday. |
+| **Series** | one canonical pull per token, >= 360 daily points | CoinGecko `coins/{id}/market_chart?days=365&interval=daily`; a short series is a hard FAIL, not a silent pass. |
+
+**Self-inflicted error logged for honesty:** the 2026-07-29 pass "corrected" LINK's 52w low from $7.00 to $7.19 without noting that $7.19 is the *close-basis* low while $7.00/$7.02 is the *intraday* low. The original figure was defensible; the "fix" silently switched convention. Both are now shown with labels.
+
+**Wrong-ticker trap:** Yahoo `AERO-USD` and `JUP-USD` resolve to **different assets** (AERO returns ~$0.0002 vs Aerodrome's $0.416; JUP returns ~$0.00001 vs Jupiter's $0.194). Do not cross-check these tickers on Yahoo — this is the same failure mode that produced the retracted $16.73 LINK print.
+
+**Enforcement:** `bun .agents/scripts/validate/drawdown_basis.ts <report.md>` parses every drawdown/range claim, requires an explicit basis, and recomputes it from one canonical per-token series, failing on any mismatch > 0.5pp. Wired as a pre-commit gate. It currently flags **45 of 63** claims in this document — the AERO and PUMP 52w range rows (drafted from a different venue than the validator's series) are **unresolved and must be re-pulled from their original source before those numbers are cited**.
+
+---
+
 ## Per-Token Analysis
 
 ### 1. BTC — Bitcoin
@@ -98,7 +118,7 @@
 | 210d Volume Trend | Declining (19.9M → 7.1M weekly) |
 | Latest Weekly Close | $73.94 (down −3.2%) |
 
-**Assessment:** SOL has been sliding for weeks, down 75% from highs. Volume declining every week since the mid-June peak — bearish. Stablecoins on Solana at $15B+ shows infrastructure is real, but token price disconnected from ecosystem growth. On-chain activity likely depressed as memecoin mania cooled.
+**Assessment:** SOL has been sliding for weeks, down 75.0% from its 52w high. Volume declining every week since the mid-June peak — bearish. Stablecoins on Solana at $15B+ shows infrastructure is real, but token price disconnected from ecosystem growth. On-chain activity likely depressed as memecoin mania cooled.
 
 **Verdict HOLD — no accumulation signal until volume returns. $60 is the hard floor.**
 
@@ -184,7 +204,7 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 | 210d Volume Trend | Declining (123M → 54M weekly) |
 | Latest Weekly Close | $0.186 (−5.3%) |
 
-**Assessment:** JUP in free-fall territory, down 87% from highs. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
+**Assessment:** JUP in free-fall territory, down 87.1% from its 52w high. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
 
 **Verdict AVOID — downtrend intact, no reversal signal. Wait for volume base + ladder entry if ever.**
 
@@ -252,7 +272,7 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 | % from 52w High | −79.7% |
 | Weekly Volume | 27B tokens ($49M) |
 
-**Assessment:** Memecoin launchpad token, down 80% from highs. Volume massive in token terms but small in USD — typical penny-token behavior.
+**Assessment:** Memecoin launchpad token, down 79.7% from its 52w high. Volume massive in token terms but small in USD — typical penny-token behavior.
 
 **Corrected 2026-07-27 (analyse-defi seat) — two claims in the draft were wrong.** (1) Revenue is **not** "$500M+/year": DeFiLlama `pump.fun revenue 1y= $323,949,113`, 30d `$19,667,529` (30d-annualized $239.3M, a −26% run-rate contraction). (2) Accrual is **not** "unproven" — it is live, on-chain, and prints **every single day without gaps**: `holdersRevenue 30d= $14,301,309`, daily 2026-07-20→26 = `475035, 503718, 552001, 529763, 577372, 531409, 587823`. Adapter methodology: *"PUMP token buyback (sourced from onchain burns)"*, era split *"100% pre-2025-07-14, 0% from 2025-07-14, 50% from 2026-04-28."* That is **~$174M/yr of buyback against an $845M mcap = 20.6% of market cap repurchased annually** — the highest buyback yield in the entire 11-token universe, and the only one with continuous (not batched) prints.
 
@@ -271,8 +291,8 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 | Metric | Value |
 |---|---|
 | Price | **$8.32** |
-| 52w Range | $6.996 ↔ $30.94 |
-| % from 52w High | −73.1% |
+| 52w Range (intraday) | **$7.02 ↔ $27.74** — *corrected 2026-07-29; the drafted $30.94 high is unsupported by any pulled series (Yahoo LINK-USD 1y intraday max = $27.74, close max = $26.75). The $6.996 low was ~right on an intraday basis ($7.02).* |
+| % from 52w High | **−69.9% (intraday basis) / −68.8% (close basis)** — *−73.1% was derived from the bad $30.94 high* |
 | Latest Weekly Close | $8.32 (−0.8% from $8.39) |
 | Volume Trend | Declining (13.8M → 5.7M weekly) |
 
@@ -310,7 +330,7 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 >
 > **LINK = $8.60–8.622 @ 2026-07-27T21:08Z (6 venues, max spread 0.26%).** All three earlier figures ($8.594 / $8.599 / $8.611) are consistent with this band and none was wrong; only the "authoritative single tick" framing was. The one figure that WAS wrong — $8.80 — remains retracted. Any downstream verdict may cite the band; no verdict may cite a single venue tick as *the* price.
 
-The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.594 Jul 23-27). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
+The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.594 Jul 23-27). LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
 
 **Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot $8.26–8.28 as of 2026-07-29T15:12Z (3 venues, max spread 0.06%). Oversold candidate but no reversal signal yet.**
 
@@ -334,10 +354,10 @@ The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is 
 | **HYPE** | ✅ (perp DEX) | ⚠️ (−23% from ATH) | ⚠️ | Pullback, healthy | **WATCH $50-55** |
 | **AAVE** | ⚠️ (TVL $14.6B, but 0% accrual) | ⚠️ (base building) | ⚠️ | buyback restart UNDATED | **HOLD (existing) / AVOID (new)** |
 | **UNI** | ⚠️ (burn live, 3.49% capture) | ✅ (+8.3% wk) | ⚠️ | v4 fee vote (burn already live) | **HOLD** |
-| **JUP** | ⚠️ (product OK) | ❌ (−87% from high) | ⚠️ | None | **AVOID** |
+| **JUP** | ⚠️ (product OK) | ❌ (**−65.2% from 52w high**; −87% is the ATH basis) | ⚠️ | None | **AVOID** |
 | **AERO** | ⚠️ (fees real, emission 1.9x) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
 | **PUMP** | ✅ (20.6% buyback yield) | ❌ (penny token) | ⚠️ | Buyback live daily | **AVOID (risk, not accrual)** |
-| **LINK** | ✅ (institutional) | ❌ (−73% from high) | ⚠️ | Oversold candidate | **WATCH** |
+| **LINK** | ✅ (institutional) | ❌ (**−69.9% from 52w high**, intraday basis) | ⚠️ | Oversold candidate | **WATCH** |
 ### Key Portfolio Decisions
 
 1. **AAVE re-derived, no longer the primary accumulator (2026-07-27/28, verdict-critic pass).** $14.74B TVL at MC/TVL ~0.10, GHO $648M, price up +5% this week while everything else red — but buybacks have been OFF since 2026-04-19 (governance-confirmed, `holdersRevenue 30d= $0`, 99+ days), revenue run-rate is the worst-contracting name in the book (−61% vs trailing-1y), and the only restart signal is an undated founder statement of intent, not a committed AIP. V4 deposit growth ($11.3M→$303M) is real but does not accrue to the token by design. **HOLD existing / AVOID adding new capital** — cheap multiples on zero accrual are not a bargain. This is a downgrade from the panel's original BUY ZONE call, not a caveat on it.

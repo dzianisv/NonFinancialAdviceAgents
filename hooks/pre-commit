@@ -37,4 +37,27 @@ if ! bun "$validator" --index; then
   echo "   Override with --no-verify only if you know why (NOT recommended)."
   exit 1
 fi
+
+# ── Drawdown-BASIS gate on staged research reports ───────────────────────────────
+# RULE 1 only (--basis-only): every "% from high" must disambiguate to 52w or ATH.
+# This is the check that would have caught the TON −49.2%/−82.5% and JUP −87% figures
+# BEFORE publication. It is network-free by design, so it is fast and safe in a hook;
+# the full recompute (RULE 2/3/4, needs CoinGecko) is a manual pre-publish step:
+#   bun .agents/scripts/validate/drawdown_basis.ts <report.md>
+ddvalidator="$root/.agents/scripts/validate/drawdown_basis.ts"
+if [ -f "$ddvalidator" ]; then
+  staged_reports=$(git diff --cached --name-only --diff-filter=ACM -- 'research/*.md' 'crypto/*.md')
+  ddfail=0
+  for f in $staged_reports; do
+    [ -f "$root/$f" ] || continue
+    bun "$ddvalidator" "$root/$f" --basis-only || ddfail=1
+  done
+  if [ "$ddfail" -ne 0 ]; then
+    echo "❌ pre-commit: drawdown-BASIS validation FAILED — a staged report states a drawdown without saying whether it is from the 52w high or the ATH."
+    echo "   That exact ambiguity shipped wrong numbers three times (TON −49.2%, TON −82.5%, JUP −87%)."
+    echo "   Fix the wording to 'from 52w high' or 'from ATH', then re-run the command above."
+    echo "   Override with --no-verify only if you know why (NOT recommended)."
+    exit 1
+  fi
+fi
 exit 0
