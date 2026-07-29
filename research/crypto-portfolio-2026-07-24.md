@@ -593,3 +593,6 @@ The earlier draft of the §11 row listed Jul 27 spot as **$8.80**; four independ
 ---
 
 *Report generated 2026-07-24. Corrections and verdict-critic passes appended 2026-07-27. Pre-publish skeptic gate appended 2026-07-29. Restructured 2026-07-29 for readability — no factual content changed; all correction history consolidated into the Appendix. Data: TradingView MCP, CoinGecko, DeFiLlama, Hyperliquid, gov.uniswap.org, Yahoo Finance, SoSoValue, repo `read_news.ts` pipeline. Educational only.*
+
+
+Negative CI test: SOL is down 42% from high.
