@@ -120,6 +120,11 @@
 
 **Verdict TRIM — no catalyst, no bottom formation (confirmed −58.5% to −59.1% from true 52w high $3.57, not −49.2%). Re-enter only if Telegram announces new crypto integration.**
 
+> **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes):** spot **$1.3949**, SMA50 $1.5930, SMA200 $1.5570, 52w range **$1.2174**–$3.5722 (**−61.0%** from high — the drawdown has deepened from the −59.1% measured Jul 28).
+> - **TRIM completes (→ EXIT the rest):** daily close below **$1.2174** (52w low). At ~4,300x fees/mcap there is no accrual floor to catch it.
+> - **TRIM is invalidated (→ back to HOLD):** weekly close above **$1.5570** (SMA200) *and* a dated Telegram integration announcement. Price alone is not enough — this name's problem is the absent catalyst, so the governance/product leg is required, not optional.
+> - The re-entry condition above was previously stated with no price at all, which made it unfalsifiable; both legs must now clear.
+
 ---
 
 ### 5. HYPE — Hyperliquid
@@ -183,6 +188,11 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 
 **Verdict AVOID — downtrend intact, no reversal signal. Wait for volume base + ladder entry if ever.**
 
+> **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$0.1944**, SMA50 $0.2036, SMA200 $0.1911, 52w range $0.1418–$0.5586.
+> - **AVOID is invalidated (→ WATCH)** on a weekly close above **$0.2036** (SMA50) *with* rising volume — that is the "volume base" this verdict demands, stated as a number.
+> - **Thesis kill (→ EXIT any residual):** daily close below **$0.1418** (52w low). A new low on a −54% revenue run-rate is confirmation, not a dip.
+> - Note: the **−87% from high** figure above is measured from the **$2.00 ATH**, not the 52w high. On the report's standard 52w basis JUP is **−65.2%** from $0.5586. Same measurement-basis error class as the corrected TON figure.
+
 ---
 
 ### 8. UNI — Uniswap
@@ -201,6 +211,11 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 
 **Verdict HOLD — but the thesis must change. The catalyst already fired and repriced nothing; UNI trades at 60.5x annualized protocol revenue. The remaining upside case is v4 fee activation (Temp Check stage), not "if the fee switch turns on."**
 
+> **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$3.96**, SMA50 $3.25, SMA200 $3.61, 52w range $2.39–$12.15.
+> - **HOLD is invalidated (→ TRIM)** on a weekly close below **$3.61** (SMA200) — UNI is the book's only fee accelerator, so losing its long-term trend removes the sole reason to hold a 60.5x multiple.
+> - **Hard stop (→ EXIT):** daily close below **$3.25** (SMA50) after an SMA200 loss, i.e. trend break confirmed on both.
+> - **Upgrade trigger (→ ADD):** a v4 fee-activation vote reaching **Snapshot with delegate sponsorship** (not Temp Check). Price is not the trigger here — governance is.
+
 ---
 
 ### 9. AERO — Aerodrome Finance
@@ -218,7 +233,13 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 
 **The real issue is emission, not price history.** Aerodrome routes 100% of protocol revenue to veAERO (*"Aerodrome's zero-leak model routes all protocol revenue to voters"*), giving `revenue/holdersRevenue 30d= $4,189,859`. But circulating supply grew `952,371,475 → 973,655,243` over 35 days = **+18.24M AERO/30d ≈ $8,103,643 of emission at $0.4442 — roughly 1.9x the fee accrual.** Fees are also contracting −58% vs trailing-1y.
 
-**Verdict WATCH → the accrual is real only if you LOCK.** veAERO voters capture the fees; unlocked spot holders are net-diluted ~−$3.9M/30d. This is a holder-class decision, not a "wait for price history" decision. Caveat: the supply delta is net circulating growth and may not fully net out veAERO locks (exact emission blocked — DeFiLlama emissions API HTTP 402), so treat 1.9x as an upper bound.
+**Verdict WATCH (lock-only) → the accrual is real only if you LOCK.**
+
+> **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$0.4158**, SMA50 $0.4712, SMA200 $0.4313, 52w range $0.3018–$1.4907. AERO trades **below both** MAs.
+> - **Entry trigger (→ lock veAERO):** weekly close back above **$0.4313** (SMA200). Below it, emissions outrun fees for unlocked holders and the "lock it" case is theoretical.
+> - **Thesis kill (→ AVOID outright):** daily close below **$0.3018** (52w low) — on a −58% revenue run-rate that is a broken protocol, not a discount.
+> - **Unlocked spot holders have no entry level at all** — they are structurally diluted ~−$3.9M/30d regardless of price. This verdict applies only to the ve-locked holder class.
+>  veAERO voters capture the fees; unlocked spot holders are net-diluted ~−$3.9M/30d. This is a holder-class decision, not a "wait for price history" decision. Caveat: the supply delta is net circulating growth and may not fully net out veAERO locks (exact emission blocked — DeFiLlama emissions API HTTP 402), so treat 1.9x as an upper bound.
 
 ---
 
@@ -235,7 +256,13 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 
 **Corrected 2026-07-27 (analyse-defi seat) — two claims in the draft were wrong.** (1) Revenue is **not** "$500M+/year": DeFiLlama `pump.fun revenue 1y= $323,949,113`, 30d `$19,667,529` (30d-annualized $239.3M, a −26% run-rate contraction). (2) Accrual is **not** "unproven" — it is live, on-chain, and prints **every single day without gaps**: `holdersRevenue 30d= $14,301,309`, daily 2026-07-20→26 = `475035, 503718, 552001, 529763, 577372, 531409, 587823`. Adapter methodology: *"PUMP token buyback (sourced from onchain burns)"*, era split *"100% pre-2025-07-14, 0% from 2025-07-14, 50% from 2026-04-28."* That is **~$174M/yr of buyback against an $845M mcap = 20.6% of market cap repurchased annually** — the highest buyback yield in the entire 11-token universe, and the only one with continuous (not batched) prints.
 
-**Verdict AVOID — but on RISK, not on absent accrual.** At 3.5x annualized revenue with a 20.6% buyback yield, PUMP is the cheapest verified cashflow in the book. The AVOID stands because launchpad revenue is the most cyclical and competitively-attackable cashflow in crypto, terminal value is genuinely uncertain, the fee split has already been revised twice (100% → 0% → 50%), and FDV $1.80B vs $845M mcap = 53% supply overhang. That is a defensible risk call — "accrual unproven" was not.
+**Verdict AVOID — but on RISK, not on absent accrual.**
+
+> **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$0.001880**, SMA50 $0.001586, SMA200 $0.001890, 52w range $0.001199–$0.008609.
+> - **AVOID is deliberately NOT price-invalidated upward.** The objection is terminal value and a fee split already revised twice (100% → 0% → 50%), plus a 53% supply overhang (FDV $1.80B vs $845M mcap). No price makes a cyclical launchpad's cashflow durable, so a rally is not evidence.
+> - **The only upgrade trigger is structural:** the 50% fee split surviving **two consecutive quarters unchanged** with buybacks printing daily. That is a calendar condition, not a chart level.
+> - **Downside confirmation (stay out, do not bottom-fish):** daily close below **$0.001199** (52w low).
+> - Stated for completeness so this verdict is falsifiable: it would be **wrong** if PUMP holds above SMA200 **$0.001890** *and* the split is untouched at the next revision window. At 3.5x annualized revenue with a 20.6% buyback yield, PUMP is the cheapest verified cashflow in the book. The AVOID stands because launchpad revenue is the most cyclical and competitively-attackable cashflow in crypto, terminal value is genuinely uncertain, the fee split has already been revised twice (100% → 0% → 50%), and FDV $1.80B vs $845M mcap = 53% supply overhang. That is a defensible risk call — "accrual unproven" was not.
 
 ---
 
@@ -285,7 +312,12 @@ Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% pr
 
 The ~$0.27 gap between Jul 24 close ($8.33) and the Jul 27 $8.60–8.62 band is a Monday bounce, not a data error. The $16.73 in the Jul 22 report was a bogus/glitched print (wrong-ticker or stale quote); no −50% crash occurred. Yahoo 5-day closes were smooth ($8.46 → $8.33 → $8.37 → $8.594 Jul 23-27). LINK is grinding near its 52w low ($7.00), down 73% from highs on declining volume. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels.
 
-**Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot bounced to the $8.60–8.622 band as of 2026-07-27T21:08Z (6 venues, max spread 0.26%). Near 52w low ($7.00); oversold candidate but no reversal signal yet.**
+**Verdict WATCH — $8.33 Jul 24 close confirmed; $16.73 from Jul 22 was bad data. Spot $8.26–8.28 as of 2026-07-29T15:12Z (3 venues, max spread 0.06%). Oversold candidate but no reversal signal yet.**
+
+> **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$8.28**, SMA50 $7.99, SMA200 $9.44, 52w range **$7.19**–$26.73 (the "$7.00 52w low" used above is approximate; the pulled series low is **$7.19**).
+> - **WATCH → BUY (ladder start)** on a weekly close above **$9.44** (SMA200), which would end a 69% downtrend. Absent that, CCIP adoption is real but bids nothing.
+> - **WATCH → AVOID** on a daily close below **$7.19** (52w low). Fees settle in weekly lumps (304 of 355 days print $0), so a new low with no accrual floor is capitulation, not value.
+> - **Do not size on the Aave-CCIP headline alone** — it is an integration datapoint, not a token-demand mechanism.
 
 ---
 
@@ -405,13 +437,19 @@ Two (**AERO 6/6 bearish, LINK 5/6 bearish**) show the **correlated-quorum** sign
 
 #### Net verdict changes
 
-| Token | Was | Now | Why |
-|---|---|---|---|
-| JUP | HOLD | **HOLD** (unchanged, bear stack thinned) | Fundamentals reproduce; the funding leg is deleted, not replaced |
-| UNI | HOLD | **HOLD → constructive bias** | Sole fee accelerator (+27.3% vs 1y, not +32%) *and* the capture brake is at an on-chain vote |
-| AERO | SELL | **SELL** (unchanged, rationale restated) | Bear case survives as ~25%/yr inflation; the "1.9x upper bound" framing is retired |
-| PUMP | HOLD, do not chase | **HOLD, do not chase** (unchanged) | RSI 69 + 53% overhang stands; sole-influencer framing retired |
-| LINK | SELL | **SELL → WATCH** (aligns with §11) | 109x revenue justifies "don't add"; it does not justify liquidating into an Aave CCIP standardisation the panel never saw |
+> **READ THIS BEFORE THE TABLE (reconciliation added 2026-07-29).** The `Was`/`Now` columns grade **what the 6-seat analyst panel output**, before and after the verdict-critic pass. They are *not* the book's position. Earlier revisions of this document left the two side by side unlabelled, so JUP read "HOLD" here and "AVOID" in §7, AERO "SELL" here and "WATCH" in §9, PUMP "HOLD" here and "AVOID" in §10. Those were never disagreements about the trade — they are two different objects. **The `CANONICAL BOOK VERDICT` column is the only one that governs a position.** Where the panel and the book differ, the book wins and the reason is stated.
+
+| Token | Panel: was | Panel: after critic | **CANONICAL BOOK VERDICT** | Why the book differs (or doesn't) |
+|---|---|---|---|---|
+| JUP | HOLD | HOLD (bear stack thinned) | **AVOID** (§7) | Panel graded the *analysis* as reproducing; the book still refuses new capital on a −54% revenue run-rate and no reversal. "Bear case is thinner" ≠ "buy it." |
+| UNI | HOLD | HOLD → constructive bias | **HOLD** (§8) | Aligned. The constructive bias is a *tilt within* HOLD (sole fee accelerator, +27.3% vs 1y), not an upgrade to ADD — holders still capture only 3.49%. |
+| AERO | SELL | SELL (rationale restated) | **WATCH — lock-only** (§9) | Book is *less* bearish than the panel, deliberately: the panel priced a spot holder (structurally diluted, SELL is right for them); the book's WATCH applies **only to the ve-locked class**, which does capture fees. Holder-class split, not a contradiction. |
+| PUMP | HOLD, do not chase | HOLD, do not chase | **AVOID** (§10) | Book is *more* bearish than the panel. Panel judged accrual (real, 20.6% buyback yield); book vetoes on terminal-value risk + a fee split revised twice + 53% supply overhang. Risk veto beats accrual. |
+| LINK | SELL | SELL → WATCH | **WATCH** (§11) | Aligned after the critic pass. 109x revenue justifies "don't add"; it does not justify liquidating into the Aave CCIP standardisation the panel never saw. |
+| BTC | — | — | **HOLD, accumulate $60–62K** (§1) | The Tier-Scoring table's "WAIT $60K" is the same call stated as an entry level, not a second verdict. |
+| SOL | — | — | **HOLD** (§3) | A seat-level SELL lean appears in the critic notes; the book holds — volume decay is a reason not to *add*, and $60 is the stated floor. |
+
+**Net: the book runs BTC/ETH/SOL HOLD · TON TRIM · HYPE/LINK WATCH · AERO WATCH (lock-only) · AAVE HOLD-existing/AVOID-new · UNI HOLD · JUP/PUMP AVOID.** Every one of those now carries a price or governance invalidation level in its section.
 
 > **Corrected accelerator figure:** UNI `dailyFees` total30d = **$89,567,655** vs total1y $855,888,834 ($2.986M/d vs $2.345M/d) = **+27.3%**, not the drafted +32% (https://api.llama.fi/summary/fees/uniswap?dataType=dailyFees). Also missed for UNI: **Robinhood Chain** — Uniswap live at the 2026-07-01 mainnet debut, **>$1B cumulative swap volume by 2026-07-10**, fee expansion at on-chain stage (https://gov.uniswap.org/t/26168.json); and the 2026-07-23 **permissioned tokenized-asset pool framework** with Superstate / Securitize / Dowgo (https://www.coindesk.com/business/2026/07/22/uniswap-pushes-deeper-into-tokenized-assets-with-permissioned-trading-pools). And the "live RFC replacing the burn with staking" cited as a UNI risk is an **unsponsored community post** — gov.uniswap.org topic 26132, author `Mr.Vock`, 4 posts / 169 views, no delegate backing, no Snapshot, dormant since 2026-07-10, and its sole substantive reply *opposes* it.
 
