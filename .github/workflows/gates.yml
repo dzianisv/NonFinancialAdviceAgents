@@ -1,0 +1,138 @@
+name: gates
+
+# Runs the SAME gates as the local git hooks (hooks/pre-commit, hooks/pre-push)
+# on every PR and every push to main.
+#
+# Why this exists: the hooks only protect commits made on a machine that has run
+# `git config core.hooksPath hooks`. They do nothing for a contributor who hasn't,
+# for a commit made in the GitHub web UI, or for anyone using `--no-verify`.
+# This workflow is the enforcement that actually binds.
+#
+# DELIBERATE DIFFERENCE FROM THE HOOKS: the hooks are written to no-op when a
+# validator script is absent (they are shared across branches/worktrees that may
+# not carry it). CI must NOT do that — a missing gate script here means the gate
+# was deleted, which is exactly the change that most needs to fail. Every job
+# below asserts its script exists before running it.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  skill-frontmatter:
+    name: SKILL.md frontmatter loads in Copilot CLI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Assert validator is present
+        run: |
+          test -f .agents/scripts/skills/validate_skill_md.ts \
+            || { echo "::error::validate_skill_md.ts is missing — the skill-loader gate has been removed."; exit 1; }
+      # A SKILL.md whose frontmatter is unparseable, or whose description exceeds
+      # 1024 parsed chars, is SILENTLY dropped by Copilot CLI at load time.
+      - run: bun .agents/scripts/skills/validate_skill_md.ts
+
+  drawdown-basis:
+    name: Report drawdowns state their basis (52w vs ATH)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # need the base commit to diff against
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Assert validator is present
+        run: |
+          test -f .agents/scripts/validate/drawdown_basis.ts \
+            || { echo "::error::drawdown_basis.ts is missing — the basis gate has been removed."; exit 1; }
+      # SCOPE: only reports ADDED or MODIFIED by this PR/push — the same scope as the
+      # pre-commit hook, which gates the staged set.
+      #
+      # Deliberately NOT all reports. 17 historical reports predate this rule and would
+      # fail it. They are a frozen audit trail; retroactively rewriting them to satisfy a
+      # rule invented later would corrupt the record we rely on for incident forensics.
+      # New and edited reports must comply; history stays as it was written.
+      - name: Validate changed reports
+        shell: bash
+        run: |
+          set -uo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+          # First push of a new branch reports an all-zero "before" SHA.
+          if ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "base $base unavailable — falling back to the previous commit"
+            base="$head~1"
+          fi
+          # ACMR (not ACM) + destination-path extraction — see changed_reports.sh for why:
+          # a rename-plus-edit is scored `R`, which the old filter silently excluded,
+          # letting a re-dated report smuggle a bare "from high" past this gate with exit 0.
+          changed=$(bash .agents/scripts/validate/changed_reports.sh "$base" "$head" || true)
+          if [ -z "$changed" ]; then
+            echo "No report added or modified — nothing to gate."
+            exit 0
+          fi
+          echo "Gating:"; echo "$changed" | sed 's/^/  /'
+          fail=0
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            echo "── $f"
+            bun .agents/scripts/validate/drawdown_basis.ts "$f" --basis-only || fail=1
+          done <<< "$changed"
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::A changed report states a drawdown without saying whether it is from the 52w high or the ATH. That ambiguity shipped wrong numbers three times (TON -49.2%, TON -82.5%, JUP -87%)."
+          fi
+          exit $fail
+
+  invariants:
+    name: Invariant tests (drawdown-basis + hedge-fund gate contract)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Assert invariant scripts are present
+        run: |
+          missing=0
+          for f in .agents/scripts/validate/drawdown_basis.test.ts \
+                   .agents/scripts/validate/changed_reports.test.ts \
+                   .agents/scripts/validate/changed_reports.sh \
+                   evals/hf/test_gate_contract.mjs \
+                   evals/hf/apply_score_caps.mjs; do
+            test -f "$f" || { echo "::error::$f is missing — an invariant gate has been removed."; missing=1; }
+          done
+          exit $missing
+      # Hermetic: price series are injected, no network.
+      - name: drawdown-basis invariants
+        run: bun test ./.agents/scripts/validate/drawdown_basis.test.ts
+      # Guards the gate's own CHANGE DETECTION: a renamed report is scored `R`, which
+      # the old filter silently excluded, so re-dating a report bypassed the basis gate
+      # entirely (exit 0, "nothing to gate"). Uses a throwaway temp repo, no network.
+      - name: report change-detection invariants (rename bypass)
+        run: bun test ./.agents/scripts/validate/changed_reports.test.ts
+      # Guards the SanDisk regression: a discovered narrative name must never be
+      # filtered out before the panel sees it.
+      - name: hedge-fund gate contract
+        run: node evals/hf/test_gate_contract.mjs
+      - name: score-cap selftest
+        run: node evals/hf/apply_score_caps.mjs --selftest

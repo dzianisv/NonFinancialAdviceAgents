@@ -25,6 +25,23 @@ if [ -f "$evaldir/apply_score_caps.mjs" ]; then
   }
 fi
 
+# Drawdown-BASIS invariant: every published "% from high" must state 52w vs ATH and must
+# recompute from ONE canonical series. Guards the TON −49.2%/−82.5% and JUP −87% incidents.
+# Hermetic (injected price series, no network), so it is safe in a hook.
+ddtest="$root/.agents/scripts/validate/drawdown_basis.test.ts"
+if [ -f "$ddtest" ]; then
+  if command -v bun >/dev/null 2>&1; then
+    bun test "$ddtest" >/dev/null 2>&1 || {
+      echo "❌ pre-push: drawdown-basis invariant tests FAILED — a report drawdown could ship with an ambiguous or unverified basis."
+      echo "   Run: bun test $ddtest"
+      fail=1
+    }
+  else
+    echo "❌ pre-push: bun is required to run the drawdown-basis invariant tests but was not found on PATH."
+    fail=1
+  fi
+fi
+
 if [ "$fail" -ne 0 ]; then
   echo "Push blocked. Fix the failing invariant test(s). Override with --no-verify only if you know why (NOT recommended)."
   exit 1
