@@ -66,6 +66,11 @@
 
 **Verdict HOLD — $60-62K is the accumulation zone. Below that, reassess open positions.**
 
+> **Invalidation / re-entry levels (added 2026-07-29; Coinbase daily candles, 52w window, n=367):** live **$63,559**, SMA50 $63,321, SMA200 $71,616, 52w range $57,717.55–$126,296.
+> - **HOLD → ADD (start the ladder):** any daily close inside **$60,000–62,000**, the stated accumulation zone.
+> - **HOLD → reassess (de-risk):** daily close below **$57,717.55** (52w low). A new 52w low with the death cross still active removes the "range base" thesis.
+> - **Bear thesis invalidated (→ trend repair):** weekly close above **$71,616** (SMA200), which would also resolve the 50/200 death cross.
+
 ---
 
 ### 2. ETH — Ethereum
@@ -82,7 +87,12 @@
 
 **Assessment:** ETH diverges positively on ETF flows, but the durable version of this claim is the RELATIVE one — ether funds drew nearly as much capital as bitcoin ETFs over three weeks on roughly one-eighth the net assets (https://www.theblock.co/post/409660/bitcoin-etf-weekly-trading-volume-falls-to-lowest-since-october-2024-as-ether-funds-lead-inflows-again) — **not** a live daily inflow streak (that streak snapped Jul 25; see §A3). Spot price remains weak, ETH/BTC at 0.029 (compressed). The utility thesis (staking yields, L2 adoption, RWA tokenization) is gaining institutional traction even as speculative momentum remains absent.
 
-**Verdict HOLD — $1,800 is the key support. ETH ETF inflow divergence is a positive signal for relative outperformance.**
+**Verdict HOLD — $1,800 is the key support. ETH ETF relative strength is a positive signal for relative outperformance.**
+
+> **Invalidation / re-entry levels (added 2026-07-29; Coinbase daily candles, 52w window, n=367):** live **$1,887**, SMA50 $1,763, SMA200 $2,117, 52w range $1,505.00–$4,955.90.
+> - **HOLD → TRIM:** daily close below **$1,800** (the stated support). Next structural level is the 52w low **$1,505.00**.
+> - **HOLD → ADD:** weekly close above **$2,117** (SMA200) — that, not ETF flow commentary, is the level that would confirm relative outperformance.
+> - Note the ETF-divergence leg was downgraded on 2026-07-27 (streak snapped); do not size on it alone.
 
 ---
 
@@ -100,6 +110,11 @@
 **Assessment:** SOL has been sliding for weeks, down **70.8% from its 52w high** (intraday basis; the earlier 75.0% came from a retracted out-of-window high). Volume declining every week since the mid-June peak — bearish. Stablecoins on Solana at $15B+ shows infrastructure is real, but token price disconnected from ecosystem growth. On-chain activity likely depressed as memecoin mania cooled.
 
 **Verdict HOLD — no accumulation signal until volume returns. $60 is the hard floor.**
+
+> **Invalidation / re-entry levels (added 2026-07-29; Coinbase daily candles, 52w window, n=367):** live **$72.87**, SMA50 $74.42, SMA200 $86.82, 52w range $60.11–$253.61.
+> - **HOLD → EXIT:** daily close below **$60.11** (52w low, and effectively the stated $60 floor). Volume is already declining, so a floor break has no demand beneath it.
+> - **HOLD → ADD:** weekly close above **$86.82** (SMA200) **with** weekly volume rising — the verdict demands volume, so this trigger has two legs, not one.
+> - SOL is below both MAs; the base case is drift, not reversal.
 
 ---
 
@@ -141,7 +156,12 @@ Standard 52-week-high basis (not the ATH framing in the table above): **−62.8%
 
 **Unlock:** the real next unlock, per tokenomist.ai (refreshed 2026-07-27 15:32 UTC), is **2026-08-06, 9,916,667 HYPE (~$594.6M), Core Contributors cliff**. The date is **single-sourced** — re-check before this drives any sizing decision. FOMC Jul 28-29 is independently confirmed real (federalreserve.gov); it does not coincide with this unlock. A fabricated "Jul-29 / $817M" unlock claim was retracted — see §A6.
 
-**Verdict WATCH — $50-55 is the accumulation zone. Current $59 is above ideal entry. Perp DEX volumes key metric to monitor. The Aug-6 team-cliff unlock (~$595M, single-sourced) is a fresh risk to watch into next week.**
+**Verdict WATCH — $50-55 is the accumulation zone. Perp DEX volumes are the key metric. The Aug-6 team-cliff unlock (~$595M, single-sourced) is the live risk.**
+
+> **Invalidation / re-entry levels (added 2026-07-29; Coinbase daily candles, 52w window, n=367):** live **$53.15** (Hyperliquid mid, 2026-07-29) — **now inside the $50–55 zone**, vs $59.14 at the Jul-24 snapshot.
+> - **WATCH → ADD (first tranche only):** price inside **$50–55** — now satisfied. **Hold the second tranche until after the Aug-6 cliff**; a ~$595M unlock into a Fear regime is the only dated, known supply event in this book.
+> - **Thesis kill (→ AVOID):** daily close below **$50** on rising volume, or perp-DEX volume making a new 3-month low.
+> - The unlock is **single-sourced** — verify before sizing on it in either direction.
 
 ---
 
@@ -162,7 +182,14 @@ Standard 52-week-high basis (not the ATH framing in the table above): **−62.8%
 
 Other live figures: `fees 30d= $28,094,909`, `revenue 30d= $3,761,140` (13.4% protocol take, to treasury), GHO supply **$648,238,270**. Revenue run-rate is the worst-contracting in the book: 1y $117,285,863 vs 30d-annualized $45,760,537 = **−61%**. Aave V4 deposits grew from $11.3M (Apr 15) to **$303M (Jul 23)** across 11 cap-raise rounds plus an Avalanche launch — real protocol traction, but V4's own accrual design is unconfirmed. *(Provenance for the restart-condition and V4-accrual claims: §A7.)*
 
-**VERDICT — HOLD (existing) / AVOID (new capital).** Weighing the honest evidence, not softened language:
+**VERDICT — HOLD (existing) / AVOID (new capital).**
+
+> **Invalidation / re-entry levels (added 2026-07-29; Coinbase daily candles, 52w window, n=367):** live **$97.44**, SMA50 $86.23, SMA200 $103.14, 52w range $57.82–$385.59.
+> - **AVOID → ADD is a GOVERNANCE trigger, not a price one:** a dated, passed AIP restarting the buyback. Buybacks have been off since 2026-04-19 (99+ days). No chart level upgrades this, because price cannot fix zero accrual.
+> - **HOLD → TRIM:** daily close below **$86.23** (SMA50), or any DAO decision allocating treasury to the unresolved rsETH bad debt ahead of holders.
+> - **Thesis repairing:** weekly close above **$103.14** (SMA200) *with* buybacks live.
+
+Weighing the honest evidence, not softened language:
 - **Against accumulating:** buyback has been $0 for 99+ consecutive days (`holdersRevenue` 30d = $0, every day 2026-06-25→07-27, governance-confirmed at `governance.aave.com/t/24686`); revenue run-rate is the worst-contracting name in the entire 11-token book (−61% 30d-annualized vs trailing-1y); the rsETH bad-debt overhang from the April exploit is still unresolved on the balance sheet; and there is **no dated, binding restart mechanism** — only a forward-looking statement.
 - **The one governance signal that could flip this** — Aave founder Stani Kulechov stating on 2026-06-25 (`governance.aave.com/t/24936` post #16) that "new Aavenomics 3.0 will have immutable and automated buybacks" — is **intent, not a commitment**: no date, no Snapshot vote, no AIP number. It downgrades "no restart condition will ever exist" (too bearish) to "a restart is being designed" (still not investable), and does not by itself justify BUY ZONE.
 - **V4 deposit growth ($11.3M Apr 15 → $303M Jul 23, 11 cap-raise rounds + Avalanche launch)** is real protocol-level traction, but by design **V4 does not share revenue with AAVE token holders** — it strengthens the protocol's TVL/moat, not the token's cash-flow case. Growth in a bucket that doesn't accrue to the token is not a token-bullish catalyst.
