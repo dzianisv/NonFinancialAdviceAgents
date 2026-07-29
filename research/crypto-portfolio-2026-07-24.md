@@ -38,8 +38,8 @@
 | ETH ETFs Jul 23 | **+$26.3M inflow** (5d streak) | Divergent strength |
 | ETF flows *as of Jul 27* (corrected) | ETH 5-day streak **SNAPPED Jul 25**, week closed red; BTC shed **−$465M over two days** (IBIT −$415M). **Both** BTC and ETH funds still extended **weekly** inflow streaks to **three**. | Divergence narrower than drafted |
 | 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
-| Oil (WTI) — **CANONICAL, live 2026-07-29T15:02Z** | **$85.41** (CL=F). Round-tripped the Iran spike to $79.26 on Jul 28, then reversed **+7.8% in one session**. Now **ABOVE** the Jul 17 pre-spike close of $82.49 (+3.5%) | **Headwind BACK ON** |
-| Oil (Brent) — **CANONICAL, live 2026-07-29T15:02Z** | **$90.92** (BZ=F). Low $84.09 Jul 28; above the $88.10 pre-spike close (+3.2%) | Same reversal — not a WTI-only artifact |
+| Oil (WTI) — live 2026-07-29T15:02Z; **superseded by $84.56 @ 20:53Z, §A2** | **$85.41** (CL=F). Round-tripped the Iran spike to $79.26 on Jul 28, then reversed **+7.8% in one session**. Now **ABOVE** the Jul 17 pre-spike close of $82.49 (+3.5%) | **Headwind BACK ON** |
+| Oil (Brent) — live 2026-07-29T15:02Z; **superseded by $90.55 @ 20:53Z, §A2** | **$90.92** (BZ=F). Low $84.09 Jul 28; above the $88.10 pre-spike close (+3.2%) | Same reversal — not a WTI-only artifact |
 
 **Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), and oil back above its pre-spike level. The BTC→ETH ETF rotation read is weaker than drafted — both complexes logged a third consecutive weekly inflow. Note the whipsaw on the oil leg: a macro input that round-trips ±10% in three sessions is a low-conviction leg in either direction. Size for volatility, not for direction.
 
@@ -206,11 +206,11 @@ Weighing the honest evidence, not softened language:
 |---|---|
 | Price | **$0.186** |
 | 52w Range — **VERIFIED 2026-07-29, 3 venues** | **intraday $0.0563 ↔ $0.5784** (Binance) / $0.1078 ↔ $0.5780 (Kraken) · **close-basis $0.1372 ↔ $0.5588**. The drafted low **$0.056 is CONFIRMED but venue-specific** — a Binance intraday wick; Kraken's low over the same window is $0.1078, ~1.9x higher. The drafted high **$1.44 is RETRACTED** — no venue prints above $0.5784 inside 52 weeks; $1.44 is an out-of-window (>52w) level. |
-| % from 52w High | −87.1% |
+| % from 52w High | **−65.2%** — *corrected: the drafted −87.1% is the **ATH-basis** drawdown (−**87.1% from ATH**), mislabelled as 52w. Both are now stated on their own basis, per the mandatory convention below.* |
 | 210d Volume Trend | Declining (123M → 54M weekly) |
 | Latest Weekly Close | $0.186 (−5.3%) |
 
-**Assessment:** JUP in free-fall territory, down 87.1% from its 52w high. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
+**Assessment:** JUP in free-fall territory, **−65.2% from its 52w high** (−**87.1% from ATH**) — the drafted "87.1% from its 52w high" conflated the two bases and is corrected. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
 
 **Verdict AVOID — downtrend intact, no reversal signal. Wait for volume base + ladder entry if ever.**
 
@@ -310,11 +310,11 @@ Weighing the honest evidence, not softened language:
 | Kraken LINKUSD | **$8.2592** | 2026-07-29T15:11Z |
 | CoinGecko | **$8.26** | 2026-07-29T15:11:30Z |
 
-Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
+Max spread **0.06%**. **Superseded — any downstream cite must use $8.18 @ 2026-07-29T21:03Z** (median of CoinGecko $8.19 / Coinbase $8.18 / Kraken $8.1777, max spread 0.15%; final resolution in §A9). The $8.26 @ 15:12Z figure below was canonical for its timestamp and is now stale by −1.0%. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
 
 **Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.0% to $8.26. LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
 
-**Verdict WATCH — $8.33 Jul 24 close confirmed. Spot $8.26–8.28 as of 2026-07-29T15:12Z (3 venues, max spread 0.06%). Oversold candidate but no reversal signal yet — grinding closer to its 52w low strengthens "oversold, no demand," not weakens it.**
+**Verdict WATCH — $8.33 Jul 24 close confirmed. Spot $8.18 as of 2026-07-29T21:03Z (3 venues, max spread 0.15%; the earlier $8.26 @ 15:12Z is superseded, §A9). Oversold candidate but no reversal signal yet — grinding closer to its 52w low strengthens "oversold, no demand," not weakens it.**
 
 > **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$8.28**, SMA50 $7.99, SMA200 $9.44, 52w range **$7.19**–$26.73 (the "$7.00 52w low" used above is approximate; the pulled series low is **$7.19**).
 > - **WATCH → BUY (ladder start)** on a weekly close above **$9.44** (SMA200), which would end a 69% downtrend. Absent that, CCIP adoption is real but bids nothing.
@@ -337,7 +337,7 @@ Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**
 | **AAVE** | ⚠️ (TVL $14.6B, but 0% accrual) | ⚠️ (base building) | ⚠️ | buyback restart UNDATED | **HOLD (existing) / AVOID (new)** |
 | **UNI** | ⚠️ (burn live, 3.49% capture) | ✅ (+8.3% wk) | ⚠️ | v4 fee vote (burn already live) | **HOLD** |
 | **JUP** | ⚠️ (product OK) | ❌ (**−65.2% from 52w high, close basis — VERIFIED on 3 venues**; −66.4% intraday; −87% was the ATH basis) | ⚠️ | None | **AVOID** |
-| **AERO** | ⚠️ (fees real, emission 1.9x) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
+| **AERO** | ⚠️ (fees real, **+25%/yr supply inflation** — the "emission 1.9x" framing is retracted as an inverted bound, §9 / §A8 F3) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
 | **PUMP** | ✅ (20.6% buyback yield) | ❌ (penny token) | ⚠️ | Buyback live daily | **AVOID (risk, not accrual)** |
 | **LINK** | ✅ (institutional) | ❌ (**−69.9% from 52w high**, intraday basis) | ⚠️ | Oversold candidate | **WATCH** |
 
@@ -351,7 +351,7 @@ Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**
 
 3. **Trimming:** TON at $1.44, deeply below its true 52w high ($3.57) and with no catalyst. Cut position size.
 
-4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH (**$8.26 @ 2026-07-29T15:12Z**, 3 venues, max spread 0.06%; the $8.33 Jul 24 close is confirmed). *Per §11, never cite a single venue tick as "the" price.*
+4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH (**$8.18 @ 2026-07-29T21:03Z**, 3 venues, max spread 0.15%; the $8.33 Jul 24 close is confirmed; the $8.26 @ 15:12Z print is superseded, §A9). *Per §11, never cite a single venue tick as "the" price.*
 
 5. **ETH ETF divergence is a relative tilt, not a live rotation signal.** The +$26.3M / 5-day-streak vs BTC's −$225M outflow framing looked like the week's most interesting signal, but the streak snapped Jul 25 and ETH's week closed red while BTC shed −$465M over two days — **both** complexes still booked a third straight WEEKLY inflow. Keep the relative claim (ether funds ≈ bitcoin funds' capital on ~1/8 the assets over three weeks); drop the "live streak" framing. ETH may still be a relative outperformer, but this is no longer the week's cleanest signal.
 
