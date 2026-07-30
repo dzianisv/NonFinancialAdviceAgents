@@ -15,6 +15,10 @@ import {
   parseArgs,
   parseExemptions,
   parseMarkerValues,
+  parseMarkerHead,
+  exemptionWarning,
+  EXEMPTION_WARN_RATIO,
+  EXEMPTION_WARN_COUNT,
   staleExemptionErrors,
   valueMatches,
   resolveBasis,
@@ -25,9 +29,17 @@ import {
   type CandlePoint,
   type SeriesFetcher,
   type SeriesPoint,
+  type MarkerValue,
   type SeriesResult,
   type Status,
 } from "./drawdown_basis";
+
+/** Marker values carry a sigil now; these keep the value-list assertions readable. */
+function nums(v: MarkerValue[] | undefined): number[] | undefined {
+  return v?.map((x) => x.value);
+}
+const dollar = (value: number, signed = false): MarkerValue => ({ value, sigil: "$", signed });
+const pct = (value: number, signed = true): MarkerValue => ({ value, sigil: "%", signed });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -1137,8 +1149,8 @@ describe("retraction exemption marker", () => {
     );
     expect(errors).toEqual([]);
     expect([...byLine.keys()].sort((x, y) => x - y)).toEqual([2, 3, 4, 5]);
-    expect(byLine.get(3)).toMatchObject({ scope: "block", markerLine: 2 });
-    expect(byLine.get(5)).toMatchObject({ scope: "inline", markerLine: 5 });
+    expect(byLine.get(3)).toMatchObject([{ scope: "block", markerLine: 2 }]);
+    expect(byLine.get(5)).toMatchObject([{ scope: "inline", markerLine: 5 }]);
     expect(byLine.has(6)).toBe(false);
   });
 
@@ -1322,20 +1334,25 @@ describe("value-scoped retraction marker", () => {
   });
 
   test("value parsing survives thousands separators, unicode minus, percent and emphasis", () => {
-    expect(parseMarkerValues("$1,505.00")).toEqual([1505]);
-    expect(parseMarkerValues("−80.4%")).toEqual([-80.4]);          // U+2212
-    expect(parseMarkerValues("-80.4%")).toEqual([-80.4]);          // ASCII hyphen
-    expect(parseMarkerValues("–80.4%")).toEqual([-80.4]);          // en-dash
-    expect(parseMarkerValues("**$19.47**")).toEqual([19.47]);
-    expect(parseMarkerValues("$0.410, $0.518")).toEqual([0.41, 0.518]);
-    expect(parseMarkerValues("$1,505.00 ↔ $4,956.78")).toEqual([1505, 4956.78]);
-    expect(parseMarkerValues("−80.4%, $2.00, $19.47 — drafted values quoted verbatim")).toEqual([
+    // `parseMarkerValues` returns {value, sigil, signed} — the sigil is load-bearing (it
+    // pins the CLAIM KIND a listed value may exempt), so it is asserted here too.
+    expect(nums(parseMarkerValues("$1,505.00"))).toEqual([1505]);
+    expect(nums(parseMarkerValues("−80.4%"))).toEqual([-80.4]);          // U+2212
+    expect(nums(parseMarkerValues("-80.4%"))).toEqual([-80.4]);          // ASCII hyphen
+    expect(nums(parseMarkerValues("–80.4%"))).toEqual([-80.4]);          // en-dash
+    expect(nums(parseMarkerValues("**$19.47**"))).toEqual([19.47]);
+    expect(nums(parseMarkerValues("$0.410, $0.518"))).toEqual([0.41, 0.518]);
+    expect(parseMarkerValues("$0.410")).toEqual([{ value: 0.41, sigil: "$", signed: false }]);
+    expect(parseMarkerValues("−80.4%")).toEqual([{ value: -80.4, sigil: "%", signed: true }]);
+    expect(parseMarkerValues("80.4%")).toEqual([{ value: 80.4, sigil: "%", signed: false }]);
+    expect(nums(parseMarkerValues("$1,505.00 ↔ $4,956.78"))).toEqual([1505, 4956.78]);
+    expect(nums(parseMarkerValues("−80.4%, $2.00, $19.47 — drafted values quoted verbatim"))).toEqual([
       -80.4, 2, 19.47,
     ]);
     // Values are read ONLY from the head, before the first — / – / ;. Prose that quotes
     // a number must not widen the marker's own scope — this is the real bug found when
     // applying the markers to the shipped report.
-    expect(parseMarkerValues("$0.410, $0.518 — the corrected $0.3018 ↔ $1.4907 stays verified")).toEqual([
+    expect(nums(parseMarkerValues("$0.410, $0.518 — the corrected $0.3018 ↔ $1.4907 stays verified"))).toEqual([
       0.41, 0.518,
     ]);
     expect(parseMarkerValues("drafted range quoted verbatim; corrected value is $0.3018")).toBeUndefined();
@@ -1347,20 +1364,20 @@ describe("value-scoped retraction marker", () => {
 
   test("a leading dash is a SIGN when a digit follows it and a SEPARATOR when one does not", () => {
     // En-dash plays both roles in real documents, so the distinction must be positional.
-    expect(parseMarkerValues("–80.4%")).toEqual([-80.4]);        // sign, glued to digits
-    expect(parseMarkerValues("— $0.410, $0.518")).toEqual([0.41, 0.518]); // separator
-    expect(parseMarkerValues("- $0.410")).toEqual([0.41]);
-    expect(parseMarkerValues("−80.4% — quoted as drafted")).toEqual([-80.4]);
+    expect(nums(parseMarkerValues("–80.4%"))).toEqual([-80.4]);        // sign, glued to digits
+    expect(nums(parseMarkerValues("— $0.410, $0.518"))).toEqual([0.41, 0.518]); // separator
+    expect(nums(parseMarkerValues("- $0.410"))).toEqual([0.41]);
+    expect(nums(parseMarkerValues("−80.4% — quoted as drafted"))).toEqual([-80.4]);
   });
 
-  test("matching is on the PARSED NUMBER and on absolute value (drawdowns are stored signed)", () => {
-    expect(valueMatches(1505, 1505.0)).toBe(true);
-    expect(valueMatches(-80.4, -80.4)).toBe(true);
-    expect(valueMatches(80.4, -80.4)).toBe(true);   // marker may omit the sign
-    expect(valueMatches(-80.4, 80.4)).toBe(true);
-    expect(valueMatches(0.41, 0.410)).toBe(true);
-    expect(valueMatches(0.41, 0.42)).toBe(false);
-    expect(valueMatches(1505, 1506)).toBe(false);
+  test("matching is on the PARSED NUMBER, and an UNSIGNED marker still matches a signed claim", () => {
+    expect(valueMatches(dollar(1505), { kind: "low", value: 1505.0 })).toBe(true);
+    expect(valueMatches(pct(-80.4), { kind: "drawdown", value: -80.4 })).toBe(true);
+    // A marker may omit the sign; an author being terse is not an ambiguity about kind.
+    expect(valueMatches(pct(80.4, false), { kind: "drawdown", value: -80.4 })).toBe(true);
+    expect(valueMatches(dollar(0.41), { kind: "high", value: 0.41 })).toBe(true);
+    expect(valueMatches(dollar(0.41), { kind: "high", value: 0.42 })).toBe(false);
+    expect(valueMatches(dollar(1505), { kind: "low", value: 1506 })).toBe(false);
   });
 
   test("a `$1,505.00`-style marker matches a `$1,505.00`-style claim end to end", async () => {
@@ -1409,6 +1426,468 @@ describe("value-scoped retraction marker", () => {
   test("parseExemptions carries the listed values through to the exemption", () => {
     const { byLine, errors } = parseExemptions("a <!-- retracted: $0.410, $0.518 -->");
     expect(errors).toEqual([]);
-    expect(byLine.get(1)).toMatchObject({ scope: "inline", markerLine: 1, values: [0.41, 0.518] });
+    expect(byLine.get(1)).toMatchObject([
+      {
+        scope: "inline",
+        markerLine: 1,
+        values: [
+          { value: 0.41, sigil: "$" },
+          { value: 0.518, sigil: "$" },
+        ],
+      },
+    ]);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADVERSARIAL REVIEW — every case below was REPRODUCED against the previous
+// implementation. Each one is a way a marker could suppress a LIVE claim without the
+// output ever saying so, which is strictly worse than the MISMATCH noise markers exist
+// to remove: a visible failure gets fixed, an invisible exemption ships.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("MAJOR-1 — a marker's SIGIL pins the claim KIND it may exempt", () => {
+  /** 52w low $100 — so a stated `$80.40` low is WRONG and must fail. */
+  const ETH_OK: SeriesResult = { ok: true, points: makeSeries(366, 500, 100, 200), ath: 500 };
+  const ethFetcher = fetcherFor({ ETH: ETH_OK });
+
+  /** The reviewer's repro: one number, two claim KINDS, one percent marker. */
+  const CROSS_LINE =
+    "| 52w Low | $80.40 | and the drop was −80.4% from 52w high";
+
+  test("INVISIBILITY CASE 1: a % marker must NOT exempt a $ price level sharing the line", async () => {
+    const md = report("ETH", `${CROSS_LINE} <!-- retracted: 80.4% -->`);
+    const rep = await validateReport(md, { fetcher: ethFetcher });
+
+    const byKind = Object.fromEntries(rep.results.map((r) => [r.claim.kind, r]));
+    // The DRAWDOWN is what the marker names — it is exempt.
+    expect(byKind.drawdown!.status).toBe("RETRACTED");
+    // The PRICE LEVEL is a live claim. It is recomputed, it is wrong, and it FAILS LOUDLY.
+    expect(byKind.low!.status).toBe("MISMATCH");
+    expect(byKind.low!.claim.value).toBe(80.4);
+    expect(rep.exempted).toBe(1);
+    expect(rep.ok).toBe(false);
+    // …and the failure is in the printed output, not just the object.
+    expect(formatReport(rep, "R.md")).toContain("MISMATCH");
+  });
+
+  test("the mirror case: a $ marker must NOT exempt a drawdown sharing the line", async () => {
+    const md = report("ETH", `${CROSS_LINE} <!-- retracted: $80.40 -->`);
+    const rep = await validateReport(md, { fetcher: ethFetcher });
+
+    const byKind = Object.fromEntries(rep.results.map((r) => [r.claim.kind, r]));
+    expect(byKind.low!.status).toBe("RETRACTED");
+    // −80.4% is not the true drawdown (200/500−1 = −60%), so it fails.
+    expect(byKind.drawdown!.status).toBe("MISMATCH");
+    expect(rep.exempted).toBe(1);
+    expect(rep.ok).toBe(false);
+  });
+
+  test("valueMatches refuses to cross kinds in either direction", () => {
+    expect(valueMatches(pct(-80.4), { kind: "low", value: 80.4 })).toBe(false);
+    expect(valueMatches(pct(-80.4), { kind: "high", value: 80.4 })).toBe(false);
+    expect(valueMatches(dollar(80.4), { kind: "drawdown", value: -80.4 })).toBe(false);
+    expect(valueMatches(pct(-80.4), { kind: "drawdown", value: -80.4 })).toBe(true);
+    expect(valueMatches(dollar(80.4), { kind: "low", value: 80.4 })).toBe(true);
+  });
+
+  test("a SIGNED listed drawdown must agree in sign — −80.4% does not exempt +80.4%", () => {
+    expect(valueMatches(pct(-80.4), { kind: "drawdown", value: 80.4 })).toBe(false);
+    expect(valueMatches(pct(80.4, true), { kind: "drawdown", value: -80.4 })).toBe(false);
+    // Unsigned stays permissive: omitting the sign is terseness, not kind ambiguity.
+    expect(valueMatches(pct(80.4, false), { kind: "drawdown", value: -80.4 })).toBe(true);
+  });
+
+  test("a listed value with NO sigil is a MARKER_ERROR, not a loose match", async () => {
+    const md = report("ETH", `${CROSS_LINE} <!-- retracted: 80.4 -->`);
+    const rep = await validateReport(md, { fetcher: ethFetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("no sigil");
+    // A marker we cannot read suppresses NOTHING — both claims are validated.
+    expect(rep.exempted).toBe(0);
+    expect(rep.ok).toBe(false);
+    expect(parseMarkerHead("80.4").error).toContain("no sigil");
+    expect(parseMarkerHead("80.4").values).toBeUndefined();
+  });
+
+  test("`$80.4%` names both kinds at once and is rejected", () => {
+    expect(parseMarkerHead("$80.4%").error).toContain("BOTH");
+    expect(parseMarkerHead("$80.4%").values).toBeUndefined();
+  });
+
+  test("prose that is not a value list is still whole-line, with NO bogus sigil error", () => {
+    expect(parseMarkerHead("only 2 weekly bars available").error).toBeUndefined();
+    expect(parseMarkerHead("quoted as drafted, corrected above").error).toBeUndefined();
+    expect(parseMarkerValues("only 2 weekly bars available")).toBeUndefined();
+  });
+});
+
+describe("MAJOR-2 — the value head is a WHITELIST, so no separator can widen a marker", () => {
+  // Previously ONLY ` — `, `;` and ` -- ` cut the head. Every other separator an author
+  // might type let the marker read values out of its OWN EXPLANATION and exempt them.
+  const WIDENED = "$0.410, $0.518";
+  const PROSE_VALUE = 0.3018;
+
+  const cases: [string, string][] = [
+    ["em-dash", `${WIDENED} — the corrected $0.3018 stays verified`],
+    ["ASCII hyphen", `${WIDENED} - the corrected $0.3018 stays verified`],
+    ["colon", `${WIDENED}: the corrected $0.3018 stays verified`],
+    ["comma then prose", `${WIDENED}, corrected to $0.3018 below`],
+    ["parenthesis", `${WIDENED} (corrected to $0.3018 below)`],
+    ["the word and", `${WIDENED} and the corrected $0.3018 stays verified`],
+    ["slash", `${WIDENED} / corrected $0.3018`],
+    ["semicolon", `${WIDENED}; corrected $0.3018`],
+    ["double hyphen", `${WIDENED} -- corrected $0.3018`],
+    ["no separator at all", `${WIDENED} corrected $0.3018`],
+  ];
+
+  for (const [name, reason] of cases) {
+    test(`${name}: the prose value $0.3018 is NOT read as a listed value`, () => {
+      const values = parseMarkerValues(reason);
+      expect(nums(values)).toEqual([0.41, 0.518]);
+      expect(nums(values)).not.toContain(PROSE_VALUE);
+    });
+  }
+
+  test("END TO END: an ASCII-hyphen reason no longer suppresses the corrected value", async () => {
+    const AERO_OK: SeriesResult = { ok: true, points: makeSeries(366, 1.4907, 0.3018, 0.416), ath: 2.32 };
+    const md = report(
+      "AERO",
+      "| AERO 52w range $0.410 ↔ $0.518 | corrected: 365d range $0.3018 ↔ $1.4907 |" +
+        " <!-- retracted: $0.410, $0.518 - drafted values quoted verbatim, corrected $0.3018 ↔ $1.4907 -->",
+    );
+    const rep = await validateReport(md, { fetcher: fetcherFor({ AERO: AERO_OK }) });
+
+    // Exactly the two drafted values are suppressed; the two corrected ones are VERIFIED.
+    expect(rep.exempted).toBe(2);
+    expect(
+      rep.results.filter((r) => r.status === "RETRACTED").map((r) => r.claim.value).sort((a, b) => a - b),
+    ).toEqual([0.41, 0.518]);
+    expect(statuses(rep.results.filter((r) => r.status !== "RETRACTED"))).toEqual(["OK", "OK"]);
+    expect(rep.markerErrors).toEqual([]);
+  });
+});
+
+describe("MAJOR-3 — every marker on a line is parsed and stale-checked", () => {
+  const UNI_OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  test("(a) a SECOND inline marker on the same line is parsed", () => {
+    const { byLine, errors } = parseExemptions("x <!-- retracted: $1.00 --> y <!-- retracted: $2.00 -->");
+    expect(errors).toEqual([]);
+    expect(byLine.get(1)!.length).toBe(2);
+    expect(nums(byLine.get(1)![0]!.values)).toEqual([1]);
+    expect(nums(byLine.get(1)![1]!.values)).toEqual([2]);
+  });
+
+  test("(a) a SECOND inline marker's STALE value is reported", async () => {
+    const md = report(
+      "UNI",
+      "| 52w Low | $2.316 | <!-- retracted: $2.316 --> trailing <!-- retracted: $99.99 -->",
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("99.99");
+    expect(rep.markerErrors[0]).toContain("stale exemption");
+    expect(rep.ok).toBe(false);
+  });
+
+  test("(a) a SECOND inline marker still EXEMPTS what it names", async () => {
+    const md = report("UNI", "| 52w Range | $2.00 ↔ $19.47 | <!-- retracted: $2.00 --> <!-- retracted: $19.47 -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.exempted).toBe(2);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("(b) an inline marker INSIDE a block is kept, and its stale value is reported", async () => {
+    const md = report(
+      "UNI",
+      [
+        "<!-- retracted:start — $2.00 -->",
+        "| UNI 52w range $2.00 ↔ $19.47 | <!-- retracted: $77.77 -->",
+        "<!-- retracted:end -->",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("77.77");
+    expect(rep.ok).toBe(false);
+  });
+
+  test("(b) an inline marker inside a block still EXEMPTS values the block does not name", async () => {
+    const md = report(
+      "UNI",
+      [
+        "<!-- retracted:start — $2.00 -->",
+        "| UNI 52w range $2.00 ↔ $19.47 | <!-- retracted: $19.47 -->",
+        "<!-- retracted:end -->",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    // Block names $2.00, the inline names $19.47 — together they cover the row and NO
+    // claim is left silently un-exempted-but-uncheckable.
+    expect(rep.exempted).toBe(2);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.ok).toBe(true);
+  });
+});
+
+describe("MAJOR-4 — a whole-line marker that exempts NOTHING is an error", () => {
+  const UNI_OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  test("INVISIBILITY CASE 2: a dormant <!-- retracted --> on a claim-free line fails loudly", async () => {
+    const md = report("UNI", ["Some prose with no figures. <!-- retracted -->", "| 52w Low | $2.316 |"].join("\n"));
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("dormant marker");
+    expect(rep.markerErrors[0]).toContain("exempts NO claim");
+    expect(rep.ok).toBe(false);
+    expect(formatReport(rep, "R.md")).toContain("MARKER_ERROR");
+  });
+
+  test("the same dormant marker is EXACTLY the booby trap it is called: it would suppress a future edit", async () => {
+    // Proof the error is not pedantry — add one claim to that line and it is silenced,
+    // with no listed value to review.
+    const md = report("UNI", "| 52w Low | $80.40 | <!-- retracted -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.exempted).toBe(1);
+    expect(rep.markerErrors).toEqual([]);
+  });
+
+  test("a block marker covering zero claims is caught too", async () => {
+    const md = report("UNI", ["<!-- retracted:start -->", "no figures here", "<!-- retracted:end -->"].join("\n"));
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("dormant marker");
+  });
+
+  test("a whole-line marker that DOES exempt a claim raises nothing", async () => {
+    const md = report("UNI", "| 52w Range | $2.00 ↔ $19.47 | <!-- retracted -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.exempted).toBe(2);
+  });
+});
+
+describe("MINOR-5 — a block value marker may not silence the same number under several tokens", () => {
+  const OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const fetcher = fetcherFor({ UNI: OK, AAVE: OK });
+
+  test("one listed value matching two tokens inside a block is a MARKER_ERROR", async () => {
+    const md = [
+      "# R",
+      "<!-- retracted:start — $2.00 -->",
+      "### 1. UNI — Uniswap",
+      "| 52w Low | $2.00 |",
+      "### 2. AAVE — Aave",
+      "| 52w Low | $2.00 |",
+      "<!-- retracted:end -->",
+    ].join("\n");
+    const rep = await validateReport(md, { fetcher });
+
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("2 different tokens");
+    expect(rep.markerErrors[0]).toContain("UNI");
+    expect(rep.markerErrors[0]).toContain("AAVE");
+    expect(rep.ok).toBe(false);
+  });
+
+  test("the same value under ONE token inside a block is fine", async () => {
+    const md = [
+      "# R",
+      "<!-- retracted:start — $2.00 -->",
+      "### 1. UNI — Uniswap",
+      "| 52w Low | $2.00 |",
+      "| 52w Low | $2.00 |",
+      "<!-- retracted:end -->",
+    ].join("\n");
+    const rep = await validateReport(md, { fetcher });
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.exempted).toBe(2);
+  });
+
+  test("an INLINE marker is exempt from the rule — its scope is one line by construction", async () => {
+    const md = report("UNI", "| UNI $2.00 and AAVE $2.00 | <!-- retracted: $2.00 -->");
+    const rep = await validateReport(md, { fetcher });
+    expect(rep.markerErrors.filter((e) => e.includes("different tokens"))).toEqual([]);
+  });
+});
+
+describe("MINOR-6 — markers are inert in fenced code and in nested comments", () => {
+  const UNI_OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  test("a ```-fenced EXAMPLE of the syntax does not suppress anything", async () => {
+    const md = report(
+      "UNI",
+      [
+        "```markdown",
+        "| 52w Low | $2.00 | <!-- retracted -->",
+        "```",
+        "| 52w Low | $2.00 |",
+      ].join("\n"),
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    // Both the fenced line and the live line are validated; neither is exempt.
+    expect(rep.exempted).toBe(0);
+    expect(rep.failures.length).toBe(2);
+    expect(rep.failures.every((r) => r.status === "MISMATCH")).toBe(true);
+  });
+
+  test("a ~~~-fenced block behaves the same", () => {
+    const { byLine } = parseExemptions(["~~~", "x <!-- retracted -->", "~~~"].join("\n"));
+    expect(byLine.size).toBe(0);
+  });
+
+  test("a retracted:start inside a fence cannot open a block", () => {
+    const { byLine, errors } = parseExemptions(
+      ["```", "<!-- retracted:start -->", "```", "live line"].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect(byLine.size).toBe(0);
+  });
+
+  test("an OPEN block still covers a fenced example inside it (the block was opened in live prose)", () => {
+    const { byLine, errors } = parseExemptions(
+      ["<!-- retracted:start -->", "```", "x", "```", "<!-- retracted:end -->"].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect([...byLine.keys()].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  test("a marker NESTED in another HTML comment is an error and suppresses nothing", async () => {
+    const md = report("UNI", "| 52w Low | $2.00 | <!-- OUTER <!-- retracted --> -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.exempted).toBe(0);
+    expect(rep.markerErrors.length).toBe(1);
+    expect(rep.markerErrors[0]).toContain("NESTED");
+    expect(rep.failures.length).toBe(1);
+    expect(rep.ok).toBe(false);
+  });
+
+  test("an UNTERMINATED comment carrying a marker is an error, not a silent no-op", () => {
+    const { byLine, errors } = parseExemptions("| 52w Low | $2.00 | <!-- retracted");
+    expect(byLine.size).toBe(0);
+    expect(errors.length).toBe(1);
+    expect(errors[0]).toContain("unterminated");
+  });
+});
+
+describe("MINOR-8 — a `>` inside the reason must not silently disable the marker", () => {
+  const UNI_OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  test("the marker still parses, and its value still applies", async () => {
+    const md = report("UNI", "| 52w Low | $2.00 | <!-- retracted: $2.00 — drafted $5 > $3, corrected below -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    expect(rep.exempted).toBe(1);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.ok).toBe(true);
+  });
+
+  test("a whole-line marker whose reason contains `>` still exempts its line", () => {
+    const { byLine, errors } = parseExemptions("x <!-- retracted: drafted $5 > $3 -->");
+    expect(errors).toEqual([]);
+    expect(byLine.get(1)!.length).toBe(1);
+  });
+
+  test("a marker word that is not a marker is not silently swallowed", () => {
+    const { errors } = parseExemptions("x <!-- retractedish: whatever -->");
+    expect(errors.length).toBe(1);
+    expect(errors[0]).toContain("malformed retraction marker");
+  });
+});
+
+describe("abuse ceiling — count AND ratio, printed where CI cannot miss it", () => {
+  const UNI_OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  /** Builds a report with `exempt` whole-line-marked range rows and `live` clean rows. */
+  function build(exempt: number, live: number): string {
+    const rows: string[] = [];
+    for (let i = 0; i < exempt / 2; i++) rows.push("| 52w Range | $2.00 ↔ $19.47 | <!-- retracted -->");
+    for (let i = 0; i < live / 2; i++) rows.push("| 52w Range | $2.316 ↔ $12.285 |");
+    return report("UNI", rows.join("\n"));
+  }
+
+  test("the ratio ceiling still fires", async () => {
+    const rep = await validateReport(build(2, 2), { fetcher: uniFetcher });
+    const out = formatReport(rep, "R.md");
+    expect(rep.exempted).toBe(2);
+    expect(out).toContain("⚠ WARNING");
+    expect(out).toContain("50% of claims are exempted");
+  });
+
+  test("REGRESSION: the COUNT ceiling fires where the ratio alone stayed silent", async () => {
+    // 8 exempted of 40 = 20%, comfortably under the 25% ratio. Eight live claims'
+    // verification is off, and the ratio-only rule said nothing at all.
+    const rep = await validateReport(build(8, 32), { fetcher: uniFetcher });
+    const out = formatReport(rep, "R.md");
+
+    expect(rep.exempted).toBe(8);
+    expect(rep.exempted / rep.results.length).toBeLessThan(EXEMPTION_WARN_RATIO);
+    expect(out).toContain("⚠ WARNING");
+    expect(out).toContain(`> ${EXEMPTION_WARN_COUNT} claims in absolute terms`);
+    expect(exemptionWarning(rep)).toBeDefined();
+  });
+
+  test("under BOTH ceilings there is no warning", async () => {
+    const rep = await validateReport(build(4, 32), { fetcher: uniFetcher });
+    expect(rep.exempted).toBe(4);
+    expect(exemptionWarning(rep)).toBeUndefined();
+    expect(formatReport(rep, "R.md")).not.toContain("WARNING");
+  });
+
+  test("the warning is printed at the TOP as well as the bottom", async () => {
+    const rep = await validateReport(build(8, 32), { fetcher: uniFetcher });
+    const lines = formatReport(rep, "R.md").split("\n");
+    const hits = lines.map((l, i) => (l.includes("⚠ WARNING") ? i : -1)).filter((i) => i >= 0);
+
+    expect(hits.length).toBe(2);
+    expect(hits[0]).toBeLessThan(3);                 // above the per-claim table
+    expect(hits[1]).toBeGreaterThan(lines.length - 4); // and in the summary
+  });
+});
+
+describe("MINOR-6 (extended) — a marker quoted in an INLINE code span is documentation", () => {
+  const UNI_OK: SeriesResult = { ok: true, points: makeSeries(366, 12.285, 2.316, 3.81), ath: 44.97 };
+  const uniFetcher = fetcherFor({ UNI: UNI_OK });
+
+  test("REGRESSION (found in the shipped report): a backticked example does not suppress", async () => {
+    const md = report(
+      "UNI",
+      "A `<!-- retracted -->` marker is the fix; use `<!-- retracted: $0.410, $0.518 -->`." +
+        "\n| 52w Low | $2.00 |",
+    );
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+
+    // No exemption, no dormant-marker error, and the live wrong claim still fails.
+    expect(rep.exempted).toBe(0);
+    expect(rep.markerErrors).toEqual([]);
+    expect(rep.failures.length).toBe(1);
+    expect(rep.failures[0]!.status).toBe("MISMATCH");
+  });
+
+  test("a REAL marker on the same line as a backticked example still works", async () => {
+    const md = report("UNI", "| 52w Low | $2.00 | see `<!-- retracted -->` <!-- retracted: $2.00 -->");
+    const rep = await validateReport(md, { fetcher: uniFetcher });
+    expect(rep.exempted).toBe(1);
+    expect(rep.markerErrors).toEqual([]);
+  });
+
+  test("double-backtick spans (which may contain a backtick) are masked too", () => {
+    const { byLine, errors } = parseExemptions("x ``a `b` <!-- retracted --> c`` y");
+    expect(byLine.size).toBe(0);
+    expect(errors).toEqual([]);
   });
 });
