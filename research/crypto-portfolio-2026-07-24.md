@@ -1,3 +1,5 @@
+> **AS-OF NOTICE — published 2026-08-12.** This report's analysis date is 2026-07-24 with live re-marks from 2026-07-29. All prices, F&G, oil, and yield figures are **14-19 days stale** and must be re-verified before any action. Verdicts are directional guidance for that window, not live entries. As of 2026-08-12T15:45Z: **BTC $63,500 · LINK $8.78 · WTI $83.29 · F&G 27** — LINK **+7.3%** vs the report's canonical $8.18, WTI **−1.5%** vs $84.56, BTC **−0.7%** vs $63,922, F&G **−1 pt** vs 28.
+
 # Crypto Portfolio Advisor — 2026-07-24
 
 ## BOTTOM LINE
@@ -38,8 +40,8 @@
 | ETH ETFs Jul 23 | **+$26.3M inflow** (5d streak) | Divergent strength |
 | ETF flows *as of Jul 27* (corrected) | ETH 5-day streak **SNAPPED Jul 25**, week closed red; BTC shed **−$465M over two days** (IBIT −$415M). **Both** BTC and ETH funds still extended **weekly** inflow streaks to **three**. | Divergence narrower than drafted |
 | 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
-| Oil (WTI) — live 2026-07-29T15:02Z; **superseded by $84.56 @ 20:53Z, §A2** | **$85.41** (CL=F). Round-tripped the Iran spike to $79.26 on Jul 28, then reversed **+7.8% in one session**. Now **ABOVE** the Jul 17 pre-spike close of $82.49 (+3.5%) | **Headwind BACK ON** |
-| Oil (Brent) — live 2026-07-29T15:02Z; **superseded by $90.55 @ 20:53Z, §A2** | **$90.92** (BZ=F). Low $84.09 Jul 28; above the $88.10 pre-spike close (+3.2%) | Same reversal — not a WTI-only artifact |
+| Oil (WTI) — **CANONICAL $84.56 @ 2026-07-29T20:53Z** (§A2 Resolution 4); the earlier **$85.41 @ 15:02Z is SUPERSEDED** | **$84.56** (CL=F). Round-tripped the Iran spike to $79.26 on Jul 28, then reversed **+7.8% in one session**. Now **ABOVE** the Jul 17 pre-spike close of $82.49 (+3.5%) | **Headwind BACK ON** |
+| Oil (Brent) — **CANONICAL $90.55 @ 2026-07-29T20:53Z** (§A2 Resolution 4); the earlier **$90.92 @ 15:02Z is SUPERSEDED** | **$90.55** (BZ=F). Low $84.09 Jul 28; above the $88.10 pre-spike close (+3.2%) | Same reversal — not a WTI-only artifact |
 
 **Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), and oil back above its pre-spike level. The BTC→ETH ETF rotation read is weaker than drafted — both complexes logged a third consecutive weekly inflow. Note the whipsaw on the oil leg: a macro input that round-trips ±10% in three sessions is a low-conviction leg in either direction. Size for volatility, not for direction.
 
@@ -206,11 +208,11 @@ Weighing the honest evidence, not softened language:
 |---|---|
 | Price | **$0.186** |
 | 52w Range — **VERIFIED 2026-07-29, 3 venues** | **intraday $0.0563 ↔ $0.5784** (Binance) / $0.1078 ↔ $0.5780 (Kraken) · **close-basis $0.1372 ↔ $0.5588**. The drafted low **$0.056 is CONFIRMED but venue-specific** — a Binance intraday wick; Kraken's low over the same window is $0.1078, ~1.9x higher. The drafted high **$1.44 is RETRACTED** — no venue prints above $0.5784 inside 52 weeks; $1.44 is an out-of-window (>52w) level. |
-| % from 52w High | **−65.2%** — *corrected: the drafted −87.1% is the **ATH-basis** drawdown (−**87.1% from ATH**), mislabelled as 52w. Both are now stated on their own basis, per the mandatory convention below.* |
+| Drawdown — **52w-high basis vs ATH basis** | **−65.2% from the 52w high ($0.5588 close basis)** · **−87.1% from the all-time high ($2.00)** — *corrected: the drafted −87.1% is the **ATH-basis** drawdown (−**87.1% from ATH**), mislabelled as 52w. Both are now stated on their own basis, per the mandatory convention below.* |
 | 210d Volume Trend | Declining (123M → 54M weekly) |
 | Latest Weekly Close | $0.186 (−5.3%) |
 
-**Assessment:** JUP in free-fall territory, **−65.2% from its 52w high** (−**87.1% from ATH**) — the drafted "87.1% from its 52w high" conflated the two bases and is corrected. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
+**Assessment:** JUP in free-fall territory, **−65.2% from its 52w high (close basis $0.5588)** and **−87.1% from its all-time high ($2.00)** — two different bases, both stated — the drafted "87.1% from its 52w high" conflated the two bases and is corrected. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
 
 **Verdict AVOID — downtrend intact, no reversal signal. Wait for volume base + ladder entry if ever.**
 
@@ -275,10 +277,10 @@ Weighing the honest evidence, not softened language:
 |---|---|
 | Price | **$0.001824** |
 | 52w Range — **RESOLVED 2026-07-29, 2 venues** | **intraday $0.001150 ↔ $0.008999** (Coinbase PUMP-USD, n=367) · **close-basis $0.001200 ↔ $0.008623**. The drafted high **$0.00898 is CONFIRMED** (0.2% off Coinbase's intraday $0.008999 — it came from an intraday venue). The drafted low **$0.000411 is RETRACTED as impossible**: it sits *below PUMP's all-time low* of $0.00115473 (CoinGecko, set 2026-06-25). |
-| % from 52w High | **−79.0% intraday / −78.1% close** (Coinbase). The drafted −79.7% is within 0.7pp of the intraday figure — directionally sound, now pinned. |
+| Drawdown — **52w-high basis** | **−79.0% intraday / −78.1% close** from the 52w high (Coinbase). *(ATH basis is not materially different — PUMP's ATH sits inside the 52w window.)* The drafted −79.7% is within 0.7pp of the intraday figure — directionally sound, now pinned. |
 | Weekly Volume | 27B tokens ($49M) |
 
-**Assessment:** Memecoin launchpad token, down 79.7% from its 52w high. Volume massive in token terms but small in USD — typical penny-token behavior.
+**Assessment:** Memecoin launchpad token, **down 79.0% (intraday) / 78.1% (close) from its 52w high** — the drafted 79.7% is superseded. Volume massive in token terms but small in USD — typical penny-token behavior.
 
 **Accrual is live, not unproven.** DeFiLlama `pump.fun revenue 1y= $323,949,113`, 30d `$19,667,529` (30d-annualized $239.3M, a −26% run-rate contraction). Buybacks print **every single day without gaps**: `holdersRevenue 30d= $14,301,309`, daily 2026-07-20→26 = `475035, 503718, 552001, 529763, 577372, 531409, 587823`. Adapter methodology: *"PUMP token buyback (sourced from onchain burns)"*, era split *"100% pre-2025-07-14, 0% from 2025-07-14, 50% from 2026-04-28."* That is **~$174M/yr of buyback against an $845M mcap = 20.6% of market cap repurchased annually** — the highest buyback yield in the entire 11-token universe, and the only one with continuous (not batched) prints. *(The drafted "$500M+/year revenue" and "accrual unproven" claims are retracted — §A4.)* The recent +20-40% move is over-determined: BOOST mode activation ~2026-07-21 and an 81.7K SOL exchange transfer both coincide with the named-influencer story (§A8, F4).
 
@@ -309,14 +311,14 @@ Weighing the honest evidence, not softened language:
 | **CoinGecko** | **$8.19** | **2026-07-29T21:02Z** |
 | **Coinbase LINK-USD** | **$8.18** | **2026-07-29T21:03Z** |
 | **Kraken LINKUSD** | **$8.1777** | **2026-07-29T21:03Z** |
-| *— superseded 15:12Z snapshot below —* | | |
+| *— SUPERSEDED 15:12Z snapshot below — not actionable, retained for audit only —* | | |
 | Coinbase LINK-USD | $8.264 | 2026-07-29T15:12:47Z |
 | Kraken LINKUSD | $8.2592 | 2026-07-29T15:11Z |
 | CoinGecko | $8.26 | 2026-07-29T15:11:30Z |
 
-**CANONICAL: $8.18 @ 2026-07-29T21:03Z** (median of 3 venues, max spread **0.15%**). Binance excluded — `api.binance.com` returned HTTP 451 geo-restriction, not imputed. The $8.26 @ 15:12Z snapshot above was correct for its timestamp and is now stale by −1.0%; final resolution in §A9. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
+**CANONICAL: $8.18 @ 2026-07-29T21:03Z** (median of 3 venues, max spread **0.15%**). Binance excluded — `api.binance.com` returned HTTP 451 geo-restriction, not imputed. The $8.26 @ 15:12Z snapshot above was correct for its timestamp, is **superseded and not actionable** (−1.0% stale); final resolution in §A9. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
 
-**Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.0% to $8.26. LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
+**Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.9% to the canonical **$8.18 @ 2026-07-29T21:03Z** (the intraday $8.26 @ 15:12Z is superseded). LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
 
 **Verdict WATCH — $8.33 Jul 24 close confirmed. Spot $8.18 as of 2026-07-29T21:03Z (3 venues, max spread 0.15%; the earlier $8.26 @ 15:12Z is superseded, §A9). Oversold candidate but no reversal signal yet — grinding closer to its 52w low strengthens "oversold, no demand," not weakens it.**
 
@@ -341,7 +343,7 @@ Weighing the honest evidence, not softened language:
 | **AAVE** | ⚠️ (TVL $14.6B, but 0% accrual) | ⚠️ (base building) | ⚠️ | buyback restart UNDATED | **HOLD (existing) / AVOID (new)** |
 | **UNI** | ⚠️ (burn live, 3.49% capture) | ✅ (+8.3% wk) | ⚠️ | v4 fee vote (burn already live) | **HOLD** |
 | **JUP** | ⚠️ (product OK) | ❌ (**−65.2% from 52w high, close basis — VERIFIED on 3 venues**; −66.4% intraday; −87% was the ATH basis) | ⚠️ | None | **AVOID** |
-| **AERO** | ⚠️ (fees real, **+25%/yr supply inflation** — the "emission 1.9x" framing is retracted as an inverted bound, §9 / §A8 F3) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
+| **AERO** | ⚠️ (fees real, **+25%/yr supply inflation**, 68.5% fee capture to veAERO) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
 | **PUMP** | ✅ (20.6% buyback yield) | ❌ (penny token) | ⚠️ | Buyback live daily | **AVOID (risk, not accrual)** |
 | **LINK** | ✅ (institutional) | ❌ (**−69.9% from 52w high**, intraday basis) | ⚠️ | Oversold candidate | **WATCH** |
 
