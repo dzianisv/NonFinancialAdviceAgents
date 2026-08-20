@@ -1,104 +1,89 @@
-# Setup: crypto-advisor on the Telegram trader bot (@MichaelBurryTraderBot)
+# @MichaelBurryTraderBot — investor agent runbook
 
-**How to use this:** paste the prompt block below to the bot in one message. The *agent* installs its own
-skills and registers its own cron job with its native tools. Nobody hand-edits the bot's internals.
+Live agent behind Telegram bot **@MichaelBurryTraderBot** (bot id `8642078678`).
 
-> Recommend-only / educational. The agent never trades.
+## Ground truth (verified 2026-08-20)
 
-## Verified prerequisites (checked 2026-08-20)
-
-| Item | Status |
+| Field | Value |
 |---|---|
-| Repo `dzianisv/NonFinancialAdviceAgents` | public (`dzianisv/backtest` redirects here) |
-| `crypto-advisor/SKILL.md` on `main` | sha256 `cc4f1ca4…` — identical to local working copy |
-| All 16 dependency `SKILL.md` files on `main` | HTTP 200 |
-| `@MichaelBurryTraderBot` reachable | ❌ **unresponsive** — no reply to 5 messages; last bot output 2026-06-21 |
+| Owner | user `whoisdzianis` (telegram id `1916982742`), openclawbot user id `1` |
+| Agent record | agents id **92**, subdomain `oc-30641f`, ns `tenant-oc-30641f` |
+| **Runtime** | **hermes** (NOT openclaw) |
+| Host | LXD VM `vmi3445496/oc-30641f`, `169.58.52.49:22000`, private `10.138.0.4` |
+| Shell user | `root`, `HOME=/root` |
+| Active profile | `investor` |
+| **Skills dir** | **`/root/.hermes/profiles/investor/skills/`** |
+| Workspace | `/root/.hermes/profiles/investor/workspace` |
+| Telegram delivery | long-poll (no webhook) |
 
-Bring the agent back online before pasting, then verify with `/help` or a plain ping.
+> ⚠️ `~/.hermes/skills/` is a DIFFERENT, mostly-empty dir (21 entries). The profile dir is the
+> one that counts. Checking the wrong path is what made the agent report "NOT FOUND" for skills
+> that were actually installed.
 
-## Skill set installed
+## Installed skills
+
+`105 / 107` skill dirs from `.agents/skills/` are present, byte-identical to the local working copy:
+
+| Skill | sha256 of SKILL.md | Status |
+|---|---|---|
+| `crypto-advisor` | `cc4f1ca4…91b8e1` | ✅ matches local |
+| `stocks-advisor` | `d9788446…f5417` | ✅ matches local |
+| `stocks-advisor-fast` | `1f6d5e72…310eb1` | ✅ matches local |
+
+Total in profile: **207 entries**. Dependency closure of the three headline skills (68 skills incl.
+`analyse-*`, `investor-*`, `read-news`, `reference-validator`, `skeptic`, `mkt`) is fully present.
+
+Two deliberate exclusions:
+- `watchlist-alerts` — has **no SKILL.md** (helper `README.md` + `.ts` only). Copied as plain files.
+  `risk-desk` references it in comments only and explicitly does **not** import it (`risk-desk.ts:24`).
+- `update-porfolio-positions` — untracked local-only WIP (note the typo in the dir name), never
+  committed, so absent from GitHub. Not a dependency of any of the three skills. Commit it if wanted.
+
+## Daily cron
 
 ```
-crypto-advisor                                          ← orchestrator
-analyse-technical  analyse-onchain  analyse-defi        ← Phase 1 Research Desk
-analyse-macro      analyse-smartmoney
-investor-benjamin-graham   investor-warren-buffett      ← Phase 2 Investment Panel
-investor-ray-dalio         investor-stanley-druckenmiller
-investor-lyn-alden         (analyse-defi doubles as the Burniske seat)
-read-news  narrative-news  reference-validator          ← sourcing + citation post-hook
-crypto-token-screener  skeptic  mkt                     ← screening, skeptic gate, buy-alerts
+id:       0f922569f2d9
+name:     crypto-advisor-daily
+schedule: 0 8 * * *   (UTC)
+repeat:   forever
+deliver:  telegram:1916982742
+next run: 2026-08-21T08:00:00+00:00
 ```
 
-## 📋 PASTE THIS TO THE BOT
+Managed by hermes' native scheduler (`hermes cron list`). Do not hand-edit job files.
 
-```text
-<role>
-You own this task inside your own runtime. Configure and execute it end-to-end with your native tools
-(terminal, skill_manage, cron). Do not ask me to SSH into your host.
-</role>
+## Known capability gap
 
-<goal>
-1) Install the crypto-advisor skill + all its dependency skills from the public repo
-   dzianisv/NonFinancialAdviceAgents.
-2) Create a durable DAILY cron job that runs crypto-advisor and delivers the report to this Telegram chat.
-</goal>
+`crypto-advisor` is written for an orchestrator holding **TradingView MCP** tools. This agent has none,
+so `analyse-technical` and most on-chain metrics come back `[UNAVAILABLE]` and the panel runs on
+CoinGecko / DeFiLlama / Fear&Greed / Google-News RSS instead. Verified in a live 2-token smoke run:
+Druckenmiller and Burniske seats correctly self-reported LOW conviction with `[UNAVAILABLE]` rather
+than inventing levels. Wire a TradingView MCP in to close it.
 
-<execution>
-STEP 1 — INSTALL SKILLS (one command, from your workspace dir):
-  npx -y skills add dzianisv/NonFinancialAdviceAgents --agent openclaw --yes --copy --dangerously-accept-openclaw-risks
+## Installing / updating skills on this agent
 
-  Skills are nested under .agents/skills/ in that repo. If discovery fails, fall back to per-skill URL
-  install of each SKILL.md from:
-  https://raw.githubusercontent.com/dzianisv/NonFinancialAdviceAgents/main/.agents/skills/<NAME>/SKILL.md
-
-  Required skill list (crypto-advisor + dependencies):
-  crypto-advisor
-  analyse-technical, analyse-onchain, analyse-defi, analyse-macro, analyse-smartmoney
-  investor-benjamin-graham, investor-warren-buffett, investor-ray-dalio,
-  investor-stanley-druckenmiller, investor-lyn-alden
-  read-news, narrative-news, reference-validator, crypto-token-screener, skeptic, mkt
-
-STEP 2 — VERIFY THE LOAD LIST (a SKILL.md on disk is NOT a loaded skill):
-  node openclaw.mjs skills list --agent investor --json
-  Every skill above must show "eligible": true AND "modelVisible": true.
-  Report the exact JSON rows for crypto-advisor and the 5 investor-* skills.
-
-STEP 3 — CREATE THE DAILY CRON (native scheduler only; never hand-edit ~/.openclaw/cron/jobs.json):
-  schedule: 0 8 * * *   (08:00 daily, your local TZ — state which TZ you used)
-  target:   telegram, this chat
-  prompt:   "Load the crypto-advisor skill and execute EVERY mandatory step end-to-end: per-token
-             sequential data pull, Phase 1 Research Desk (5 researchers), CIO briefing package,
-             Phase 2 Investment Panel (6 investors), conviction-weighted verdict, Portfolio Governor
-             cap, Verdict Critic for EVERY token, citation validation, then send the Telegram daily
-             recap. Universe: BTC ETH SOL TON HYPE AAVE JUP UNI AERO PUMP LINK.
-             Educational only, not financial advice."
-
-STEP 4 — RUN ONCE NOW as a smoke test and send the output here.
-</execution>
-
-<constraints>
-- Current-run command output only. No claims without evidence.
-- Note honestly which tools you lack (e.g. TradingView MCP) and degrade the run rather than fabricating data.
-- Never print credentials.
-</constraints>
-
-<output>
-Return a compact status table: skills installed (count + names), load-list verification result,
-cron job id + schedule + next run, smoke-test result. Mark anything unproven as BLOCKED.
-</output>
-```
-
-## Known degradation on this host
-
-`crypto-advisor` assumes **TradingView MCP tools in the orchestrator**. The openclaw investor agent has no
-TradingView MCP, so `tv_data_package` will be empty and the `analyse-technical` brief degrades to
-`INSUFFICIENT DATA`. Either wire a TradingView MCP into the agent, or accept a run driven by the on-chain /
-DeFi / macro / smart-money seats only — and require the agent to say so rather than invent price levels.
-
-## Verify after install
+`hermes skills install` hits the **unauthenticated GitHub API rate limit (60/hr)** and fails. Clone and
+copy instead:
 
 ```sh
-node openclaw.mjs skills list --agent investor --json | grep -E 'crypto-advisor|investor-|analyse-'
+rm -rf /tmp/nfaa && git clone --depth 1 https://github.com/dzianisv/NonFinancialAdviceAgents /tmp/nfaa
+cp -r /tmp/nfaa/.agents/skills/<NAME> /root/.hermes/profiles/investor/skills/<NAME>
 ```
-Each row must show `"eligible": true` AND `"modelVisible": true`. `skills add` can exit 0 having installed
-nothing — "installation complete" is not proof, the load list is.
+
+Verify by checksum, never by asking the agent whether a skill is "loaded":
+
+```sh
+sha256sum /root/.hermes/profiles/investor/skills/crypto-advisor/SKILL.md
+```
+
+## ⚠️ Do not add a second Telegram consumer
+
+The token must have exactly **one** consumer. Binding it to the openclaw tenant (`tenant-oc-6d376f`,
+agents id 1443) as well causes two competing `getUpdates` long-polls, so replies come back
+nondeterministically from whichever runtime won the race. Symptom: the bot answers as the right
+persona but from the wrong filesystem. Keep the binding on hermes only.
+
+## BotFather hazard
+
+`/mybots` → selecting the bot resumed a **pending `/deletebot` flow** and asked for
+`"Yes, I am totally sure."`. Send `/cancel` first. Use `/token` to read the token, never `/mybots`.
