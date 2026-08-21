@@ -45,6 +45,117 @@
  *
  * Also validates stated 52w low / 52w high / 52w range levels against the same series.
  *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * RETRACTION EXEMPTION MARKER (`<!-- retracted -->`)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * A published report keeps an APPENDIX CORRECTION TABLE that quotes each wrong figure
+ * AS ORIGINALLY DRAFTED, so the error stays auditable. Those quoted numbers are not
+ * live claims — they are evidence of a fixed mistake — yet the validator recomputed
+ * them and cried MISMATCH forever. Deleting the rows to go green would destroy the
+ * audit trail this tool exists to protect, so an explicit marker is the correct fix.
+ *
+ *   inline:  `| UNI 52w range $2.00 ↔ $19.47 | … |  <!-- retracted -->`
+ *            exempts claims on THAT LINE ONLY.
+ *   block:   `<!-- retracted:start -->` … `<!-- retracted:end -->`
+ *            exempts claims on the marker lines and every line between them.
+ *   A reason may be attached: `<!-- retracted: quoted as drafted, corrected above -->`.
+ *
+ * VALUE SCOPE (`<!-- retracted: $0.410, $0.518 -->`) — PREFER THIS FORM.
+ *   A marker may NAME the values it exempts. Only claims whose stated value matches a
+ *   listed value are exempted; every other claim on the covered line(s) is validated
+ *   normally.
+ *
+ *   WHY THIS EXISTS: line scope is too blunt for the real document. The AERO appendix
+ *   row carries the CORRECTED range ($0.3018 ↔ $1.4907) in the SAME table row as the
+ *   drafted one ($0.410 ↔ $0.518). Marking that row whole-line suppressed 6 claims when
+ *   only 4 were quoted retractions — it silently switched OFF verification of two
+ *   values that were CORRECT and previously verified. A suppression tool that quietly
+ *   disables checking of correct numbers is worse than the MISMATCH noise it removes,
+ *   so value scope is the default form and whole-line is the BLUNT FALLBACK.
+ *
+ *   A listed value is a numeric token carrying a `$` prefix or a `%` suffix — `$0.410`,
+ *   `−80.4%`, `**$19.47**`, `$1,505.00`. That requirement is what stops an incidental
+ *   number in a prose reason ("only 2 weekly bars") from silently turning a whole-line
+ *   marker into a value-scoped one.
+ *
+ *   THE SIGIL IS PART OF THE MATCH, NOT DECORATION. `$` names a PRICE LEVEL (a 52w
+ *   low/high claim); `%` names a DRAWDOWN. Matching on the bare magnitude let one
+ *   listed value exempt two different KINDS of claim at once: on
+ *   `| 52w Low | $80.40 |  … −80.4% from 52w high  <!-- retracted: 80.4% -->` the
+ *   percent marker — legitimately covering the quoted drawdown — ALSO suppressed the
+ *   LIVE `$80.40` price level, and the output called both `RETRACTED[value]` with
+ *   nothing saying one listed value had crossed claim kinds. That is invisible
+ *   suppression of a live claim, the exact failure this marker design exists to
+ *   prevent. So `$` matches only low/high and `%` matches only drawdowns.
+ *   A value written with an EXPLICIT sign (`−80.4%`) must also agree in sign;
+ *   an unsigned one (`80.4%`) still matches on magnitude, because omitting the sign is
+ *   ordinary authoring, not ambiguity about kind. A listed number with NO sigil is a
+ *   MARKER_ERROR — it could name either kind, and guessing is how scope leaks.
+ *
+ *   Values are read ONLY from the HEAD of the reason — the grammar is
+ *   `<!-- retracted: <values> — <free prose> -->`. The head is a WHITELIST: sigiled
+ *   numeric tokens, `,`, `↔`, emphasis marks and whitespace. Scanning stops at the
+ *   FIRST token outside that set, and everything after it is prose. Blacklisting a few
+ *   separators instead (`—`, `;`, ` -- `) failed for every other separator an author
+ *   might type — `:`, `,`-then-prose, `(`, `and`, `/`, ASCII `-` — each of which let a
+ *   marker read values out of its own explanation and WIDEN ITS OWN SCOPE. A whitelist
+ *   cannot fail open that way.
+ *
+ *   Matching is on the PARSED NUMBER: thousands separators stripped, unicode
+ *   minus/en-dash normalized, emphasis ignored.
+ *
+ *   A LISTED VALUE THAT MATCHES NOTHING ON THE COVERED LINE(S) IS A HARD ERROR
+ *   (MARKER_ERROR). A stale exemption is precisely how a marker keeps suppressing after
+ *   the text around it changed, so it must fail loudly and be cleaned up — never be
+ *   silently ignored.
+ *
+ *   A marker with NO parseable value (`<!-- retracted -->`, or a prose-only reason)
+ *   keeps the original WHOLE-LINE behaviour. That is the blunt fallback: it exempts
+ *   every claim in scope, including any that are correct. Use it only when the whole
+ *   line really is a quotation. A whole-line marker that exempts ZERO claims is itself a
+ *   MARKER_ERROR: a dormant `<!-- retracted -->` sitting on a line with nothing to
+ *   suppress is a booby trap that silently swallows whatever claim is edited onto that
+ *   line next — the same rot as a stale listed value, one scope wider.
+ *
+ * A suppression mechanism rots a gate if it can be applied broadly or silently, so it
+ * is deliberately hostile to abuse:
+ *   - NEVER SILENT. An exempted claim still appears in the results with an explicit
+ *     `RETRACTED` status (it is never dropped), and the summary states how many claims
+ *     were exempted. You can see what was suppressed without diffing the source. The
+ *     output also SAYS WHICH SCOPE did it — `RETRACTED[value]` vs `RETRACTED[line]` —
+ *     so a reader can tell a surgical exemption from a blunt one at a glance.
+ *   - NARROW BY CONSTRUCTION. Inline is one line; a block must be closed explicitly;
+ *     a value-scoped marker is narrower still — only the values it names, and only
+ *     claims of the KIND its sigil names.
+ *   - MARKERS ARE INERT INSIDE CODE. A fenced block or an inline backtick span showing
+ *     the syntax is documentation, not an instruction; honouring it let a paragraph
+ *     ABOUT the tool switch the tool off. The shipped report contained exactly that.
+ *   - A MARKER NESTED IN ANOTHER HTML COMMENT IS AN ERROR, not a live marker.
+ *     `<!-- OUTER <!-- retracted --> -->` reads as commented-OUT to a human and used to
+ *     suppress anyway.
+ *   - EVERY MARKER ON A LINE IS PARSED. A second inline marker used to be invisible to
+ *     the scanner, and an inline marker inside a block was thrown away — in both cases
+ *     its listed values escaped the stale-value check entirely.
+ *   - AN UNCLOSED `retracted:start` IS A HARD ERROR (MARKER_ERROR), not an implicit
+ *     exempt-to-EOF. Exempting the rest of a file by forgetting one comment is the
+ *     precise abuse this design exists to prevent. A nested/duplicate `retracted:start`
+ *     and a stray `retracted:end` are hard errors for the same reason: ambiguous scope.
+ *     Marker errors fail the run on their own, even if every claim otherwise passes.
+ *   - ABUSE CEILING, ON BOTH AXES. The summary shouts if exemptions exceed
+ *     EXEMPTION_WARN_RATIO (25%) of claims OR EXEMPTION_WARN_COUNT (5) claims in
+ *     absolute terms. Ratio alone was gameable by volume: in a 78-claim report, 19 live
+ *     claims could be silenced under the 25% line without a word. The warning is printed
+ *     at the TOP and the BOTTOM of the report so it cannot scroll out of a CI log.
+ *
+ * RULE 1 (basis) INSIDE AN EXEMPTION — deliberate decision: exempted claims are exempt
+ * from RULE 1 too. A quoted retraction reproduces the original text VERBATIM; forcing
+ * "from 52w high" into it would falsify the quote and defeat the audit trail. That does
+ * make the marker a full bypass — which is why the loud reporting above (visible
+ * RETRACTED rows, an exemption count, and the >25% warning) is the thing keeping it
+ * honest, rather than a partial rule that would silently corrupt quotes.
+ *
+ * The marker is an HTML comment, so it does not render in Notion/GitHub views.
+ *
  * Usage:
  *   bun .agents/scripts/validate/drawdown_basis.ts research/crypto-portfolio-2026-07-24.md
  *   bun .agents/scripts/validate/drawdown_basis.ts REPORT.md --tolerance 0.5 --price-tolerance-pct 1.0
@@ -92,6 +203,48 @@ export type SeriesFetcher = (symbol: string) => Promise<SeriesResult>;
 export type Basis = "52w" | "ATH" | "UNKNOWN";
 export type ClaimKind = "drawdown" | "low" | "high";
 
+/**
+ * A value NAMED by a `<!-- retracted: … -->` marker, with the sigil that fixes WHICH
+ * KIND of claim it may exempt. Dropping the sigil made `80.4%` and `$80.40` the same
+ * listed value, so one marker silently crossed from a quoted drawdown onto a live price
+ * level. The sigil is therefore carried, not discarded, all the way to the match.
+ */
+export type MarkerValue = {
+  /** Parsed number, signed as written. */
+  value: number;
+  /** `$` ⇒ price level (low/high). `%` ⇒ drawdown. */
+  sigil: "$" | "%";
+  /** True when the author wrote an explicit sign, which then MUST agree with the claim. */
+  signed: boolean;
+};
+
+/** Why a claim is exempt from recomputation, and which marker did it. */
+export type Exemption = {
+  /** `inline` = marker on the claim's own line; `block` = inside a start/end pair. */
+  scope: "inline" | "block";
+  /** 1-based line of the marker (the `start` marker, for a block). */
+  markerLine: number;
+  /**
+   * Ordinal of this marker among the markers on `markerLine` (a block start is always 0).
+   *
+   * WHY IT EXISTS: two inline markers can sit on ONE line, so `markerLine` alone does not
+   * identify a marker. Grouping by line merged them, and the second marker's listed values
+   * silently escaped the stale-value check — the very bypass this pass is closing.
+   */
+  markerIndex: number;
+  /** Optional free text from `<!-- retracted: … -->`. */
+  reason?: string;
+  /**
+   * Values named by the marker (`<!-- retracted: $0.410, $0.518 -->`). When present the
+   * marker is VALUE-SCOPED: only claims matching one of these — in NUMBER and in KIND —
+   * are exempted, so a corrected figure sharing the line stays verified. Absent ⇒ blunt
+   * whole-line scope.
+   */
+  values?: MarkerValue[];
+  /** The listed value this particular claim matched. Only set on value-scoped exemptions. */
+  matchedValue?: number;
+};
+
 export type Claim = {
   line: number;
   /** Column span in the source line, used to de-duplicate overlapping matches. */
@@ -108,10 +261,16 @@ export type Claim = {
    * defensible. An explicit AMBIGUOUS_TOKEN failure beats a confident wrong PASS.
    */
   ambiguousTokens?: string[];
+  /**
+   * Set when a `<!-- retracted -->` marker covers this claim. The claim is STILL
+   * reported (as RETRACTED) — never dropped — so a suppression is always visible.
+   */
+  exemption?: Exemption;
 };
 
 export type Status =
   | "OK"
+  | "RETRACTED"
   | "BASIS_MISSING"
   | "MISMATCH"
   | "FETCH_FAILED"
@@ -145,6 +304,15 @@ export type ClaimResult = {
 export type ValidationReport = {
   results: ClaimResult[];
   failures: ClaimResult[];
+  /**
+   * Malformed retraction markers (unclosed / nested `start`, stray `end`) AND stale
+   * value-scoped markers whose listed value matches no claim in scope. These fail
+   * the run BY THEMSELVES: an ambiguous or stale exemption is the abuse vector, so it is
+   * never tolerated, no matter how many claims pass.
+   */
+  markerErrors: string[];
+  /** Count of claims suppressed by a `<!-- retracted -->` marker. */
+  exempted: number;
   ok: boolean;
 };
 
@@ -386,6 +554,487 @@ function overlaps(claims: Claim[], line: number, start: number, end: number): bo
   return claims.some((c) => c.line === line && start < c.end && end > c.start);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Retraction exemption markers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Above this share of exempted claims the summary shouts. See the header comment. */
+export const EXEMPTION_WARN_RATIO = 0.25;
+/**
+ * Above this ABSOLUTE number of exempted claims the summary shouts, whatever the ratio.
+ *
+ * WHY BOTH: the ratio alone is gameable by volume. In a 78-claim report, 19 live claims
+ * could be suppressed and still sit under 25% — nineteen unverified numbers, no warning.
+ * A share tells you how much of the report is quotation; a count tells you how much
+ * verification was actually switched off. Only the second one is a risk measure.
+ */
+export const EXEMPTION_WARN_COUNT = 5;
+
+/**
+ * Every `<!-- … -->` comment on a line, scanned by hand rather than by regex.
+ *
+ * WHY NOT A REGEX: the old marker patterns bounded the reason with `[^>]*?`, so a single
+ * `>` inside it (`<!-- retracted: $5 > $3 -->`) made the pattern match NOTHING — no
+ * exemption AND no error, a marker that looks live in the source and is dead in the
+ * tool. Scanning to the literal `-->` terminator handles `>` correctly and, as a bonus,
+ * makes an unterminated comment and a NESTED comment detectable instead of invisible.
+ */
+type RawComment = {
+  /** Text between `<!--` and `-->`. */
+  content: string;
+  /** True when another `<!--` opens inside this comment — `<!-- OUTER <!-- retracted --> -->`. */
+  nested: boolean;
+  /** True when no `-->` closes it on this line. */
+  unterminated: boolean;
+};
+
+function scanHtmlComments(line: string): RawComment[] {
+  const out: RawComment[] = [];
+  let i = 0;
+  for (;;) {
+    const open = line.indexOf("<!--", i);
+    if (open === -1) break;
+    const close = line.indexOf("-->", open + 4);
+    if (close === -1) {
+      out.push({ content: line.slice(open + 4), nested: false, unterminated: true });
+      break;
+    }
+    const content = line.slice(open + 4, close);
+    out.push({ content, nested: content.includes("<!--"), unterminated: false });
+    i = close + 3;
+  }
+  return out;
+}
+
+type MarkerKind = "start" | "end" | "inline";
+
+/** Classifies one comment body as a retraction marker, or `null` if it is not one. */
+function classifyMarker(content: string): { kind: MarkerKind; reason?: string } | null {
+  const t = content.trim();
+  if (!/^retracted\b/i.test(t)) return null;
+  const rest = t.slice("retracted".length);
+  const start = rest.match(/^\s*:\s*start\b([\s\S]*)$/i);
+  if (start) {
+    const reason = start[1]!.trim();
+    return reason ? { kind: "start", reason } : { kind: "start" };
+  }
+  if (/^\s*:\s*end\b/i.test(rest)) return { kind: "end" };
+  const inline = rest.match(/^\s*:\s*([\s\S]*)$/);
+  if (inline) {
+    const reason = inline[1]!.trim();
+    return reason ? { kind: "inline", reason } : { kind: "inline" };
+  }
+  if (/^\s*$/.test(rest)) return { kind: "inline" };
+  return null;
+}
+
+/**
+ * Head-scan tokens. A MINUS is a SIGN only when it is glued to what follows — `−80.4%`.
+ * A dash with a space after it is a prose separator, never a sign.
+ */
+const RE_HEAD_DOLLAR = new RegExp(`^(${MINUS})?\\$\\s*(${NUM})`);
+const RE_HEAD_PCT = new RegExp(`^(${MINUS})?(${NUM})\\s*%`);
+const RE_HEAD_BARE = new RegExp(`^(${MINUS})?(${NUM})`);
+/** Whitespace and the punctuation an author uses BETWEEN listed values, plus emphasis. */
+const HEAD_SKIP = /[\s,↔*_`]/;
+
+export type MarkerHead = { values?: MarkerValue[]; error?: string };
+
+/**
+ * Splits `$0.410, $0.518 — drafted values quoted verbatim` into the VALUE LIST HEAD
+ * (`$0.410, $0.518`) and the human prose after it.
+ *
+ * WHY THE SPLIT: without it, values mentioned in the explanatory prose are read as
+ * listed values. That is not hypothetical — writing the reason
+ * `… the corrected $0.3018 ↔ $1.4907 in the same row stays verified` silently exempted
+ * the corrected figures it was describing. A marker must never widen its own scope by
+ * explaining itself.
+ *
+ * WHY A WHITELIST AND NOT A SEPARATOR BLACKLIST: the blacklist form cut the head at
+ * `\s[—–]\s|;|\s--\s` and NOTHING else, so it held only for authors who typed an
+ * em-dash. `:` `,`-then-prose `(` `and` `/` and a plain ASCII `-` all read straight
+ * through into the prose and widened the marker. Scanning FORWARD over an explicit
+ * allow-set and stopping at the first foreign token fails closed instead: an unknown
+ * separator ends the value list rather than being ignored.
+ */
+export function parseMarkerHead(reason: string | undefined): MarkerHead {
+  if (!reason) return {};
+  // A LEADING dash is a separator (`retracted:start — $0.410`) unless a digit follows
+  // it, in which case it is a MINUS SIGN (`−80.4%`). En-dash serves as both in real
+  // documents, so the distinction has to be positional, not by character.
+  const s = reason.replace(/^[\s:]*[—–-](?![\d.])\s*/, "");
+  const values: MarkerValue[] = [];
+  let i = 0;
+  while (i < s.length) {
+    if (HEAD_SKIP.test(s[i]!)) {
+      i++;
+      continue;
+    }
+    const rest = s.slice(i);
+    const d = RE_HEAD_DOLLAR.exec(rest);
+    if (d) {
+      values.push({ value: num(`${d[1] ?? ""}${d[2]!}`), sigil: "$", signed: Boolean(d[1]) });
+      i += d[0].length;
+      // `$80.4%` names a price AND a percent. Guessing which one the author meant is
+      // exactly the kind-crossing this sigil exists to stop, so refuse.
+      if (/^\s*%/.test(s.slice(i))) {
+        return {
+          error:
+            `listed value "${d[0]}%" carries BOTH a $ and a % sigil — a value names a price ` +
+            `level ($) or a drawdown (%), never both; split it into two listed values`,
+        };
+      }
+      continue;
+    }
+    const p = RE_HEAD_PCT.exec(rest);
+    if (p) {
+      values.push({ value: num(`${p[1] ?? ""}${p[2]!}`), sigil: "%", signed: Boolean(p[1]) });
+      i += p[0].length;
+      continue;
+    }
+    const b = RE_HEAD_BARE.exec(rest);
+    if (b) {
+      // A bare number in value position could name either kind. Loose matching on it is
+      // how `80.4` would exempt a $80.40 price level and a −80.4% drawdown at once.
+      return {
+        error:
+          `listed value "${b[0].trim()}" has no sigil — write $${b[0].trim()} for a price ` +
+          `level or ${b[0].trim()}% for a drawdown, so the marker states WHICH KIND of ` +
+          `claim it exempts`,
+      };
+    }
+    break; // First token outside the allow-set: everything from here is free prose.
+  }
+  return values.length ? { values } : {};
+}
+
+/** Extracts the values a marker names, or undefined when it names none (whole-line scope). */
+export function parseMarkerValues(reason: string | undefined): MarkerValue[] | undefined {
+  return parseMarkerHead(reason).values;
+}
+
+/**
+ * Does a marker-listed value name this claim?
+ *
+ * KIND FIRST. `$` may match only a price level, `%` only a drawdown. Comparing bare
+ * magnitudes let `<!-- retracted: 80.4% -->` — covering a quoted drawdown — also
+ * suppress a LIVE `$80.40` 52w-low on the same line, labelled `RETRACTED[value]` with
+ * nothing in the output hinting that one listed value had reached across claim kinds.
+ *
+ * SIGN. A drawdown is stored signed (−80.4). An author who writes the sign must have it
+ * respected — a listed `−80.4%` must not exempt a `+80.4%` claim. An author who omits it
+ * (`80.4%`) is being terse, not ambiguous, so magnitude matching still applies there.
+ *
+ * The epsilon is scaled so `$1,505.00` vs 1505 compares equal without letting two
+ * genuinely different large prices collide.
+ */
+export function valueMatches(listed: MarkerValue, claim: { kind: ClaimKind; value: number }): boolean {
+  const claimIsPrice = claim.kind === "low" || claim.kind === "high";
+  if ((listed.sigil === "$") !== claimIsPrice) return false;
+  const near = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+  if (listed.signed) return near(listed.value, claim.value);
+  return near(Math.abs(listed.value), Math.abs(claim.value));
+}
+
+export type ExemptionScan = {
+  /**
+   * 1-based line number → EVERY exemption covering it. A list, not a single entry: a
+   * line may carry two inline markers, or an inline marker inside an open block, and
+   * collapsing them dropped one silently — taking its listed values out of the
+   * stale-value check with it.
+   */
+  byLine: Map<number, Exemption[]>;
+  /** Malformed-marker errors. Non-empty ⇒ the run FAILS. */
+  errors: string[];
+};
+
+/** Matches an opening/closing fenced-code delimiter (``` or ~~~), per CommonMark. */
+const RE_FENCE = /^ {0,3}(`{3,}|~{3,})/;
+
+/**
+ * Blanks the contents of INLINE code spans, so a marker quoted inside backticks is not
+ * a marker.
+ *
+ * Found by this very pass, in the shipped report: a paragraph explaining the syntax
+ * quoted two markers in backticks, and BOTH were live. They suppressed nothing only
+ * because that paragraph happens to state no figures — the moment a figure is edited
+ * onto that line, the documentation silences it. Fenced blocks and inline spans are the
+ * same hazard: writing ABOUT the tool must never operate the tool.
+ *
+ * Length is preserved so the masked line stays index-aligned with the source.
+ */
+function maskInlineCode(line: string): string {
+  return line.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, (m) => " ".repeat(m.length));
+}
+
+/**
+ * Resolves every `<!-- retracted -->` marker into a line → exemptions map.
+ *
+ * Scope rules (deliberately rigid — an exemption whose extent you have to guess is
+ * exactly how a suppression mechanism turns into a silent blanket bypass):
+ *   - inline marker  → its OWN line only. EVERY inline marker on the line is parsed.
+ *   - block          → the `start` line, the `end` line, and everything between them.
+ *                      An inline marker inside a block still applies, and is still
+ *                      stale-checked.
+ *   - inside a fenced code block → NOT a marker. A ```-fenced example of the syntax is
+ *                      documentation; letting it fire meant documenting the tool could
+ *                      disable it.
+ *   - nested in another HTML comment → HARD ERROR. `<!-- OUTER <!-- retracted --> -->`
+ *                      reads as commented-out to a human; it must not suppress.
+ *   - unclosed `start`, nested `start`, stray `end`, unterminated comment, malformed
+ *     value head → HARD ERROR. In particular an unclosed `start` is NOT treated as
+ *     exempt-to-EOF: forgetting one comment must never silently exempt the rest of the
+ *     file.
+ */
+export function parseExemptions(markdown: string): ExemptionScan {
+  const lines = markdown.split(/\r?\n/);
+  const byLine = new Map<number, Exemption[]>();
+  const errors: string[] = [];
+  let open: { line: number; reason?: string; values?: MarkerValue[] } | null = null;
+  let fence: string | null = null;
+
+  const cover = (lineNo: number, ex: Exemption) => {
+    const at = byLine.get(lineNo);
+    if (at) at.push(ex);
+    else byLine.set(lineNo, [ex]);
+  };
+
+  lines.forEach((line, i) => {
+    const lineNo = i + 1;
+
+    const f = line.match(RE_FENCE);
+    if (f) {
+      const delim = f[1]![0]!;
+      if (fence === null) fence = delim;
+      else if (fence === delim) fence = null;
+    }
+    // A fence line and everything inside the fence carry no markers — but an already
+    // open block still covers them, because the block was opened in live prose.
+    if (fence !== null || f) {
+      if (open) cover(lineNo, blockExemption(open));
+      return;
+    }
+
+    const inlineHere: Exemption[] = [];
+    let sawEnd = false;
+
+    for (const c of scanHtmlComments(maskInlineCode(line))) {
+      const looksRetracted = /retracted/i.test(c.content);
+      if (c.unterminated) {
+        if (looksRetracted) {
+          errors.push(
+            `L${lineNo}: unterminated <!-- retracted … comment (no closing -->) — a marker ` +
+              `whose end you cannot see has no definable scope`,
+          );
+        }
+        continue;
+      }
+      if (c.nested) {
+        if (looksRetracted) {
+          errors.push(
+            `L${lineNo}: <!-- retracted --> marker is NESTED inside another HTML comment — ` +
+              `it reads as commented-OUT but used to suppress anyway; un-nest it or delete it`,
+          );
+        }
+        continue;
+      }
+      const m = classifyMarker(c.content);
+      if (!m) {
+        if (looksRetracted) {
+          errors.push(
+            `L${lineNo}: malformed retraction marker «<!--${c.content}-->» — the accepted ` +
+              `forms are <!-- retracted -->, <!-- retracted: … -->, <!-- retracted:start … --> ` +
+              `and <!-- retracted:end -->`,
+          );
+        }
+        continue;
+      }
+
+      const head = parseMarkerHead(m.reason);
+      if (head.error) {
+        // No exemption is created: a marker we cannot read must fail LOUDLY and suppress
+        // NOTHING. Creating a whole-line fallback here would turn a typo into a blanket.
+        errors.push(`L${lineNo}: <!-- retracted --> ${head.error}`);
+        continue;
+      }
+
+      if (m.kind === "start") {
+        if (open) {
+          errors.push(
+            `L${lineNo}: nested <!-- retracted:start --> (a block is already open from ` +
+              `L${open.line}) — the scope of the exemption is ambiguous; close the first block first`,
+          );
+        } else {
+          open = {
+            line: lineNo,
+            ...(m.reason ? { reason: m.reason } : {}),
+            ...(head.values ? { values: head.values } : {}),
+          };
+        }
+      } else if (m.kind === "end") {
+        if (!open) {
+          errors.push(`L${lineNo}: stray <!-- retracted:end --> with no matching <!-- retracted:start -->`);
+        }
+        sawEnd = true;
+      } else {
+        inlineHere.push({
+          scope: "inline",
+          markerLine: lineNo,
+          markerIndex: inlineHere.length,
+          ...(m.reason ? { reason: m.reason } : {}),
+          ...(head.values ? { values: head.values } : {}),
+        });
+      }
+    }
+
+    if (open) cover(lineNo, blockExemption(open));
+    for (const ex of inlineHere) cover(lineNo, ex);
+    if (sawEnd && open) open = null;
+  });
+
+  if (open) {
+    const line = (open as { line: number }).line;
+    errors.push(
+      `L${line}: unclosed <!-- retracted:start --> — add <!-- retracted:end -->. ` +
+        `An unclosed block is NOT treated as exempt-to-EOF: that would silently suppress ` +
+        `every remaining claim in the file.`,
+    );
+    // Everything the unclosed block "covered" is un-exempted, so those claims are still
+    // validated normally AND the marker error fails the run. Failing twice is correct
+    // here: neither signal may be lost. Inline markers on those lines survive — they
+    // have their own, well-defined scope.
+    for (let n = line; n <= lines.length; n++) {
+      const at = byLine.get(n);
+      if (!at) continue;
+      const kept = at.filter((ex) => !(ex.scope === "block" && ex.markerLine === line));
+      if (kept.length) byLine.set(n, kept);
+      else byLine.delete(n);
+    }
+  }
+
+  return { byLine, errors };
+}
+
+function blockExemption(open: { line: number; reason?: string; values?: MarkerValue[] }): Exemption {
+  return {
+    scope: "block",
+    markerLine: open.line,
+    markerIndex: 0,
+    ...(open.reason ? { reason: open.reason } : {}),
+    ...(open.values ? { values: open.values } : {}),
+  };
+}
+
+/** Renders a marker-listed value back the way an author would write it, for error text. */
+function fmtValue(v: number): string {
+  return Number.isInteger(v) ? String(v) : String(Number(v.toFixed(6)));
+}
+
+function fmtMarkerValue(v: MarkerValue): string {
+  return v.sigil === "$" ? `$${fmtValue(Math.abs(v.value))}` : `${fmtValue(v.value)}%`;
+}
+
+/**
+ * Finds markers that suppress nothing, or whose scope reaches further than one author
+ * can reasonably have meant.
+ *
+ * (1) STALE LISTED VALUE — a value-scoped marker naming a value that matches NO claim in
+ *     scope. A marker naming `$0.410` keeps sitting in the document after someone edits
+ *     the row that used to contain `$0.410`. If a no-op listed value were ignored, the
+ *     marker would linger forever, and the next edit that happens to reintroduce that
+ *     number would be silently un-verified by a marker nobody remembers writing.
+ *
+ * (2) DORMANT WHOLE-LINE MARKER — a bare `<!-- retracted -->` covering ZERO claims. Same
+ *     rot, one scope wider and worse: it names no value, so whatever claim lands on that
+ *     line next is suppressed wholesale, with no listed value to make the intent
+ *     reviewable. It was the one marker form with no staleness check at all.
+ *
+ * (3) CROSS-TOKEN BLOCK VALUE — a BLOCK-scoped listed value that matches claims under
+ *     more than one token. See the note on the error text.
+ *
+ * Scope is per MARKER, not per line, so a block marker's values may match anywhere in
+ * its block.
+ */
+export function staleExemptionErrors(scan: ExemptionScan, claims: Claim[]): string[] {
+  type Agg = {
+    scope: "inline" | "block";
+    markerLine: number;
+    markerIndex: number;
+    values?: MarkerValue[];
+    lines: Set<number>;
+  };
+  const byMarker = new Map<string, Agg>();
+  for (const [line, list] of scan.byLine) {
+    for (const ex of list) {
+      // Keyed by marker IDENTITY, not by line: two inline markers share a line number.
+      const key = `${ex.scope}:${ex.markerLine}:${ex.markerIndex}`;
+      const entry =
+        byMarker.get(key) ??
+        ({
+          scope: ex.scope,
+          markerLine: ex.markerLine,
+          markerIndex: ex.markerIndex,
+          values: ex.values,
+          lines: new Set<number>(),
+        } as Agg);
+      entry.lines.add(line);
+      byMarker.set(key, entry);
+    }
+  }
+
+  const errors: string[] = [];
+  const ordered = [...byMarker.values()].sort(
+    (a, b) => a.markerLine - b.markerLine || a.scope.localeCompare(b.scope) || a.markerIndex - b.markerIndex,
+  );
+  for (const { scope, markerLine, values, lines } of ordered) {
+    const inScope = claims.filter((c) => lines.has(c.line));
+    const where = `line${lines.size > 1 ? "s" : ""} ${[...lines].sort((a, b) => a - b).join(", ")}`;
+
+    if (!values?.length) {
+      if (inScope.length === 0) {
+        errors.push(
+          `L${markerLine}: whole-line <!-- retracted --> exempts NO claim (${where} state no ` +
+            `drawdown or price level) — a dormant marker. It suppresses nothing today and would ` +
+            `silently suppress WHATEVER claim is edited onto its line next, with no listed value ` +
+            `to review. Remove it, or give it the values it is meant to cover.`,
+        );
+      }
+      continue;
+    }
+
+    for (const v of values) {
+      const hits = inScope.filter((c) => valueMatches(v, c));
+      if (hits.length === 0) {
+        const kind = v.sigil === "$" ? "price level" : "drawdown";
+        errors.push(
+          `L${markerLine}: <!-- retracted --> lists ${fmtMarkerValue(v)} but NO ${kind} claim in ` +
+            `its scope (${where}) states that value — a stale exemption. It suppresses nothing ` +
+            `today and would silently suppress a FUTURE claim that happens to state ` +
+            `${fmtMarkerValue(v)}. Remove it or correct the listed value.`,
+        );
+        continue;
+      }
+      if (scope === "block") {
+        // A block spans many lines, so ONE listed value can silence the same number under
+        // several different tokens at once — the author reviewed one row and suppressed
+        // several. Requiring a token annotation would add marker syntax (more surface,
+        // more ways to be wrong); requiring the author to NARROW the block, or use inline
+        // markers, costs nothing and keeps the grammar as small as it is.
+        const symbols = [...new Set(hits.map((c) => c.symbol).filter((s): s is string => Boolean(s)))];
+        if (symbols.length > 1) {
+          errors.push(
+            `L${markerLine}: block <!-- retracted --> lists ${fmtMarkerValue(v)}, which matches ` +
+              `claims under ${symbols.length} different tokens (${symbols.join(", ")}) across ${where} — ` +
+              `one review of one figure must not silence the same number for several tokens. ` +
+              `Narrow the block, or mark each line inline.`,
+          );
+        }
+      }
+    }
+  }
+  return errors;
+}
+
 /**
  * Extracts EVERY drawdown / 52w-level claim from a markdown report.
  * Token attribution: the nearest preceding `### N. SYM — Name` heading, overridden
@@ -394,6 +1043,7 @@ function overlaps(claims: Claim[], line: number, start: number, end: number): bo
 export function parseClaims(markdown: string): Claim[] {
   const lines = markdown.split(/\r?\n/);
   const claims: Claim[] = [];
+  const { byLine: exemptions } = parseExemptions(markdown);
   let sectionSymbol: string | null = null;
 
   lines.forEach((line, i) => {
@@ -426,6 +1076,21 @@ export function parseClaims(markdown: string): Claim[] {
 
     const push = (start: number, end: number, kind: ClaimKind, basis: Basis, value: number) => {
       if (overlaps(claims, lineNo, start, end)) return;
+      // A value-scoped marker exempts ONLY the values it names, and only claims of the
+      // KIND its sigil names, so a corrected figure sharing the line keeps its coverage.
+      // A marker naming no value is whole-line. Value-scoped markers are consulted FIRST
+      // so the output reports the surgical suppression when both forms cover a claim.
+      const markers = exemptions.get(lineNo) ?? [];
+      let exemption: Exemption | undefined;
+      for (const m of markers) {
+        if (!m.values) continue;
+        const hit = m.values.find((v) => valueMatches(v, { kind, value }));
+        if (hit) {
+          exemption = { ...m, matchedValue: hit.value };
+          break;
+        }
+      }
+      if (!exemption) exemption = markers.find((m) => !m.values);
       claims.push({
         line: lineNo,
         start,
@@ -436,6 +1101,7 @@ export function parseClaims(markdown: string): Claim[] {
         basis,
         value,
         ...(ambiguousTokens ? { ambiguousTokens } : {}),
+        ...(exemption ? { exemption } : {}),
       });
     };
 
@@ -564,6 +1230,8 @@ export async function validateReport(
   const fetcher = opts.fetcher;
 
   const claims = parseClaims(markdown);
+  const scan = parseExemptions(markdown);
+  const markerErrors = [...scan.errors, ...staleExemptionErrors(scan, claims)];
   const results: ClaimResult[] = [];
   const cache = new Map<string, SeriesResult>();
 
@@ -586,6 +1254,29 @@ export async function validateReport(
   }
 
   for (const claim of claims) {
+    // RETRACTION EXEMPTION — checked BEFORE every rule, including RULE 1 (basis).
+    // A quoted retraction reproduces the drafted text verbatim; demanding a basis on it
+    // would falsify the quote. The claim is still emitted (RETRACTED) and counted, so
+    // the suppression is visible in the output and in the summary — see the header.
+    if (claim.exemption) {
+      const { scope, markerLine, reason, matchedValue } = claim.exemption;
+      // Say WHICH scope suppressed it. A blunt whole-line exemption and a surgical
+      // value-scoped one carry very different risk, and a reader must be able to tell
+      // them apart in the output without re-reading the source.
+      const how =
+        matchedValue === undefined
+          ? "whole-line (blunt: every claim on the line is suppressed)"
+          : `value-scoped to ${fmtValue(matchedValue)}`;
+      results.push({
+        claim,
+        status: "RETRACTED",
+        detail:
+          `exempted by ${scope} ${how} <!-- retracted --> marker at L${markerLine}` +
+          (reason ? `: ${reason}` : "") +
+          " — not recomputed, and NOT evidence the figure is correct",
+      });
+      continue;
+    }
     // RULE 1 — basis first, and it applies to drawdowns whether or not we have data.
     if (claim.kind === "drawdown" && claim.basis === "UNKNOWN") {
       results.push({
@@ -759,8 +1450,11 @@ export async function validateReport(
     }
   }
 
-  const failures = results.filter((r) => r.status !== "OK");
-  return { results, failures, ok: failures.length === 0 };
+  const failures = results.filter((r) => r.status !== "OK" && r.status !== "RETRACTED");
+  const exempted = results.filter((r) => r.status === "RETRACTED").length;
+  // A malformed marker fails the run on its own — an exemption of ambiguous scope is
+  // never allowed to pass, however clean the rest of the report is.
+  return { results, failures, markerErrors, exempted, ok: failures.length === 0 && markerErrors.length === 0 };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -922,6 +1616,7 @@ export async function fetchCoinbaseCandles(
 
 const ICON: Record<Status, string> = {
   OK: "✓",
+  RETRACTED: "⊘",
   BASIS_MISSING: "✗",
   MISMATCH: "✗",
   FETCH_FAILED: "✗",
@@ -931,8 +1626,16 @@ const ICON: Record<Status, string> = {
   NO_TOKEN: "✗",
 };
 
-/** Display label: an OK verdict must SAY which price convention backed it. */
+/**
+ * Display label: an OK verdict must SAY which price convention backed it, and a
+ * RETRACTED verdict must SAY which exemption scope suppressed it — `RETRACTED[value]`
+ * is surgical, `RETRACTED[line]` is the blunt fallback that also suppresses any correct
+ * figure sharing the line.
+ */
 export function statusLabel(r: ClaimResult): string {
+  if (r.status === "RETRACTED") {
+    return r.claim.exemption?.matchedValue === undefined ? "RETRACTED[line]" : "RETRACTED[value]";
+  }
   if (r.status !== "OK") return r.status;
   if (r.verification === "intraday") return "OK[intraday]";
   if (r.verification === "close") return "OK[close]";
@@ -940,8 +1643,44 @@ export function statusLabel(r: ClaimResult): string {
   return "OK";
 }
 
+/**
+ * The abuse-ceiling banner, or undefined when exemptions are within BOTH ceilings.
+ *
+ * Two independent triggers, because they measure different things: the RATIO says how
+ * much of the report is quotation, the COUNT says how many numbers stopped being
+ * verified. Ratio alone is gameable by volume — 19 suppressed claims in a 78-claim
+ * report is 24%, silent under a ratio-only rule.
+ *
+ * It WARNS rather than fails: a genuine correction appendix legitimately quotes many
+ * retracted figures, and a hard failure there would push authors to delete the audit
+ * trail to go green — the exact outcome the marker exists to avoid. The deterrent is
+ * visibility (every suppression printed, counted, scoped, and this banner top and
+ * bottom), not an exit code that invites deletion.
+ */
+export function exemptionWarning(rep: ValidationReport): string | undefined {
+  if (rep.exempted === 0) return undefined;
+  const pct = (rep.exempted / rep.results.length) * 100;
+  const overRatio = rep.exempted > rep.results.length * EXEMPTION_WARN_RATIO;
+  const overCount = rep.exempted > EXEMPTION_WARN_COUNT;
+  if (!overRatio && !overCount) return undefined;
+  const why = [
+    overRatio ? `> ${(EXEMPTION_WARN_RATIO * 100).toFixed(0)}% of claims` : null,
+    overCount ? `> ${EXEMPTION_WARN_COUNT} claims in absolute terms` : null,
+  ].filter(Boolean);
+  return (
+    `⚠ WARNING: ${pct.toFixed(0)}% of claims are exempted — ${rep.exempted} of ${rep.results.length} ` +
+    `claim(s) were NOT verified (${why.join(" and ")}); ` +
+    `check the markers are quoting retractions, not hiding live claims`
+  );
+}
+
 export function formatReport(rep: ValidationReport, path: string): string {
   const out: string[] = [`drawdown-basis validation — ${path}`, ""];
+  const abuse = exemptionWarning(rep);
+  // Printed at the TOP as well as the bottom: in a CI log the per-claim table can run to
+  // hundreds of lines, and a warning that only ever appears after it is a warning nobody
+  // reads. This is the one line that says verification was switched off in bulk.
+  if (abuse) out.push(abuse, "");
   for (const r of rep.results) {
     const sym = r.claim.symbol ?? "?";
     out.push(
@@ -952,11 +1691,26 @@ export function formatReport(rep: ValidationReport, path: string): string {
   }
   out.push("");
   const unverified = rep.results.filter((r) => r.status === "OK" && r.verification === "close-only").length;
+  for (const e of rep.markerErrors) out.push(`✗ MARKER_ERROR      ${e}`);
+  if (rep.markerErrors.length) out.push("");
   out.push(
     rep.ok
       ? `✓ all ${rep.results.length} claim(s) passed`
-      : `✗ ${rep.failures.length} of ${rep.results.length} claim(s) FAILED`,
+      : `✗ ${rep.failures.length} of ${rep.results.length} claim(s) FAILED` +
+        (rep.markerErrors.length ? `; ${rep.markerErrors.length} malformed retraction marker(s)` : ""),
   );
+  // The exemption count is ALWAYS printed when non-zero: a suppression that nobody can
+  // see in the summary is the failure mode this whole marker design guards against.
+  if (rep.exempted > 0) {
+    const retracted = rep.results.filter((r) => r.status === "RETRACTED");
+    const wholeLine = retracted.filter((r) => r.claim.exemption?.matchedValue === undefined).length;
+    const valueScoped = retracted.length - wholeLine;
+    out.push(
+      `⊘ ${rep.exempted} of ${rep.results.length} claim(s) EXEMPTED by <!-- retracted --> marker(s) — not verified ` +
+        `(${valueScoped} value-scoped, ${wholeLine} whole-line)`,
+    );
+    if (abuse) out.push(abuse);
+  }
   if (unverified > 0) {
     out.push(`⚠ ${unverified} claim(s) passed on CLOSE data only — intraday unverified`);
   }
