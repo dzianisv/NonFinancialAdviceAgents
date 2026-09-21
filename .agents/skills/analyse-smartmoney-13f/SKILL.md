@@ -34,6 +34,7 @@ A 13F-HR is a quarterly SEC filing required of managers with >$100M in US "13(f)
 - **Lag:** due **45 days after quarter-end** (Q1 → ~May 15, Q2 → ~Aug 14, Q3 → ~Nov 14, Q4 → ~Feb 14). Today's "latest" is the most recent quarter whose deadline has passed.
 - **Long-only US equity:** shows US-listed long positions + *disclosed* options (puts/calls appear as notional). **Does NOT show** shorts, cash, bonds, commodities, non-US listings, or crypto. A "100% GOOG" 13F may be a hedged book — the filing only shows one leg.
 - **Stale by design:** a manager may have already sold what the filing shows. Use it for *thesis* and *direction*, not timing.
+- **Freshness gate:** always print the position date (quarter-end) and the filing date. A snapshot older than 150 days (i.e. once the next quarter's deadline has passed without a new filing) is EXPIRED and must not count toward ACC/DIST in the conductor.
 
 ## Sources (primary first)
 

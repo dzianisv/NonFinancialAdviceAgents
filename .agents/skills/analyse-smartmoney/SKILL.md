@@ -46,13 +46,26 @@ The unifying discipline is **cross-class confirmation**: five options prints agr
 
 2. **Route to each relevant spoke and collect per-signal verdicts.** For a US equity, the full spoke sequence is: `analyse-smartmoney-form4` → `analyse-smartmoney-13f` → `analyse-smartmoney-13d` → `analyse-smartmoney-ptr` → `analyse-smartmoney-positioning` → `analyse-smartmoney-options` → `analyse-smartmoney-darkpool` → `analyse-smartmoney-polymarket`. Each spoke returns one verdict: **ACC** (accumulating / bullish) / **DIST** (distributing / bearish) / **NEUTRAL** / **UNAVAIL** (data not available or not applicable).
 
-3. **Apply reliability weighting.** Weight verdicts in descending reliability order: Form 4 cluster buys (real money, 2-day lag) > 13F/13D institutional clustering (real money, 45-day / near-real-time) > COT extremes in commodities (3-day lag, best-informed hedgers) > DIX/dark-pool tilt (delayed, index-level only) > Wyckoff structure (discretionary, after-the-fact) > options flow (real-time but low signal-to-noise) > congressional PTR (45-day lag, alpha contested post-STOCK Act). A high-reliability ACC verdict outweighs two low-reliability DIST verdicts in the synthesis.
+3. **Apply the freshness gate (hard, before any weighting).** Every datapoint carries a *trade/position date*, not a filing date. Anything older than its spoke's window is **EXPIRED** and may not count toward ACC/DIST, confirmation counts, or conviction — it may only be mentioned as background, labelled `EXPIRED`. Windows (by trade/position date, as of today):
 
-4. **Require cross-class confirmation.** Count how many **independent signal classes** agree — disclosed flows (Form 4 + 13F + 13D + PTR as one class) vs. market-implied (positioning + options + dark pool + polymarket as one class). Require at least two independent classes pointing the same direction before emitting ACC or DIST with MED or HIGH conviction. One class agreeing → LOW conviction. Zero classes in agreement or active conflict → NEUTRAL.
+   | Spoke | Max age | Reason |
+   |---|---|---|
+   | Form 4 | 90 days | T+2 filing; older buys have already been priced or reversed |
+   | 13D/13G | 90 days | near-real-time; stale stakes are just holdings |
+   | 13F | latest filed quarter only; **positions >150 days old are EXPIRED** (e.g. a Q2 snapshot expires ~Nov 27 — after the Q3 deadline) | 45-day lag on top of a quarter-end snapshot |
+   | PTR (Congress) | 90 days | 45-day filing lag; disclosures older than a quarter are consensus noise |
+   | Personal disclosures (OGE 278e/278-T, executive/political) | 90 days by trade date; annual 278e holdings are **UNAVAIL** as flow | annual, late-filed, holdings ≠ trades |
+   | Options / dark pool / positioning / polymarket | 14 days | decay in days, not months |
 
-5. **Check for the hedge-as-signal failure mode before finalizing.** For every market-implied signal reading ACC or DIST, ask: *could this be one leg of a hedge whose offsetting position I cannot see?* A large put position in a 13F may be a protective put against a long equity book. A block on the options tape may be a market maker hedging a client's opposite position. If the hedge interpretation is plausible, downgrade conviction one notch.
+   Also: a spoke where the same actor took the **opposite side within 90 days** (e.g. a sell then a buy) nets to NEUTRAL for that actor — do not cite one leg. Print the trade date next to every datapoint used in the verdict; a datapoint with no date is UNAVAIL.
 
-6. **Emit the structured verdict.** Follow the output contract below exactly. State the invalidation condition — the specific signal flip that would reverse the verdict. Always include the NOTE line.
+4. **Apply reliability weighting.** Weight verdicts in descending reliability order: Form 4 cluster buys (real money, 2-day lag) > 13F/13D institutional clustering (real money, 45-day / near-real-time) > COT extremes in commodities (3-day lag, best-informed hedgers) > DIX/dark-pool tilt (delayed, index-level only) > Wyckoff structure (discretionary, after-the-fact) > options flow (real-time but low signal-to-noise) > congressional PTR (45-day lag, alpha contested post-STOCK Act). A high-reliability ACC verdict outweighs two low-reliability DIST verdicts in the synthesis.
+
+5. **Require cross-class confirmation.** Count how many **independent signal classes** agree — disclosed flows (Form 4 + 13F + 13D + PTR as one class) vs. market-implied (positioning + options + dark pool + polymarket as one class). Require at least two independent classes pointing the same direction before emitting ACC or DIST with MED or HIGH conviction. One class agreeing → LOW conviction. Zero classes in agreement or active conflict → NEUTRAL.
+
+6. **Check for the hedge-as-signal failure mode before finalizing.** For every market-implied signal reading ACC or DIST, ask: *could this be one leg of a hedge whose offsetting position I cannot see?* A large put position in a 13F may be a protective put against a long equity book. A block on the options tape may be a market maker hedging a client's opposite position. If the hedge interpretation is plausible, downgrade conviction one notch.
+
+7. **Emit the structured verdict.** Follow the output contract below exactly. State the invalidation condition — the specific signal flip that would reverse the verdict. Always include the NOTE line.
 
 ## Routing table
 
@@ -87,6 +100,7 @@ DISCLOSED FLOWS                        MARKET-IMPLIED
 ────────────────────────────────────────────────────────────
 VERDICT:      [ACCUMULATING / DISTRIBUTING / NEUTRAL]
 CONVICTION:   [HIGH / MED / LOW]
+FRESHNESS:    [per spoke: newest trade date used | EXPIRED items excluded, listed by name]
 CONFIRMATION: [N independent signal classes agreeing — e.g., "2 of 2: disclosed + implied both ACC"]
 INVALIDATION: [specific signal flip that changes the verdict — e.g., "Form 4 cluster sell or 13F net reduction >20% flips to DIST"]
 NOTE: Educational only. Lag / crowding / hedge-as-signal caveats apply. Re-pull spoke data before acting.
