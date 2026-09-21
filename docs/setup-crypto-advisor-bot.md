@@ -39,18 +39,62 @@ Two deliberate exclusions:
 - `update-porfolio-positions` — untracked local-only WIP (note the typo in the dir name), never
   committed, so absent from GitHub. Not a dependency of any of the three skills. Commit it if wanted.
 
-## Daily cron
+## Weekly cron
 
 ```
 id:       0f922569f2d9
-name:     crypto-advisor-daily
-schedule: 0 8 * * *   (UTC)
+name:     crypto-advisor-weekly
+schedule: 0 8 * * 1   (Monday 08:00 UTC)
 repeat:   forever
 deliver:  telegram:1916982742
-next run: 2026-08-21T08:00:00+00:00
+skill:    crypto-advisor
+workdir:  /root/.hermes/profiles/investor/workspace
+model:    gpt-5.4
+provider: custom:litellm
 ```
 
 Managed by hermes' native scheduler (`hermes cron list`). Do not hand-edit job files.
+
+## Report quality gates
+
+The installed `crypto-advisor` skill fails closed:
+
+- Citation validation must contain only `VERIFIED` or `PARTIAL`; skipped validation, `NOT_FOUND`, and
+  `FETCH_FAILED` trigger a bounded repair loop.
+- Every non-HOLD token requires at least one accepted citation.
+- The skeptic must return `PASS` with zero challenges.
+- A remaining failure delivers only `QUALITY GATE FAILED — report not delivered`; it does not send the
+  draft report or publish it.
+
+The canonical `report.md` artifact is created only after both gates pass.
+
+## Why `crypto-daily` does not run on Hermes
+
+`crypto-daily` is a local publication wrapper. It expects TradingView MCP, Notion MCP, a logged-in
+Chrome/X session, and a personal `telegram-cli` session. The Hermes investor profile does not expose
+those tools. Schedule `crypto-advisor` instead and let Hermes cron deliver the final report to
+Telegram. The report degrades unavailable TradingView/on-chain inputs to `[UNAVAILABLE]` rather than
+inventing data.
+
+Attach the skill explicitly with `--skill crypto-advisor`; prompt-only discovery leaves cron
+preflight unable to validate the dependency.
+
+## Manual trigger
+
+On Hermes v0.20.4, `/cron` is not registered as a Telegram slash command. Use:
+
+```sh
+hermes -p investor cron run 0f922569f2d9 --accept-hooks
+```
+
+This command is synchronous. When invoked through the agent's terminal tool, run it with
+`background=true` and no timeout. A foreground terminal call is killed after 120 seconds and leaves
+the execution ledger in `unknown`. Confirm success with:
+
+```sh
+hermes -p investor cron runs 0f922569f2d9 --limit 5
+hermes -p investor cron list
+```
 
 ## Known capability gap
 
@@ -75,6 +119,64 @@ Verify by checksum, never by asking the agent whether a skill is "loaded":
 ```sh
 sha256sum /root/.hermes/profiles/investor/skills/crypto-advisor/SKILL.md
 ```
+
+Quality-gate version verified 2026-08-21:
+
+```
+SKILL.md  aa80c907a069d88965e0f1f128d91ba737b070096a8811b93bfb5bd7e2f601e0
+README.md 579eee62bd54e168ee00f4d406d03e847c3fd061c036faa22acff072a51d1fb2
+```
+
+## Latest end-to-end validation
+
+Execution `435c011414384b24864eb8447f4b342d` completed and delivered on 2026-08-21:
+
+- 11/11 token sections present.
+- 11/11 verdict critics present.
+- Citation gate: 13 VERIFIED, 4 PARTIAL, 0 NOT_FOUND, 0 FETCH_FAILED.
+- Skeptic gate: PASS, 0 challenges.
+- Telegram delivery contained the complete report and the quality-gate PASS summary.
+
+## Weekly stocks plan review
+
+```
+id:       c6be6f07a468
+name:     stocks-advisor-weekly
+schedule: 0 3 * * 2   (Monday 20:00 Pacific during daylight time)
+repeat:   forever
+deliver:  telegram:1916982742
+skills:   stocks-advisor, tradfi-portfolio-manager, stock-chair
+workdir:  /root/.hermes/profiles/investor/workspace
+model:    gpt-5.4
+provider: custom:litellm
+```
+
+Each run resolves spreadsheet `1aunLbpNGo85WqrMHiIsy6nFUija4Lnjot-rIhE-pGU8`, sheet id
+`881284498`, through `gws` at runtime. The tab title and contribution rows are never cached or
+hardcoded. The parser treats the tab as a recurring-contribution plan, not a quantity/cost-basis
+ledger.
+
+The stocks cron fails closed unless:
+
+- every detected instrument row is accounted for exactly once;
+- the individual-stock panel writes separate seat, skeptic, CIO, risk, and verdict JSON artifacts;
+- `tradfi-portfolio-manager` produces its literal weekly-note tags and covers every ETF sleeve;
+- crypto rows are explicitly excluded from the equity analysis;
+- degraded technical mode contains no BUY;
+- `quality_gate.json` and `report.md` both exist.
+
+Execution `3a2b282859a043cd94d16dec471b0464` completed and delivered on 2026-08-21:
+
+- Runtime sheet resolution and fresh snapshots passed.
+- Parsed accounting reconciled: 26 detected rows, 19 source rows, 7 ignored rows, 0 duplicate refs.
+- Ten unique symbols were accounted for: 1 stock, 4 ETF sleeves, 5 crypto/stablecoin rows excluded.
+- All required stock panel JSON artifacts were valid and non-empty.
+- ETF weekly-note tags, stock-chair isolation, degraded-mode rules, and source appendix passed.
+- Telegram delivery succeeded with `QUALITY GATE PASS`.
+
+The prior skill ambiguity was caused by a backup directory inside the active profile skills tree.
+It was moved intact to `/root/.hermes/backups/`; do not store backups beneath the active
+`/root/.hermes/profiles/investor/skills/` directory.
 
 ## ⚠️ Do not add a second Telegram consumer
 

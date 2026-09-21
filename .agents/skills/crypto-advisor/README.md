@@ -54,7 +54,10 @@ flowchart TD
     QUORUM["③ CIO conviction-weighted synthesis\nweigh vote × conviction, not headcount\nCORE lens for this token leads\nHIGH CORE dissent caps at SPLIT\n→ BULLISH / SPLIT / BEARISH / UNCERTAIN"]
 
     QUORUM --> GOV["F&G Governor Cap\nExtreme Fear → max 4\nFear → max 6"]
-    GOV --> OUT["📋 Final Report\nper-token: analyst briefs + panel reasoning + signal\nACTIVE / WATCH / HOLD / SELL"]
+    GOV --> CRITIC["④ Verdict critics\nall tokens reviewed\nrevise every FLAG"]
+    CRITIC --> CITES["⑤ Citation repair gate\nVERIFIED / PARTIAL only\nrepair or fail closed"]
+    CITES --> SKEPTIC["⑥ Skeptic repair gate\nPASS + 0 challenges\nrepair or fail closed"]
+    SKEPTIC --> OUT["📋 Final Report\nonly after both gates PASS\nACTIVE / WATCH / HOLD / SELL"]
 ```
 
 ## Layers
@@ -90,7 +93,12 @@ flowchart TD
 | Debasement | [`investor-lyn-alden`](../investor-lyn-alden/SKILL.md) | Alden (*Broken Money*) — fiscal dominance, scarce-asset, BTC-as-hurdle; **reads live 30d macro context from `current_context.ts` injected into briefing** |
 | On-chain | [`analyse-defi`](../analyse-defi/SKILL.md) | Burniske (*Cryptoassets* value-accrual) — dual role: research + vote |
 
-### Layer 3 — CIO (conviction-weighted synthesis → signal → governor → report)
+### Layer 3 — CIO (conviction-weighted synthesis → signal → governor → quality gates → report)
+
+The draft is never delivered directly. Every token first receives a verdict critic. The complete draft
+then passes a citation repair loop and a separate skeptic repair loop. Any remaining `NOT_FOUND`,
+`FETCH_FAILED`, skipped validation, or skeptic challenge blocks Telegram and Notion delivery; warning
+labels are not treated as a pass.
 
 ## Signal table
 
