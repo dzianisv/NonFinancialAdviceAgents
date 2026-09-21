@@ -62,7 +62,28 @@ Insiders have informational edge: they know pipeline, cost structure, board inte
 
 ## How to Apply
 
-**Fetch:**
+**Fetch (run the script first — never hand-browse EDGAR before this):**
+
+```bash
+python3 .agents/skills/analyse-smartmoney-form4/fetch_form4.py TICKER [TICKER ...] --days 120 --json
+# SEC_UA="<name> <email>" overrides the SEC User-Agent (literal form required; browser UA -> 403)
+```
+
+1. Resolves CIK from `company_tickers.json`, pulls every Form 4 in the window from the EDGAR
+   submissions API (cap `MAX_FORM4_FETCH=100`), parses the RAW XML for open-market `P`/`S`, and runs an
+   EDGAR full-text search for SC 13D/13G. Sources: `form4`, `sc_13dg`. 13F/options/darkpool are other spokes.
+2. Guards: the `xsl*/` prefix on `primaryDocument` is stripped and the body is asserted to be Form 4 XML
+   (the HTML render parses to zero rows = false negative). Never bypass this.
+3. Read `status` (`OK | NO_DATA | MISSING(reason)`) and `complete`/`filings_seen`/`filings_examined`/
+   `filings_failed`. If `complete=false` say **PARTIAL** in the verdict and drop conviction one step.
+   If `summary.dollar_totals_complete=false` every dollar figure is a floor.
+4. Each txn carries `plan_10b5_1`. Scheduled sales are tagged, not dropped — never cite one as impairment.
+5. A `MISSING` source is reported by name with its reason. Never abstain silently.
+
+Verified 2026-09-21: `fetch_form4.py HOOD --days 120 --json` → 69 filings seen/examined, 3 open-market
+buys totalling $55,306,258 (Malka Meyer), 84 10b5-1 sells tagged.
+
+Fallback URLs if the script is MISSING:
 - Primary: SEC EDGAR full-text search — `https://efts.sec.gov/LATEST/search-index?q=%22insider+purchase%22&dateRange=custom&startdt=YYYY-MM-DD&category=form-type&forms=4`
 - Per-ticker screen: `https://openinsider.com/screener?s=TICKER` — shows recent Form 4 activity sorted by transaction date. Filter to `P` (purchase) transactions only.
 - EDGAR company filings: `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=<cik>&type=4&dateb=&owner=include&count=40`

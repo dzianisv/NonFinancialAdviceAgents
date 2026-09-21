@@ -449,81 +449,27 @@ sizing/stop authority and its breaches are RISK-class actions, subject to the sa
 
 ## Smart-money data path (MANDATORY — this seat may originate a sell, so its plumbing must work)
 
-**The 2026-07-24 failure.** The smart-money seat returned `INSUFFICIENT_DATA` on every name — not because
-the flows were ambiguous, but because **nothing was fetched.** The seat pointed at finviz (301s) and
-openinsider (403 since 2026-07-05), found neither, and quietly abstained. The panel silently lost a vote and
-nothing in the output revealed it. That is not survivable now that this is one of only three seats that may
-originate a sell.
+The seat does NOT own a fetcher. It MUST load the `analyse-smartmoney` conductor skill and run its spokes:
 
-**Always run the fetcher first** — before any web_fetch, for every name going to the panel:
+1. **Form 4 spoke (PRIMARY, T+2d):** `python3 .agents/skills/analyse-smartmoney-form4/fetch_form4.py {TICKER} --days 120 --json`
+   — also returns SC 13D/13G hits (`sc_13dg`). Read `status`, `complete`, `filings_*`, `plan_10b5_1` per txn.
+2. **13F spoke (corroboration only, 45d+ stale):** `bun .agents/skills/analyse-smartmoney-13f/scripts/top5-13f-report.ts`
+   — state the 13F lag (newest filed quarter + position age in days) every time 13F is cited.
+3. **13D spoke:** `analyse-smartmoney-13d` (`watch.ts`/`score.ts`) for activist stakes; 13D lag T+5d.
+4. More spokes (options, darkpool, positioning, PTR) are optional; if not run, list them as `UNAVAIL`.
+5. Emit the conductor's output contract: per-spoke `ACC/DIST/NEUTRAL/UNAVAIL`, verdict, `CONVICTION`,
+   `CONFIRMATION` (independent signal classes agreeing), `INVALIDATION`.
 
-```bash
-python3 .agents/skills/stocks-advisor/scripts/smartmoney.py {TICKER} --days 120 --json
-```
+Rules (unchanged, non-negotiable):
 
-It resolves the CIK from SEC `company_tickers.json`, pulls every Form 4 in the window from the EDGAR
-submissions API, parses the **raw** XML for open-market P/S transactions, runs an EDGAR full-text search for
-SC 13D/13G, and computes today's exact 13F staleness. Every source returns `OK | NO_DATA | MISSING(reason)`.
+- **Never originate a sell from 13F.** A 45-day-stale long-only snapshot cannot show impairment today.
+- **Never cite a 10b5-1 sale as thesis impairment.** Only discretionary open-market sales by named officers count.
+- **MISSING is named, never silent.** Report `Form 4: MISSING (EDGAR HTTP 503)`, never a bare `INSUFFICIENT_DATA`.
+  Known-dead: finviz (301), openinsider (403). SEC UA must be literal `<name> <email>` (env `SEC_UA`).
+- **PARTIAL drops conviction one step.** If `complete=false` or `dollar_totals_complete=false`, say PARTIAL in the
+  verdict line; dollar figures are floors.
 
-> Note for anyone extending it: EDGAR's `primaryDocument` for a Form 4 is the **XSL-rendered HTML** view
-> (`xslF345X06/form4.xml`). Fetching that path returns HTML with zero `<nonDerivativeTransaction>` elements,
-> which parses to "no insider activity" — a false negative on a sell-originating seat. The script strips the
-> `xsl*/` prefix and asserts the body actually looks like Form 4 XML before parsing.
-
-### Source priority — LOW LAG FIRST. State the lag out loud.
-
-| Rank | Source | Lag | Role |
-|---|---|---|---|
-| 1 | **Form 4** insider transactions | **T+2 business days** | PRIMARY — deciding |
-| 2 | **13D / 13G** activist & 5% stakes | 13D T+5d; 13G varies | deciding |
-| 3 | **Short-interest CHANGE** | twice monthly, ~T+8d | supporting |
-| 4 | **Options flow / dark-pool** prints | near real-time | supporting — name the venue |
-| 5 | **13F** institutional holdings | **45 DAYS MINIMUM** | corroboration only |
-
-### The 13F rule (hard)
-
-**13F is due 45 calendar days after quarter end.** As of 2026-07-24 the newest FILED quarter is Q1'26
-(period ended 2026-03-31). **Q2'26 is NOT filed — it is due ~2026-08-14.** A 13F read today therefore
-describes positions **at least ~115 days old** that may have been fully unwound.
-
-- 13F may **CORROBORATE** a low-lag signal. It may **NEVER substitute** for one.
-- Never describe 13F holdings as "current", "recent" or "latest" positioning.
-- **Never originate a sell from 13F.** A 45-day-stale, long-only snapshot cannot establish that a thesis is
-  impaired today.
-- Print the staleness number the script computed, verbatim, whenever 13F is cited.
-
-### 10b5-1 vs open-market — the distinction that decides a sell
-
-A pre-scheduled **10b5-1** sale carries almost no thesis information: it was set months earlier, usually for
-diversification or taxes. A discretionary **open-market** sale by a named officer is real evidence. The
-script tags each transaction. **Never cite a 10b5-1 sale as evidence of thesis impairment.**
-
-Worked example, 2026-07-24: NEM showed 7 insider sells — **all 10b5-1, zero open-market** → weak, does not
-support a sell. MRVL showed 1 officer open-market sale of **$632,272** plus 6 scheduled → that single
-open-market line is the only one that could support a TRIM, and only alongside a stated thesis.
-
-### Missing is named, never silent
-
-If a source is unreachable, the seat reports it **by name with the reason**. It may not abstain, and it may
-not fold the failure into a generic `INSUFFICIENT_DATA`. Known-dead sources — report MISSING and move on,
-do not stall: `finviz.com` (301/blocked), `openinsider.com` (403 since 2026-07-05).
-
-SEC fair-access requires a User-Agent of the literal form `<name> <email>`; a browser UA and a parenthetical
-`tool/1.0 (contact ...)` form are **both** rejected with HTTP 403. Override via the `SEC_UA` env var.
-
-### A partial read is not a clean read
-
-Same rule one level down: an *incomplete* source must not present as a *complete* one. `smartmoney.py`
-reports `complete`, `filings_seen`, `filings_examined`, `filings_failed`, and prints `[OK/PARTIAL]` when
-they disagree; `dollar_totals_complete` is false whenever some transaction had unparseable share/price
-fields, which makes every dollar figure a **floor**, not a total. The seat must state PARTIAL in its verdict
-line and drop CONVICTION one step.
-
-Why: on 2026-07-24 the fetcher capped at the newest 25 Form 4s. MRVL had filed **43** in the window, so the
-seat saw **1** open-market officer sale (**$632,272**) and reported a confident `OK`. The full read is **5**
-sales totalling **$4,639,734** — a materially different evidence picture on a seat that is allowed to
-originate a sell. The cap is now `MAX_FORM4_FETCH = 100` and any truncation that still bites is named in
-`reason` and flips `complete` to false.
+Why this exists: on 2026-07-24 nothing was fetched and the seat silently abstained on every name.
 
 ---
 
@@ -670,7 +616,7 @@ market-data point is traceable. Aggregate from every seat that fetched:
 
 1. **News / narrative sources** — every URL the narrative seat web_fetched OR got from the feed scripts
    (`feeds/wsj.ts`, `feeds/ft.ts`, `read_news.ts`). One per line: `[Tn] https://url (date) — "verbatim teaser/quote"`.
-2. **Smart-money / filing sources** — the `scripts/smartmoney.py` JSON plus every URL the seat additionally
+2. **Smart-money / filing sources** — the `analyse-smartmoney-form4/fetch_form4.py` JSON, the 13F spoke report, plus every URL the seat additionally
    web_fetched. Print each source with its STATUS and its LAG (see §Smart-money data path). A source that
    was unreachable is listed **by name with the reason** (`Form 4: MISSING (EDGAR HTTP 503)`) — never
    omitted and never collapsed into a bare `INSUFFICIENT_DATA`. The 13F staleness line is mandatory whenever
@@ -992,7 +938,7 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
 - [ ] **Triage covered the whole book.** `{n} names screened` matches the position count, and the
       `data MISSING` count is stated. Any held position that produced no screen output is listed as
       `REVIEW_NOW / NO_SCREEN_OUTPUT`, never silently absent.
-- [ ] **Smart-money actually ran.** `smartmoney.py` output exists for every panel name, each source carries
+- [ ] **Smart-money actually ran.** `fetch_form4.py` output exists for every panel name, each source carries
       `OK | NO_DATA | MISSING(reason)` with its lag, and any 13F citation carries its staleness in days.
 
 - [ ] The report **OPENS with the 2–3 sentence prose RECAP** (highest-confidence buy/sell to take now +
@@ -1023,7 +969,8 @@ $280 trigger rule must clear strategy-discovery-backtest before risking capital.
       hypotheses to be backtested in `strategy-discovery-backtest`.
 - [ ] A TradingView screenshot is embedded inline per stock — UNLESS DEGRADED_TECH mode, where screenshots
       are skipped and each block is tagged DEGRADED.
-- [ ] The smart-money seat **ran `scripts/smartmoney.py`** and reported each source's status + lag. A bare
+- [ ] The smart-money seat **loaded `analyse-smartmoney` and ran the form4 + 13F + 13D spokes**, emitting the
+      conductor's ACC/DIST/NEUTRAL + conviction + confirmation + invalidation, with each source's status + lag. A bare
       `INSUFFICIENT DATA` with no named source is NOT acceptable any more — that was the 2026-07-24 failure
       (nothing was fetched and nobody could tell). Every unreachable source is named with its reason; no
       filing is fabricated; any 13F citation carries its computed staleness in days and is labeled

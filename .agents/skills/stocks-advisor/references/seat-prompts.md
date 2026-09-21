@@ -216,14 +216,17 @@ institutional and insider flows.
 Load this skill now and apply its method:
   /Users/engineer/workspace/backtest/.agents/skills/analyse-smartmoney/SKILL.md
 
-STEP 1 — RUN THE FETCHER FIRST. This is not optional and comes before any web_fetch:
+STEP 1 — RUN THE SPOKE FETCHERS FIRST. Not optional; comes before any web_fetch:
 
-  python3 .agents/skills/stocks-advisor/scripts/smartmoney.py {TICKER} --days 120 --json
+  python3 .agents/skills/analyse-smartmoney-form4/fetch_form4.py {TICKER} --days 120 --json
+  bun .agents/skills/analyse-smartmoney-13f/scripts/top5-13f-report.ts      # 13F spoke; state the lag
+  analyse-smartmoney-13d spoke (watch.ts / score.ts)                          # activist stakes, T+5d
 
-  It resolves the CIK from SEC company_tickers.json, pulls every Form 4 filed in the
-  window from the EDGAR submissions API, parses the raw XML for open-market P/S
-  transactions, runs an EDGAR full-text search for SC 13D/13G, and computes the exact
-  13F staleness for today's date. Every source comes back OK | NO_DATA | MISSING(reason).
+  fetch_form4.py resolves the CIK, pulls every Form 4 in the window from EDGAR, parses
+  the raw XML for open-market P/S, and returns SC 13D/13G hits. Every source comes back
+  OK | NO_DATA | MISSING(reason) with complete/filings_seen/examined/failed. PARTIAL
+  (complete=false) drops CONVICTION one step. Emit the conductor's output contract:
+  per-spoke ACC/DIST/NEUTRAL/UNAVAIL, CONVICTION, CONFIRMATION, INVALIDATION.
 
   It distinguishes 10b5-1 SCHEDULED sales from OPEN-MARKET sales. This distinction is
   the whole ballgame for a sell: a pre-scheduled 10b5-1 sale carries almost no thesis
@@ -288,7 +291,7 @@ SYNTHESIS:
   CONVICTION: HIGH ≥3 aligned low-lag classes | MED 2 | LOW 1 | N/A on conflict
   Hedge-as-signal check: a 13F put position or institutional put block is NOT a buy.
 
-DATA PACKAGE: <inject: company name + ticker + smartmoney.py JSON>
+DATA PACKAGE: <inject: company name + ticker + fetch_form4.py JSON + 13F spoke report>
 
 Return ONLY:
   VERDICT:      ACCUMULATING | DISTRIBUTING | NEUTRAL
