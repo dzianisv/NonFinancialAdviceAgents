@@ -83,6 +83,7 @@ the discovered names.
    Sell-side=Street consensus) and label each seat line with its lens (§Output format per stock). A run whose
    output shows generic seat labels without lens names — or that skips loading the lens skills to save time —
    is non-compliant, not merely abbreviated.
+   Fundamental / Valuation seats: run `investor-peter-lynch/scripts/lynch_metrics.py TICKER` for the numbers before writing the row.
 8. **SELL ORIGINATION RULE — technicals may not originate or decide a sell.** See the full rule below. This
    is a hard constraint, not a preference. A TRIM or EXIT that cannot name a fundamentals / narrative /
    smart-money seat finding the thesis impaired, with stated evidence, is a defect — delete it and print

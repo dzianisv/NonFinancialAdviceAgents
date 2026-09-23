@@ -27,6 +27,7 @@ Use these rows:
 - Position
 - Fundamental Analysis
 - Valuation Check
+  (Fundamental / Valuation seats: run `investor-peter-lynch/scripts/lynch_metrics.py TICKER` for the numbers before writing the row.)
 - Cycle Risk
 - Technical Analysis / Entry Price
 - Smart Money
