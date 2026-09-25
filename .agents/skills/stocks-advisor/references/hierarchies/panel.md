@@ -31,7 +31,7 @@ The briefing has **N = 6 sections**. Each is either populated with real, this-ru
 | 1 | Fundamentals | `fundamentals.py` (yfinance) — valuation, quality, growth, drawdown |
 | 2 | Technicals | TradingView `data_get_study_values` (RSI/BB/MACD/Volume) + MA levels, or DEGRADED_TECH trend-only |
 | 3 | Narrative / News | web_fetch + `feeds/wsj.ts` / `feeds/ft.ts` — theme phase, catalysts |
-| 4 | Smart-Money / Flows | `scripts/smartmoney.py` — Form 4 open-market P/S via EDGAR (T+2), SC 13D/13G (T+5); 13F is 45d-stale CORROBORATION ONLY and may never originate a sell |
+| 4 | Smart-Money / Flows | `analyse-smartmoney` conductor: `analyse-smartmoney-form4/fetch_form4.py` — Form 4 open-market P/S via EDGAR (T+2) + SC 13D/13G (T+5); 13F spoke `analyse-smartmoney-13f/scripts/top5-13f-report.ts`; 13D spoke; 13F is 45d-stale CORROBORATION ONLY and may never originate a sell |
 | 5 | Sell-side / Consensus | analyst rating, PT dispersion, momentum (2-of-3 rule) |
 | 6 | Macro / Regime | Step 0.9 macro-regime paragraph — rates, USD, liquidity backdrop |
 

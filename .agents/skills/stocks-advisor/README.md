@@ -248,6 +248,6 @@ Smart-money is a conviction modifier (not a primary driver):
 | `scripts/fundamentals.py` | yfinance data helper — writes `.cache/stocks-advisor/fundamentals/{TICKER}.out.json` (never into `scripts/`) |
 | `scripts/triage.py` | **attention ranker** — REVIEW_NOW/REVIEW/NO_ACTION over the whole book; writes `.cache/stocks-advisor/_triage.json` (never into `scripts/`). Emits no verdicts. |
 | `scripts/test_triage.py` | totality + no-verdict + incident-regression suite (enumerates ~97k inputs) |
-| `scripts/smartmoney.py` | low-lag disclosed-flow fetcher — EDGAR Form 4 (T+2) + SC 13D/13G; computes 13F staleness |
+| `scripts/smartmoney.py` | **REMOVED 2026-09-21** — moved to `analyse-smartmoney-form4/fetch_form4.py`; the smart-money seat now runs the `analyse-smartmoney` family (form4 + 13F + 13D spokes) |
 | `scripts/scorecard.py` | **REMOVED 2026-07-24** — hard-fail shim. Was a verdict engine; emitted WAIT from an unreachable branch (NEM) and TRIM from pure technicals (MRVL). |
 | `references/seat-prompts.md` | Per-seat subagent prompt templates |

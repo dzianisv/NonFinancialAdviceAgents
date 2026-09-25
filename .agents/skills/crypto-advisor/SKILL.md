@@ -11,7 +11,7 @@ metadata:
 
 # Crypto Advisor
 
-Loop through the token universe **one token at a time** (TradingView has a single chart slot — CIO holds it per token) → run Phase 1 Research Desk in parallel (5 researchers) → CIO consolidates briefing → run Phase 2 Investment Panel in parallel (6 investors) → conviction-weighted synthesis → Verdict Critic → Citation Validator → print the report.
+Loop through the token universe **one token at a time** (TradingView has a single chart slot — CIO holds it per token) → run Phase 1 Research Desk in parallel (5 researchers) → CIO consolidates briefing → run Phase 2 Investment Panel in parallel (6 investors) → conviction-weighted synthesis → Verdict Critic → Citation Validator repair gate → Skeptic repair gate → deliver the report.
 
 > Educational analysis, not financial advice. No leverage. Ever.
 
@@ -45,7 +45,7 @@ Loop through the token universe **one token at a time** (TradingView has a singl
 ```
 Run the crypto advisor
 ```
-Analyzes the default universe, pulls live TradingView data, runs Phase 1 Research Desk + Phase 2 Investment Panel per token, prints the 3-block report (signal table + plain-English verdicts + ranked news). **Attach a TradingView screenshot for each token.**
+Analyzes the default universe, pulls live TradingView data, runs Phase 1 Research Desk + Phase 2 Investment Panel per token, and delivers the 3-block report only after citation validation and skeptic review pass. **Attach a TradingView screenshot for each token.**
 
 ### Custom token set
 ```
@@ -396,16 +396,18 @@ echo '{verdict_json}' > "$RUN_DIR/{TOKEN}/verdict.json"
 
 Repeat Steps 1a–1e for the next `pending` todo until none remain.
 
-**After all tokens complete — write the full report:**
-```bash
-echo "$FULL_REPORT_MARKDOWN" > "$RUN_DIR/report.md"
-echo "Run artifacts: $RUN_DIR"
-```
+After all tokens complete, keep only the per-token artifacts. The report draft is built in Step 3;
+`$RUN_DIR/report.md` must not exist until both Step 5 quality gates pass.
 
 Directory layout after a complete run:
 ```
 .cache/crypto-advisor/research/2026-06-27_14-30/
-├── report.md
+├── report-draft.md
+├── verdict-critics.md
+├── citation-validation.md
+├── skeptic-review.md
+├── quality-gates.md
+├── report.md                  # created only after both quality gates PASS
 ├── BTC/
 │   ├── tv_data_package.json
 │   ├── brief_technical.json
@@ -495,7 +497,11 @@ The ranking step makes downgrades auditable and catches upstream signal errors (
 
 ---
 
-## Step 3 — Print the full run report
+## Step 3 — Build the full run report draft
+
+Build the complete report in `$RUN_DIR/report-draft.md`. **Do not place the report in the user-visible
+reply, Telegram recap, or Notion yet.** Steps 4 and 5 are hard delivery gates; a draft that has not
+passed them is an internal artifact, not a report.
 
 **Open with a 2–3 sentence exec recap** before Block 1. No headers — plain text. Format:
 
@@ -722,19 +728,23 @@ Constraints: You are a devil's advocate — find problems, do not confirm. You h
 this run; start fresh. You have web_fetch and bash (for the read-news script), not TradingView — you read the world, not the chart.
 ```
 
-**4b. Print all critic reports** for all tokens in sequence.
+**4b. Save all critic reports** for all tokens in sequence to
+`$RUN_DIR/verdict-critics.md`. Keep the raw critic output in the artifact; do not put it in the
+user-visible report.
 
 **4c. Act on FLAGs before printing Block 1:**
 - `OVERALL: FLAG` on any token → **revise that token's quorum verdict** to address the critique, re-run the signal decision, and mark it `⚠️ REVISED` in Block 1.
-- `OVERALL: PASS` on all tokens → print `✅ Verdict Critic: {n}/{total} tokens reviewed` where `n` must equal `total`. ⛔ If n < total, the run is INCOMPLETE — do not proceed to Block 1.
+- `OVERALL: PASS` on all tokens → record `✅ Verdict Critic: {n}/{total} tokens reviewed` where `n` must equal `total`. ⛔ If n < total, the run is INCOMPLETE — do not proceed to citation validation.
 
-⛔ **SELF-CHECK BEFORE BLOCK 1:** Verify `n == total` by re-reading the pre-flight critic list. If any token is missing a printed `CRITIC — {TOKEN}` / `OVERALL` result, run the missing critics now. Do not print Block 1 until all critics are printed and counted.
+⛔ **SELF-CHECK BEFORE CITATION VALIDATION:** Verify `n == total` by re-reading the pre-flight critic
+list. If any token is missing a saved `CRITIC — {TOKEN}` / `OVERALL` result, run the missing critics
+now. Do not finalize the report draft until all critics are saved and counted.
 
 ---
 
-## Step 5 — Citation validation (post-hook: format check)
+## Step 5 — Citation validation and skeptic delivery gates
 
-After printing Block 3, run the `reference-validator` post-hook to verify every research-seat source is real.
+After building Block 3, run the `reference-validator` post-hook to verify every research-seat source is real.
 
 **5a. Assemble the citations JSON** — collect every `[T1]`/`[T2]`/`[T3]` entry from Block 3 with a real `https://` URL (skip `[FETCH FAILED]`):
 
@@ -755,18 +765,94 @@ Invoke the reference-validator skill with this citations JSON:
 [...paste array here...]
 ```
 
-**5c. Print the validation report** returned by the subagent verbatim — do not edit it.
+**5c. Save the validation report** returned by the subagent verbatim to
+`$RUN_DIR/citation-validation.md` — do not edit it.
 
-**5d. Act on failures:**
-- Any token with ≥1 `NOT_FOUND` source → append `⚠️ CITATION_FAILED` to that token's signal in Block 1 and note it in Block 2.
-- Any token with only `FETCH_FAILED` sources → append `ℹ️ UNVERIFIED` to that token's signal.
-- If ALL sources for ALL tokens are `VERIFIED` or `PARTIAL` → print `✅ All citations verified`.
+**5d. Citation acceptance rule:**
+- PASS only when every retained citation is `VERIFIED` or `PARTIAL`.
+- `VALIDATION SKIPPED`, malformed/empty input, `NOT_FOUND`, and `FETCH_FAILED` are failures.
+- A token may have no retained external source only if every source-derived claim for that token is
+  removed, Block 2 says `Sources unavailable this run`, and its signal is capped at `HOLD`.
+- Never append `CITATION_FAILED` or `UNVERIFIED` and continue to delivery. A warning label does not make
+  an unsupported recommendation safe.
+- This fail-closed rule overrides the reference-validator's generic suggestion that callers may merely
+  label a signal `UNVERIFIED`.
+
+Before recording PASS, build and save a per-token citation coverage table:
+```
+Token | Signal | Retained citations | VERIFIED/PARTIAL | Coverage result
+```
+Every non-HOLD signal requires at least one `VERIFIED` or `PARTIAL` citation. A HOLD with zero accepted
+citations must contain `Sources unavailable this run` and no source-derived claim. If either condition
+is false, the gate has not passed: revise the signal/draft, rebuild the citations JSON, and revalidate.
+
+**5e. Repair failed citations, then revalidate (maximum 2 repair cycles):**
+Set `citation_repair_cycles = 0` once for the whole run. It never resets, including when citation
+validation is repeated during skeptic repair.
+
+1. For each `NOT_FOUND` or `FETCH_FAILED`, remove the unsupported quote and every claim derived from it.
+2. Fetch a replacement source and copy a short literal quote from the fetched response. Prefer:
+   - stable JSON/API responses for current numeric data;
+   - specific article URLs returned by `read_news.ts`;
+   - `https://api.llama.fi/protocol/{slug}` for protocol snapshots when the changing dashboard page
+     cannot preserve an exact quote.
+3. Never reuse a dynamic dashboard quote that just failed. If no replacement verifies, keep the claim
+   removed and apply the no-source/HOLD rule from 5d.
+4. Rebuild Blocks 1–3 and the citations JSON, rerun `reference-validator`, and overwrite
+   `$RUN_DIR/citation-validation.md` with the new raw report.
+
+After two total citation repair cycles, if any citation still fails, stop with:
+```
+QUALITY GATE FAILED — report not delivered
+Citation gate: FAIL — {VERIFIED}/{PARTIAL}/{NOT_FOUND}/{FETCH_FAILED counts}
+Skeptic gate: {NOT RUN | INTERRUPTED — citation regression}
+Artifacts: {RUN_DIR}
+```
+Do not emit Blocks 1–3, do not build/send the Telegram recap, and do not publish to Notion.
+
+**5f. Run the skeptic hard gate after citations pass:**
+Spawn a fresh `skeptic` subagent with the complete post-critic, citation-clean report draft. Save its
+raw output to `$RUN_DIR/skeptic-review.md`.
+
+Acceptance is exact:
+- PASS only when the skeptic returns `VERDICT: PASS (all claims backed)` with zero challenges.
+- `VERDICT: BLOCKED (N challenges)` is a hard stop, not a warning.
+
+For a BLOCKED result, resolve every challenge by fetching evidence, revising the claim, or removing it.
+If a revision changes a verdict or signal, rerun that token's Verdict Critic and deterministic signal
+decision. Because the draft changed, rerun the citation validator before rerunning the skeptic.
+Allow at most 2 skeptic repair cycles. A citation failure discovered here consumes the same
+`citation_repair_cycles` budget from 5e; never open or reset a nested citation budget. If the citation
+budget is exhausted, stop with the 5e failure message and report the skeptic as
+`INTERRUPTED — citation regression`.
+
+After two repair cycles, if the skeptic is still BLOCKED, stop with:
+```
+QUALITY GATE FAILED — report not delivered
+Citation gate: PASS
+Skeptic gate: BLOCKED — {N} unresolved challenges
+Artifacts: {RUN_DIR}
+```
+Do not emit Blocks 1–3, do not build/send the Telegram recap, and do not publish to Notion.
+
+**5g. Delivery unlock:**
+Only when citation validation passes and the skeptic returns PASS may the report proceed. Record:
+```
+QUALITY GATES: PASS
+Citation gate: PASS — {verified} VERIFIED, {partial} PARTIAL, 0 NOT_FOUND, 0 FETCH_FAILED
+Skeptic gate: PASS — 0 challenges
+```
+Append this summary to `$RUN_DIR/quality-gates.md` and include the concise summary in the delivered report.
+Only now copy the clean draft to the canonical completed artifact:
+```bash
+cp "$RUN_DIR/report-draft.md" "$RUN_DIR/report.md"
+```
 
 ---
 
-## Step 6 — Telegram daily recap (append after both post-hooks)
+## Step 6 — Telegram daily recap (only after both quality gates pass)
 
-After Block 3 and citation validation, print the Telegram message for @CryptoAiInvestor.
+After Step 5g unlocks delivery, print the report and Telegram message for @CryptoAiInvestor.
 
 **Recap style rules (mandatory — read before building the message):**
 

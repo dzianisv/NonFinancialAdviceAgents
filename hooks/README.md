@@ -81,6 +81,55 @@ The validator enforces four rules and exits non-zero on any failure:
    `NO_TOKEN`, a missing ATH is `ATH_UNAVAILABLE`. Missing data is `[UNAVAILABLE]` and
    loud (repo invariant #4) — never a silent skip or pass.
 
+### Retraction exemption marker (`<!-- retracted -->`)
+
+A report's appendix correction table quotes each wrong figure **as originally drafted**,
+so the error stays auditable. Those quotes are not live claims, but the validator
+recomputed them and cried `MISMATCH` forever — and deleting the rows to go green would
+destroy the audit trail the tool exists to protect. Mark them instead:
+
+```markdown
+| UNI 52w range $2.00 ↔ $19.47 | corrected: $2.316 ↔ $12.285 | <!-- retracted: $2.00, $19.47 -->
+
+<!-- retracted:start -->
+…several quoted-retraction rows…
+<!-- retracted:end -->
+```
+
+- **Prefer the value-scoped form** `<!-- retracted: $0.410, $0.518 — why -->`. It exempts
+  ONLY the values it names; every other claim on the line is validated normally. This
+  matters: the AERO appendix row carries the *corrected* range `$0.3018 ↔ $1.4907` in the
+  **same row** as the drafted `$0.410 ↔ $0.518`, so a whole-line marker there suppressed
+  6 claims when only 4 were quoted retractions — silently switching off verification of
+  two values that were correct. Grammar is `<!-- retracted: <values> — <free prose> -->`;
+  values are read only from the head, so prose quoting a number cannot widen the scope.
+  A listed value needs a `$` prefix or `%` suffix; matching is on the parsed number
+  (thousands separators, unicode minus, `**` emphasis all handled) and on absolute value.
+- **A listed value that matches nothing in scope is a hard `MARKER_ERROR`.** A stale
+  exemption suppresses nothing today and would silently suppress a future claim that
+  happens to state that number — so it fails loudly and must be cleaned up.
+- A **bare** `<!-- retracted -->` (or a prose-only reason) keeps whole-line scope. That is
+  the **blunt fallback**: it also suppresses any correct figure sharing the line. Use it
+  only when the entire line really is a quotation.
+- **Inline** exempts that line only. **Block** exempts the marker lines and everything
+  between them. The marker is an HTML comment, so it does not render in Notion/GitHub.
+- An exempted claim is **still reported**, with status `RETRACTED[value]` or
+  `RETRACTED[line]` — never dropped — and the summary prints
+  `⊘ N of M claim(s) EXEMPTED … (X value-scoped, Y whole-line)`. Suppression is always
+  visible, and you can see at a glance which ones were blunt.
+- An **unclosed `retracted:start` is a hard `MARKER_ERROR`** (exit 1), *not* exempt-to-EOF
+  — forgetting one comment must never silently suppress the rest of the file. A nested
+  `start` and a stray `end` are errors for the same reason (ambiguous scope). A marker
+  error fails the run even when every claim passes.
+- Exempted claims skip RULE 1 (basis) as well: a quoted retraction is verbatim text, and
+  forcing a basis into it would falsify the quote. The loud reporting is what keeps that
+  full bypass honest.
+- **Abuse ceiling:** exemptions over 25% of all claims trigger a prominent `⚠ WARNING` —
+  a report mostly made of exemptions is a smell.
+
+Use it ONLY for figures quoted as-drafted alongside their correction. It is not a way to
+silence a live claim you have not fixed.
+
 Usage:
 - Full pre-publish check (network): `bun .agents/scripts/validate/drawdown_basis.ts research/<report>.md`
 - Basis-only, no network (what pre-commit runs): `bun .agents/scripts/validate/drawdown_basis.ts research/<report>.md --basis-only`

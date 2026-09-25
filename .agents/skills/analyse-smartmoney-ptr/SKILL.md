@@ -23,6 +23,7 @@ This **proposes / notifies** — it **never trades** and never sizes a real orde
 ## Important caveats
 
 - **30–45 day lag:** STOCK Act requires disclosure within 45 calendar days of a transaction.
+- **Freshness gate:** use *transaction date*, not publication date. Trades older than 90 days are EXPIRED — report as background only, never as a buy signal. A member who sold the same ticker within 90 days of a buy nets to NEUTRAL (e.g. Pelosi GOOGL: sold 1M–5M 2025-12-29, bought 500K–1M 2026-01-15 → no signal).
 - **Long-only, personal accounts:** Not macro smart-money. Focus on clusters (≥3 members same ticker).
 - **Purchases only:** Ignore sales, partial sales, exchanges.
 

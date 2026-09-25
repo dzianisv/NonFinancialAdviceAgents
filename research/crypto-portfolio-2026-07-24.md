@@ -1,3 +1,5 @@
+> **AS-OF NOTICE — published 2026-08-12.** This report's analysis date is 2026-07-24 with live re-marks from 2026-07-29. All prices, F&G, oil, and yield figures are **14-19 days stale** and must be re-verified before any action. Verdicts are directional guidance for that window, not live entries. As of 2026-08-12T15:45Z: **BTC $63,500 · LINK $8.78 · WTI $83.29 · F&G 27** — LINK **+7.3%** vs the report's canonical $8.18, WTI **−1.5%** vs $84.56, BTC **−0.7%** vs $63,922, F&G **−1 pt** vs 28.
+
 # Crypto Portfolio Advisor — 2026-07-24
 
 ## BOTTOM LINE
@@ -38,8 +40,8 @@
 | ETH ETFs Jul 23 | **+$26.3M inflow** (5d streak) | Divergent strength |
 | ETF flows *as of Jul 27* (corrected) | ETH 5-day streak **SNAPPED Jul 25**, week closed red; BTC shed **−$465M over two days** (IBIT −$415M). **Both** BTC and ETH funds still extended **weekly** inflow streaks to **three**. | Divergence narrower than drafted |
 | 10Y Treasury | ~4.70% (18-month high) | Liquidity tightening |
-| Oil (WTI) — **CANONICAL, live 2026-07-29T15:02Z** | **$85.41** (CL=F). Round-tripped the Iran spike to $79.26 on Jul 28, then reversed **+7.8% in one session**. Now **ABOVE** the Jul 17 pre-spike close of $82.49 (+3.5%) | **Headwind BACK ON** |
-| Oil (Brent) — **CANONICAL, live 2026-07-29T15:02Z** | **$90.92** (BZ=F). Low $84.09 Jul 28; above the $88.10 pre-spike close (+3.2%) | Same reversal — not a WTI-only artifact |
+| Oil (WTI) — **CANONICAL $84.56 @ 2026-07-29T20:53Z** (§A2 Resolution 4); the earlier **$85.41 @ 15:02Z is SUPERSEDED** | **$84.56** (CL=F). Round-tripped the Iran spike to $79.26 on Jul 28, then reversed **+7.8% in one session**. Now **ABOVE** the Jul 17 pre-spike close of $82.49 (+3.5%) | **Headwind BACK ON** |
+| Oil (Brent) — **CANONICAL $90.55 @ 2026-07-29T20:53Z** (§A2 Resolution 4); the earlier **$90.92 @ 15:02Z is SUPERSEDED** | **$90.55** (BZ=F). Low $84.09 Jul 28; above the $88.10 pre-spike close (+3.2%) | Same reversal — not a WTI-only artifact |
 
 **Regime: BEARISH.** F&G 28 = Fear territory, weakening from 31 on Jul 22. BTC briefly broke below $65K intraday, closed at $63,922. Macro headwinds mounting: US-Iran tensions, 10Y yields at 18-month high (~4.70%), and oil back above its pre-spike level. The BTC→ETH ETF rotation read is weaker than drafted — both complexes logged a third consecutive weekly inflow. Note the whipsaw on the oil leg: a macro input that round-trips ±10% in three sessions is a low-conviction leg in either direction. Size for volatility, not for direction.
 
@@ -206,11 +208,11 @@ Weighing the honest evidence, not softened language:
 |---|---|
 | Price | **$0.186** |
 | 52w Range — **VERIFIED 2026-07-29, 3 venues** | **intraday $0.0563 ↔ $0.5784** (Binance) / $0.1078 ↔ $0.5780 (Kraken) · **close-basis $0.1372 ↔ $0.5588**. The drafted low **$0.056 is CONFIRMED but venue-specific** — a Binance intraday wick; Kraken's low over the same window is $0.1078, ~1.9x higher. The drafted high **$1.44 is RETRACTED** — no venue prints above $0.5784 inside 52 weeks; $1.44 is an out-of-window (>52w) level. |
-| % from 52w High | −87.1% |
+| Drawdown — **52w-high basis vs ATH basis** | **−65.2% from the 52w high ($0.5588 close basis)** · **−87.1% from the all-time high ($2.00)** — *corrected: the drafted −87.1% is the **ATH-basis** drawdown (−**87.1% from ATH**), mislabelled as 52w. Both are now stated on their own basis, per the mandatory convention below.* |
 | 210d Volume Trend | Declining (123M → 54M weekly) |
 | Latest Weekly Close | $0.186 (−5.3%) |
 
-**Assessment:** JUP in free-fall territory, down 87.1% from its 52w high. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
+**Assessment:** JUP in free-fall territory, **−65.2% from its 52w high (close basis $0.5588)** and **−87.1% from its all-time high ($2.00)** — two different bases, both stated — the drafted "87.1% from its 52w high" conflated the two bases and is corrected. Solana DEX aggregator has real product-market fit (high volume, low fees) but token price action is catastrophic. Volume declining every week since June. No demand for the token at these levels despite utility.
 
 **Verdict AVOID — downtrend intact, no reversal signal. Wait for volume base + ladder entry if ever.**
 
@@ -275,10 +277,10 @@ Weighing the honest evidence, not softened language:
 |---|---|
 | Price | **$0.001824** |
 | 52w Range — **RESOLVED 2026-07-29, 2 venues** | **intraday $0.001150 ↔ $0.008999** (Coinbase PUMP-USD, n=367) · **close-basis $0.001200 ↔ $0.008623**. The drafted high **$0.00898 is CONFIRMED** (0.2% off Coinbase's intraday $0.008999 — it came from an intraday venue). The drafted low **$0.000411 is RETRACTED as impossible**: it sits *below PUMP's all-time low* of $0.00115473 (CoinGecko, set 2026-06-25). |
-| % from 52w High | **−79.0% intraday / −78.1% close** (Coinbase). The drafted −79.7% is within 0.7pp of the intraday figure — directionally sound, now pinned. |
+| Drawdown — **52w-high basis** | **−79.0% intraday / −78.1% close** from the 52w high (Coinbase). *(ATH basis is not materially different — PUMP's ATH sits inside the 52w window.)* The drafted −79.7% is within 0.7pp of the intraday figure — directionally sound, now pinned. |
 | Weekly Volume | 27B tokens ($49M) |
 
-**Assessment:** Memecoin launchpad token, down 79.7% from its 52w high. Volume massive in token terms but small in USD — typical penny-token behavior.
+**Assessment:** Memecoin launchpad token, **down 79.0% (intraday) / 78.1% (close) from its 52w high** — the drafted 79.7% is superseded. Volume massive in token terms but small in USD — typical penny-token behavior.
 
 **Accrual is live, not unproven.** DeFiLlama `pump.fun revenue 1y= $323,949,113`, 30d `$19,667,529` (30d-annualized $239.3M, a −26% run-rate contraction). Buybacks print **every single day without gaps**: `holdersRevenue 30d= $14,301,309`, daily 2026-07-20→26 = `475035, 503718, 552001, 529763, 577372, 531409, 587823`. Adapter methodology: *"PUMP token buyback (sourced from onchain burns)"*, era split *"100% pre-2025-07-14, 0% from 2025-07-14, 50% from 2026-04-28."* That is **~$174M/yr of buyback against an $845M mcap = 20.6% of market cap repurchased annually** — the highest buyback yield in the entire 11-token universe, and the only one with continuous (not batched) prints. *(The drafted "$500M+/year revenue" and "accrual unproven" claims are retracted — §A4.)* The recent +20-40% move is over-determined: BOOST mode activation ~2026-07-21 and an 81.7K SOL exchange transfer both coincide with the named-influencer story (§A8, F4).
 
@@ -306,15 +308,19 @@ Weighing the honest evidence, not softened language:
 
 | Venue | LINK/USD | Timestamp |
 |---|---|---|
-| Coinbase LINK-USD | **$8.264** | 2026-07-29T15:12:47Z |
-| Kraken LINKUSD | **$8.2592** | 2026-07-29T15:11Z |
-| CoinGecko | **$8.26** | 2026-07-29T15:11:30Z |
+| **CoinGecko** | **$8.19** | **2026-07-29T21:02Z** |
+| **Coinbase LINK-USD** | **$8.18** | **2026-07-29T21:03Z** |
+| **Kraken LINKUSD** | **$8.1777** | **2026-07-29T21:03Z** |
+| *— SUPERSEDED 15:12Z snapshot below — not actionable, retained for audit only —* | | |
+| Coinbase LINK-USD | $8.264 | 2026-07-29T15:12:47Z |
+| Kraken LINKUSD | $8.2592 | 2026-07-29T15:11Z |
+| CoinGecko | $8.26 | 2026-07-29T15:11:30Z |
 
-Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
+**CANONICAL: $8.18 @ 2026-07-29T21:03Z** (median of 3 venues, max spread **0.15%**). Binance excluded — `api.binance.com` returned HTTP 451 geo-restriction, not imputed. The $8.26 @ 15:12Z snapshot above was correct for its timestamp, is **superseded and not actionable** (−1.0% stale); final resolution in §A9. *(Retracted and superseded LINK prints — $8.80, $16.73, and the "authoritative single tick" framing around $8.594 / $8.599 / $8.611 — are logged in §A9.)*
 
-**Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.0% to $8.26. LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
+**Assessment:** The ~$0.27 gap between the Jul 24 close ($8.33) and the later Jul 27 $8.60–8.62 band was a Monday bounce, not a data error; LINK has since drifted −4.9% to the canonical **$8.18 @ 2026-07-29T21:03Z** (the intraday $8.26 @ 15:12Z is superseded). LINK is grinding near its 52w low (**$7.02 intraday / $7.19 close basis**), **down 69.9% from its 52w high on an intraday basis (−68.8% close basis)** — the drafted "down 73%" came from an unsupported $30.94 high and is retracted. Real institutional thesis (CCIP, DTCC/Swift pilots) intact but token price has no demand at these levels. Aave standardised its entire cross-chain infrastructure on Chainlink CCIP on 2026-07-21 (§A8, F5) — an integration datapoint, not a token-demand mechanism. Note the accrual shape: **304 of 355 days print exactly $0** — the Reserve is funded in ~weekly lumps, a materially weaker "buyback" than the continuous daily prints seen at pump.fun (§10).
 
-**Verdict WATCH — $8.33 Jul 24 close confirmed. Spot $8.26–8.28 as of 2026-07-29T15:12Z (3 venues, max spread 0.06%). Oversold candidate but no reversal signal yet — grinding closer to its 52w low strengthens "oversold, no demand," not weakens it.**
+**Verdict WATCH — $8.33 Jul 24 close confirmed. Spot $8.18 as of 2026-07-29T21:03Z (3 venues, max spread 0.15%; the earlier $8.26 @ 15:12Z is superseded, §A9). Oversold candidate but no reversal signal yet — grinding closer to its 52w low strengthens "oversold, no demand," not weakens it.**
 
 > **Invalidation / re-entry levels (added 2026-07-29; CoinGecko 366 daily closes, pulled 15:2xZ):** spot **$8.28**, SMA50 $7.99, SMA200 $9.44, 52w range **$7.19**–$26.73 (the "$7.00 52w low" used above is approximate; the pulled series low is **$7.19**).
 > - **WATCH → BUY (ladder start)** on a weekly close above **$9.44** (SMA200), which would end a 69% downtrend. Absent that, CCIP adoption is real but bids nothing.
@@ -337,7 +343,7 @@ Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**
 | **AAVE** | ⚠️ (TVL $14.6B, but 0% accrual) | ⚠️ (base building) | ⚠️ | buyback restart UNDATED | **HOLD (existing) / AVOID (new)** |
 | **UNI** | ⚠️ (burn live, 3.49% capture) | ✅ (+8.3% wk) | ⚠️ | v4 fee vote (burn already live) | **HOLD** |
 | **JUP** | ⚠️ (product OK) | ❌ (**−65.2% from 52w high, close basis — VERIFIED on 3 venues**; −66.4% intraday; −87% was the ATH basis) | ⚠️ | None | **AVOID** |
-| **AERO** | ⚠️ (fees real, emission 1.9x) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
+| **AERO** | ⚠️ (fees real, **+25%/yr supply inflation**, 68.5% fee capture to veAERO) | ❌ (−72% from 52w high) | ⚠️ | veAERO lock required | **WATCH (lock-only)** |
 | **PUMP** | ✅ (20.6% buyback yield) | ❌ (penny token) | ⚠️ | Buyback live daily | **AVOID (risk, not accrual)** |
 | **LINK** | ✅ (institutional) | ❌ (**−69.9% from 52w high**, intraday basis) | ⚠️ | Oversold candidate | **WATCH** |
 
@@ -351,7 +357,7 @@ Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**
 
 3. **Trimming:** TON at $1.44, deeply below its true 52w high ($3.57) and with no catalyst. Cut position size.
 
-4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH (**$8.26 @ 2026-07-29T15:12Z**, 3 venues, max spread 0.06%; the $8.33 Jul 24 close is confirmed). *Per §11, never cite a single venue tick as "the" price.*
+4. **No action:** BTC/ETH/SOL — hold. JUP/AERO/PUMP — avoid. LINK — WATCH (**$8.18 @ 2026-07-29T21:03Z**, 3 venues, max spread 0.15%; the $8.33 Jul 24 close is confirmed; the $8.26 @ 15:12Z print is superseded, §A9). *Per §11, never cite a single venue tick as "the" price.*
 
 5. **ETH ETF divergence is a relative tilt, not a live rotation signal.** The +$26.3M / 5-day-streak vs BTC's −$225M outflow framing looked like the week's most interesting signal, but the streak snapped Jul 25 and ETH's week closed red while BTC shed −$465M over two days — **both** complexes still booked a third straight WEEKLY inflow. Keep the relative claim (ether funds ≈ bitcoin funds' capital on ~1/8 the assets over three weeks); drop the "live streak" framing. ETH may still be a relative outperformer, but this is no longer the week's cleanest signal.
 
@@ -364,9 +370,9 @@ Max spread **0.06%**. Any downstream cite must use **$8.26 @ 2026-07-29T15:12Z**
 - F&G 28 (Fear), ↓3 pts from Jul 22. Market getting more scared.
 - BTC death cross active — alts highly correlated.
 - BTC ETF outflow day (−$225M) was large but BlackRock dominated (−$202.5M) — likely one large account rotating, not a structural shift.
-- Macro headwinds: US-Iran tensions, 10Y yields at 18-month high (~4.70%), tariffs escalating, and **oil back ON as a headwind — WTI $85.41 / Brent $90.92 live 2026-07-29T15:02Z**, above their pre-spike closes after a full round-trip and reversal.
+- Macro headwinds: US-Iran tensions, 10Y yields at 18-month high (~4.70%), tariffs escalating, and **oil back ON as a headwind — WTI $84.56 / Brent $90.55 live 2026-07-29T20:53Z** (2 independent sources, ≤0.05% apart; supersedes the 15:02Z $85.41/$90.92 pair, §A2 Resolution 4), above their pre-spike closes after a full round-trip and reversal.
 - ETH ETF divergence offers a potential rotation hedge within crypto — **but this is a relative-strength tilt, not an active rotation signal**: the daily inflow streak broke Jul 25 and both complexes still posted a third weekly inflow.
-- **Oil round-tripped, then reversed — net headwind RESTORED.** WTI $89.31 (Jul 24) → $79.26 (Jul 28) → **$85.41** (Jul 29 live); Brent $96.78 → $84.09 → **$90.92**. Treat oil as a high-volatility, low-conviction leg in either direction, not as a durable input.
+- **Oil round-tripped, then reversed — net headwind RESTORED.** WTI $89.31 (Jul 24) → $79.26 (Jul 28) → $85.41 (Jul 29 15:02Z) → **$84.56** (Jul 29 20:53Z); Brent $96.78 → $84.09 → $90.92 → **$90.55**. Treat oil as a high-volatility, low-conviction leg in either direction, not as a durable input.
 - No single asset should exceed 5-10% of crypto book at current regime.
 - **AAVE-specific:** unresolved rsETH bad-debt allocation is a live balance-sheet risk, not just a paused-buyback issue. The pause exists precisely to preserve treasury capacity for a possible DAO-level response.
 
@@ -395,7 +401,7 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 
 **JUP's −65.2% is now independently verified on three venues, not inferred.** TON's drawdown is deeper than any figure previously published here: **−60.9% close / −62.8% intraday**, versus the −58.5%/−59.1% carried since Jul 27 — those were right when taken and went stale as price fell. Both tokens also show a deep downside wick (TON $0.554–0.563, JUP $0.0563 on Binance vs $0.1078 on Kraken); wicks are venue-specific and must never be cited as "the" 52w low without naming the venue.
 
-**Known validator limitations (2).** *(1) Quoted retractions.* The appendix correction table quotes each figure **as originally drafted** so the error stays auditable. The validator cannot distinguish a quoted-retracted number from a live claim, so those rows (AERO $0.410↔$0.518, UNI $2.00↔$19.47) are reported as MISMATCHes. They are **already retracted in the body** — deleting them to make the tool green would destroy the audit trail the tool exists to protect. A `<!-- retracted -->` exemption marker is the proper fix and is not yet built.
+**Known validator limitations (2).** *(1) Quoted retractions.* The appendix correction table quotes each figure **as originally drafted** so the error stays auditable. The validator cannot distinguish a quoted-retracted number from a live claim, so those rows (AERO $0.410↔$0.518, UNI $2.00↔$19.47) are reported as MISMATCHes. They are **already retracted in the body** — deleting them to make the tool green would destroy the audit trail the tool exists to protect. A `<!-- retracted -->` exemption marker is the proper fix and is now built. Both rows carry a **value-scoped** marker naming only the drafted figures (`<!-- retracted: $0.410, $0.518 -->`), so those report as `RETRACTED[value]` (still listed, still counted in the summary) instead of `MISMATCH`, while every other claim on the same row — including AERO's **corrected** `$0.3018 ↔ $1.4907`, which sits in the same table row and now verifies `OK` — keeps full coverage. **6 claims exempted across three quoted retractions** (AERO §A appendix row, UNI §A appendix row, and the AERO §A4 prose that quotes the drafted range a third time) — **not 12:** an earlier whole-line marker suppressed the corrected AERO values as collateral, which is exactly the over-suppression a value-scoped marker exists to prevent. Each marker names a `$` (price level) or `%` (drawdown) sigil, and the sigil is part of the match — a `%` marker cannot reach across and silence a `$` price level sharing its line. A listed value matching nothing in its scope, and a whole-line marker that exempts nothing at all, are both hard `MARKER_ERROR`s, so a stale or dormant exemption cannot linger. Markers quoted inside backticks or fenced code (like the examples in this very paragraph) are inert — documenting the tool must not operate it. The quoted figures stay in the audit trail untouched.
 
 *(2) Date drift.* The gate recomputes drawdowns from the **live** price, while this report is a dated **2026-07-24 snapshot**. A correct as-of figure will therefore show as a MISMATCH once price moves (ETH's −62.6% is right at the snapshot price $1,855 and reads −61.8% at today's $1,894.46). Treat drawdown MISMATCHes on a dated report as *review prompts*, not proven errors; **level** claims (52w high/low) are unaffected because they do not depend on spot. Fixing this properly means passing the report date and pricing as-of that date.
 
@@ -424,7 +430,7 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 | JUP drawdown stated with no basis (the −87% figure) | That figure is **−87% from ATH** ($2.00). On the 52w basis JUP is **−65.2%** close / −66.4% intraday | 2026-07-29 | 3-venue verification |
 | UNI fee switch "if activated" | **Live since 2025-12-28**, 11 chains, 3.49% realised capture | 2026-07-27 | gov.uniswap.org t/26162 |
 | UNI fee accelerator **+32%** | **+27.3%** — `dailyFees` total30d $89,567,655 vs total1y $855,888,834 ($2.986M/d vs $2.345M/d) | 2026-07-27 | https://api.llama.fi/summary/fees/uniswap?dataType=dailyFees |
-| AERO "only 2 weekly bars", 52w range **$0.410↔$0.518** | **365 daily points**, 365d range **$0.3018↔$1.4907**, ATH $2.32 (2024-12-07) | 2026-07-27 | CoinGecko market_chart |
+| AERO "only 2 weekly bars", 52w range **$0.410↔$0.518** | **365 daily points**, 365d range **$0.3018↔$1.4907**, ATH $2.32 (2024-12-07) | 2026-07-27 | CoinGecko market_chart | <!-- retracted: $0.410, $0.518 — drafted range quoted verbatim; the corrected $0.3018 ↔ $1.4907 in the same row stays verified -->
 | PUMP "accrual unproven", "$500M+/yr" | **$14,301,309/30d buyback, daily**; revenue 1y **$323,949,113** | 2026-07-27 | DeFiLlama dailyHoldersRevenue |
 | PUMP 52w low **$0.000411** | **RETRACTED as impossible** — below PUMP's all-time low of $0.00115473 (set 2026-06-25). Correct intraday low **$0.001150** | 2026-07-29 | Coinbase PUMP-USD n=367; CoinGecko |
 | LINK 52w high **$30.94**, drawdown **−73.1%** | **$27.74** intraday (close max $26.75); **−69.9%** intraday / −68.8% close | 2026-07-29 | Yahoo LINK-USD 1y |
@@ -435,7 +441,7 @@ Every "% from high" and every 52w low/high in this document must state **both** 
 | WTI prior-week close **$83.33** (+7.1%) | **$82.49** Jul 17 (+8.3%) | 2026-07-27 | Yahoo `CL=F` daily |
 | ETH ETF "5-day inflow streak" / BTC "−$225M" as live rotation signal | **Streak SNAPPED Jul 25**, ETH week closed red; BTC shed **−$465M over 2 days** (IBIT −$415M); **both** complexes still logged a **third consecutive weekly inflow** | 2026-07-27 | cointelegraph.com/markets/ethereum-etfs-week-red-end-inflow-streak; coindesk.com/markets/2026/07/27/bitcoin-etfs-record-third-consecutive-weekly-inflows-despite-losses-of-usd465-million-to-end-week |
 | TON "zero token-specific journalism" (used to justify TRIM) | **Too strong** — the repo's `read_news.ts` store holds two TON-adjacent items dated Jul 21-22 (Telegram wallet rollout, STON.fi wire). Coverage is thin, not absent. Verdict unchanged | 2026-07-28 | repo `read_news.ts` store |
-| UNI 52w range **$2.00 ↔ $19.47**, −80.4% | **$2.316 ↔ $12.285** intraday (Coinbase / Kraken); **−69.0%** at the $3.81 snapshot. Both ends out-of-window; the high was 59% too high. Self-contradicted 11 lines later by "$2.39–$12.15" | Coinbase + Kraken daily candles, 2026-07-29 |
+| UNI 52w range **$2.00 ↔ $19.47**, −80.4% | **$2.316 ↔ $12.285** intraday (Coinbase / Kraken); **−69.0%** at the $3.81 snapshot. Both ends out-of-window; the high was 59% too high. Self-contradicted 11 lines later by "$2.39–$12.15" | Coinbase + Kraken daily candles, 2026-07-29 | <!-- retracted: $2.00, $19.47 — drafted range quoted verbatim; the corrected $2.316 ↔ $12.285 in the same row stays verified -->
 | AAVE 52w high **$399.85**, −76.5% | **$385.59** intraday (Coinbase; Kraken $385.61); **−75.6%** at the $94.00 snapshot. Low $57.83 was correct. Self-contradicted later in the same section by "$385.59" | Coinbase + Kraken daily candles, 2026-07-29 |
 | Binance LINK/AERO cross-check | **[FETCH FAILED: api.binance.com — HTTP 451 geo-restricted]** | — | not imputed |
 | AERO exact gross emission | **[FETCH FAILED: api.llama.fi/emission/aerodrome-v1 — HTTP 402]** → net-supply-delta proxy used, labelled | — | not imputed |
@@ -460,13 +466,14 @@ The oil macro input was "resolved" three times. Only the last is canonical. Kept
 | **Jul 27 close** | 82.61 | 88.36 |
 | **Jul 28 00:14Z live (then-canonical, NOW RETRACTED)** | ~~82.00~~ | ~~87.75~~ |
 | **Jul 28 close** | 79.26 | 84.09 |
-| **Jul 29 15:02Z live — CANONICAL** | **85.41** | **90.92** |
+| Jul 29 15:02Z live (then-canonical, SUPERSEDED) | 85.41 | 90.92 |
+| **Jul 29 20:53Z live — CANONICAL** | **84.56** | **90.55** |
 
 **Resolution 1 (2026-07-27).** The report listed oil in TWO contradictory places, and even after a first "resolution" pass the fix itself carried TWO more mutually inconsistent number pairs ($81.85/$87.66 in the macro table vs $81.64/$87.50 in the Risk Overlay and BTC/ETH/SOL critic sections) — a second live pull was ~2% off. That pass pinned the daily series above, which remains accurate.
 
 **Resolution 2 (2026-07-28T00:14Z) — WITHDRAWN.** Its conclusion, verbatim and struck: ~~"The conflict resolves AGAINST the report's own bearish framing. WTI at $82.00 is not merely 'pulling back' — it is below the $82.49 Jul 17 pre-spike close, i.e. the entire Iran geo-premium has round-tripped and then some. 'Oil = inflation/geo headwind' was a valid Jul 24 input and is a dead input as of this re-pull. One of the four bearish legs no longer exists."~~ **Withdrawn 2026-07-29.** Valid for roughly 24 hours. **Do not cite $82.00 or $87.75.**
 
-**Resolution 3 (2026-07-29T15:02Z) — CANONICAL.** The unwind overshot to **$79.26 on Jul 28** (a deeper round-trip than Resolution 2 captured), then **reversed +7.8% in one session to $85.41**. WTI is now **ABOVE** the $82.49 pre-spike close (+3.5%); Brent $90.92 is **above** its $88.10 pre-spike close (+3.2%). **The oil leg of `Regime: BEARISH` is restored.** The Jul 28 instruction "do not cite oil as a bear input" is **withdrawn** — it was correct for a 24-hour window and is wrong today.
+**Resolution 3 (2026-07-29T15:02Z) — SUPERSEDED by Resolution 4, direction upheld.** The unwind overshot to **$79.26 on Jul 28** (a deeper round-trip than Resolution 2 captured), then **reversed +7.8% in one session to $85.41**. WTI was **ABOVE** the $82.49 pre-spike close (+3.5%); Brent $90.92 **above** its $88.10 pre-spike close (+3.2%). **The oil leg of `Regime: BEARISH` is restored.** The Jul 28 instruction "do not cite oil as a bear input" is **withdrawn** — it was correct for a 24-hour window and is wrong today. *(Prices restated at 20:53Z by Resolution 4; the conclusion is unchanged.)*
 
 **Net effect on the regime call:** `BEARISH` was built on four legs (F&G 28, BTC death cross, 10Y ~4.70%, oil shock). Resolution 2 knocked out the oil leg and downgraded the ETF-rotation read; Resolution 3 **restores the oil leg**. Regime label **BEARISH stands, on firmer footing than the Jul 28 revision implied.** **No token verdict changes** followed from any of the three passes.
 
@@ -494,7 +501,7 @@ Also corrected in the same paragraph: WTI CL=F closed $89.31 on Jul 24 (spiked t
 
 ## A4. Retracted per-token draft claims (prose)
 
-**AERO — original draft was materially wrong and is retracted.** The claim *"newly listed on Binance — only 2 weekly bars available… hasn't built a track record"* and the 52w range *"$0.410 ↔ $0.518"* are both false. AERO is not a discovery-phase listing; it is −72.1% from its 52-week high, a very different setup from the −19.6% the draft implied.
+**AERO — original draft was materially wrong and is retracted.** The claim *"newly listed on Binance — only 2 weekly bars available… hasn't built a track record"* and the 52w range *"$0.410 ↔ $0.518"* are both false. AERO is not a discovery-phase listing; it is −72.1% from its 52-week high, a very different setup from the −19.6% the draft implied. <!-- retracted: $0.410, $0.518 — drafted range quoted verbatim; the live −72.1% figure in the same sentence stays verified -->
 
 **PUMP — two claims in the draft were wrong** (analyse-defi seat, 2026-07-27). (1) Revenue is **not** "$500M+/year". (2) Accrual is **not** "unproven" — it is live, on-chain, and prints every single day without gaps. Corrected figures are in §10 and §A1.
 

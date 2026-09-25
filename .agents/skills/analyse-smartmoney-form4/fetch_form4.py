@@ -1,49 +1,29 @@
 #!/usr/bin/env python3
-"""smartmoney.py — low-lag disclosed-flow fetcher for the SMART-MONEY seat.
+"""fetch_form4.py — EDGAR Form 4 + SC 13D/13G fetcher for the analyse-smartmoney-form4 spoke.
 
-WHY THIS EXISTS
----------------
-On 2026-07-24 the smart-money seat returned INSUFFICIENT_DATA on every name —
-not because the flows were ambiguous, but because NOTHING WAS FETCHED. The seat
-prompt pointed at finviz (301s from this sandbox) and openinsider (403 since
-2026-07-05), so the seat quietly abstained and the panel lost a vote.
+Moved here from stocks-advisor/scripts/smartmoney.py (retired 2026-09-21). This script
+fetches only the two low-lag disclosed-flow sources this spoke owns:
 
-That was tolerable when a script emitted the verdict. It is NOT tolerable now:
-smart-money is one of only THREE seats that may ORIGINATE a sell (SKILL.md
-§SELL ORIGINATION RULE). A deciding vote must have working plumbing.
+  * Form 4 (insider open-market P/S transactions) — T+2 business days. PRIMARY.
+  * SC 13D / 13G (activist / 5% stakes) via EDGAR full-text search — 13D T+5d.
 
-SOURCE PRIORITY — LOW LAG FIRST
--------------------------------
-Ranked by how long the information takes to become public. The seat must weight
-them in this order and must SAY the lag out loud:
+13F, options, dark pool, short-interest are OTHER spokes of the analyse-smartmoney family
+(analyse-smartmoney-13f / -options / -darkpool) and are not fetched or placeholdered here.
 
-  1. Form 4 (insider transactions)  — T+2 business days.  ** PRIMARY **
-  2. 13D / 13G (activist / 5% stakes) — 13D T+5 days; 13G varies (quarterly to
-     T+5 depending on filer class).
-  3. Short-interest CHANGE           — twice monthly, ~T+8 calendar days.
-  4. Options / dark-pool prints      — near-real-time but NOT on EDGAR; the seat
-     must fetch these itself and name the venue, or report them MISSING.
-  5. 13F (institutional holdings)    — ** 45 DAYS STALE, MINIMUM **.
-
-THE 13F LAG IS A HARD DISCLOSURE
---------------------------------
-13F is due 45 calendar days after quarter end. As of 2026-07-24 the newest
-filed quarter is Q1'26 (period ended 2026-03-31, filed by ~2026-05-15). Q2'26
-(period ended 2026-06-30) IS NOT FILED YET — it is due ~2026-08-14. So any 13F
-read today describes positions that are AT LEAST 115 days old and may have been
-fully unwound. 13F may CORROBORATE a low-lag signal. It may NEVER substitute for
-one, and it may never be described as "current" or "recent" positioning. This
-script computes and prints that staleness rather than trusting the reader to.
-
-MISSING IS NAMED, NEVER SILENT
-------------------------------
-Every source returns OK | NO_DATA | MISSING(reason). A source that is
-unreachable is reported by NAME with the HTTP status or exception — the seat
-then reports "Form 4: MISSING (EDGAR 503)" instead of abstaining. Silence is
-the failure mode this file exists to remove.
+GUARDS (do not remove):
+  (a) EDGAR `primaryDocument` for a Form 4 is the XSL-rendered HTML (`xslF345X06/form4.xml`).
+      Fetching it yields HTML with zero <nonDerivativeTransaction> -> a FALSE NEGATIVE. The
+      xsl*/ prefix is stripped and the body is asserted to be Form 4 XML before parsing.
+  (b) PARTIAL reporting: `complete`, `filings_seen`, `filings_examined`, `filings_failed`;
+      MAX_FORM4_FETCH=100; when a transaction's shares/price fail to parse the dollar totals
+      are a FLOOR (`dollar_totals_complete=false`). PARTIAL is printed next to the status.
+  * SEC fair-access UA must be the literal form "<name> <email>" (env SEC_UA); browser and
+    parenthetical UAs get HTTP 403.
+  * 10b5-1 sales are TAGGED (plan_10b5_1), never dropped and never cited as impairment.
+  * Every source returns OK | NO_DATA | MISSING(named reason). MISSING is named, never silent.
 
 Usage:
-  python3 smartmoney.py TICKER [TICKER ...] [--days 90] [--json] [--out-dir DIR]
+  python3 fetch_form4.py TICKER [TICKER ...] [--days 90] [--json] [--out-dir DIR]
 """
 import os
 import json
@@ -69,9 +49,6 @@ SEC_FTS = "https://efts.sec.gov/LATEST/search-index?q={q}&forms={forms}&dateRang
 
 OK, NO_DATA, MISSING = "OK", "NO_DATA", "MISSING"
 
-# 13F statutory lag. Not a guess — 17 CFR 240.13f-1: due within 45 days of the
-# end of each calendar quarter.
-FORM_13F_LAG_DAYS = 45
 # Ceiling on Form 4 documents fetched per ticker. Was 25, which silently cut a
 # real read in half — MRVL filed 43 Form 4s in a 120d window on 2026-07-24, so
 # 18 filings went unexamined while the seat still reported status OK. At ~0.12s
@@ -338,38 +315,6 @@ def fetch_13dg(ticker, days):
     }
 
 
-def thirteen_f_staleness(today=None):
-    """The 13F disclosure the seat MUST print. Computed, not remembered."""
-    today = today or dt.date.today()
-    q_end_month = ((today.month - 1) // 3) * 3          # start month of this qtr
-    this_q_start = dt.date(today.year, q_end_month + 1, 1)
-    prev_q_end = this_q_start - dt.timedelta(days=1)     # end of last full quarter
-    prev_due = prev_q_end + dt.timedelta(days=FORM_13F_LAG_DAYS)
-    if today >= prev_due:
-        newest_period, newest_due, filed = prev_q_end, prev_due, True
-    else:
-        # last quarter not due yet — newest FILED data is the quarter before it
-        pq_start = dt.date(prev_q_end.year, ((prev_q_end.month - 1) // 3) * 3 + 1, 1)
-        newest_period = pq_start - dt.timedelta(days=1)
-        newest_due = newest_period + dt.timedelta(days=FORM_13F_LAG_DAYS)
-        filed = True
-    return {
-        "status": MISSING,
-        "reason": ("13F is NOT fetched by this script by design — it is too stale to be a "
-                   "deciding input. Fetch it separately only to CORROBORATE a low-lag signal."),
-        "lag_days_statutory": FORM_13F_LAG_DAYS,
-        "newest_filed_period_end": newest_period.isoformat(),
-        "newest_filed_due_by": newest_due.isoformat(),
-        "position_age_days_minimum": (today - newest_period).days,
-        "next_quarter_period_end": prev_q_end.isoformat() if not filed else
-                                   (this_q_start - dt.timedelta(days=1)).isoformat(),
-        "next_quarter_due": (prev_due if not filed else
-                             (this_q_start - dt.timedelta(days=1) +
-                              dt.timedelta(days=FORM_13F_LAG_DAYS))).isoformat(),
-        "disclosure": None,   # filled in below
-    }
-
-
 def summarize_form4(f4):
     """Evidence summary. Deliberately does NOT emit ACCUMULATING/DISTRIBUTING —
     that is the seat's call, and a sell additionally needs a stated thesis."""
@@ -439,30 +384,6 @@ def run_ticker(ticker, days=90):
         rec["sources"]["form4"]["summary"] = summarize_form4(f4)
         rec["sources"]["sc_13dg"] = fetch_13dg(ticker, days)
 
-    tf = thirteen_f_staleness()
-    tf["disclosure"] = (
-        f"13F LAG: statutory {FORM_13F_LAG_DAYS} days after quarter end. Newest FILED period is "
-        f"{tf['newest_filed_period_end']} — those positions are at least "
-        f"{tf['position_age_days_minimum']} days old TODAY and may be fully unwound. "
-        f"The next quarter ({tf['next_quarter_period_end']}) is not due until {tf['next_quarter_due']}. "
-        f"13F may CORROBORATE a low-lag signal; it may NEVER substitute for one and may never be "
-        f"described as current positioning.")
-    rec["sources"]["form_13f"] = tf
-
-    # Sources this script cannot reach — named, never silently omitted.
-    for key, note in (
-        ("options_flow", "not fetched by this script — the seat must fetch and NAME the venue "
-                         "(unusual-options / sweep data), or report MISSING"),
-        ("dark_pool", "not fetched by this script — the seat must fetch and NAME the venue "
-                      "(off-exchange volume %), or report MISSING"),
-        ("short_interest_change", "not fetched by this script — fundamentals.py emits a short_percent "
-                                  "LEVEL; the CHANGE (twice-monthly, ~T+8d) must be sourced separately"),
-    ):
-        rec["sources"][key] = {"status": MISSING, "reason": note,
-                               "lag": {"options_flow": "near real-time",
-                                       "dark_pool": "near real-time",
-                                       "short_interest_change": "twice monthly, ~T+8d"}[key]}
-
     rec["fetched_ok"] = [k for k, v in rec["sources"].items() if v.get("status") == OK]
     rec["named_missing"] = [f"{k}: {v.get('reason', '')}" for k, v in rec["sources"].items()
                             if v.get("status") == MISSING]
@@ -491,8 +412,6 @@ def _fmt(rec):
     L.append(f"  13D/G  [{d.get('status')}] lag={d.get('lag')}  {d.get('reason','')}".rstrip())
     for h in (d.get("hits") or [])[:5]:
         L.append(f"    {h.get('filed')} {h.get('form')} — {h.get('filer')}")
-    tf = rec["sources"]["form_13f"]
-    L.append(f"  13F    [{tf['status']}] {tf['disclosure']}")
     L.append(f"  named MISSING: {len(rec['named_missing'])} — " +
              ", ".join(k.split(':')[0] for k in rec["named_missing"]))
     return "\n".join(L)
@@ -527,7 +446,7 @@ def main(argv):
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
         for rec in recs:
-            p = os.path.join(out_dir, f"{rec['ticker']}.smartmoney.json")
+            p = os.path.join(out_dir, f"{rec['ticker']}.form4.json")
             with open(p, "w") as fh:
                 json.dump(rec, fh, indent=2)
         print(f"wrote {len(recs)} file(s) to {out_dir}", file=sys.stderr)
