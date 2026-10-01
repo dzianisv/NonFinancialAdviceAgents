@@ -702,7 +702,6 @@ fetches, normalizes, and dedupes the financial-news pipeline. Remaining standalo
 | `stock-chair` | Equity committee chair; portfolio-aware buy/sell decision |
 | `research-manager` | Intake/triage desk head; discovers skills live, assembles the research desk for any query |
 | `narrative-news` | Consumes `read-news` output → deduped events with priced-in tags |
-| `crypto-news-store` | Dedup/state store for crypto news events |
 
 ### Analyst lenses (analyst-* / investor-* / research-*)
 

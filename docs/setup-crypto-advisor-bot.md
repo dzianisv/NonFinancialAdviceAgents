@@ -28,7 +28,6 @@ Live agent behind Telegram bot **@MichaelBurryTraderBot** (bot id `8642078678`).
 |---|---|---|
 | `crypto-advisor` | `cc4f1ca4…91b8e1` | ✅ matches local |
 | `stocks-advisor` | `d9788446…f5417` | ✅ matches local |
-| `stocks-advisor-fast` | `1f6d5e72…310eb1` | ✅ matches local |
 
 Total in profile: **207 entries**. Dependency closure of the three headline skills (68 skills incl.
 `analyse-*`, `investor-*`, `read-news`, `reference-validator`, `skeptic`, `mkt`) is fully present.

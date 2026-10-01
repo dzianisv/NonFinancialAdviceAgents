@@ -23,6 +23,8 @@ metadata:
 
 **One-liner:** A DAILY monitor of the user's book answering one question — *"what that I own (or want) is undervalued enough to buy MORE of today, and what do I sell to fund it?"* Reads cached positions, runs the stocks-advisor 6-seat panel, ranks accumulate-on-weakness candidates, and emits a **SWAP table** (every buy paired with a funding sell). Publishes to three outputs: (1) a dated Notion page (via stocks-advisor), (2) a per-stock recap + swap to the **Telegram channel** (config-driven target), and (3) optionally a short X.com tweet. Educational, not investment advice.
 
+> **Decision engine (2026-09-30):** the BUY-MORE / funding-SELL call on each name comes from the `investor-peter-lynch` drill (run `lynch_metrics.py`, assign ONE category, check the two-minute story, verdict + flip number). The 6-seat panel supplies inputs only. Do NOT route to `multi-lens-quorum`. A funding SELL must name a Lynch story change (per-category sell trigger), never a price move.
+
 **Triggers:** `/stocks-daily`, "run the daily stocks monitor", "what should I buy more of / what's undervalued", "publish stocks report", "post stocks to telegram"
 
 ---

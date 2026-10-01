@@ -18,7 +18,8 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 | "Should I buy/sell/trim X?" | `research-market-workflow` | pass query + date + prior_context |
 | "Find trending stocks" | `research-market-workflow` (`args.strategy: "trend-discovery"`) | quant pre-screen → EDGAR/WebSearch journalism fan-out → beneficiary mapping → skeptic |
 | "Review my whole book / trim losers" | `research-market-workflow` (`args.mode: "holdings-sweep"`) | full-book panel per held name → ADD/HOLD/TRIM/EXIT |
-| Buy/hold/size judgment | `multi-lens-quorum` skill | 4-7 independent lenses |
+| Buy/hold/sell/size judgment on a stock | `investor-peter-lynch` skill | THE verdict: `lynch_metrics.py` → category → two-minute story → checklist → verdict + flip number |
+| Explicitly asked for multiple lenses / dissent | `multi-lens-quorum` skill | OFF by default — never a routine wrapper on a Lynch verdict |
 | "Where does X go by [date]?" | `superforecasting` skill | logged to forecast-ledger for scoring |
 | Macro view | `macro-panel` skill | 9 investor-*/research-* thinker lenses |
 | Risk-on / risk-off | `regime-detection` skill | weighted signal ensemble |
@@ -26,7 +27,7 @@ CIO of an agentic hedge-fund team. Two books, separate ledgers:
 | Weekly portfolio review | `tradfi-portfolio-manager` skill | REVIEW→ASSESS→RESEARCH→DECIDE→ORDER |
 | Compare two outputs | `pairwise-eval-workflow` | blind A/B, N judges |
 
-`stocks-trend-screener` finds WHICH names → `multi-lens-quorum` judges WHETHER/size → `superforecasting` times. Chain in that order.
+`stocks-trend-screener` finds WHICH names → `investor-peter-lynch` drill judges WHETHER/size (this is the verdict) → `superforecasting` times, only when there is a dated catalyst. Chain in that order.
 
 ## Watchlist sheet — canonical trigger registry
 Add alerts as a script on bun/typescript. Setup it on hermes-ai agent using telegram-cli @AflredAiBot.
@@ -235,7 +236,7 @@ structure, prompt) in stocks-advisor / crypto-advisor / stocks-daily / research 
 | Skill | Role |
 |---|---|
 | `dip-scanner` | equity (S&P100 ≥20/25/30% below 52w high, RISK_ON gate) + crypto (F&G <25 gate). `dip_scanner.py --universe all` |
-| `signal-convergence-alert` | crosses pools/ledgers; DMs on ≥2 sources per ticker; ≥3 → `multi-lens-quorum`. `convergence.py` |
+| `signal-convergence-alert` | crosses pools/ledgers; DMs on ≥2 sources per ticker; ≥3 → `investor-peter-lynch` drill. `convergence.py` |
 | `stocks-trend-screener` | mention-velocity vs ticker's own baseline → convergence pool. `mention_velocity.py` |
 
 ### Slow advisor (weekly workflow)
